@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章归档 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/Content.css">
+    <script src="js/global-music-player.js"></script>
+    <style>
+        .archive-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .archive-content {
+            background: var(--card-bg);
+            color: #ffffff;
+        }
+        
+        .archive-content h2 {
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        [data-theme="dark"] .archive-content h2 {
+            color: #f0f0f0;
+            border-bottom-color: var(--border-color);
+        }
+        
+        .archive-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .archive-list li {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        [data-theme="dark"] .archive-list li {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        .archive-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .archive-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 100px;
+        }
+        
+        [data-theme="dark"] .archive-date {
+            color: #b0b0b0;
+        }
+        
+        .archive-title {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            flex: 1;
+            margin-left: 1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .archive-title:hover {
+            color: var(--primary-darker);
+            text-decoration: underline;
+        }
+        
+        [data-theme="dark"] .archive-title {
+            color: #64b5f6;
+        }
+        
+        [data-theme="dark"] .archive-title:hover {
+            color: #90caf9;
+        }
+        
+        .archive-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 1rem;
+        }
+        
+        .archive-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .archive-stat-item {
+            background: var(--primary-lighter);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+        }
+        
+        [data-theme="dark"] .archive-stat-item {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+        }
+        
+        .archive-stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        [data-theme="dark"] .archive-stat-number {
+            color: #64b5f6;
+        }
+        
+        .archive-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        [data-theme="dark"] .archive-stat-label {
+            color: #b0b0b0;
+        }
+        
+        .archive-search {
+            margin-bottom: 2rem;
+        }
+        
+        .archive-search input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--primary-lighter);
+        }
+        
+        [data-theme="dark"] .archive-search input {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+            color: #ffffff;
+        }
+        
+        .archive-search input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.3);
+        }
+        
+        .archive-year {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .archive-year h2 {
+            margin: 0;
+            flex: 1;
+        }
+        
+        .archive-year-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        [data-theme="dark"] .no-results {
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="about.html" data-icon="👤">关于</a></li>
+                        <li><a href="archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <!-- 侧边栏 -->
+                <aside class="sidebar">
+                    <!-- 站点统计模块 -->
+                    <div class="site-stats sidebar-module">
+                        <h2 class="sidebar-title">站点统计</h2>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <div class="stat-label">文章</div>
+                                <div class="stat-number">10</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">分类</div>
+                                <div class="stat-number">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">标签</div>
+                                <div class="stat-number">19</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">总字数</div>
+                                <div class="stat-number">25,163</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">运行时长</div>
+                                <div class="stat-number">120天</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">最后活动</div>
+                                <div class="stat-number">15天前</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日历模块 -->
+                    <div class="calendar sidebar-module">
+                        <h2 class="sidebar-title">文章日历</h2>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                                <h3 class="calendar-title" id="currentMonth">2024年1月</h3>
+                                <button class="calendar-nav-btn" id="nextMonth">›</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div>
+                                <div class="weekday">一</div>
+                                <div class="weekday">二</div>
+                                <div class="weekday">三</div>
+                                <div class="weekday">四</div>
+                                <div class="weekday">五</div>
+                                <div class="weekday">六</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                                <!-- 日历日期将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- 主内容 -->
+                <div id="mainContent">
+                    <div class="archive-content">
+                        <h1 class="page-title">文章归档</h1>
+                        
+                        <!-- 归档统计 -->
+                        <div class="archive-stats">
+                            <div class="archive-stat-item">
+                                <div class="archive-stat-number">10</div>
+                                <div class="archive-stat-label">文章总数</div>
+                            </div>
+                            <div class="archive-stat-item">
+                                <div class="archive-stat-number">3</div>
+                                <div class="archive-stat-label">分类数量</div>
+                            </div>
+                            <div class="archive-stat-item">
+                                <div class="archive-stat-number">19</div>
+                                <div class="archive-stat-label">标签总数</div>
+                            </div>
+                            <div class="archive-stat-item">
+                                <div class="archive-stat-number">25,163</div>
+                                <div class="archive-stat-label">总字数</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 搜索框 -->
+                        <div class="archive-search">
+                            <input type="text" id="archiveSearchInput" placeholder="搜索文章标题..." oninput="filterArchive()">
+                        </div>
+                        
+                        <!-- 2026年 -->
+                        <div class="archive-year">
+                            <h2>2026年</h2>
+                            <span class="archive-year-count">1篇</span>
+                        </div>
+                        <ul class="archive-list">
+                            <li>
+                                <span class="archive-date">2026-01-30</span>
+                                <a href="Content/前端核心学习表.html" class="archive-title">前端核心学习表</a>
+                                <span class="archive-category">学习</span>
+                            </li>
+                        </ul>
+                        
+                        <!-- 2025年 -->
+                        <div class="archive-year">
+                            <h2>2025年</h2>
+                            <span class="archive-year-count">9篇</span>
+                        </div>
+                        <ul class="archive-list">
+                            <li>
+                                <span class="archive-date">2025-12-21</span>
+                                <a href="Content/Vue.js,Three.js和Node.js的区别.html" class="archive-title">Vue.js,Three.js和Node.js的区别</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-21</span>
+                                <a href="Content/RhinoWeb的常见问题.html" class="archive-title">RhinoWeb的常见问题</a>
+                                <span class="archive-category">小知识</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-02-27</span>
+                                <a href="Content/Vue3学习笔记.html" class="archive-title">Vue3学习笔记</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-17</span>
+                                <a href="Content/JS进阶1.html" class="archive-title">JS进阶笔记（一）</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-17</span>
+                                <a href="Content/JS进阶2.html" class="archive-title">JS进阶笔记（二）</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-13</span>
+                                <a href="Content/Web API.html" class="archive-title">Web API笔记</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-13</span>
+                                <a href="Content/Web API2.html" class="archive-title">Web API笔记（二）</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-13</span>
+                                <a href="Content/Web API3.html" class="archive-title">Web API笔记（三）</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-12-13</span>
+                                <a href="Content/Web API4.html" class="archive-title">Web API笔记（四）</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                            <li>
+                                <span class="archive-date">2025-10-15</span>
+                                <a href="Content/JS基础.html" class="archive-title">JS基础笔记</a>
+                                <span class="archive-category">技术</span>
+                            </li>
+                        </ul>
+                        
+                        <div id="noResults" class="no-results" style="display: none;">
+                            没有找到匹配的文章
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="index.html">首页</a>
+                    <a href="about.html">关于</a>
+                    <a href="archive.html">归档</a>
+                    <a href="music.html">音乐室</a>
+                    <a href="mailto:1344908013@qq.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/static-blog.js"></script>
+    <script>
+        // 日历脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentMonthEl = document.getElementById('currentMonth');
+            const calendarDaysEl = document.getElementById('calendarDays');
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
+            
+            const currentDate = new Date();
+            let currentYear = currentDate.getFullYear();
+            let currentMonth = currentDate.getMonth();
+            
+            function generateCalendar(year, month) {
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                currentMonthEl.textContent = `${year}年${monthNames[month]}`;
+                
+                calendarDaysEl.innerHTML = '';
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('calendar-day', 'empty');
+                    calendarDaysEl.appendChild(emptyDay);
+                }
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.classList.add('calendar-day');
+                    dayEl.textContent = day;
+                    
+                    const todayDate = new Date();
+                    const isToday = year === todayDate.getFullYear() && month === todayDate.getMonth() && day === todayDate.getDate();
+                    if (isToday) {
+                        dayEl.classList.add('today');
+                    }
+                    
+                    calendarDaysEl.appendChild(dayEl);
+                }
+            }
+            
+            generateCalendar(currentYear, currentMonth);
+            
+            prevMonthBtn.addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+        });
+        
+        // 归档搜索功能
+        function filterArchive() {
+            const searchInput = document.getElementById('archiveSearchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const archiveItems = document.querySelectorAll('.archive-list li');
+            const noResults = document.getElementById('noResults');
+            let visibleCount = 0;
+            
+            archiveItems.forEach(item => {
+                const title = item.querySelector('.archive-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            if (visibleCount === 0 && searchTerm !== '') {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        }
+        
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            function updateThemeIcon(theme) {
+                if (themeToggle) {
+                    if (theme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+            }
+            
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                });
+            }
+        });
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

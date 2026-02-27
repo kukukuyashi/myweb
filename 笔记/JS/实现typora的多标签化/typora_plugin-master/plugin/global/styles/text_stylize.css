@@ -1,0 +1,47 @@
+#plugin-text-stylize {
+    top: 25%;
+    left: 100px;
+    background-color: ${backgroundColor};
+    min-height: auto;
+    overflow: visible;
+}
+
+#plugin-text-stylize .stylize-tool {
+    display: flex;
+    padding: 10px;
+}
+
+#plugin-text-stylize .stylize-tool > [action] {
+    fill: currentColor;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    opacity: 0.6;
+    margin: 0 1px;
+}
+
+#plugin-text-stylize .stylize-tool > [action].select {
+    background: #e0e6ed;
+    border-radius: 5px;
+    color: currentColor;
+    opacity: 1;
+}
+
+#plugin-text-stylize .stylize-palette {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    display: none;
+    transition: all 0.3s ease-in-out;
+}
+
+#plugin-text-stylize .stylize-palette td {
+    width: 30px;
+    height: 17px;
+    border: 1px #000 solid;
+    cursor: pointer;
+}
+
+#plugin-text-stylize .stylize-palette td:hover {
+    box-shadow: inset 0 0 0 2px #fff;
+}

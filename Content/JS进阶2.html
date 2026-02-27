@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS进阶笔记（二） - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        /* 悬浮目录样式 */
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        .toc-sidebar .toc-level-2 {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+        
+        .toc-sidebar .toc-level-3 {
+            padding-left: 2.4rem;
+        }
+        
+        /* 目录样式 */
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .toc-level-2 {
+            padding-left: 1.5rem;
+        }
+        
+        .toc-level-3 {
+            padding-left: 3rem;
+        }
+        
+        /* 推荐文章样式 */
+        .related-posts {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .related-posts h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .related-posts ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .related-posts li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .related-posts a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .related-posts a:hover {
+            color: var(--primary-darker);
+            text-decoration: underline;
+        }
+        
+        /* 评论区样式 */
+        .comments-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        .comment-form {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .comment-author {
+            font-weight: 500;
+            color: var(--primary-darker);
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+        }
+        
+        /* 代码块样式优化 */
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        /* 暗模式样式 */
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-sidebar .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .related-posts {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .related-posts h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .related-posts li {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .comments-section {
+            border-top-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comments-section h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment-form {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: #000000;
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] p {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .exercise {
+            background: var(--card-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .exercise-answer {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-dark);
+        }
+        
+        /* 文章容器样式 */
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        /* 暗模式下标题样式 - 创建视觉层次 */
+        [data-theme="dark"] h1 {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #f0f0f0 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 暗模式下重点标题特殊颜色 */
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(100, 181, 246, 0.3) !important;
+            background: linear-gradient(90deg, rgba(100,181,246,0.1), transparent) !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            display: inline-block !important;
+        }
+        
+        /* 确保重点标题颜色不被覆盖 */
+        [data-theme="dark"] .article-content h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #c0c0c0 !important;
+        }
+        
+        [data-theme="dark"] h6 {
+            color: #b0b0b0 !important;
+        }
+        
+        /* 文章页面按钮样式 */
+        .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* 目录一级标题样式 */
+        .toc-sidebar .toc > ul > li > a {
+            font-weight: 600;
+            color: var(--primary-darker);
+            font-size: 1.05rem;
+        }
+        
+        /* 暗模式下目录一级标题 */
+        [data-theme="dark"] .toc-sidebar .toc > ul > li > a {
+            color: #e0e0e0;
+        }
+        
+        /* 标题样式优化 */
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        /* 段落和列表样式优化 */
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        /* 练习和答案样式 */
+        .exercise {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .exercise-answer {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-dark);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        /* 暗模式下blockquote样式优化 */
+        [data-theme="dark"] .article-content blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+    </style>
+    <script src="../js/static-blog.js"></script>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <div id="mainContent">
+                    <!-- 悬浮目录 -->
+                    <div class="toc-sidebar" id="tocSidebar">
+                        <div class="toc-content">
+                            <div class="toc">
+                                <h3>目录</h3>
+                                <ul>
+                                    <li><a href="#section4">4. JS 进阶 异步编程</a>
+                                        <ul class="toc-level-2">
+                                            <li><a href="#section4-1">4.1 异步编程概述</a></li>
+                                            <li><a href="#section4-2">4.2 回调函数</a></li>
+                                            <li><a href="#section4-3">4.3 Promise</a></li>
+                                            <li><a href="#section4-4">4.4 async/await</a></li>
+                                            <li><a href="#section4-5">4.5 异步编程最佳实践</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 目录切换按钮 -->
+                    <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+                    
+                    <div class="article-container">
+                        <button class="btn btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                        <h1 class="article-title">JS进阶笔记（二）</h1>
+                        <div class="post-meta">
+                            <span class="post-date">2025-12-17</span>
+                            <span class="post-author">Cyinc</span>
+                            <span class="post-category">技术</span>
+                        </div>
+                        <div class="article-content">
+                            <h2 id="section4">4 JS 进阶 异步编程</h2>
+                            <blockquote>
+                                <p>学习 JavaScript 中异步编程的概念和实现方式，包括回调函数、Promise、async/await 等。</p>
+                            </blockquote>
+
+                            <h3 id="section4-1">4.1 异步编程概述</h3>
+                            <p>JavaScript 是单线程语言，这意味着它一次只能执行一个任务。但是，JavaScript 提供了异步编程机制，允许在等待某些操作（如网络请求、文件读取等）完成时继续执行其他代码。</p>
+
+                            <h4>同步与异步</h4>
+                            <ul>
+                                <li>同步：代码按照顺序执行，前一个任务完成后才能执行下一个任务</li>
+                                <li>异步：代码不需要等待前一个任务完成就可以继续执行</li>
+                            </ul>
+
+                            <pre><code class="javascript">// 同步代码
+console.log('开始');
+console.log('中间');
+console.log('结束');
+
+// 异步代码
+console.log('开始');
+setTimeout(() => {
+    console.log('延迟执行');
+}, 1000);
+console.log('结束');</code></pre>
+
+                            <h3 id="section4-2">4.2 回调函数</h3>
+                            <p>回调函数是作为参数传递给另一个函数的函数，当某个事件或条件满足时被调用。</p>
+
+                            <h4>基本用法</h4>
+                            <pre><code class="javascript">function fetchData(callback) {
+    setTimeout(() => {
+        callback("数据已加载");
+    }, 1000);
+}
+
+fetchData(function(message) {
+    console.log(message); // 数据已加载
+});</code></pre>
+
+                            <h4>回调地狱</h4>
+                            <p>当多个异步操作需要按顺序执行时，回调函数会嵌套多层，形成"回调地狱"，代码难以阅读和维护。</p>
+
+                            <pre><code class="javascript">// 回调地狱示例
+getData(function(a) {
+    getMoreData(a, function(b) {
+        getMoreData(b, function(c) {
+            getMoreData(c, function(d) {
+                // 多层嵌套，难以维护
+            });
+        });
+    });
+});</code></pre>
+
+                            <h3 id="section4-3">4.3 Promise</h3>
+                            <p>Promise是ES6引入的一种处理异步操作的方式，它代表了一个异步操作的最终完成或失败。</p>
+
+                            <h4>基本语法</h4>
+                            <p>Promise 对象有三种状态：</p>
+                            <ul>
+                                <li>Pending（进行中）：初始状态</li>
+                                <li>Fulfilled（已成功）：操作成功完成</li>
+                                <li>Rejected（已失败）：操作失败</li>
+                            </ul>
+
+                            <pre><code class="javascript">const fetchData = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const success = true;
+            if (success) {
+                resolve("数据已加载");
+            } else {
+                reject("加载失败");
+            }
+        }, 1000);
+    });
+};
+
+fetchData()
+    .then(message => {
+        console.log(message); // 数据已加载
+    })
+    .catch(error => {
+        console.error(error); // 加载失败
+    })
+    .finally(() => {
+        console.log("操作完成");
+    });</code></pre>
+
+                            <h4>Promise 链式调用</h4>
+                            <p>Promise 的 then 方法返回一个新的 Promise，因此可以进行链式调用，避免回调地狱。</p>
+
+                            <pre><code class="javascript">fetchData()
+    .then(data => {
+        console.log(data);
+        return fetchMoreData(data);
+    })
+    .then(data => {
+        console.log(data);
+        return fetchMoreData(data);
+    })
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error(error);
+    });</code></pre>
+
+                            <h4>Promise 静态方法</h4>
+                            <p>Promise 提供了一些静态方法，用于处理多个 Promise 对象。</p>
+
+                            <pre><code class="javascript">// Promise.all：所有 Promise 都成功时才成功
+const promise1 = Promise.resolve(3);
+const promise2 = 1337;
+const promise3 = new Promise((resolve) => setTimeout(resolve, 100, 'foo'));
+
+Promise.all([promise1, promise2, promise3]).then((values) => {
+    console.log(values); // [3, 1337, "foo"]
+});
+
+// Promise.race：第一个完成的 Promise 的结果
+const promise4 = new Promise((resolve) => setTimeout(resolve, 500, 'one'));
+const promise5 = new Promise((resolve) => setTimeout(resolve, 100, 'two'));
+
+Promise.race([promise4, promise5]).then((value) => {
+    console.log(value); // "two"
+});</code></pre>
+
+                            <h3 id="section4-4">4.4 async/await</h3>
+                            <p>async/await是ES2017引入的一种处理异步操作的语法糖，它让异步代码看起来像同步代码一样。</p>
+
+                            <h4>async 函数</h4>
+                            <p>async 函数总是返回一个 Promise 对象。</p>
+
+                            <pre><code class="javascript">async function hello() {
+    return "Hello";
+}
+
+hello().then(value => console.log(value)); // Hello</code></pre>
+
+                            <h4>await 表达式</h4>
+                            <p>await 只能在 async 函数内部使用，它会暂停 async 函数的执行，等待 Promise 完成后再继续执行。</p>
+
+                            <pre><code class="javascript">const fetchData = () => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve("数据已加载");
+        }, 1000);
+    });
+};
+
+async function main() {
+    try {
+        const message = await fetchData();
+        console.log(message); // 数据已加载
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+main();</code></pre>
+
+                            <h4>async/await 的优势</h4>
+                            <ul>
+                                <li>代码更简洁，更易读</li>
+                                <li>可以使用 try/catch 进行错误处理</li>
+                                <li>可以使用 for、while 等循环语句</li>
+                            </ul>
+
+                            <h4>并行处理</h4>
+                            <p>使用 Promise.all 可以并行执行多个异步操作。</p>
+
+                            <pre><code class="javascript">async function fetchAllData() {
+    try {
+        const [data1, data2, data3] = await Promise.all([
+            fetchData1(),
+            fetchData2(),
+            fetchData3()
+        ]);
+        console.log(data1, data2, data3);
+    } catch (error) {
+        console.error(error);
+    }
+}</code></pre>
+
+                            <h3 id="section4-5">4.5 异步编程最佳实践</h3>
+                            <h4>错误处理</h4>
+                            <p>始终使用 try/catch 处理 async/await 中的错误。</p>
+
+                            <pre><code class="javascript">async function fetchData() {
+    try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        throw error;
+    }
+}</code></pre>
+
+                            <h4>避免阻塞</h4>
+                            <p>不要在循环中使用 await，除非需要按顺序执行。</p>
+
+                            <pre><code class="javascript">// 不推荐：顺序执行，耗时较长
+async function processItems(items) {
+    for (const item of items) {
+        await processItem(item);
+    }
+}
+
+// 推荐：并行执行，耗时较短
+async function processItems(items) {
+    await Promise.all(items.map(item => processItem(item)));
+}</code></pre>
+
+                            <h4>总结</h4>
+                            <ol>
+                                <li>回调函数是最基本的异步编程方式，但容易形成回调地狱</li>
+                                <li>Promise 提供了链式调用，避免了回调地狱</li>
+                                <li>async/await 让异步代码看起来像同步代码，更易读</li>
+                                <li>始终使用 try/catch 处理 async/await 中的错误</li>
+                                <li>使用 Promise.all 并行执行多个异步操作，提高性能</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- 推荐文章 -->
+                    <div class="related-posts">
+                        <h3>推荐阅读</h3>
+                        <ul>
+                            <li><a href="JS基础.html">JS基础笔记</a> - 学习JavaScript基础知识点，包括变量、数据类型、运算符、函数等</li>
+                            <li><a href="JS进阶1.html">JS进阶笔记（一）</a> - 学习JavaScript进阶知识点，包括函数、构造函数、面向对象编程等</li>
+                            <li><a href="Web API.html">Web API笔记</a> - 学习Web API，包括DOM操作、事件处理、BOM操作等</li>
+                            <li><a href="前端核心学习表.html">前端核心学习表</a> - 前端开发核心学习路径和知识点总结</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 评论区 -->
+                    <div class="comments-section">
+                        <h3>评论区</h3>
+                        
+                        <!-- 评论表单 -->
+                        <div class="comment-form">
+                            <h4>添加评论</h4>
+                            <form id="commentForm">
+                                <div class="form-group">
+                                    <label for="name">用户名</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="comment">评论内容</label>
+                                    <textarea id="comment" name="comment" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">提交评论</button>
+                            </form>
+                        </div>
+                        
+                        <!-- 评论列表 -->
+                        <div class="comment-list" id="commentList">
+                            <!-- 评论将通过JavaScript动态添加 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="../index.html">首页</a>
+                    <a href="#about">关于</a>
+                    <a href="#archive">归档</a>
+                    <a href="mailto:cyinc@example.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，初始化脚本');
+            
+            // 主题切换功能
+            const themeToggle = document.getElementById('theme-toggle');
+            console.log('主题切换按钮:', themeToggle);
+            const html = document.documentElement;
+            
+            // 直接测试点击事件
+            if (themeToggle) {
+                console.log('主题切换按钮存在，添加点击事件');
+                themeToggle.onclick = function() {
+                    console.log('主题切换按钮被点击 (onclick)');
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    // 更新主题属性
+                    html.setAttribute('data-theme', newTheme);
+                    console.log('主题已切换为:', newTheme);
+                    
+                    // 保存主题偏好到本地存储
+                    localStorage.setItem('theme', newTheme);
+                    
+                    // 更新图标
+                    if (newTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                };
+            }
+            
+            // 目录收缩/展开功能
+            const tocSidebar = document.getElementById('tocSidebar');
+            const tocToggleBtn = document.getElementById('tocToggleBtn');
+            let isCollapsed = false;
+            
+            // 切换目录显示状态
+            tocToggleBtn.addEventListener('click', function() {
+                isCollapsed = !isCollapsed;
+                
+                if (isCollapsed) {
+                    tocSidebar.classList.add('collapsed');
+                    tocToggleBtn.innerHTML = '☰';
+                    tocToggleBtn.title = '展开目录';
+                } else {
+                    tocSidebar.classList.remove('collapsed');
+                    tocToggleBtn.innerHTML = '✕';
+                    tocToggleBtn.title = '收起目录';
+                }
+            });
+            
+            // 初始化按钮图标
+            tocToggleBtn.innerHTML = '✕';
+            tocToggleBtn.title = '收起目录';
+            
+            // 代码块复制功能
+            const codeBlocks = document.querySelectorAll('pre code');
+            console.log('找到代码块数量:', codeBlocks.length);
+            
+            codeBlocks.forEach(function(codeBlock) {
+                const preElement = codeBlock.parentElement;
+                
+                // 创建复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '复制';
+                copyBtn.title = '复制代码';
+                
+                // 添加点击事件
+                copyBtn.addEventListener('click', function() {
+                    const code = codeBlock.textContent;
+                    
+                    // 复制到剪贴板
+                    navigator.clipboard.writeText(code).then(function() {
+                        copyBtn.textContent = '已复制';
+                        copyBtn.classList.add('copied');
+                        
+                        // 2秒后恢复原状
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('复制失败:', err);
+                        copyBtn.textContent = '失败';
+                        
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+                
+                // 将按钮添加到代码块
+                preElement.appendChild(copyBtn);
+            });
+        });
+        
+        // 评论功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentForm = document.getElementById('commentForm');
+            const commentList = document.getElementById('commentList');
+            
+            // 加载评论
+            loadComments();
+            
+            // 提交评论
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const comment = document.getElementById('comment').value;
+                const date = new Date().toLocaleString();
+                
+                // 创建评论对象
+                const newComment = {
+                    id: Date.now(),
+                    name: name,
+                    comment: comment,
+                    date: date
+                };
+                
+                // 获取现有评论
+                let comments = JSON.parse(localStorage.getItem('js-advanced2-comments')) || [];
+                
+                // 添加新评论
+                comments.push(newComment);
+                
+                // 保存评论到localStorage
+                localStorage.setItem('js-advanced2-comments', JSON.stringify(comments));
+                
+                // 清空表单
+                commentForm.reset();
+                
+                // 重新加载评论
+                loadComments();
+            });
+            
+            // 加载评论函数
+            function loadComments() {
+                // 获取评论
+                let comments = JSON.parse(localStorage.getItem('js-advanced2-comments')) || [];
+                
+                // 清空评论列表
+                commentList.innerHTML = '';
+                
+                // 如果没有评论，显示提示
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                    return;
+                }
+                
+                // 添加评论到列表
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.name}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-content">${comment.comment}</div>
+                    `;
+                    commentList.appendChild(commentElement);
+                });
+            }
+        });
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

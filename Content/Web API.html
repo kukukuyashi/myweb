@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web API笔记 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        /* 悬浮目录样式 */
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        .toc-sidebar .toc-level-2 {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+        
+        .toc-sidebar .toc-level-3 {
+            padding-left: 2.4rem;
+        }
+        
+        /* 目录样式 */
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .toc-level-2 {
+            padding-left: 1.5rem;
+        }
+        
+        .toc-level-3 {
+            padding-left: 3rem;
+        }
+        
+        /* 推荐文章样式 */
+        .related-posts {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .related-posts h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .related-posts ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .related-posts li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .related-posts a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .related-posts a:hover {
+            color: var(--primary-darker);
+            text-decoration: underline;
+        }
+        
+        /* 评论区样式 */
+        .comments-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        .comment-form {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .comment-author {
+            font-weight: 500;
+            color: var(--primary-darker);
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+        }
+        
+        /* 代码块样式优化 */
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        /* 暗模式样式 */
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-sidebar .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .related-posts {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .related-posts h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .related-posts li {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .comments-section {
+            border-top-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comments-section h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment-form {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: #000000;
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] p {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .exercise {
+            background: var(--card-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .exercise-answer {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-dark);
+        }
+        
+        /* 文章容器样式 */
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        /* 暗模式下标题样式 - 创建视觉层次 */
+        [data-theme="dark"] h1 {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #f0f0f0 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 暗模式下重点标题特殊颜色 */
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(100, 181, 246, 0.3) !important;
+            background: linear-gradient(90deg, rgba(100,181,246,0.1), transparent) !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            display: inline-block !important;
+        }
+        
+        /* 确保重点标题颜色不被覆盖 */
+        [data-theme="dark"] .article-content h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #c0c0c0 !important;
+        }
+        
+        [data-theme="dark"] h6 {
+            color: #b0b0b0 !important;
+        }
+        
+        /* 文章页面按钮样式 */
+        .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* 目录一级标题样式 */
+        .toc-sidebar .toc > ul > li > a {
+            font-weight: 600;
+            color: var(--primary-darker);
+            font-size: 1.05rem;
+        }
+        
+        /* 暗模式下目录一级标题 */
+        [data-theme="dark"] .toc-sidebar .toc > ul > li > a {
+            color: #e0e0e0;
+        }
+        
+        /* 标题样式优化 */
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        /* 段落和列表样式优化 */
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        /* 练习和答案样式 */
+        .exercise {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .exercise-answer {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-dark);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        /* 暗模式下blockquote样式优化 */
+        [data-theme="dark"] .article-content blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <div id="mainContent">
+        <!-- 悬浮目录 -->
+        <div class="toc-sidebar" id="tocSidebar">
+            <div class="toc-content">
+                <div class="toc">
+                    <h3>目录</h3>
+                    <ul>
+                        <li><a href="#section1">1. Web API</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section1-1">1.1 API作用和分类</a></li>
+                                <li><a href="#section1-2">1.2 DOM操作</a></li>
+                                <li><a href="#section1-4">1.4 定时器-间歇函数</a></li>
+                                <li><a href="#section1-5">1.5 事件处理</a></li>
+                                <li><a href="#section1-6">1.6 事件流</a></li>
+                                <li><a href="#section1-7">1.7 DOM节点操作</a></li>
+                                <li><a href="#section1-8">1.8 BOM操作</a></li>
+                                <li><a href="#section1-9">1.9 正则表达式</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+
+        <div class="article-container">
+            <button class="btn btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+            <h1 class="article-title">Web API笔记</h1>
+            <div class="post-meta">
+                <span class="post-date">2025-12-13</span>
+                <span class="post-author">Cyinc</span>
+                <span class="post-category">技术</span>
+            </div>
+            <div class="article-content">
+                <h2 id="section1">1 Web API</h2>
+
+                <h3 id="section1-1">1.1 API作用和分类</h3>
+                <p>api分为 <strong>DOM</strong> 和 <strong>BOM</strong> 组成</p>
+
+                <blockquote>
+                    <p><strong>DOM(Document Object Model--文档对象模型)</strong>是用来呈现以及与任意 HTML 或 XML文档交互的API</p>
+                    <p><strong>白话文:</strong>DOM是浏览器提供的一套专门用来 <strong>操作网页内容</strong> 的功能</p>
+                </blockquote>
+
+                <h4>DOM树</h4>
+                <p>将 HTML 文档以<strong>树状结构</strong>直观的表现出来，我们称之为文档树或 DOM 树</p>
+
+                <h4>DOM对象</h4>
+                <p>浏览器根据html标签生成的<strong>JS对象</strong></p>
+                <ul>
+                    <li>所有的标签属性都可以在这个对象上面找到</li>
+                    <li>修改这个对象的属性会自动映射到标签身上</li>
+                </ul>
+
+                <h4>小练习：</h4>
+                <p>请控制台依次输出 以下 3个li 的 DOM对象</p>
+
+                <pre><code class="html">&lt;ul class="nav"&gt;
+  &lt;li&gt;我的&lt;/li&gt;
+  &lt;li&gt;你的&lt;/li&gt;
+  &lt;li&gt;大家的&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+                <h5>答案：</h5>
+                <pre><code class="javascript">const lione = document.querySelectorAll('.nav li')</code></pre>
+
+                <h3 id="section1-2">1.2 DOM操作</h3>
+
+                <h4>获取DOM元素</h4>
+                <pre><code class="javascript">// 根据ID获取元素
+const elementById = document.getElementById('myId');
+
+// 根据类名获取元素集合
+const elementsByClass = document.getElementsByClassName('myClass');
+
+// 根据标签名获取元素集合
+const elementsByTag = document.getElementsByTagName('div');
+
+// 根据选择器获取元素
+const elementByQuery = document.querySelector('.myClass');
+const elementsByQueryAll = document.querySelectorAll('.myClass');</code></pre>
+
+                <h4>修改DOM元素</h4>
+
+                <h5>修改元素内容</h5>
+                <p>元素innerText属性：将文本内容添加/更新到任意标签位置，显示纯文本，不解析标签</p>
+                <pre><code class="javascript">const h1 = document.querySelector('h1')
+h1.innerText = '&lt;strong&gt;nihao&lt;/strong&gt;'</code></pre>
+
+                <p>元素innerHTML属性：将文本内容添加/更新到任意标签位置，会解析标签，多标签建议使用模板字符</p>
+                <pre><code class="javascript">const h1 = document.querySelector('h1')
+h1.innerHTML = '&lt;strong&gt;nihao&lt;/strong&gt;'</code></pre>
+
+                <h5>修改元素属性</h5>
+                <pre><code class="javascript">// 修改元素属性
+element.setAttribute('class', 'newClass');
+element.src = 'new-image.jpg';</code></pre>
+
+                <h5>修改元素样式</h5>
+                <pre><code class="javascript">// 修改元素样式
+element.style.color = 'red';
+element.style.fontSize = '16px';</code></pre>
+
+                <h5>通过类名修改样式</h5>
+                <pre><code class="javascript">// 通过类名修改样式
+element.className = 'active';</code></pre>
+
+                <h5>通过classList修改样式</h5>
+                <pre><code class="javascript">// 追加一个类
+element.classList.add('类名')
+
+// 删除一个类
+element.classList.remove('类名')
+
+// 切换一个类
+element.classList.toggle('类名')</code></pre>
+
+                <h5>获取设置表单的值</h5>
+                <pre><code class="javascript">// 获取表单值
+const value = input.value;
+
+// 设置表单值
+input.value = '新的值';
+
+// 修改表单类型
+input.type = 'password';
+
+// 布尔值属性
+checkbox.checked = true;
+button.disabled = false;</code></pre>
+
+                <h5>自定义属性</h5>
+                <pre><code class="javascript">// HTML中：data-自定义属性
+&lt;div class="box" data-idddd="100"&gt;&lt;/div&gt;
+
+// JS中获取
+const box = document.querySelector('.box')
+console.log(box.dataset.idddd) // 100</code></pre>
+
+                <h4>添加和删除DOM元素</h4>
+                <pre><code class="javascript">// 创建新元素
+const newElement = document.createElement('div');
+newElement.textContent = '新元素';
+
+// 添加到父元素
+parentElement.appendChild(newElement);
+
+// 在指定元素之前插入
+parentElement.insertBefore(newElement, referenceElement);
+
+// 删除元素
+parentElement.removeChild(childElement);
+
+// 替换元素
+parentElement.replaceChild(newElement, oldElement);</code></pre>
+
+                <h3 id="section1-4">1.4 定时器-间歇函数</h3>
+
+                <h4>开启定时器</h4>
+                <p>语法：setInterval(函数，间隔时间)</p>
+                <pre><code class="javascript">setInterval(function(){
+  console.log("Hello, World!")
+},1000)
+
+function fn() {
+  console.log("nihao")
+}
+setInterval(fn, 2000)  // fn不用加小括号</code></pre>
+
+                <h4>关闭定时器</h4>
+                <pre><code class="javascript">function fn() {
+  console.log("nihao")
+}
+let n = setInterval(fn, 2000)
+clearInterval(n)</code></pre>
+
+                <h4>案例：阅读注册协议</h4>
+                <p>需求：按钮5秒之后才可以使用</p>
+                <pre><code class="html">&lt;textarea name="" id="" cols="30" rows="10"&gt;dwajdlijwalidj&lt;/textarea&gt;&lt;br&gt;
+&lt;button class="btn" type="text" disabled&gt;我已经阅读(5)秒&lt;/button&gt;
+&lt;script&gt;
+  const button = document.querySelector('button.btn')
+  let i = 5
+  let n = setInterval(function(){ 
+    i--
+    button.innerText = `我已经阅读(${i})秒`
+    if(i === 0){
+      button.innerText = `我已经阅读了`
+      button.disabled = false
+      clearInterval(n)
+    }
+  }, 1000)
+&lt;/script&gt;</code></pre>
+
+                <h4>案例：轮播图定时器版</h4>
+                <p>需求：每隔一秒钟切换一个图片</p>
+                <pre><code class="javascript">const Data = [
+  { url: "img/1.jfif", title: "阿达达瓦的大卫带", color: "rgb(240, 128, 128)" },
+  { url: "img/2.jfif", title: "分外附加赛", color: "rgb(135, 206, 250)" },
+  { url: "img/3.jfif", title: "动物很费解啊我就", color: "rgb(144, 238, 144)" },
+  { url: "img/4.jfif", title: "如图一哦请问你", color: "rgb(255, 182, 193)" },
+  { url: "img/5.jfif", title: "挖到了叽歪了", color: "rgb(221, 160, 221)" },
+  { url: "img/6.jfif", title: "提取哦i祭扫", color: "rgb(255, 228, 181)" },
+  { url: "img/7.jfif", title: "期间地区建设的", color: "rgb(176, 224, 230)" },
+  { url: "img/8.jfif", title: "纪念他们单位挖的", color: "rgb(152, 251, 152)" },
+]
+
+const img = document.querySelector('.slider-wrapper img')
+const title = document.querySelector('.slider-footer p')
+const indicator = document.querySelectorAll('.slider-indicator li')
+const color = document.querySelector('.slider-footer')
+
+let m = 0
+let i = setInterval(function() {
+  m += 1
+  if(m === Data.length){
+    m = 0
+  }
+  img.src = Data[m].url
+  title.innerHTML = Data[m].title
+  color.style.backgroundColor = Data[m].color
+  document.querySelector('.slider-indicator li.active').classList.remove('active')
+  indicator[m].classList.toggle('active')
+},2000)</code></pre>
+
+                <h3 id="section1-5">1.5 事件处理</h3>
+
+                <h4>事件监听</h4>
+                <p>事件是编程语言中的术语，它是用来描述程序的行为或状态的，一旦行为或状态发生改变，便立即调用一个函数。</p>
+                <p>addEventListener 是 DOM 对象专门用来添加事件监听的方法，它的两个参数分别为【事件类型】和【事件回调】。</p>
+                <pre><code class="javascript">const button = document.querySelector('button')
+button.addEventListener('click',function() {
+  alert('按钮被点击了')
+})</code></pre>
+
+                <h4>常用事件类型</h4>
+                <ul>
+                    <li><strong>鼠标事件：</strong>click、dblclick、mousedown、mouseup、mousemove、mouseover、mouseout、mouseenter、mouseleave</li>
+                    <li><strong>键盘事件：</strong>keydown、keyup、keypress</li>
+                    <li><strong>表单事件：</strong>submit、change、focus、blur</li>
+                    <li><strong>文档事件：</strong>load、resize、scroll</li>
+                </ul>
+
+                <h4>事件对象</h4>
+                <pre><code class="javascript">element.addEventListener('click', function(event) {
+    // 阻止事件冒泡
+    event.stopPropagation();
+    
+    // 阻止默认行为
+    event.preventDefault();
+    
+    // 获取事件目标
+    const target = event.target;
+    
+    // 获取鼠标坐标
+    const x = event.clientX;
+    const y = event.clientY;
+});</code></pre>
+
+                <h4>案例：网页广告关闭</h4>
+                <pre><code class="javascript">const close = document.querySelector('.box2')
+close.addEventListener('click',function(){
+  document.querySelector(".box").style.display = "none" 
+})</code></pre>
+
+                <h4>案例：随机点名</h4>
+                <pre><code class="javascript">const Data = [
+  { url: "img/1.jfif"},
+  { url: "img/2.jfif"},
+  { url: "img/3.jfif"},
+  { url: "img/4.jfif"},
+  { url: "img/5.jfif"},
+  { url: "img/6.jfif"},
+  { url: "img/7.jfif"},
+  { url: "img/8.jfif"}
+]
+
+const ks = document.querySelector('.ks')
+const js = document.querySelector('.js')
+const img = document.querySelector('div img')
+let time = 0
+let ran = 0
+ks.addEventListener("click",function() {
+  time = setInterval(function() {
+    ran = parseInt(Math.random() * Data.length)
+    img.src = Data[ran].url
+  }, 100)
+  
+  if (Data.length === 1) {
+    ks.disabled = js.disabled = true
+  }
+})
+js.addEventListener("click",function() {
+  clearInterval(time)
+  Data.splice(ran, 1)
+})</code></pre>
+
+                <h4>案例：轮播图点击切换</h4>
+                <p>需求：当点击左右的按钮，可以切换轮播图</p>
+                <pre><code class="javascript">const Data = [
+  { url: "img/1.jfif", title: "阿达达瓦的大卫带", color: "rgb(240, 128, 128)" },
+  { url: "img/2.jfif", title: "分外附加赛", color: "rgb(135, 206, 250)" },
+  { url: "img/3.jfif", title: "动物很费解啊我就", color: "rgb(144, 238, 144)" },
+  { url: "img/4.jfif", title: "如图一哦请问你", color: "rgb(255, 182, 193)" },
+  { url: "img/5.jfif", title: "挖到了叽歪了", color: "rgb(221, 160, 221)" },
+  { url: "img/6.jfif", title: "提取哦i祭扫", color: "rgb(255, 228, 181)" },
+  { url: "img/7.jfif", title: "期间地区建设的", color: "rgb(176, 224, 230)" },
+  { url: "img/8.jfif", title: "纪念他们单位挖的", color: "rgb(152, 251, 152)" },
+]
+
+const slider = document.querySelector('.slider')
+const img = document.querySelector('.slider-wrapper img')
+const title = document.querySelector('.slider-footer p')
+const indicator = document.querySelectorAll('.slider-indicator li')
+const color = document.querySelector('.slider-footer')
+const prev = document.querySelector('.prev')
+const next = document.querySelector('.next')
+
+function getranyuan() {
+  document.querySelector('.slider-indicator li.active').classList.remove('active')
+  indicator[m].classList.toggle('active')
+  img.src = Data[m].url
+  title.innerHTML = Data[m].title
+  color.style.backgroundColor = Data[m].color
+}
+
+let m = 0
+let i = 0
+prev.addEventListener('click', function() {
+  m -= 1
+  if(m < 0){
+    m = Data.length - 1
+  }
+  getranyuan()
+})
+next.addEventListener('click',function() {
+  m += 1
+  if(m === Data.length) {
+    m = 0
+  }
+  getranyuan()
+})
+
+function getks() {
+  i = setInterval(function() {
+    m += 1
+    if(m === Data.length){
+      m = 0
+    }
+    getranyuan()
+  },1000)
+}
+getks()
+slider.addEventListener('mouseenter',function() {
+  clearInterval(i)
+}) 
+slider.addEventListener('mouseleave',function() {
+  getks()
+})</code></pre>
+
+                <h4>焦点事件</h4>
+                <p>focus 获得焦点，blur 失去焦点</p>
+                <pre><code class="javascript">const input = document.querySelector('input')
+input.addEventListener('focus', function () {
+  console.log("有焦点触发")
+})
+input.addEventListener('blur', function () {
+  console.log("失焦点触发")
+})</code></pre>
+
+                <h4>案例：小米搜索框</h4>
+                <p>需求：当表单得到焦点，显示下拉菜单，失去焦点隐藏下来菜单</p>
+                <pre><code class="javascript">const input = document.querySelector("[type='search']")
+const caidan = document.querySelector(".result-list")
+
+input.addEventListener("focus",function(){
+  caidan.style.display = "block"
+  input.style.border = "1px solid rgb(250, 177, 138)"
+  caidan.classList.add("active")     
+})
+
+input.addEventListener("blur",function(){
+  input.style.border = "1px solid #484747"
+  caidan.classList.remove("active")
+  caidan.style.display = "none"
+})</code></pre>
+
+                <h4>键盘事件</h4>
+                <p>keydown 键盘按下触发，keyup 键盘抬起触发</p>
+                <pre><code class="javascript">const input = document.querySelector('input')
+input.addEventListener('keydown', function () {
+  console.log("键盘按下了")
+})
+input.addEventListener('keyup', function () {
+  console.log("键盘松开了")
+})</code></pre>
+
+                <h4>文本框输入事件</h4>
+                <p>input 用户输入什么就能检测到什么</p>
+                <pre><code class="javascript">const input = document.querySelector('input')
+input.addEventListener('input',function() {
+  console.log(input.value);
+})</code></pre>
+
+                <h4>案例：评论字数统计</h4>
+                <p>需求：用户输入文字，可以计算用户输入的字数</p>
+                <pre><code class="javascript">const input = document.querySelector('input')
+const button = document.querySelector('.Anniu')
+const zi = document.querySelector('span')
+input.addEventListener('input', function() {
+  zi.innerHTML = input.value.length + '/200字'
+})
+
+input.addEventListener('focus', function() {
+  zi.style.opacity = 1
+})
+
+input.addEventListener('blur', function() {
+  if (input.value.length === 0) {
+    zi.style.opacity = 0
+  }
+})</code></pre>
+
+                <h4>案例：评论回车发布</h4>
+                <p>需求：按下回车键盘，可以发布信息</p>
+                <pre><code class="javascript">const input = document.querySelector('#tx')
+const total = document.querySelector('.total')
+const p = document.querySelector('.info p.text')
+const item = document.querySelector('.item')
+
+input.addEventListener('input',function(){
+  total.innerHTML = `${input.value.length +'/ 200字'}`
+})
+
+input.addEventListener('keyup', function(e) {
+  if (e.key ==='Enter') {
+    if (input.value.trim() !== "" ) {
+      item.style.display = 'block'
+      p.innerHTML = input.value
+    }
+    input.value = ''
+    total.innerHTML = `0/200字`
+  }
+})
+
+input.addEventListener('focus', function() {
+  total.style.opacity = 1
+})
+
+input.addEventListener('blur', function() {
+  total.style.opacity = 0
+})</code></pre>
+
+                <h4>环境对象</h4>
+                <p>环境对象指的是函数内部特殊的变量this，它代表着当前函数运行时所处的环境。</p>
+                <pre><code class="javascript">function sayHi() {
+  console.log(this);
+}
+
+let user = {
+  name: '张三',
+  sayHi: sayHi
+}
+
+sayHi() // window
+user.sayHi() // user</code></pre>
+
+                <h4>案例：TAB切换</h4>
+                <p>需求：鼠标经过不同的选项卡，底部可以显示不同的内容</p>
+                <pre><code class="javascript">const as = document.querySelectorAll('.tab-nav a')
+const tab = document.querySelector('.tab-nav')
+const item = document.querySelectorAll('.tab-content .item')
+
+for (let i = 0; i < as.length; i++) { 
+  as[i].addEventListener('mouseover' ,function() {
+    document.querySelector('.tab-nav a.active').classList.remove('active')
+    document.querySelector('.tab-content .active').classList.remove('active')
+    document.querySelector(`.tab-content .item:nth-child(${i+1})`).classList.add('active')
+    as[i].classList.add('active') 
+  })
+}</code></pre>
+
+                <h3 id="section1-6">1.6 事件流</h3>
+
+                <h4>事件流的概念</h4>
+                <p>事件流是对事件执行过程的描述，了解事件的执行过程有助于加深对事件的理解，提升开发实践中对事件运用的灵活度。</p>
+                <p>任意事件被触发时总会经历两个阶段：【捕获阶段】和【冒泡阶段】。</p>
+                <p>捕获阶段是【从父到子】的传导过程，冒泡阶段是【从子向父】的传导过程。</p>
+
+                <h4>捕获和冒泡</h4>
+                <p>如果事件是在冒泡阶段执行的，我们称为冒泡模式，它会先执行子盒子事件再去执行父盒子事件，默认是冒泡模式。</p>
+                <p>如果事件是在捕获阶段执行的，我们称为捕获模式，它会先执行父盒子事件再去执行子盒子事件。</p>
+                <pre><code class="javascript">const outer = document.querySelector('.outer')
+const inner = document.querySelector('.inner')
+
+// 外层的盒子
+outer.addEventListener('click', function () {
+  console.log('outer...')
+}, true) // true 表示在捕获阶段执行事件
+
+// 中间的盒子
+inner.addEventListener('click', function () {
+  console.log('inner...')
+}, true)</code></pre>
+
+                <h4>阻止冒泡</h4>
+                <p>阻止冒泡是指阻断事件的流动，保证事件只在当前元素被执行，而不再去影响到其对应的祖先元素。</p>
+                <pre><code class="javascript">inner.addEventListener('click', function (e) {
+  console.log('inner...')
+  // 阻止事件冒泡
+  e.stopPropagation()
+})</code></pre>
+
+                <h4>事件解绑</h4>
+                <p>语法：removeEventListener(事件类型,事件处理函数，[获取捕获或者冒泡阶段])</p>
+                <pre><code class="javascript">const button = document.querySelector('button')
+function fn() {
+  console.log('按钮被点击了')
+}
+button.addEventListener('click', fn)
+button.removeEventListener('click', fn)</code></pre>
+
+                <h4>事件委托</h4>
+                <p>事件委托是利用事件流的特征解决一些现实开发需求的知识技巧，主要的作用是提升程序效率。</p>
+                <pre><code class="javascript">const ul = document.querySelector('ul')
+ul.addEventListener('click', function(e) {
+  if (e.target.tagName === 'LI') {
+    e.target.style.color = 'blue'
+  }
+})</code></pre>
+
+                <h4>案例：事件委托版tab切换</h4>
+                <pre><code class="javascript">const ul = document.querySelector('.tab-nav ul')
+
+ul.addEventListener('click', function(e) {
+  if (e.target.tagName === 'A') {
+    document.querySelector(".tab-nav .active").classList.remove('active')
+    e.target.classList.add('active')
+    const i = +e.target.dataset.id
+    document.querySelector(".tab-content .active").classList.remove('active')
+    document.querySelector(`.tab-content .item:nth-child(${i+1})`).classList.add('active')
+  }
+})</code></pre>
+
+                <h4>阻止元素默认行为</h4>
+                <pre><code class="javascript">const form = document.querySelector('form')
+form.addEventListener('submit', function(e) {
+  e.preventDefault()
+})</code></pre>
+
+                <h4>页面加载事件</h4>
+                <p>加载外部资源（如图片、外联CSS和JavaScript等）加载完毕时触发的事件</p>
+                <pre><code class="javascript">window.addEventListener('load', function() {
+    // xxxxx
+})</code></pre>
+
+                <h4>元素滚动事件</h4>
+                <p>很多网页需要检测用户把页面滚动到某个区域后做一些处理，比如固定导航栏，比如返回顶部</p>
+                <pre><code class="javascript">const div = document.querySelector("div")
+window.addEventListener("scroll",function(){
+  let i = document.documentElement.scrollTop
+  if (i >= 100) {
+    div.style.display = "block"
+  } else {
+    div.style.display = "none"
+  }
+})</code></pre>
+
+                <h4>页面尺寸事件</h4>
+                <p>获取元素的可见部分宽高(不包含边框，margin，滚动条等)</p>
+                <pre><code class="javascript">const div = document.querySelector('div')
+const ll = document.querySelector('.ll')
+const nn = document.querySelector('.nn')
+window.addEventListener('scroll',function(){
+  const n = document.documentElement.scrollTop
+  ll.style.opacity = n >= div.offsetTop ? 1 : 0
+  nn.style.opacity = n >= ll.offsetHeight ? 1 : 0
+})</code></pre>
+
+                <h3 id="section1-7">1.7 DOM节点操作</h3>
+
+                <h4>查找节点</h4>
+                <h5>父节点查找</h5>
+                <p>parentNode：返回最近一级的父节点，找不到返回为null</p>
+                <pre><code class="javascript">const box = document.querySelectorAll('.box1')
+for (let i = 0; i < box.length; i++) {
+  box[i].addEventListener('click', function() {
+    this.parentNode.style.display = 'none'
+  })
+}</code></pre>
+
+                <h5>子节点查找</h5>
+                <p>childNodes：获得所有子节点、包括文本节点(空格、换行)、注释节点等</p>
+                <p>children属性(重点)：仅获得所有元素节点，返回的还是一个伪数组</p>
+                <pre><code class="javascript">const ul = document.querySelector('ul')
+console.log(ul.children)</code></pre>
+
+                <h5>兄弟节点查找</h5>
+                <p>nextElementSibling属性：下一个兄弟节点</p>
+                <p>previousElementSibling属性：上一个兄弟节点</p>
+                <pre><code class="javascript">const li2 = document.querySelector('ul li:nth-child(2)')
+console.log(li2.nextElementSibling)
+console.log(li2.previousElementSibling)</code></pre>
+
+                <h4>增加节点</h4>
+                <h5>创建节点</h5>
+                <pre><code class="javascript">document.createElement("div")</code></pre>
+
+                <h5>追加节点</h5>
+                <p>插入到父元素的最后一个子元素：父元素.appendChild(要插入的元素)</p>
+                <p>插入到父元素中某个子元素的前面：父元素.insertBefore(要插入的元素, 在哪个元素前面)</p>
+                <pre><code class="javascript">const div = document.querySelector("div")
+const li1 = document.createElement("li")
+const li2 = document.createElement("li")
+li1.innerHTML = "Hello World1"
+li2.innerHTML = "Hello World2"
+div.insertBefore(li2, div.children[0])
+div.appendChild(li1)</code></pre>
+
+                <h5>克隆节点</h5>
+                <p>cloneNode会克隆出一个跟原标签一样的元素，括号内传入布尔值</p>
+                <p>若为true，则代表克隆时会包含后代节点一起克隆</p>
+                <p>若为false，则代表克隆时不包含后代节点，默认为false</p>
+                <pre><code class="javascript">const ul = document.querySelector('ul')
+ul.appendChild(ul.children[0].cloneNode(true))
+ul.appendChild(ul.children[0].cloneNode())</code></pre>
+
+                <h4>删除节点</h4>
+                <p>在JavaScript原生DOM操作中，要删除元素必须通过父元素删除</p>
+                <pre><code class="javascript">父元素.removeChild(要删除的元素)</code></pre>
+
+                <h4>案例：学生信息表</h4>
+                <p>核心思路：声明一个空的数组，点击录入，根据相关数据，生成对象，追加到数组里面，根据数组数据渲染页面-表格的行，点击删除按钮，删除的是对应数组里面的数据，再次根据数组的数据，渲染页面</p>
+
+                <h4>案例：表单全选反选</h4>
+                <p>需求：用户点击全选，则下面复选框全部选择，取消全选则全部取消</p>
+                <pre><code class="javascript">const allCheck = document.querySelector('#allCheck');
+const ck = document.querySelectorAll('.ck')
+
+allCheck.addEventListener('click', function() {
+  if (this.checked === true) {
+    for (let i = 0; i < ck.length; i++) {
+      ck[i].checked = true
+    }
+  }
+  if (this.checked === false) {
+    for (let i = 0; i < ck.length; i++) {
+      ck[i].checked = false
+    }
+  }
+})
+
+for (let i = 0; i < ck.length; i++) {
+  ck[i].addEventListener('click', function() {
+    if (document.querySelectorAll(".ck:checked").length ===  ck.length) {
+      allCheck.checked = true
+    }
+    else {
+      allCheck.checked = false
+    }
+  })
+}</code></pre>
+
+                <h4>日期对象</h4>
+                <p>ECMAScript中内置了获取系统时间的对象Date，使用Date时与之前学习的内置对象console和Math不同，它需要借助new关键字才能使用。</p>
+
+                <h5>实例化</h5>
+                <pre><code class="javascript">const date = new Date(); // 系统默认时间
+const date = new Date('2020-05-01') // 指定时间</code></pre>
+
+                <h5>方法</h5>
+                <ul>
+                    <li>getFullYear 获取四位年份</li>
+                    <li>getMonth 获取月份，取值为 0 ~ 11</li>
+                    <li>getDate 获取月份中的每一天，不同月份取值也不相同</li>
+                    <li>getDay 获取星期，取值为 0 ~ 6</li>
+                    <li>getHours 获取小时，取值为 0 ~ 23</li>
+                    <li>getMinutes 获取分钟，取值为 0 ~ 59</li>
+                    <li>getSeconds 获取秒，取值为 0 ~ 59</li>
+                </ul>
+
+                <h5>案例：页面显示时间</h5>
+                <p>需求：将当前时间以:YYYY-MM-DD HH:mm形式显示在页面</p>
+                <pre><code class="javascript">const div = document.querySelector('div')
+setInterval(function() {
+  const data = new Date()
+  div.innerHTML = data.toLocaleString()
+},1000)</code></pre>
+
+                <h5>时间戳</h5>
+                <p>时间戳是指1970年01月01日00时00分00秒起至现在的总秒数或毫秒数，它是一种特殊的计量时间的方式。</p>
+                <pre><code class="javascript">const date = new Date()
+console.log(date.getTime())
+console.log(+new Date())
+console.log(Date.now())</code></pre>
+
+                <h4>M端事件</h4>
+                <p>移动端也有自己独特的地方。比如触屏事件touch(也称触摸事件)，Android和IOS都有。</p>
+                <p>touch对象代表一个触摸点。触摸点可能是一根手指，也可能是一根触摸笔。触屏事件可响应用户手指(或触控笔)对屏幕或者触控板操作。</p>
+
+                <h5>常见的触屏事件</h5>
+                <ul>
+                    <li>touchstart：手指触摸到一个DOM元素时触发</li>
+                    <li>touchmove：手指在一个DOM元素上滑动时触发</li>
+                    <li>touchend：手指从一个DOM元素上移开时触发</li>
+                </ul>
+                <pre><code class="javascript">const div = document.querySelector('div')
+div.addEventListener('touchstart' , function (){
+  console.log('开始摸')
+})
+div.addEventListener('touchmove' , function (){
+  console.log('滑动中')
+})    
+div.addEventListener('touchend' , function (){
+  console.log('结束')
+})</code></pre>
+
+                <h3 id="section1-8">1.8 BOM操作</h3>
+
+                <h4>window对象</h4>
+                <p>window对象是一个全局对象，也可以说是JavaScript中的顶级对象。像document、alert()、console.log()这些都是window的属性，基本BOM的属性和方法都是window的。</p>
+                <pre><code class="javascript">// 浏览器窗口尺寸
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+// 打开新窗口
+window.open('https://example.com', '_blank');
+
+// 关闭窗口
+window.close();</code></pre>
+
+                <h4>延时函数</h4>
+                <p>JavaScript内置的一个用来让代码延迟执行的函数，叫setTimeout。setTimeout仅仅只执行一次，所以可以理解为就是把一段代码延迟执行，平时省略window。</p>
+                <p>语法：setTimeout(回调函数，等待的毫秒数)</p>
+                <pre><code class="javascript">const box = document.querySelector('.box')
+const time = setTimeout(function() {
+  box.style.display = 'none'
+} , 5000)</code></pre>
+
+                <h4>JS执行机制</h4>
+                <p>JavaScript语言的一大特点就是单线程，也就是说，同一个时间只能做一件事。</p>
+                <p>为了解决这个问题，利用多核CPU的计算能力，HTML5提出Web Worker标准，允许JavaScript脚本创建多个线程。于是，JS中出现了同步和异步。</p>
+
+                <h5>同步</h5>
+                <p>前一个任务结束后再执行后一个任务，程序的执行顺序与任务的排列顺序是一致的、同步的。</p>
+
+                <h5>异步</h5>
+                <p>你在做一件事情时，因为这件事情会花费很长时间，在做这件事的同时，你还可以去处理其他事情。</p>
+
+                <h5>事件循环</h5>
+                <ol>
+                    <li>先执行执行栈中的同步任务</li>
+                    <li>异步任务放入任务队列中</li>
+                    <li>一旦执行栈中的所有同步任务执行完毕，系统就会按次序读取任务队列中的异步任务，于是被读取的异步任务结束等待状态，进入执行栈，开始执行</li>
+                </ol>
+
+                <h4>location对象</h4>
+                <p>location的数据类型是对象，它拆分并保存了URL地址的各个组成部分。</p>
+
+                <h5>常用属性和方法</h5>
+                <p>search属性获取地址中携带的参数，符号?后面部分</p>
+                <pre><code class="javascript">console.log(location.hash)</code></pre>
+
+                <h5>案例：页面跳转</h5>
+                <pre><code class="javascript">const a = document.querySelector('a')
+let num = 5
+let timeid = setInterval(function(){
+  num--
+  a.innerHTML = `${num}秒后跳转到bilibili`
+  if(num === 0){
+    clearInterval(timeid)
+    location.href = 'https://www.bilibili.com/'
+  }
+},1000)</code></pre>
+
+                <h5>reload方法</h5>
+                <p>reload方法用来刷新当前页面，传入参数true时表示强制刷新</p>
+                <pre><code class="javascript">let btn = document.querySelector('button')
+btn.addEventListener('click', function() {
+  location.reload(true)
+})</code></pre>
+
+                <h4>navigator对象</h4>
+                <p>navigator的数据类型是对象，该对象下记录了浏览器自身的相关信息。</p>
+                <p>应用场景：开发者可以通过解析userAgent来判断用户的浏览器类型或操作系统，并根据不同的设备环境做出相应的调整。</p>
+                <pre><code class="javascript">!(function () {
+  const userAgent = navigator.userAgent
+  const android = userAgent.match(/(Android);?[\s\/]+([\d.]+)?/)
+  const iphone = userAgent.match(/(iPhone\sOS)\s([\d_]+)/)
+  if (android || iphone) {
+    location.href = 'http://m.itcast.cn'
+  }
+})();</code></pre>
+
+                <h4>history对象</h4>
+                <p>history的数据类型是对象，主要管理历史记录，该对象与浏览器地址栏的操作相对应，如前进、后退、历史记录等。</p>
+
+                <h5>history对象方法</h5>
+                <ul>
+                    <li>back()：可以后退功能</li>
+                    <li>forward()：前进功能</li>
+                    <li>go(参数)：前进后退功能，参数如果是1前进1个页面，如果是-1后退1个页面</li>
+                </ul>
+                <pre><code class="javascript">const back = document.querySelector('button:first-child')
+const forward = back.nextElementSibling
+
+back.addEventListener('click', function(){
+  history.back()
+  history.go(-1)
+})
+forward.addEventListener('click', function(){
+  history.forward()
+  history.go(1)
+})</code></pre>
+
+                <h4>本地存储</h4>
+
+                <h5>localStorage</h5>
+                <p>作用：可以将数据永久存储在本地(用户的电脑)，除非手动删除，否则关闭页面也会存在。</p>
+                <p>特性：可以多窗口(页面)共享(同一浏览器可以共享)，以键值对的形式存储使用。</p>
+                <p>语法：</p>
+                <pre><code class="javascript">localStorage.setItem(key, value)
+localStorage.getItem(key)
+localStorage.removeItem(key)</code></pre>
+
+                <h5>sessionStorage</h5>
+                <p>特性：生命周期为关闭浏览器窗口，在同一个窗口(页面)下数据可以共享，以键值对的形式存储使用。用法跟localStorage基本相同。</p>
+
+                <h5>存储复杂数据类型</h5>
+                <p>本地只能存储字符串，无法存储复杂数据类型并且无法直接使用。</p>
+                <p>使用方法：用JSON.stringify转换为JSON字符串存储，用JSON.parse把JSON字符串转换为对象。</p>
+                <pre><code class="javascript">const arr = {
+  name: '张三',
+  age: 20,
+  sex: '男'
+}
+localStorage.setItem('obj', JSON.stringify(arr))
+console.log(JSON.parse(localStorage.getItem('obj')))</code></pre>
+
+                <h4>字符串拼接</h4>
+                <p>利用map()和join()数组方法实现字符串拼接。</p>
+
+                <h5>使用map的方法</h5>
+                <p>map可以遍历数组处理数据，并且返回新的数组。map重点在于有返回值，forEach没有返回值。</p>
+                <pre><code class="javascript">const arr = ['red','green','blue']
+const newArr = arr.map(function (ele , index) {
+  return ele + '颜色'
+})
+console.log(newArr) // ['red颜色', 'green颜色', 'blue颜色']</code></pre>
+
+                <h5>使用join的方法</h5>
+                <p>join()方法用于把数组中的所有元素转换一个字符串。</p>
+                <pre><code class="javascript">const arr = ['red','green','blue']
+const newArr = arr.map(function (ele , index) {
+  return ele + '颜色'
+})
+console.log(newArr.join()) // red颜色,green颜色,blue颜色
+console.log(newArr.join("")) // red颜色green颜色blue颜色
+console.log(newArr.join("|")) // red颜色|green颜色|blue颜色</code></pre>
+
+                <h4>案例：学生就业信息表</h4>
+                <p>核心步骤：</p>
+                <ol>
+                    <li>读取localStorage本地数据，如果有数据则转换为对象放到变量里面一会使用它渲染页面，如果没有则用默认空数组[]</li>
+                    <li>根据数据渲染页面。遍历数组，根据数据生成tr，里面填充数据，最后追加给tbody</li>
+                    <li>给form注册提交事件，要阻止默认提交事件(阻止默认行为)</li>
+                    <li>给arr数组追加对象，里面存储表单获取过来的数据，渲染页面和重置表单(reset()方法)</li>
+                    <li>采用事件委托形式，给tbody注册点击事件得到当前点击的索引号</li>
+                    <li>根据索引号，利用splice删除数组这条数据，重新渲染页面，把最新arr数组存入本地存储</li>
+                </ol>
+                <pre><code class="javascript">const initData = [
+  {
+    id: 1,
+    name: '迪丽热巴',
+    age: 23,
+    gender: '女',
+    salary: 12000,
+    city: '北京',
+    time: '2099/9/9 08:08:08'
+  }
+]
+const arr = JSON.parse(localStorage.getItem('data')) || []
+const tbody = document.querySelector('tbody')
+const getspan = document.querySelector('.title span')
+
+function render() {
+  const trArr = arr.map(function(ele ,index) {
+    return `
+      &lt;tr&gt;
+        &lt;td&gt;${ele.id}&lt;/td&gt;
+        &lt;td&gt;${ele.name}&lt;/td&gt;
+        &lt;td&gt;${ele.age}&lt;/td&gt;
+        &lt;td&gt;${ele.gender}&lt;/td&gt;
+        &lt;td&gt;${ele.salary}&lt;/td&gt;
+        &lt;td&gt;${ele.city}&lt;/td&gt;
+        &lt;td&gt;${ele.time}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;a href="javascript:" data-id="${index}"&gt;
+            &lt;i class="iconfont icon-shanchu"&gt;&lt;/i&gt;
+            删除
+          &lt;/a&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `
+  })
+  tbody.innerHTML = trArr.join('')
+  getspan.innerHTML = arr.length
+}
+
+render()
+
+const info = document.querySelector('.info')
+const uname = document.querySelector('.uname')
+const age = document.querySelector('.age')
+const salary = document.querySelector('.salary')
+const gender = document.querySelector('.gender')
+const city = document.querySelector('.city')
+
+info.addEventListener('submit', function(e) {
+  e.preventDefault()
+  if(!uname.value || !age.value || !salary.value ) {
+    return alert('请填写完整信息')
+  }
+  arr.push({
+    id: arr.length ?arr[arr.length-1].id + 1 : 1,
+    name: uname.value,
+    age: age.value,
+    gender: gender.value,
+    salary: salary.value,
+    city: city.value,
+    time: new Date().toLocaleString()
+  })
+  render()
+  info.reset()
+  localStorage.setItem('data',JSON.stringify(arr))
+})
+
+tbody.addEventListener('click', function(e) {
+  if(e.target.tagName === 'A'){
+    if(confirm('确定删除吗?')) {
+      arr.splice(e.target.dataset.id,1)
+      render()
+      localStorage.setItem('data',JSON.stringify(arr))
+    }
+  }
+})</code></pre>
+
+                <h3 id="section1-9">1.9 正则表达式</h3>
+
+                <h4>正则表达式的介绍和使用</h4>
+                <p>正则表达式(Regular Expression)是用于匹配字符串中字符组合的模式。在JavaScript中，正则表达式也是对象，通常用来查找、替换那些符合正则表达式的文本，许多语言都支持正则表达式。</p>
+
+                <h5>正则表达式的作用</h5>
+                <ul>
+                    <li>表单验证(匹配)</li>
+                    <li>过滤敏感词(替换)</li>
+                    <li>字符串中提取我们想要的部分(提取)</li>
+                </ul>
+
+                <h5>语法</h5>
+                <p>1.定义正则表达式语法：</p>
+                <pre><code class="javascript">const reg = /World/</code></pre>
+
+                <p>2.判断是否有符合规则的字符串：</p>
+                <p>test()方法用来查看正则表达式与指定的字符串是否匹配</p>
+                <pre><code class="javascript">const str = 'Hello World'
+const reg = /World/
+console.log(reg.test(str))</code></pre>
+
+                <p>3.检索(查找)符合规则的字符串：</p>
+                <p>exec()方法在一个指定字符串中执行一个搜索匹配。如果匹配成功，exec()方法返回一个数组，否则返回null。</p>
+                <pre><code class="javascript">const str = 'Hello World'
+const reg = /World/
+console.log(reg.exec(str))</code></pre>
+
+                <h4>元字符</h4>
+
+                <h5>普通字符</h5>
+                <p>大多数的字符仅能够描述它们本身，这些字符称作普通字符，例如所有的字母和数字。也就是说普通字符只能够匹配字符串中与它们相同的字符。</p>
+
+                <h5>元字符(特殊字符)</h5>
+                <p>是一些具有特殊含义的字符，可以极大提高了灵活性和强大的匹配功能。比如，规定用户只能输入英文26个英文字母，普通字符的话abcdefghijklmnopqrstuvwxyz，但是换成元字符写法:[a-z]</p>
+
+                <h5>边界符</h5>
+                <ul>
+                    <li>^：表示匹配行首的文本(以谁开始)</li>
+                    <li>$：表示匹配行尾的文本(以谁结束)</li>
+                </ul>
+                <p>如果^和$在一起，表示必须是精确匹配。</p>
+                <pre><code class="javascript">console.log(/^哈/.test('哈'))  // true
+console.log(/哈$/.test('一哈'))  // true
+console.log(/^哈$/.test('哈'))   // true
+console.log(/^哈哈$/.test('哈哈'))   // true
+console.log(/^哈$/.test('哈哈'))     // false</code></pre>
+
+                <h5>量词</h5>
+                <p>量词用来设定某个模式出现的次数。</p>
+                <ul>
+                    <li>*：重复零次或更多次</li>
+                    <li>+：重复一次或更多次</li>
+                    <li>？：重复零次或一次</li>
+                    <li>{n}：重复n次</li>
+                    <li>{n,}：重复n次或更多次</li>
+                    <li>{n,m}：重复n次到m次</li>
+                </ul>
+                <pre><code class="javascript">console.log(/^哈*$/.test('哈')) // true
+console.log(/哈+$/.test('一哈')) // true
+console.log(/^哈{2,3}$/.test('哈')) // false
+console.log(/^哈哈{1,3}$/.test('哈哈')) // true
+console.log(/^哈{1,2}$/.test('哈哈哈'))  // false</code></pre>
+
+                <h5>字符类</h5>
+                <p>[]匹配字符集合，后面的字符串只要包含abc中任意一个字符，都返回true。</p>
+                <pre><code class="javascript">console.log(/^[abc]$/.test('a'))
+console.log(/^[abc]$/.test('b'))
+console.log(/^[a-z]$/.test('ab'))
+console.log(/^[abc]$/.test('abc'))</code></pre>
+
+                <p>[]里面加上^取反符号。</p>
+                <pre><code class="javascript">console.log(/^[^abc]$/.test('d'))</code></pre>
+
+                <h5>预定义</h5>
+                <p>指的是某些常见模式的简写方式。</p>
+                <ul>
+                    <li>\d：匹配0-9之间的任一数字，相当于[0-9]</li>
+                    <li>\D：匹配所有0-9以外的字符，相当于[^0-9]</li>
+                    <li>\w：匹配任意的字母、数字和下划线，相当于[A-Za-z0-9]</li>
+                    <li>\W：除所有字母、数字和下划线以外的字符，相当于[^A-Za-z0-9_]</li>
+                    <li>\s：匹配空格(包括换行符、制表符、空格符等)，相等于[\t\r\n\v\f]</li>
+                    <li>\S：匹配非空格的字符，相当于[^ \t\r\n\v\f]</li>
+                </ul>
+
+                <h5>修饰符</h5>
+                <p>修饰符约束正则执行的某些细节行为，如是否区分大小写、是否支持多行匹配等。</p>
+                <p>i是单词ignore的缩写，正则匹配时字母不区分大小写。</p>
+                <p>g是单词global的缩写，匹配所有满足正则表达式的结果。</p>
+                <pre><code class="javascript">console.log(/a/i.test('a')) // true
+console.log(/a/g.test('A')) // false</code></pre>
+
+                <h5>替换replace</h5>
+                <pre><code class="javascript">const str = 'hello java world'
+console.log(str.replace(/java/i,"nihao")) // hello nihao world</code></pre>
+
+                <h4>案例：用户名验证案例</h4>
+                <p>需求：用户名要求用户英文字母,数字,下划线或者短横线组成，并且用户名长度为6~16位。</p>
+                <p>分析：</p>
+                <ol>
+                    <li>首先准备好这种正则表达式模式/^[a-zA-Z0-9-]{6,16}$/</li>
+                    <li>当表单失去焦点就开始验证</li>
+                    <li>如果符合正则规范，则让后面的span标签添加right类</li>
+                    <li>如果不符合正则规范，则让后面的span标签添加wrong类</li>
+                </ol>
+
+
+            </div>
+            
+            <!-- 推荐文章 -->
+            <div class="related-posts">
+                <h3>推荐阅读</h3>
+                <ul>
+                    <li><a href="JS基础.html">JS基础笔记</a> - 学习JavaScript基础知识点，包括变量、数据类型、运算符、函数等</li>
+                    <li><a href="JS进阶.html">JS进阶笔记</a> - 学习JavaScript进阶知识点，包括闭包、原型、异步编程等</li>
+                    <li><a href="前端核心学习表.html">前端核心学习表</a> - 前端开发核心学习路径和知识点总结</li>
+                </ul>
+            </div>
+            
+            <!-- 评论区 -->
+            <div class="comments-section">
+                <h3>评论区</h3>
+                
+                <!-- 评论表单 -->
+                <div class="comment-form">
+                    <h4>添加评论</h4>
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="name">用户名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容</label>
+                            <textarea id="comment" name="comment" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交评论</button>
+                    </form>
+                </div>
+                
+                <!-- 评论列表 -->
+                <div class="comment-list" id="commentList">
+                    <!-- 评论将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="../index.html">首页</a>
+                    <a href="#about">关于</a>
+                    <a href="#archive">归档</a>
+                    <a href="mailto:cyinc@example.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/static-blog.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，初始化脚本');
+            
+            // 主题切换功能
+            const themeToggle = document.getElementById('theme-toggle');
+            console.log('主题切换按钮:', themeToggle);
+            const html = document.documentElement;
+            
+            // 直接测试点击事件
+            if (themeToggle) {
+                console.log('主题切换按钮存在，添加点击事件');
+                themeToggle.onclick = function() {
+                    console.log('主题切换按钮被点击 (onclick)');
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    // 更新主题属性
+                    html.setAttribute('data-theme', newTheme);
+                    console.log('主题已切换为:', newTheme);
+                    
+                    // 保存主题偏好到本地存储
+                    localStorage.setItem('theme', newTheme);
+                    
+                    // 更新图标
+                    if (newTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                };
+            }
+            
+            // 目录收缩/展开功能
+            const tocSidebar = document.getElementById('tocSidebar');
+            const tocToggleBtn = document.getElementById('tocToggleBtn');
+            let isCollapsed = false;
+            
+            // 切换目录显示状态
+            tocToggleBtn.addEventListener('click', function() {
+                isCollapsed = !isCollapsed;
+                
+                if (isCollapsed) {
+                    tocSidebar.classList.add('collapsed');
+                    tocToggleBtn.innerHTML = '☰';
+                    tocToggleBtn.title = '展开目录';
+                } else {
+                    tocSidebar.classList.remove('collapsed');
+                    tocToggleBtn.innerHTML = '✕';
+                    tocToggleBtn.title = '收起目录';
+                }
+            });
+            
+            // 初始化按钮图标
+            tocToggleBtn.innerHTML = '✕';
+            tocToggleBtn.title = '收起目录';
+            
+            // 代码块复制功能
+            const codeBlocks = document.querySelectorAll('pre code');
+            console.log('找到代码块数量:', codeBlocks.length);
+            
+            codeBlocks.forEach(function(codeBlock) {
+                const preElement = codeBlock.parentElement;
+                
+                // 创建复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '复制';
+                copyBtn.title = '复制代码';
+                
+                // 添加点击事件
+                copyBtn.addEventListener('click', function() {
+                    const code = codeBlock.textContent;
+                    
+                    // 复制到剪贴板
+                    navigator.clipboard.writeText(code).then(function() {
+                        copyBtn.textContent = '已复制';
+                        copyBtn.classList.add('copied');
+                        
+                        // 2秒后恢复原状
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('复制失败:', err);
+                        copyBtn.textContent = '失败';
+                        
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+                
+                // 将按钮添加到代码块
+                preElement.appendChild(copyBtn);
+            });
+        });
+        
+        // 评论功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentForm = document.getElementById('commentForm');
+            const commentList = document.getElementById('commentList');
+            
+            // 加载评论函数
+            function loadComments() {
+                // 获取评论
+                let comments = JSON.parse(localStorage.getItem('web-api-comments')) || [];
+                
+                // 清空评论列表
+                commentList.innerHTML = '';
+                
+                // 如果没有评论，显示提示
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                    return;
+                }
+                
+                // 添加评论到列表
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.name}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-content">${comment.comment}</div>
+                    `;
+                    commentList.appendChild(commentElement);
+                });
+            }
+            
+            // 加载评论
+            loadComments();
+            
+            // 提交评论
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const comment = document.getElementById('comment').value;
+                const date = new Date().toLocaleString();
+                
+                // 创建评论对象
+                const newComment = {
+                    id: Date.now(),
+                    name: name,
+                    comment: comment,
+                    date: date
+                };
+                
+                // 获取现有评论
+                let comments = JSON.parse(localStorage.getItem('web-api-comments')) || [];
+                
+                // 添加新评论
+                comments.push(newComment);
+                
+                // 保存评论到localStorage
+                localStorage.setItem('web-api-comments', JSON.stringify(comments));
+                
+                // 清空表单
+                commentForm.reset();
+                
+                // 重新加载评论
+                loadComments();
+            });
+        });
+    </script>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

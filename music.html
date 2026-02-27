@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐室 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/Content.css">
+    <script src="js/global-music-player.js"></script>
+    <style>
+        .music-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .music-content {
+            background: var(--card-bg);
+            color: #ffffff;
+        }
+        
+        .music-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--primary-lighter);
+            border-radius: 8px;
+        }
+        
+        [data-theme="dark"] .music-header {
+            background: var(--hover-bg);
+        }
+        
+        .music-header h2 {
+            color: var(--primary-darker);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        [data-theme="dark"] .music-header h2 {
+            color: #f0f0f0;
+        }
+        
+        .music-header p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0 0 0;
+            font-style: italic;
+        }
+        
+        [data-theme="dark"] .music-header p {
+            color: #b0b0b0;
+        }
+        
+        .music-player {
+            background: #f6f8fa;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="dark"] .music-player {
+            background: #2d3748;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .player-screen {
+            background: #1a202c;
+            color: #48bb78;
+            font-family: 'Courier New', monospace;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .player-status {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .player-system {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .control-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: var(--primary-darker);
+            transform: translateY(-2px);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .control-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        [data-theme="dark"] .control-btn:disabled {
+            background: #4a5568;
+        }
+        
+        .music-tracklist {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .music-tracklist th,
+        .music-tracklist td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="dark"] .music-tracklist th,
+        [data-theme="dark"] .music-tracklist td {
+            border-bottom-color: #4a5568;
+        }
+        
+        .music-tracklist th {
+            background: var(--primary-lighter);
+            font-weight: 600;
+            color: var(--primary-darker);
+        }
+        
+        [data-theme="dark"] .music-tracklist th {
+            background: #2d3748;
+            color: #f0f0f0;
+        }
+        
+        .music-tracklist tr:hover {
+            background: var(--hover-bg);
+        }
+        
+        .track-number {
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 50px;
+        }
+        
+        .track-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .track-source {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        [data-theme="dark"] .track-source {
+            color: #b0b0b0;
+        }
+        
+        .track-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .track-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .track-item.active {
+            background: var(--primary-lighter);
+            font-weight: 600;
+        }
+        
+        [data-theme="dark"] .track-item.active {
+            background: #2d3748;
+        }
+        
+        .player-info {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        [data-theme="dark"] .player-info {
+            color: #b0b0b0;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+        }
+        
+        [data-theme="dark"] .volume-control {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .volume-icon {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .volume-icon {
+            color: #b0b0b0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            max-width: 200px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+        
+        .music-collection {
+            margin-top: 3rem;
+        }
+        
+        .music-collection h3 {
+            color: var(--primary-darker);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        [data-theme="dark"] .music-collection h3 {
+            color: #f0f0f0;
+            border-bottom-color: #4a5568;
+        }
+        
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .collection-item {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .collection-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="dark"] .collection-item {
+            background: #2d3748;
+            border-color: #4a5568;
+        }
+        
+        .collection-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        [data-theme="dark"] .collection-item h4 {
+            color: #64b5f6;
+        }
+        
+        .collection-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        [data-theme="dark"] .collection-item p {
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="about.html" data-icon="👤">关于</a></li>
+                        <li><a href="archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <!-- 侧边栏 -->
+                <aside class="sidebar">
+                    <!-- 站点统计模块 -->
+                    <div class="site-stats sidebar-module">
+                        <h2 class="sidebar-title">站点统计</h2>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <div class="stat-label">文章</div>
+                                <div class="stat-number">10</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">分类</div>
+                                <div class="stat-number">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">标签</div>
+                                <div class="stat-number">19</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">总字数</div>
+                                <div class="stat-number">25,163</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">运行时长</div>
+                                <div class="stat-number">120天</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">最后活动</div>
+                                <div class="stat-number">15天前</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日历模块 -->
+                    <div class="calendar sidebar-module">
+                        <h2 class="sidebar-title">文章日历</h2>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                                <h3 class="calendar-title" id="currentMonth">2024年1月</h3>
+                                <button class="calendar-nav-btn" id="nextMonth">›</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div>
+                                <div class="weekday">一</div>
+                                <div class="weekday">二</div>
+                                <div class="weekday">三</div>
+                                <div class="weekday">四</div>
+                                <div class="weekday">五</div>
+                                <div class="weekday">六</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                                <!-- 日历日期将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- 主内容 -->
+                <div id="mainContent">
+                    <div class="music-content">
+                        <h1 class="page-title">音乐室</h1>
+                        
+                        <div class="music-header">
+                            <h2>♪ 音乐放置处 (Music Room) ♪</h2>
+                            <p>收录《奇奇怪怪》Cyinc最喜欢的曲目</p>
+                        </div>
+                        
+                        <div class="music-player">
+                            <div class="player-screen">
+                                <div class="player-status">▶ STOPPED</div>
+                                <div class="player-system">SYSTEM READY...</div>
+                            </div>
+                            
+                            <div class="player-controls">
+                                <button class="control-btn" id="playPauseBtn">PLAY / PAUSE</button>
+                                <button class="control-btn" id="stopBtn">STOP</button>
+                            </div>
+                            
+                            <div class="volume-control">
+                                <span class="volume-icon">🔈</span>
+                                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="80">
+                                <span class="volume-value" id="volumeValue">80%</span>
+                            </div>
+                            
+                            <table class="music-tracklist" id="tracklist">
+                                <thead>
+                                    <tr>
+                                        <th>NO.</th>
+                                        <th>TRACK NAME</th>
+                                        <th>SOURCE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="track-item" data-track="0">
+                                        <td class="track-number">01</td>
+                                        <td class="track-name">SANBAI OST - Ending Means Starting Again</td>
+                                        <td class="track-source">Local</td>
+                                    </tr>
+                                    <tr class="track-item" data-track="1">
+                                        <td class="track-number">02</td>
+                                        <td class="track-name">りりあ。 - あんたなんて。</td>
+                                        <td class="track-source">Local</td>
+                                    </tr>
+                                    <tr class="track-item" data-track="2">
+                                        <td class="track-number">03</td>
+                                        <td class="track-name">小林家的龙女仆 - 愛のシュプリーム!</td>
+                                        <td class="track-source">Local</td>
+                                    </tr>
+                                    <tr class="track-item" data-track="3">
+                                        <td class="track-number">04</td>
+                                        <td class="track-name">超かぐや姫！ - IROHA'S Dancing All Night</td>
+                                        <td class="track-source">Local</td>
+                                    </tr>
+                                    <tr class="track-item" data-track="4">
+                                        <td class="track-number">05</td>
+                                        <td class="track-name">超かぐや姫！ - ヤチヨ絵巻</td>
+                                        <td class="track-source">Local</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="player-info">
+                                Select a track to start playback →
+                            </div>
+                        </div>
+                        
+                        <div class="music-collection">
+                            <h3>音乐收藏</h3>
+                            <div class="collection-grid">
+                                <div class="collection-item">
+                                    <h4>SANABI</h4>
+                                    <p>游戏原声音乐</p>
+                                    <p>格式: MP3</p>
+                                    <p>文件: SANBAI OST - Ending Means Starting Again.mp3</p>
+                                </div>
+                                <div class="collection-item">
+                                    <h4>らんま1／2</h4>
+                                    <p>动画ED主题曲</p>
+                                    <p>格式: FLAC (Hi-Res)</p>
+                                    <p>文件: あんたなんて。.flac</p>
+                                </div>
+                                <div class="collection-item">
+                                    <h4>小林家的龙女仆</h4>
+                                    <p>动画原声音乐</p>
+                                    <p>格式: FLAC</p>
+                                    <p>文件: 0018865633.flac</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="index.html">首页</a>
+                    <a href="about.html">关于</a>
+                    <a href="archive.html">归档</a>
+                    <a href="music.html">音乐室</a>
+                    <a href="mailto:1344908013@qq.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/static-blog.js"></script>
+    <script>
+        // 日历脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentMonthEl = document.getElementById('currentMonth');
+            const calendarDaysEl = document.getElementById('calendarDays');
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
+            
+            const currentDate = new Date();
+            let currentYear = currentDate.getFullYear();
+            let currentMonth = currentDate.getMonth();
+            
+            function generateCalendar(year, month) {
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                currentMonthEl.textContent = `${year}年${monthNames[month]}`;
+                
+                calendarDaysEl.innerHTML = '';
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('calendar-day', 'empty');
+                    calendarDaysEl.appendChild(emptyDay);
+                }
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.classList.add('calendar-day');
+                    dayEl.textContent = day;
+                    
+                    const todayDate = new Date();
+                    const isToday = year === todayDate.getFullYear() && month === todayDate.getMonth() && day === todayDate.getDate();
+                    if (isToday) {
+                        dayEl.classList.add('today');
+                    }
+                    
+                    calendarDaysEl.appendChild(dayEl);
+                }
+            }
+            
+            generateCalendar(currentYear, currentMonth);
+            
+            prevMonthBtn.addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+        });
+        
+        // 音乐播放器功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const tracklist = document.getElementById('tracklist');
+            const trackItems = document.querySelectorAll('.track-item');
+            const playerStatus = document.querySelector('.player-status');
+            const playerSystem = document.querySelector('.player-system');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const volumeIcon = document.querySelector('.volume-icon');
+            
+            // 等待全局播放器初始化
+            setTimeout(() => {
+                const player = window.globalMusicPlayer;
+                
+                if (player) {
+                    // 从localStorage获取音量设置
+                    const savedVolume = localStorage.getItem('musicVolume');
+                    const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+                    volumeSlider.value = initialVolume * 100;
+                    volumeValue.textContent = Math.round(initialVolume * 100) + '%';
+                    
+                    // 更新音量图标
+                    function updateVolumeIcon(volume) {
+                        if (volume === 0) {
+                            volumeIcon.textContent = '🔇';
+                        } else if (volume < 0.3) {
+                            volumeIcon.textContent = '🔈';
+                        } else if (volume < 0.7) {
+                            volumeIcon.textContent = '🔉';
+                        } else {
+                            volumeIcon.textContent = '🔊';
+                        }
+                    }
+                    
+                    // 初始化音量图标
+                    updateVolumeIcon(initialVolume);
+                    
+                    // 音量控制
+                    volumeSlider.addEventListener('input', function() {
+                        const volume = this.value / 100;
+                        player.setVolume(volume);
+                        volumeValue.textContent = this.value + '%';
+                        localStorage.setItem('musicVolume', volume);
+                        updateVolumeIcon(volume);
+                    });
+                    
+                    // 播放/暂停按钮点击事件
+                    playPauseBtn.addEventListener('click', function() {
+                        player.playPause();
+                        const currentTrack = player.getCurrentTrack();
+                        if (currentTrack) {
+                            playPauseBtn.textContent = player.isPlaying ? 'PAUSE' : 'PLAY / PAUSE';
+                            playerStatus.textContent = player.isPlaying ? '▶ PLAYING' : '⏸ PAUSED';
+                            playerSystem.textContent = player.isPlaying ? 'SYSTEM PLAYING...' : 'SYSTEM PAUSED...';
+                        }
+                    });
+                    
+                    // 停止按钮点击事件
+                    stopBtn.addEventListener('click', function() {
+                        player.stop();
+                        playPauseBtn.textContent = 'PLAY / PAUSE';
+                        playerStatus.textContent = '▶ STOPPED';
+                        playerSystem.textContent = 'SYSTEM READY...';
+                    });
+                    
+                    // 曲目点击事件
+                    trackItems.forEach((item, index) => {
+                        item.addEventListener('click', function() {
+                            // 移除所有曲目的活动状态
+                            trackItems.forEach(i => i.classList.remove('active'));
+                            // 添加当前曲目的活动状态
+                            item.classList.add('active');
+                            
+                            player.playTrack(index);
+                            playPauseBtn.textContent = 'PAUSE';
+                            playerStatus.textContent = '▶ PLAYING';
+                            playerSystem.textContent = 'SYSTEM PLAYING...';
+                        });
+                    });
+                    
+                    // 更新播放器状态
+                    function updatePlayerUI() {
+                        const currentTrack = player.getCurrentTrack();
+                        if (currentTrack && player.isPlaying) {
+                            playPauseBtn.textContent = 'PAUSE';
+                            playerStatus.textContent = '▶ PLAYING';
+                            playerSystem.textContent = 'SYSTEM PLAYING...';
+                        } else if (currentTrack) {
+                            playPauseBtn.textContent = 'PLAY / PAUSE';
+                            playerStatus.textContent = '⏸ PAUSED';
+                            playerSystem.textContent = 'SYSTEM PAUSED...';
+                        } else {
+                            playPauseBtn.textContent = 'PLAY / PAUSE';
+                            playerStatus.textContent = '▶ STOPPED';
+                            playerSystem.textContent = 'SYSTEM READY...';
+                        }
+                    }
+                    
+                    // 初始化播放器UI
+                    updatePlayerUI();
+                } else {
+                    playerStatus.textContent = '❌ ERROR';
+                    playerSystem.textContent = 'SYSTEM ERROR: Player not initialized';
+                }
+            }, 100);
+        });
+        
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            function updateThemeIcon(theme) {
+                if (themeToggle) {
+                    if (theme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+            }
+            
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS进阶笔记 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        /* 悬浮目录样式 */
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        /* 暗模式适配 */
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-sidebar .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* 代码块样式优化 */
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        /* 评论区域样式 */
+        .comments {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        
+        .comment-form h4 {
+            margin-bottom: 1rem;
+            color: #343a40;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            padding: 1rem;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .comment-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .comment-content {
+            color: #212529;
+            line-height: 1.6;
+        }
+        
+        /* 暗模式评论样式 */
+        [data-theme="dark"] .comments {
+            background: rgba(45, 55, 72, 0.8);
+        }
+        
+        [data-theme="dark"] .comment-form h4 {
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #dee2e6;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #475569;
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .comment-date {
+            color: #94a3b8;
+        }
+        
+        [data-theme="dark"] .comment-content {
+            color: #cbd5e1;
+        }
+        
+        /* 标题样式优化 */
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        h1.article-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+            border-radius: 2px;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            font-weight: 600;
+        }
+        
+        /* 重点标题样式 */
+        h4 {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        h4::before {
+            content: '📌';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1rem;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        /* 确保暗模式下标题可见 */
+        [data-theme="dark"] h1.article-title {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        /* 段落和列表样式优化 */
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        /* 练习和答案样式 */
+        .exercise {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .exercise-answer {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-dark);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        /* 暗模式下代码块样式 */
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h2 {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] p {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .exercise {
+            background: var(--card-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .exercise-answer {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-dark);
+        }
+        
+        /* 文章容器样式 */
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        /* 暗模式下标题样式 - 创建视觉层次 */
+        [data-theme="dark"] h1 {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #f0f0f0 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 暗模式下重点标题特殊颜色 */
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(100, 181, 246, 0.3) !important;
+            background: linear-gradient(90deg, rgba(100,181,246,0.1), transparent) !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            display: inline-block !important;
+        }
+        
+        /* 确保重点标题颜色不被覆盖 */
+        [data-theme="dark"] .article-content h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #c0c0c0 !important;
+        }
+        
+        [data-theme="dark"] h6 {
+            color: #b0b0b0 !important;
+        }
+        
+        /* 文章页面按钮样式 */
+        .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* 暗模式下blockquote样式优化 */
+        [data-theme="dark"] .article-content blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <div id="mainContent">
+        <!-- 悬浮目录 -->
+        <div class="toc-sidebar" id="toc-sidebar">
+            <div class="toc-content">
+                <div class="toc">
+                    <h3>目录</h3>
+                    <ul>
+                        <li><a href="#section1">1. JS 进阶 函数</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section1-1">1.1 作用域</a></li>
+                                <li><a href="#section1-2">1.2 块作用域</a></li>
+                                <li><a href="#section1-3">1.3 全局作用域</a></li>
+                                <li><a href="#section1-4">1.4 作用域链</a></li>
+                                <li><a href="#section1-5">1.5 变量提升</a></li>
+                                <li><a href="#section1-6">1.6 闭包</a></li>
+                                <li><a href="#section1-7">1.7 箭头函数</a></li>
+                                <li><a href="#section1-8">1.8 解构赋值</a></li>
+                                <li><a href="#section1-9">1.9 垃圾回收机制</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#section2">2. JS 进阶 构造函数</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section2-1">2.1 深入对象</a></li>
+                                <li><a href="#section2-2">2.2 内置构造函数</a></li>
+                                <li><a href="#section2-3">2.3 包装类型</a></li>
+                                <li><a href="#section2-4">2.4 深浅拷贝</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#section3">3. JS 进阶 面向对象编程</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section3-1">3.1 编程思想</a></li>
+                                <li><a href="#section3-2">3.2 构造函数</a></li>
+                                <li><a href="#section3-3">3.3 原型</a></li>
+                                <li><a href="#section3-4">3.4 类</a></li>
+                                <li><a href="#section3-5">3.5 模块化</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 目录切换按钮 -->
+        <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+        
+        <div class="article-container">
+            <button class="btn btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+            <h1 class="article-title">JS进阶笔记</h1>
+            <div class="post-meta">
+                <span class="post-date">2025-12-17</span>
+                <span class="post-author">Cyinc</span>
+                <span class="post-category">技术</span>
+            </div>
+            <div class="article-content">
+                    <h2 id="section1">1. JS 进阶 函数</h2>
+                    <blockquote>
+                        <p>学习作用域、变量提升、闭包等语言特征，加深对 JavaScript 的理解，掌握变量赋值、函数声明的简洁语法，降低代码的冗余度。</p>
+                        <ul>
+                            <li>理解作用域对程序执行的影响</li>
+                            <li>能够分析程序执行的作用域范围</li>
+                            <li>理解闭包本质，利用闭包创建隔离作用域</li>
+                            <li>了解什么变量提升及函数提升</li>
+                            <li>掌握箭头函数、解析剩余参数等简洁语法</li>
+                        </ul>
+                    </blockquote>
+
+                    <h3 id="section1-1">1.1 作用域</h3>
+                    <blockquote>
+                        <p>了解作用域对程序执行的影响及作用域链的查找机制，使用闭包函数创建隔离作用域避免全局变量污染。</p>
+                        <p>作用域（scope）规定了变量能够被访问的"范围"，离开了这个"范围"变量便不能被访问，作用域分为全局作用域和局部作用域。</p>
+                    </blockquote>
+
+                    <h4>局部作用域</h4>
+                    <p>局部作用域分为函数作用域和块作用域。</p>
+
+                    <h5>函数作用域</h5>
+                    <p>在函数内部声明的变量只能在函数内部被访问，外部无法直接访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 声明 counter 函数
+  function counter(x, y) {
+    // 函数内部声明的变量
+    const s = x + y
+    console.log(s) // 18
+  }
+  // 设用 counter 函数
+  counter(10, 8)
+  // 访问变量 s
+  console.log(s)// 报错
+&lt;/script&gt;</code></pre>
+
+                    <h5>总结：</h5>
+                    <ol>
+                        <li>函数内部声明的变量，在函数外部无法被访问</li>
+                        <li>函数的参数也是函数内部的局部变量</li>
+                        <li>不同函数内部声明的变量无法互相访问</li>
+                        <li>函数执行完毕后，函数内部的变量实际被清空了</li>
+                    </ol>
+
+                    <h3 id="section1-2">1.2 块作用域</h3>
+                    <p>在 JavaScript 中使用 `{}` 包裹的代码称为代码块，代码块内部声明的变量外部将【有可能】无法被访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  {
+    // age 只能在该代码块中被访问
+    let age = 18;
+    console.log(age); // 正常
+  }
+  
+  // 超出了 age 的作用域
+  console.log(age) // 报错
+  
+  let flag = true;
+  if(flag) {
+    // str 只能在该代码块中被访问
+    let str = 'hello world!'
+    console.log(str); // 正常
+  }
+  
+  // 超出了 age 的作用域
+  console.log(str); // 报错
+  
+  for(let t = 1; t <= 6; t++) {
+    // t 只能在该代码块中被访问
+    console.log(t); // 正常
+  }
+  
+  // 超出了 t 的作用域
+  console.log(t); // 报错
+&lt;/script&gt;</code></pre>
+
+                    <p>JavaScript 中除了变量外还有常量，常量与变量本质的区别是【常量必须要有值且不允许被重新赋值】，常量值为对象时其属性和方法允许重新赋值。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 必须要有值
+  const version = '1.0.0';
+
+  // 不能重新赋值
+  // version = '1.0.1';
+
+  // 常量值为对象类型
+  const user = {
+    name: '小明',
+    age: 18
+  }
+
+  // 不能重新赋值
+  user = {};
+
+  // 属性和方法允许被修改
+  user.name = '小小明';
+  user.gender = '男';
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>`let` 声明的变量会产生块作用域，`var` 不会产生块作用域</li>
+                        <li>`const` 声明的常量也会产生块作用域</li>
+                        <li>不同代码块之间的变量无法互相访问</li>
+                        <li>推荐使用 `let` 或 `const`</li>
+                    </ol>
+
+                    <p>注：开发中 `let` 和 `const` 经常不加区分的使用，如果担心某个值会不小被修改时，则只能使用 `const` 声明成常量。</p>
+
+                    <h3 id="section1-3">1.3 全局作用域</h3>
+                    <p>`&lt;script&gt;` 标签和 `.js` 文件的【最外层】就是所谓的全局作用域，在此声明的变量在函数内部也可以被访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 此处是全局
+  
+  function sayHi() {
+    // 此处为局部
+  }
+
+  // 此处为全局
+&lt;/script&gt;</code></pre>
+
+                    <p>全局作用域中声明的变量，任何其它作用域都可以被访问，如下代码所示：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+    // 全局变量 name
+    const name = '小明'
+  
+    // 函数作用域中访问全局
+    function sayHi() {
+      // 此处为局部
+      console.log('你好' + name)
+    }
+
+    // 全局变量 flag 和 x
+    const flag = true
+    let x = 10
+  
+    // 块作用域中访问全局
+    if(flag) {
+      let y = 5
+      console.log(x + y) // x 是全局的
+    }
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>为 `window` 对象动态添加的属性默认也是全局的，不推荐！</li>
+                        <li>函数中未使用任何关键字声明的变量为全局变量，不推荐！！！</li>
+                        <li>尽可能少的声明全局变量，防止全局变量被污染</li>
+                    </ol>
+
+                    <p>JavaScript 中的作用域是程序被执行时的底层机制，了解这一机制有助于规范代码书写习惯，避免因作用域导致的语法错误。</p>
+
+                    <h3 id="section1-4">1.4 作用域链</h3>
+                    <p>在解释什么是作用域链前先来看一段代码：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 全局作用域
+  let a = 1
+  let b = 2
+  // 局部作用域
+  function f() {
+    let c
+    // 局部作用域
+    function g() {
+      let d = 'yo'
+    }
+  }
+&lt;/script&gt;</code></pre>
+
+                    <p>函数内部允许创建新的函数，`f` 函数内部创建的新函数 `g`，会产生新的函数作用域，由此可知作用域产生了嵌套的关系。</p>
+
+                    <p>父子关系的作用域关联在一起形成了链状的结构，作用域链的名字也由此而来。</p>
+
+                    <p>作用域链本质上是底层的变量查找机制，在函数被执行时，会优先查找当前函数作用域中查找变量，如果当前作用域查找不到则会依次逐级查找父级作用域直到全局作用域，如下代码所示：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 全局作用域
+  let a = 1
+  let b = 2
+
+  // 局部作用域
+  function f() {
+    let c
+    // let a = 10;
+    console.log(a) // 1 或 10
+    console.log(d) // 报错
+    
+    // 局部作用域
+    function g() {
+      let d = 'yo'
+      // let b = 20;
+      console.log(b) // 2 或 20
+    }
+    
+    // 调用 g 函数
+    g()
+  }
+
+  console.log(c) // 报错
+  console.log(d) // 报错
+  
+  f();
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>嵌套关系的作用域串联起来形成了作用域链</li>
+                        <li>相同作用域链中按着从小到大的规则查找变量</li>
+                        <li>子作用域能够访问父作用域，父级作用域无法访问子级作用域</li>
+                    </ol>
+
+                    <h3 id="section1-5">1.5 变量提升</h3>
+                    <p>变量提升（Hoisting）是JavaScript中的一种行为，指的是在代码执行前，JavaScript引擎会将变量和函数声明移动到其所在作用域的顶部。</p>
+
+                    <h4>var 声明的变量提升</h4>
+                    <p>使用var声明的变量会被提升到函数或全局作用域的顶部，但赋值操作仍然在原位置执行。</p>
+
+                    <pre><code class="javascript">console.log(myVar); // undefined，而不是报错
+var myVar = 10;
+console.log(myVar); // 10</code></pre>
+
+                    <h4>let 和 const 声明的变量</h4>
+                    <p>使用let和const声明的变量也会被提升，但它们会进入"暂时性死区"（Temporal Dead Zone，TDZ），在声明之前访问这些变量会报错。</p>
+
+                    <pre><code class="javascript">console.log(myLet); // 报错：Cannot access 'myLet' before initialization
+let myLet = 20;
+console.log(myLet); // 20</code></pre>
+
+                    <h4>函数提升</h4>
+                    <p>函数声明也会被提升，这意味着可以在函数声明之前调用函数。</p>
+
+                    <pre><code class="javascript">myFunction(); // 可以调用，不会报错
+
+function myFunction() {
+    console.log("函数被调用");
+}</code></pre>
+
+                    <h3 id="section1-6">1.6 闭包</h3>
+                    <p>闭包（Closure）是JavaScript中一个重要的概念，指的是函数能够记住并访问其词法作用域中的变量，即使该函数在其词法作用域之外执行。</p>
+
+                    <h4>闭包的基本概念</h4>
+                    <p>当一个函数返回另一个函数时，返回的函数会保留对创建它的函数作用域的访问，这就是闭包。</p>
+
+                    <pre><code class="javascript">function outerFunction() {
+    let outerVar = "外部变量";
+    
+    return function innerFunction() {
+        console.log(outerVar); // 可以访问外部变量
+    };
+}
+
+let myClosure = outerFunction();
+myClosure(); // 输出：外部变量</code></pre>
+
+                    <h4>闭包的应用场景</h4>
+                    <ul>
+                        <li>数据私有化：通过闭包创建私有变量</li>
+                        <li>函数工厂：创建具有特定预设参数的函数</li>
+                        <li>模块模式：创建具有公共和私有方法的模块</li>
+                    </ul>
+
+                    <h4>闭包的注意事项</h4>
+                    <ul>
+                        <li>闭包会占用内存，不当使用可能导致内存泄漏</li>
+                        <li>在循环中创建闭包时，需要特别注意变量的引用</li>
+                    </ul>
+
+                    <h3 id="section1-7">1.7 箭头函数</h3>
+                    <p>箭头函数是ES6引入的一种更简洁的函数语法，它不仅语法更简洁，还具有一些特殊的特性。</p>
+
+                    <h4>箭头函数的基本语法</h4>
+                    <pre><code class="javascript">// 传统函数
+function add(a, b) {
+    return a + b;
+}
+
+// 箭头函数
+const add = (a, b) => {
+    return a + b;
+}
+
+// 更简洁的箭头函数（单行返回）
+const add = (a, b) => a + b;</code></pre>
+
+                    <h4>箭头函数的特性</h4>
+                    <ul>
+                        <li>没有自己的this值，this继承自外层作用域</li>
+                        <li>不能用作构造函数</li>
+                        <li>没有arguments对象</li>
+                    </ul>
+
+                    <h4>箭头函数的应用场景</h4>
+                    <ul>
+                        <li>回调函数：简化回调函数的写法</li>
+                        <li>数组方法：如map、filter、reduce等</li>
+                        <li>Promise链式调用</li>
+                    </ul>
+
+                    <h3 id="section1-8">1.8 解构赋值</h3>
+                    <p>解构赋值是ES6引入的一种语法，允许我们从数组或对象中提取值并赋值给变量。</p>
+
+                    <h4>数组解构</h4>
+                    <pre><code class="javascript">const numbers = [1, 2, 3, 4, 5];
+
+const [first, second, ...rest] = numbers;
+console.log(first); // 1
+console.log(second); // 2
+console.log(rest); // [3, 4, 5]</code></pre>
+
+                    <h4>对象解构</h4>
+                    <pre><code class="javascript">const person = {
+    name: "张三",
+    age: 25,
+    city: "北京"
+};
+
+const { name, age, city } = person;
+console.log(name); // 张三
+console.log(age); // 25
+console.log(city); // 北京</code></pre>
+
+                    <h4>默认值</h4>
+                    <pre><code class="javascript">const { name = "匿名", age = 0 } = {};
+console.log(name); // 匿名
+console.log(age); // 0</code></pre>
+
+                    <h3 id="section1-9">1.9 垃圾回收机制</h3>
+                    <h4>堆栈空间分配区别</h4>
+                    <ol>
+                        <li>栈(操作系统):由操作系统自动分配释放函数的参数值、局部变量等，基本数据类型放到栈里面。</li>
+                        <li>堆(操作系统):一般由程序员分配释放，若程序员不释放，由垃圾回收机制回收。复杂数据类型放到堆里面。</li>
+                    </ol>
+
+                    <h4>垃圾回收算法</h4>
+                    <p>引用计数法 和 标记清除法</p>
+
+                    <h5>引用计数法</h5>
+                    <p>IE采用的引用计数算法，定义"内存不再使用"一个对象是否有指向它的引用，没有引用了就回收对象。</p>
+                    <p>算法：</p>
+                    <ol>
+                        <li>跟踪记录被引用的次数</li>
+                        <li>如果被引用了一次，那么就记录次数1,多次引用会累加 ++</li>
+                        <li>如果减少一个引用就 减1--</li>
+                        <li>如果引用次数是0，则释放内存</li>
+                    </ol>
+
+                    <p>如果：嵌套引用(循环引用)</p>
+                    <p>如果两个对象相互引用，尽管他们已不再使用，垃圾回收器不会进行回收，导致内存泄露。</p>
+
+                    <pre><code class="javascript">function fn() {
+      let o1 = {}
+      let o2 = {}
+      o1.a = 1
+      o2.b = 2
+      return '引用计数无法回收'
+    }
+fn()</code></pre>
+
+                    <p>因为他们的引用次数永远不会是0。这样的相互引用如果说很大量的存在就会导致大量的内存泄露！</p>
+
+                    <h5>标记清除法</h5>
+                    <p>现代的浏览器已经不再使用引用计数算法了。</p>
+                    <p>现代浏览器通用的大多是基于标记清除算法的某些改违算法，总体思想都是一致的。</p>
+
+                    <p>核心：</p>
+                    <ol>
+                        <li>标记清除算法将"不再使用的对象"定义为"无法达到的对象"</li>
+                        <li>就是从根部(在JS中就是全局对象)出发定时扫描内存中的对象。凡是能从根部到达的对象，都是还需要使用的，那些无法由根部出发触及到的对象被标记为不再使用，稍后进行回收。</li>
+                    </ol>
+
+                    <h2 id="section2">2. JS 进阶 构造函数</h2>
+                    <h3 id="section2-1">2.1 深入对象</h3>
+                    <p>对象是 JavaScript 中最重要的数据类型之一，它允许我们存储和组织相关的数据和功能。</p>
+
+                    <h4>对象的创建方式</h4>
+                    <pre><code class="javascript">// 字面量方式
+const obj1 = {};
+
+// 构造函数方式
+const obj2 = new Object();
+
+// 工厂函数方式
+function createObj(name, age) {
+    return {
+        name: name,
+        age: age,
+        sayHi: function() {
+            console.log(`Hello, my name is ${this.name}`);
+        }
+    };
+}
+const obj3 = createObj('张三', 25);</code></pre>
+
+                    <h4>对象的属性操作</h4>
+                    <pre><code class="javascript">const obj = { name: '张三' };
+
+// 添加属性
+obj.age = 25;
+obj['gender'] = '男';
+
+// 修改属性
+obj.name = '李四';
+
+// 删除属性
+delete obj.age;
+
+// 访问属性
+console.log(obj.name); // 李四
+console.log(obj['gender']); // 男</code></pre>
+
+                    <h3 id="section2-2">2.2 内置构造函数</h3>
+                    <p>JavaScript 提供了多种内置构造函数，用于创建不同类型的对象。</p>
+
+                    <h4>常用内置构造函数</h4>
+                    <ul>
+                        <li>Object：创建对象</li>
+                        <li>Array：创建数组</li>
+                        <li>String：创建字符串</li>
+                        <li>Number：创建数字</li>
+                        <li>Boolean：创建布尔值</li>
+                        <li>Function：创建函数</li>
+                        <li>Date：创建日期</li>
+                        <li>RegExp：创建正则表达式</li>
+                    </ul>
+
+                    <pre><code class="javascript">// 使用内置构造函数创建对象
+const str = new String('Hello');
+const num = new Number(10);
+const bool = new Boolean(true);
+const arr = new Array(1, 2, 3);
+const date = new Date();</code></pre>
+
+                    <h3 id="section2-3">2.3 包装类型</h3>
+                    <p>包装类型是 JavaScript 中一种特殊的对象类型，用于基本数据类型的方法调用。</p>
+
+                    <pre><code class="javascript">// 基本数据类型
+const str = 'Hello';
+
+// 自动包装为对象
+console.log(str.length); // 5
+console.log(str.toUpperCase()); // HELLO
+
+// 手动包装
+const strObj = new String('Hello');
+console.log(strObj.length); // 5
+
+// 拆箱操作
+const strPrimitive = strObj.valueOf(); // 'Hello'</code></pre>
+
+                    <h3 id="section2-4">2.4 深浅拷贝</h3>
+                    <p>在 JavaScript 中，对象的拷贝分为浅拷贝和深拷贝两种方式。</p>
+
+                    <h4>浅拷贝</h4>
+                    <p>浅拷贝只复制对象的引用，不复制对象本身。</p>
+                    <pre><code class="javascript">const obj1 = { name: '张三', age: 25 };
+const obj2 = obj1;
+obj2.name = '李四';
+console.log(obj1.name); // 李四</code></pre>
+
+                    <h4>深拷贝</h4>
+                    <p>深拷贝复制对象的所有层级，创建一个全新的对象。</p>
+                    <pre><code class="javascript">// 方法1：JSON序列化
+const obj1 = { name: '张三', age: 25, address: { city: '北京' } };
+const obj2 = JSON.parse(JSON.stringify(obj1));
+obj2.address.city = '上海';
+console.log(obj1.address.city); // 北京
+
+// 方法2：递归拷贝
+function deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (obj instanceof Date) return new Date(obj);
+    if (obj instanceof Array) return obj.map(item => deepClone(item));
+    if (typeof obj === 'object') {
+        const clonedObj = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                clonedObj[key] = deepClone(obj[key]);
+            }
+        }
+        return clonedObj;
+    }
+}
+const obj3 = deepClone(obj1);</code></pre>
+
+                    <h2 id="section3">3. JS 进阶 面向对象编程</h2>
+                    <h3 id="section3-1">3.1 编程思想</h3>
+                    <p>面向对象编程（OOP）是一种编程范式，它将数据和操作数据的方法封装在一起，形成对象。</p>
+
+                    <h4>面向对象编程的特点</h4>
+                    <ul>
+                        <li>封装：将数据和方法封装在对象中</li>
+                        <li>继承：子类可以继承父类的属性和方法</li>
+                        <li>多态：不同对象对同一方法的不同实现</li>
+                    </ul>
+
+                    <h3 id="section3-2">3.2 构造函数</h3>
+                    <p>构造函数是一种特殊的函数，用于创建和初始化对象。</p>
+
+                    <pre><code class="javascript">// 构造函数
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+    this.sayHi = function() {
+        console.log(`Hello, my name is ${this.name}`);
+    };
+}
+
+// 使用构造函数创建对象
+const person1 = new Person('张三', 25);
+const person2 = new Person('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四</code></pre>
+
+                    <h4>构造函数的特点</h4>
+                    <ul>
+                        <li>构造函数的首字母通常大写</li>
+                        <li>使用 new 关键字调用构造函数</li>
+                        <li>构造函数内部使用 this 指向新创建的对象</li>
+                        <li>构造函数默认返回新创建的对象</li>
+                    </ul>
+
+                    <h3 id="section3-3">3.3 原型</h3>
+                    <p>原型是 JavaScript 中实现继承的重要机制，每个函数都有一个 prototype 属性。</p>
+
+                    <pre><code class="javascript">// 构造函数
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+// 在原型上添加方法
+Person.prototype.sayHi = function() {
+    console.log(`Hello, my name is ${this.name}`);
+};
+
+// 使用构造函数创建对象
+const person1 = new Person('张三', 25);
+const person2 = new Person('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四
+
+// 检查原型链
+console.log(person1 instanceof Person); // true
+console.log(person1 instanceof Object); // true</code></pre>
+
+                    <h4>原型链</h4>
+                    <p>当访问对象的属性或方法时，JavaScript 会先在对象本身查找，如果找不到，就会沿着原型链向上查找，直到找到为止。</p>
+
+                    <h3 id="section3-4">3.4 类</h3>
+                    <p>ES6 引入了类（class）语法，提供了更简洁、更清晰的方式来实现面向对象编程。</p>
+
+                    <pre><code class="javascript">// 使用类语法
+class Person {
+    // 构造方法
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    // 实例方法
+    sayHi() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+    
+    // 静态方法
+    static create(name, age) {
+        return new Person(name, age);
+    }
+}
+
+// 使用类创建对象
+const person1 = new Person('张三', 25);
+const person2 = Person.create('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四</code></pre>
+
+                    <h4>类的继承</h4>
+                    <pre><code class="javascript">// 父类
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+    
+    eat() {
+        console.log(`${this.name} is eating`);
+    }
+}
+
+// 子类
+class Dog extends Animal {
+    constructor(name, breed) {
+        super(name); // 调用父类的构造方法
+        this.breed = breed;
+    }
+    
+    bark() {
+        console.log(`${this.name} is barking`);
+    }
+}
+
+// 使用子类创建对象
+const dog = new Dog('Buddy', 'Golden Retriever');
+dog.eat(); // Buddy is eating
+dog.bark(); // Buddy is barking</code></pre>
+
+                    <h3 id="section3-5">3.5 模块化</h3>
+                    <p>模块化是一种将代码分割成独立、可重用的模块的方式，它有助于提高代码的可维护性和可扩展性。</p>
+
+                    <h4>ES6 模块</h4>
+                    <pre><code class="javascript">// module.js
+// 导出
+const name = '张三';
+const age = 25;
+
+function sayHi() {
+    console.log(`Hello, my name is ${name}`);
+}
+
+export { name, age, sayHi };
+
+// 导入
+import { name, age, sayHi } from './module.js';
+
+console.log(name); // 张三
+console.log(age); // 25
+sayHi(); // Hello, my name is 张三</code></pre>
+
+                    <h4>CommonJS 模块</h4>
+                    <pre><code class="javascript">// module.js
+// 导出
+const name = '张三';
+const age = 25;
+
+function sayHi() {
+    console.log(`Hello, my name is ${name}`);
+}
+
+module.exports = { name, age, sayHi };
+
+// 导入
+const { name, age, sayHi } = require('./module.js');
+
+console.log(name); // 张三
+console.log(age); // 25
+sayHi(); // Hello, my name is 张三</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论区域 -->
+            <div class="comments">
+                <!-- 评论表单 -->
+                <div class="comment-form">
+                    <h4>添加评论</h4>
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="name">用户名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容</label>
+                            <textarea id="comment" name="comment" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交评论</button>
+                    </form>
+                </div>
+                
+                <!-- 评论列表 -->
+                <div class="comment-list" id="commentList">
+                    <!-- 评论将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+    </footer>
+    <script src="../js/static-blog.js"></script>
+    <script>
+        // 悬浮目录功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocSidebar = document.getElementById('toc-sidebar');
+            const tocToggleBtn = document.getElementById('tocToggleBtn');
+            
+            if (tocToggleBtn && tocSidebar) {
+                tocToggleBtn.addEventListener('click', function() {
+                    tocSidebar.classList.toggle('collapsed');
+                });
+            }
+            
+            // 代码块复制功能
+            const codeBlocks = document.querySelectorAll('pre code');
+            console.log('找到代码块数量:', codeBlocks.length);
+            
+            codeBlocks.forEach(function(codeBlock) {
+                const preElement = codeBlock.parentElement;
+                
+                // 创建复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '复制';
+                copyBtn.title = '复制代码';
+                
+                // 添加点击事件
+                copyBtn.addEventListener('click', function() {
+                    const code = codeBlock.textContent;
+                    
+                    // 复制到剪贴板
+                    navigator.clipboard.writeText(code).then(function() {
+                        copyBtn.textContent = '已复制';
+                        copyBtn.classList.add('copied');
+                        
+                        // 2秒后恢复原状
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('复制失败:', err);
+                        copyBtn.textContent = '失败';
+                        
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+                
+                // 将按钮添加到代码块
+                preElement.appendChild(copyBtn);
+            });
+            
+            // 评论功能
+            const commentForm = document.getElementById('commentForm');
+            const commentList = document.getElementById('commentList');
+            
+            // 加载评论函数
+            function loadComments() {
+                // 获取评论
+                let comments = JSON.parse(localStorage.getItem('js-advanced1-comments')) || [];
+                
+                // 清空评论列表
+                commentList.innerHTML = '';
+                
+                // 如果没有评论，显示提示
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                    return;
+                }
+                
+                // 添加评论到列表
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.name}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-content">${comment.comment}</div>
+                    `;
+                    commentList.appendChild(commentElement);
+                });
+            }
+            
+            if (commentForm && commentList) {
+                // 加载评论
+                loadComments();
+                
+                // 提交评论
+                commentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('name').value;
+                    const comment = document.getElementById('comment').value;
+                    const date = new Date().toLocaleString();
+                    
+                    // 创建评论对象
+                    const newComment = {
+                        id: Date.now(),
+                        name: name,
+                        comment: comment,
+                        date: date
+                    };
+                    
+                    // 获取现有评论
+                    let comments = JSON.parse(localStorage.getItem('js-advanced1-comments')) || [];
+                    
+                    // 添加新评论
+                    comments.push(newComment);
+                    
+                    // 保存评论到localStorage
+                    localStorage.setItem('js-advanced1-comments', JSON.stringify(comments));
+                    
+                    // 清空表单
+                    commentForm.reset();
+                    
+                    // 重新加载评论
+                    loadComments();
+                });
+            }
+        });
+        
+        // 切换侧边栏
+        function toggleSidebar() {
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            
+            if (mainContent.classList.contains('sidebar-hidden')) {
+                mainContent.classList.remove('sidebar-hidden');
+                toggleBtn.textContent = '◀';
+                toggleBtn.title = '隐藏导航栏';
+            } else {
+                mainContent.classList.add('sidebar-hidden');
+                toggleBtn.textContent = '▶';
+                toggleBtn.title = '显示导航栏';
+            }
+        }
+        
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // 从本地存储加载主题
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                if (themeToggle) {
+                    if (savedTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+            }
+            
+            // 添加点击事件监听器
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    // 更新主题属性
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    
+                    // 更新图标
+                    if (newTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

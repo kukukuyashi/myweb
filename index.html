@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyinc的个人博客</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/Content.css">
+    <script src="js/global-music-player.js"></script>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="about.html" data-icon="👤">关于</a></li>
+                        <li><a href="archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <!-- 侧边栏 -->
+                <aside class="sidebar">
+                    <!-- 站点统计模块 -->
+                    <div class="site-stats sidebar-module">
+                        <h2 class="sidebar-title">站点统计</h2>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <div class="stat-label">文章</div>
+                                <div class="stat-number">10</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">分类</div>
+                                <div class="stat-number">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">标签</div>
+                                <div class="stat-number">19</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">总字数</div>
+                                <div class="stat-number">25,163</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">运行时长</div>
+                                <div class="stat-number">120天</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">最后活动</div>
+                                <div class="stat-number">15天前</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日历模块 -->
+                    <div class="calendar sidebar-module">
+                        <h2 class="sidebar-title">文章日历</h2>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                                <h3 class="calendar-title" id="currentMonth">2024年1月</h3>
+                                <button class="calendar-nav-btn" id="nextMonth">›</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div>
+                                <div class="weekday">一</div>
+                                <div class="weekday">二</div>
+                                <div class="weekday">三</div>
+                                <div class="weekday">四</div>
+                                <div class="weekday">五</div>
+                                <div class="weekday">六</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                                <!-- 日历日期将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- 主内容 -->
+                <div id="mainContent">
+            <!-- 首页内容 -->
+            <div id="homePage">
+                <h1 class="page-title">最新文章</h1>
+                
+                <div class="header-actions">
+                    <!-- 分类筛选导航栏 -->
+                    <div class="category-filter">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="技术">技术</button>
+                        <button class="filter-btn" data-filter="学习">学习</button>
+                        <button class="filter-btn" data-filter="小知识">小知识</button>
+                    </div>
+                    
+                    <!-- 搜索框 -->
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="搜索文章..." class="search-input">
+                        <button id="searchBtn" class="search-btn">搜索</button>
+                    </div>
+                </div>
+                
+                <div class="posts-grid">
+                    <!-- 文章卡片1 - JS基础笔记 -->
+                    <a href="Content/JS基础.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/1.jfif" alt="JS基础笔记">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">JS基础笔记</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-10-15</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">JavaScript基础知识笔记，包括变量、数据类型、运算符、循环结构等内容，适合初学者学习。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">JavaScript</span>
+                                    <span class="post-tag">前端开发</span>
+                                    <span class="post-tag">学习笔记</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片2 - JS进阶笔记 -->
+                    <a href="Content/JS进阶1.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/2.jfif" alt="JS进阶笔记">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">JS进阶笔记</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-17</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">JavaScript进阶知识笔记，包括作用域、闭包、构造函数、面向对象编程等内容，适合有一定基础的学习者。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">JavaScript</span>
+                                    <span class="post-tag">进阶</span>
+                                    <span class="post-tag">学习笔记</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片3 - JS进阶笔记（二） -->
+                    <a href="Content/JS进阶2.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/2.jfif" alt="JS进阶笔记（二）">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">JS进阶笔记（二）</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-17</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">JavaScript进阶知识笔记（二），包括异步编程等内容，适合有一定基础的学习者。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">JavaScript</span>
+                                    <span class="post-tag">异步编程</span>
+                                    <span class="post-tag">学习笔记</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片4 - Web API笔记 -->
+                    <a href="Content/Web API.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/3.jfif" alt="Web API笔记">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Web API笔记</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">Web API笔记，包括DOM操作、事件处理、BOM操作等内容，帮助开发者更好地操作浏览器。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Web API</span>
+                                    <span class="post-tag">DOM</span>
+                                    <span class="post-tag">BOM</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片5 - Web API笔记（二） -->
+                    <a href="Content/Web API2.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（二）">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Web API笔记（二）</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">Web API笔记（二），包括事件监听、焦点事件、键盘事件、事件对象等内容。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Web API</span>
+                                    <span class="post-tag">事件</span>
+                                    <span class="post-tag">学习笔记</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片6 - Web API笔记（三） -->
+                    <a href="Content/Web API3.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（三）">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Web API笔记（三）</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">Web API笔记（三），包括事件案例、节点操作、日期对象等内容。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Web API</span>
+                                    <span class="post-tag">节点</span>
+                                    <span class="post-tag">学习笔记</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片7 - Web API笔记（四） -->
+                    <a href="Content/Web API4.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（四）">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Web API笔记（四）</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">Web API笔记（四），包括BOM操作、正则表达式、放大镜效果等内容。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Web API</span>
+                                    <span class="post-tag">BOM</span>
+                                    <span class="post-tag">正则表达式</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片8 - 前端核心学习表 -->
+                    <a href="Content/前端核心学习表.html" class="post-card-link" data-category="学习">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/4.jfif" alt="前端核心学习表">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">前端核心学习表</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2026-01-30</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">学习</span>
+                                </div>
+                                <p class="post-excerpt">前端开发核心学习路径和知识点总结，帮助学习者系统地掌握前端开发技能。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">前端</span>
+                                    <span class="post-tag">学习路径</span>
+                                    <span class="post-tag">知识点</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片9 - Vue.js,Three.js和Node.js的区别 -->
+                    <a href="Content/Vue.js,Three.js和Node.js的区别.html" class="post-card-link" data-category="小知识">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/5.jfif" alt="Vue.js,Three.js和Node.js的区别">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Vue.js,Three.js和Node.js的区别</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-12-21</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">小知识</span>
+                                </div>
+                                <p class="post-excerpt">详细介绍Vue.js、Three.js和Node.js三个技术的区别和协同工作方式。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Vue.js</span>
+                                    <span class="post-tag">Three.js</span>
+                                    <span class="post-tag">Node.js</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+
+                    <!-- 文章卡片10 - RhinoWeb的常见问题 -->
+                    <a href="Content/RhinoWeb的常见问题.html" class="post-card-link" data-category="小知识">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/ba1.gif" alt="RhinoWeb的常见问题">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">RhinoWeb的常见问题</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2024-01-05</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">小知识</span>
+                                </div>
+                                <p class="post-excerpt">解决RhinoWeb项目中模型看不见的常见问题和解决方案。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Rhino</span>
+                                    <span class="post-tag">Three.js</span>
+                                    <span class="post-tag">问题解决</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+                    
+                    <!-- 文章卡片11 - Vue3学习笔记 -->
+                    <a href="Content/Vue3学习笔记.html" class="post-card-link" data-category="技术">
+                        <article class="post-card">
+                            <div class="post-image">
+                                <img src="img/huiye1.png" alt="Vue3学习笔记">
+                            </div>
+                            <div class="post-content">
+                                <h2 class="post-title">Vue3学习笔记</h2>
+                                <div class="post-meta">
+                                    <span class="post-date">2025-02-27</span>
+                                    <span class="post-author">Cyinc</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                                <p class="post-excerpt">Vue3核心语法学习笔记，包括Composition API、ref、reactive、computed、watch等内容。</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">Vue3</span>
+                                    <span class="post-tag">Composition API</span>
+                                    <span class="post-tag">前端框架</span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+                </div>
+                
+                <!-- 热门文章模块 -->
+                <div class="popular-posts">
+                    <h2 class="section-title">热门文章</h2>
+                    <div class="popular-posts-list">
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">1</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/JS基础.html">JS基础笔记</a></h3>
+                                <p class="popular-post-excerpt">JavaScript基础知识笔记，包括变量、数据类型、运算符、循环结构等内容，适合初学者学习。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-10-15</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">2</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/JS进阶1.html">JS进阶笔记（一）</a></h3>
+                                <p class="popular-post-excerpt">JavaScript进阶知识笔记（一），包括作用域、闭包、构造函数、面向对象编程等内容，适合有一定基础的学习者。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-17</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">3</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/JS进阶2.html">JS进阶笔记（二）</a></h3>
+                                <p class="popular-post-excerpt">JavaScript进阶知识笔记（二），包括异步编程等内容，适合有一定基础的学习者。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-17</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">4</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/Web API.html">Web API笔记</a></h3>
+                                <p class="popular-post-excerpt">Web API笔记，包括DOM操作、事件处理、BOM操作等内容，帮助开发者更好地操作浏览器。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">5</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/Web API2.html">Web API笔记（二）</a></h3>
+                                <p class="popular-post-excerpt">Web API笔记（二），包括事件监听、焦点事件、键盘事件、事件对象等内容。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">6</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/Web API3.html">Web API笔记（三）</a></h3>
+                                <p class="popular-post-excerpt">Web API笔记（三），包括事件案例、节点操作、日期对象等内容。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">7</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/Web API4.html">Web API笔记（四）</a></h3>
+                                <p class="popular-post-excerpt">Web API笔记（四），包括BOM操作、正则表达式、放大镜效果等内容。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-13</span>
+                                    <span class="post-category">技术</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">8</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/前端核心学习表.html">前端核心学习表</a></h3>
+                                <p class="popular-post-excerpt">前端开发核心学习路径和知识点总结，帮助学习者系统地掌握前端开发技能。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2026-01-30</span>
+                                    <span class="post-category">学习</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">9</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/Vue.js,Three.js和Node.js的区别.html">Vue.js,Three.js和Node.js的区别</a></h3>
+                                <p class="popular-post-excerpt">详细介绍Vue.js、Three.js和Node.js三个技术的区别和协同工作方式。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-21</span>
+                                    <span class="post-category">小知识</span>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="popular-post-item">
+                            <div class="popular-post-rank">10</div>
+                            <div class="popular-post-content">
+                                <h3 class="popular-post-title"><a href="Content/RhinoWeb的常见问题.html">RhinoWeb的常见问题</a></h3>
+                                <p class="popular-post-excerpt">解决RhinoWeb项目中模型看不见的常见问题和解决方案。</p>
+                                <div class="popular-post-meta">
+                                    <span class="post-date">2025-12-21</span>
+                                    <span class="post-category">小知识</span>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                
+                <!-- 推荐阅读模块 -->
+                <div class="recommended-posts">
+                    <h2 class="section-title">推荐阅读</h2>
+                    <div class="recommended-posts-grid">
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/1.jfif" alt="JS基础笔记">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/JS基础.html">JS基础笔记</a></h3>
+                                <p class="recommended-post-excerpt">JavaScript基础知识笔记，包括变量、数据类型、运算符、循环结构等内容，适合初学者学习。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/2.jfif" alt="JS进阶笔记">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/JS进阶1.html">JS进阶笔记（一）</a></h3>
+                                <p class="recommended-post-excerpt">JavaScript进阶知识笔记（一），包括作用域、闭包、构造函数、面向对象编程等内容，适合有一定基础的学习者。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/2.jfif" alt="JS进阶笔记（二）">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/JS进阶2.html">JS进阶笔记（二）</a></h3>
+                                <p class="recommended-post-excerpt">JavaScript进阶知识笔记（二），包括异步编程等内容，适合有一定基础的学习者。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/3.jfif" alt="Web API笔记">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/Web API.html">Web API笔记</a></h3>
+                                <p class="recommended-post-excerpt">Web API笔记，包括DOM操作、事件处理、BOM操作等内容，帮助开发者更好地操作浏览器。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（二）">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/Web API2.html">Web API笔记（二）</a></h3>
+                                <p class="recommended-post-excerpt">Web API笔记（二），包括事件监听、焦点事件、键盘事件、事件对象等内容。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（三）">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/Web API3.html">Web API笔记（三）</a></h3>
+                                <p class="recommended-post-excerpt">Web API笔记（三），包括事件案例、节点操作、日期对象等内容。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/3.jfif" alt="Web API笔记（四）">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/Web API4.html">Web API笔记（四）</a></h3>
+                                <p class="recommended-post-excerpt">Web API笔记（四），包括BOM操作、正则表达式、放大镜效果等内容。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/4.jfif" alt="前端核心学习表">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/前端核心学习表.html">前端核心学习表</a></h3>
+                                <p class="recommended-post-excerpt">前端开发核心学习路径和知识点总结，帮助学习者系统地掌握前端开发技能。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/5.jfif" alt="Vue.js,Three.js和Node.js的区别">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/Vue.js,Three.js和Node.js的区别.html">Vue.js,Three.js和Node.js的区别</a></h3>
+                                <p class="recommended-post-excerpt">详细介绍Vue.js、Three.js和Node.js三个技术的区别和协同工作方式。</p>
+                            </div>
+                        </article>
+                        <article class="recommended-post-item">
+                            <div class="recommended-post-image">
+                                <img src="img/ba1.gif" alt="RhinoWeb的常见问题">
+                            </div>
+                            <div class="recommended-post-content">
+                                <h3 class="recommended-post-title"><a href="Content/RhinoWeb的常见问题.html">RhinoWeb的常见问题</a></h3>
+                                <p class="recommended-post-excerpt">解决RhinoWeb项目中模型看不见的常见问题和解决方案。</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                
+
+                
+                <!-- 日历样式 -->
+                <style>
+                    /* 日历模块样式 */
+                    .calendar {
+                        background: white;
+                        border-radius: 8px;
+                        padding: 1rem;
+                        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                    }
+                    
+                    .calendar-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 1rem;
+                    }
+                    
+                    .calendar-title {
+                        font-size: 1.1rem;
+                        font-weight: bold;
+                        color: var(--primary-darker);
+                    }
+                    
+                    .calendar-nav-btn {
+                        background: transparent;
+                        border: 1px solid var(--primary-color);
+                        color: var(--primary-color);
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .calendar-nav-btn:hover {
+                        background: var(--primary-color);
+                        color: white;
+                    }
+                    
+                    .calendar-weekdays {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 5px;
+                        margin-bottom: 0.5rem;
+                    }
+                    
+                    .weekday {
+                        text-align: center;
+                        font-size: 0.8rem;
+                        color: var(--text-secondary);
+                        font-weight: 500;
+                    }
+                    
+                    .calendar-container {
+                        width: 100%;
+                    }
+                    
+                    .calendar-days {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 5px;
+                    }
+                    
+                    .calendar-day {
+                        width: 100%;
+                        padding: 8px 0;
+                        text-align: center;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 0.9rem;
+                    }
+                    
+                    .calendar-day:hover {
+                        background: var(--primary-lighter);
+                    }
+                    
+                    .calendar-day.empty {
+                        opacity: 0;
+                        cursor: default;
+                    }
+                    
+                    .calendar-day.has-post {
+                        background: var(--primary-light);
+                        color: var(--primary-darker);
+                        font-weight: 500;
+                    }
+                    
+                    .calendar-day.today {
+                        background: var(--primary-color);
+                        color: white;
+                        font-weight: bold;
+                    }
+                    
+                    /* 暗模式下的日历样式 */
+                    [data-theme="dark"] .calendar {
+                        background: var(--card-bg);
+                    }
+                    
+                    [data-theme="dark"] .calendar-title {
+                        color: white;
+                    }
+                    
+                    [data-theme="dark"] .calendar-nav-btn {
+                        border-color: var(--primary-color);
+                        color: var(--primary-color);
+                    }
+                    
+                    [data-theme="dark"] .calendar-nav-btn:hover {
+                        background: var(--primary-color);
+                        color: white;
+                    }
+                    
+                    [data-theme="dark"] .weekday {
+                        color: var(--text-secondary);
+                    }
+                    
+                    [data-theme="dark"] .calendar-day {
+                        color: var(--text-color);
+                    }
+                    
+                    [data-theme="dark"] .calendar-day:hover {
+                        background: rgba(255,255,255,0.1);
+                    }
+                    
+                    [data-theme="dark"] .calendar-day.has-post {
+                        background: rgba(100, 181, 246, 0.2);
+                        color: var(--primary-color);
+                    }
+                    
+                    [data-theme="dark"] .calendar-day.today {
+                        background: var(--primary-color);
+                        color: white;
+                    }
+                </style>
+                
+                <!-- 日历脚本 -->
+                <script>
+                    // 初始化日历
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const currentMonthEl = document.getElementById('currentMonth');
+                        const calendarDaysEl = document.getElementById('calendarDays');
+                        const prevMonthBtn = document.getElementById('prevMonth');
+                        const nextMonthBtn = document.getElementById('nextMonth');
+                        
+                        const currentDate = new Date();
+                        let currentYear = currentDate.getFullYear();
+                        let currentMonth = currentDate.getMonth();
+                        
+                        function generateCalendar(year, month) {
+                            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                            currentMonthEl.textContent = `${year}年${monthNames[month]}`;
+                            
+                            calendarDaysEl.innerHTML = '';
+                            
+                            const firstDay = new Date(year, month, 1).getDay();
+                            const daysInMonth = new Date(year, month + 1, 0).getDate();
+                            
+                            for (let i = 0; i < firstDay; i++) {
+                                const emptyDay = document.createElement('div');
+                                emptyDay.classList.add('calendar-day', 'empty');
+                                calendarDaysEl.appendChild(emptyDay);
+                            }
+                            
+                            for (let day = 1; day <= daysInMonth; day++) {
+                                const dayEl = document.createElement('div');
+                                dayEl.classList.add('calendar-day');
+                                dayEl.textContent = day;
+                                
+                                const todayDate = new Date();
+                                const isToday = year === todayDate.getFullYear() && month === todayDate.getMonth() && day === todayDate.getDate();
+                                if (isToday) {
+                                    dayEl.classList.add('today');
+                                }
+                                
+                                calendarDaysEl.appendChild(dayEl);
+                            }
+                        }
+                        
+                        generateCalendar(currentYear, currentMonth);
+                        
+                        prevMonthBtn.addEventListener('click', function() {
+                            currentMonth--;
+                            if (currentMonth < 0) {
+                                currentMonth = 11;
+                                currentYear--;
+                            }
+                            generateCalendar(currentYear, currentMonth);
+                        });
+                        
+                        nextMonthBtn.addEventListener('click', function() {
+                            currentMonth++;
+                            if (currentMonth > 11) {
+                                currentMonth = 0;
+                                currentYear++;
+                            }
+                            generateCalendar(currentYear, currentMonth);
+                        });
+                    });
+                </script>
+
+        <!-- 文章详情页 -->
+        <div id="post1" class="hidden article-page">
+            <div class="article-container">
+                <button class="btn btn-outline" onclick="showHome()" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                <h1 class="article-title">初识Web开发：从零开始的学习之旅</h1>
+                <div class="post-meta">
+                    <span class="post-date">2024-01-15</span>
+                    <span class="post-author">Cyinc</span>
+                    <span class="post-category">技术</span>
+                </div>
+                <div class="article-content">
+                    <p>学习Web开发是一段充满挑战但也非常有趣的旅程。作为一名初学者，我从HTML和CSS开始，逐渐深入到JavaScript的世界。</p>
+
+                    <h2>为什么选择Web开发？</h2>
+                    <p>Web开发具有广泛的应用场景，从简单的静态页面到复杂的单页应用，技术栈丰富，就业机会多。更重要的是，它能够让我将自己的想法通过代码实现出来。</p>
+
+                    <h2>学习路径</h2>
+                    <p>我的学习路径大致如下：</p>
+                    <ul>
+                        <li>HTML基础：理解网页结构</li>
+                        <li>CSS样式：美化网页界面</li>
+                        <li>JavaScript：添加交互功能</li>
+                        <li>前端框架：Vue/React</li>
+                        <li>后端技术：Node.js/Python</li>
+                    </ul>
+
+                    <blockquote>
+                        学习编程最重要的是动手实践，不要只看不练。每一个小项目都是进步的机会。
+                    </blockquote>
+
+                    <h2>遇到的挑战</h2>
+                    <p>在学习过程中，我遇到了很多困难，比如调试bug、理解异步编程等。但通过查阅文档、请教他人和不断练习，这些问题都逐渐被解决。</p>
+
+                    <p>希望我的经验能对正在学习Web开发的朋友有所帮助。记住，坚持就是胜利！</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="post2" class="hidden article-page">
+            <div class="article-container">
+                <button class="btn btn-outline" onclick="showHome()" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                <h1 class="article-title">阅读《代码整洁之道》有感</h1>
+                <div class="post-meta">
+                    <span class="post-date">2024-01-10</span>
+                    <span class="post-author">Cyinc</span>
+                    <span class="post-category">思考</span>
+                </div>
+                <div class="article-content">
+                    <p>最近读完了Robert C. Martin的《代码整洁之道》，这本书让我对代码质量有了全新的认识。</p>
+
+                    <h2>核心观点</h2>
+                    <p>书中强调代码应该像文章一样易于阅读，良好的命名、合理的函数长度、适当的注释都是写出整洁代码的关键。</p>
+
+                    <h2>实践体会</h2>
+                    <p>读完这本书后，我开始在自己的项目中实践这些原则：</p>
+                    <ol>
+                        <li>使用有意义的变量名</li>
+                        <li>保持函数短小精悍</li>
+                        <li>减少嵌套层次</li>
+                        <li>编写单元测试</li>
+                    </ol>
+
+                    <blockquote>
+                        "代码是写给人看的，只是顺便让机器执行。"
+                    </blockquote>
+
+                    <h2>个人感悟</h2>
+                    <p>整洁的代码不仅提高了可维护性，也让团队协作更加顺畅。这不仅是技术问题，更是职业素养的体现。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="post3" class="hidden article-page">
+            <div class="article-container">
+                <button class="btn btn-outline" onclick="showHome()" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                <h1 class="article-title">2024年学习计划</h1>
+                <div class="post-meta">
+                    <span class="post-date">2024-01-05</span>
+                    <span class="post-author">Cyinc</span>
+                    <span class="post-category">生活</span>
+                </div>
+                <div class="article-content">
+                    <p>新的一年已经开始，制定一个清晰的学习计划对个人成长至关重要。</p>
+
+                    <h2>技术学习目标</h2>
+                    <ul>
+                        <li>深入学习TypeScript</li>
+                        <li>掌握Node.js后端开发</li>
+                        <li>了解Docker容器化技术</li>
+                        <li>学习机器学习基础</li>
+                    </ul>
+
+                    <h2>读书计划</h2>
+                    <p>计划阅读以下书籍：</p>
+                    <ul>
+                        <li>《深入理解计算机系统》</li>
+                        <li>《设计模式》</li>
+                        <li>《算法导论》</li>
+                        <li>《人类简史》</li>
+                    </ul>
+
+                    <h2>项目实践</h2>
+                    <p>计划完成以下项目：</p>
+                    <ol>
+                        <li>个人博客网站重构</li>
+                        <li>一个小型的后端API服务</li>
+                        <li>参与开源项目贡献</li>
+                    </ol>
+
+                    <blockquote>
+                        "计划不是一成不变的，而是要根据实际情况灵活调整。"
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于页面 -->
+        <div id="about" class="hidden">
+            <h1 class="page-title">关于我</h1>
+            <div class="about-content">
+                <h2>欢迎来到 Cyinc 的个人博客</h2>
+                <p>这是一个专注于技术分享和个人成长的博客空间。在这里，我会分享我在编程、设计、学习等方面的思考和经验。</p>
+
+                <h3>关于博主</h3>
+                <p>我是一名热爱技术的开发者，对前端开发、人工智能和开源项目有着浓厚的兴趣。我相信知识分享能够促进共同进步。</p>
+
+                <blockquote>
+                    "学习是一生的旅程，分享是进步的阶梯。"
+                </blockquote>
+
+                <h3>博客特色</h3>
+                <ul>
+                    <li>原创技术文章</li>
+                    <li>学习笔记整理</li>
+                    <li>项目经验分享</li>
+                    <li>读书心得记录</li>
+                </ul>
+
+                <h3>联系方式</h3>
+                <p>如果您有任何问题或建议，欢迎通过邮件联系我：1344908013@qq.com</p>
+            </div>
+        </div>
+
+        <!-- 归档页面 -->
+        <div id="archive" class="hidden">
+            <h1 class="page-title">文章归档</h1>
+            <div class="archive-list">
+                <h2>2026年</h2>
+                <ul>
+                    <li>
+                        <span class="archive-date">2026-01-30</span>
+                        <a href="Content/前端核心学习表.html" class="archive-title">前端核心学习表</a>
+                    </li>
+                </ul>
+                
+                <h2>2025年</h2>
+                <ul>
+                    <li>
+                        <span class="archive-date">2025-12-21</span>
+                        <a href="Content/Vue.js,Three.js和Node.js的区别.html" class="archive-title">Vue.js,Three.js和Node.js的区别</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-21</span>
+                        <a href="Content/RhinoWeb的常见问题.html" class="archive-title">RhinoWeb的常见问题</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-17</span>
+                        <a href="Content/JS进阶1.html" class="archive-title">JS进阶笔记（一）</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-17</span>
+                        <a href="Content/JS进阶2.html" class="archive-title">JS进阶笔记（二）</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-13</span>
+                        <a href="Content/Web API.html" class="archive-title">Web API笔记</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-13</span>
+                        <a href="Content/Web API2.html" class="archive-title">Web API笔记（二）</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-13</span>
+                        <a href="Content/Web API3.html" class="archive-title">Web API笔记（三）</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-12-13</span>
+                        <a href="Content/Web API4.html" class="archive-title">Web API笔记（四）</a>
+                    </li>
+                    <li>
+                        <span class="archive-date">2025-10-15</span>
+                        <a href="Content/JS基础.html" class="archive-title">JS基础笔记</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="index.html">首页</a>
+                    <a href="about.html">关于</a>
+                    <a href="archive.html">归档</a>
+                    <a href="music.html">音乐室</a>
+                    <a href="mailto:1344908013@qq.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/static-blog.js"></script>
+    <script>
+        // 分类筛选功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const postCards = document.querySelectorAll('.post-card-link');
+            
+            // 为每个筛选按钮添加点击事件
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // 为当前按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 获取筛选类别
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // 筛选文章卡片
+                    postCards.forEach(card => {
+                        const category = card.getAttribute('data-category');
+                        
+                        if (filter === 'all' || category === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    <script>
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // 更新主题图标
+            function updateThemeIcon(theme) {
+                if (themeToggle) {
+                    if (theme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+            }
+            
+            // 检查本地存储中的主题偏好
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            // 主题切换按钮点击事件
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    // 更新主题属性
+                    html.setAttribute('data-theme', newTheme);
+                    
+                    // 保存主题偏好到本地存储
+                    localStorage.setItem('theme', newTheme);
+                    
+                    // 更新主题图标
+                    updateThemeIcon(newTheme);
+                });
+            }
+        });
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            // 从localStorage获取音量设置
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            // 更新音量图标
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            // 初始化音量图标
+            updateVolumeIcon(initialVolume);
+            
+            // 切换音量面板
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            // 点击其他地方关闭面板
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            // 音量控制
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

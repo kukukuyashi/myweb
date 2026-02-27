@@ -1,0 +1,43 @@
+{
+  "scripts": {
+    "build": "node build/index.cjs",
+    "build:selected": "npm run build md-padding markmap markdownlint-custom-rules",
+    "test": "node --test",
+    "dev": "node --env-file=.env scripts/index.js",
+    "rpc": "npm run dev rpc",
+    "sync": "npm run dev sync",
+    "serve": "npm run dev serve"
+  },
+  "dependencies": {
+    "@marp-team/marp-core": "^4.0.1",
+    "@moritzrs/mdast-util-ofm": "^0.0.1",
+    "@moritzrs/micromark-extension-ofm": "^0.0.1",
+    "abcjs": "^6.4.4",
+    "crypto-js": "^4.2.0",
+    "https-proxy-agent": "^7.0.6",
+    "markdown-it": "^14.1.0",
+    "markdownlint": "^0.38.0",
+    "markdownlint-rule-helpers": "^0.29.0",
+    "markmap-common": "^0.17.1",
+    "markmap-lib": "^0.17.2",
+    "markmap-view": "^0.17.2",
+    "md-padding": "^1.9.2",
+    "mdast-util-from-markdown": "^2.0.2",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-math": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "micromark-extension-gfm": "^3.0.0",
+    "micromark-extension-math": "^3.1.0",
+    "minimatch": "^10.0.3",
+    "node-json-rpc": "^0.0.1",
+    "smol-toml": "^1.4.2"
+  },
+  "devDependencies": {
+    "chokidar": "^4.0.3",
+    "esbuild": "^0.25.4",
+    "fs-extra": "^11.3.1"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  }
+}

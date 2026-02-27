@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/Content.css">
+    <script src="js/global-music-player.js"></script>
+    <style>
+        .about-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .about-content {
+            background: var(--card-bg);
+            color: #ffffff;
+        }
+        
+        .about-content h2 {
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        [data-theme="dark"] .about-content h2 {
+            color: #f0f0f0;
+            border-bottom-color: var(--border-color);
+        }
+        
+        .about-content h3 {
+            color: var(--primary-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        [data-theme="dark"] .about-content h3 {
+            color: #e0e0e0;
+        }
+        
+        .about-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        [data-theme="dark"] .about-content p {
+            color: #ffffff;
+        }
+        
+        .about-content blockquote {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            border-radius: 4px;
+        }
+        
+        [data-theme="dark"] .about-content blockquote {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        .about-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .about-content li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-color);
+        }
+        
+        [data-theme="dark"] .about-content li {
+            color: #ffffff;
+        }
+        
+        .about-content li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .contact-info {
+            background: var(--primary-lighter);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        [data-theme="dark"] .contact-info {
+            background: var(--hover-bg);
+        }
+        
+        .contact-info a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .skills-section {
+            margin-top: 2rem;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .skill-item {
+            background: var(--primary-lighter);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        [data-theme="dark"] .skill-item {
+            background: var(--hover-bg);
+        }
+        
+        .skill-item h4 {
+            color: var(--primary-darker);
+            margin: 0 0 0.5rem 0;
+        }
+        
+        [data-theme="dark"] .skill-item h4 {
+            color: #e0e0e0;
+        }
+        
+        .skill-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        [data-theme="dark"] .skill-item p {
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="about.html" data-icon="👤">关于</a></li>
+                        <li><a href="archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <!-- 侧边栏 -->
+                <aside class="sidebar">
+                    <!-- 站点统计模块 -->
+                    <div class="site-stats sidebar-module">
+                        <h2 class="sidebar-title">站点统计</h2>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <div class="stat-label">文章</div>
+                                <div class="stat-number">10</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">分类</div>
+                                <div class="stat-number">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">标签</div>
+                                <div class="stat-number">19</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">总字数</div>
+                                <div class="stat-number">25,163</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">运行时长</div>
+                                <div class="stat-number">120天</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">最后活动</div>
+                                <div class="stat-number">15天前</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日历模块 -->
+                    <div class="calendar sidebar-module">
+                        <h2 class="sidebar-title">文章日历</h2>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                                <h3 class="calendar-title" id="currentMonth">2024年1月</h3>
+                                <button class="calendar-nav-btn" id="nextMonth">›</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div>
+                                <div class="weekday">一</div>
+                                <div class="weekday">二</div>
+                                <div class="weekday">三</div>
+                                <div class="weekday">四</div>
+                                <div class="weekday">五</div>
+                                <div class="weekday">六</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                                <!-- 日历日期将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- 主内容 -->
+                <div id="mainContent">
+                    <div class="about-content">
+                        <h1 class="page-title">关于我</h1>
+                        
+                        <h2>欢迎来到 Cyinc 的个人博客</h2>
+                        <p>这是一个专注于技术分享和个人成长的博客空间。在这里，我会分享我在编程、设计、学习等方面的思考和经验。我相信通过知识的分享和交流，我们能够共同进步，一起成长。</p>
+                        
+                        <h3>关于博主</h3>
+                        <p>我是一名热爱技术的开发者，对前端开发、人工智能和开源项目有着浓厚的兴趣。我相信技术能够改变世界，而分享能够让技术更有价值。</p>
+                        
+                        <blockquote>
+                            "学习是一生的旅程，分享是进步的阶梯。"
+                        </blockquote>
+                        
+                        <h3>技术栈</h3>
+                        <div class="skills-section">
+                            <div class="skills-grid">
+                                <div class="skill-item">
+                                    <h4>前端开发</h4>
+                                    <p>HTML, CSS, JavaScript, Vue.js, React</p>
+                                </div>
+                                <div class="skill-item">
+                                    <h4>后端开发</h4>
+                                    <p>Node.js, Python, PHP</p>
+                                </div>
+                                <div class="skill-item">
+                                    <h4>3D图形</h4>
+                                    <p>Three.js, WebGL</p>
+                                </div>
+                                <div class="skill-item">
+                                    <h4>工具</h4>
+                                    <p>Git, VS Code, Rhino</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3>博客特色</h3>
+                        <ul>
+                            <li>原创技术文章，分享最新的技术见解和实践经验</li>
+                            <li>学习笔记整理，帮助初学者快速入门和进阶</li>
+                            <li>项目经验分享，记录开发过程中的问题和解决方案</li>
+                            <li>读书心得记录，分享阅读技术书籍的感悟和收获</li>
+                            <li>代码示例丰富，理论与实践相结合</li>
+                            <li>持续更新内容，保持技术知识的时效性</li>
+                        </ul>
+                        
+                        <h3>个人理念</h3>
+                        <p>我相信开源精神，支持技术社区的共同发展。在这个快速变化的技术时代，保持学习的热情和好奇心是非常重要的。通过这个博客，我希望能够：</p>
+                        <ul>
+                            <li>记录自己的学习历程，巩固所学知识</li>
+                            <li>分享实用的技术方案，帮助遇到类似问题的开发者</li>
+                            <li>与同行交流思想，拓宽技术视野</li>
+                            <li>培养写作习惯，提升表达能力</li>
+                        </ul>
+                        
+                        <h3>联系方式</h3>
+                        <div class="contact-info">
+                            <p>如果您有任何问题、建议或合作意向，欢迎通过以下方式联系我：</p>
+                            <p>📧 邮箱：<a href="mailto:1344908013@qq.com">1344908013@qq.com</a></p>
+                            <p>🌐 博客：<a href="https://cyinc.github.io">https://cyinc.github.io</a></p>
+                        </div>
+                        
+                        <h3>未来规划</h3>
+                        <p>我计划在博客中增加更多内容，包括：</p>
+                        <ul>
+                            <li>更多实战项目案例和源码分析</li>
+                            <li>技术面试题库和解答</li>
+                            <li>开发工具使用技巧和效率提升方法</li>
+                            <li>个人成长感悟和职业发展思考</li>
+                            <li>开源项目介绍和贡献指南</li>
+                        </ul>
+                        
+                        <blockquote>
+                            "技术不仅仅是工具，更是一种思维方式。让我们一起在技术的道路上不断探索和成长。"
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="index.html">首页</a>
+                    <a href="about.html">关于</a>
+                    <a href="archive.html">归档</a>
+                    <a href="music.html">音乐室</a>
+                    <a href="mailto:1344908013@qq.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/static-blog.js"></script>
+    <script>
+        // 日历脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentMonthEl = document.getElementById('currentMonth');
+            const calendarDaysEl = document.getElementById('calendarDays');
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
+            
+            const currentDate = new Date();
+            let currentYear = currentDate.getFullYear();
+            let currentMonth = currentDate.getMonth();
+            
+            function generateCalendar(year, month) {
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                currentMonthEl.textContent = `${year}年${monthNames[month]}`;
+                
+                calendarDaysEl.innerHTML = '';
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('calendar-day', 'empty');
+                    calendarDaysEl.appendChild(emptyDay);
+                }
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.classList.add('calendar-day');
+                    dayEl.textContent = day;
+                    
+                    const todayDate = new Date();
+                    const isToday = year === todayDate.getFullYear() && month === todayDate.getMonth() && day === todayDate.getDate();
+                    if (isToday) {
+                        dayEl.classList.add('today');
+                    }
+                    
+                    calendarDaysEl.appendChild(dayEl);
+                }
+            }
+            
+            generateCalendar(currentYear, currentMonth);
+            
+            prevMonthBtn.addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar(currentYear, currentMonth);
+            });
+        });
+        
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            function updateThemeIcon(theme) {
+                if (themeToggle) {
+                    if (theme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+            }
+            
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                });
+            }
+        });
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

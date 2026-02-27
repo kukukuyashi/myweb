@@ -1,0 +1,3047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS基础笔记 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        /* 悬浮目录样式 */
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        /* 暗模式样式 */
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-sidebar .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        /* 目录中重点标题的特殊样式 - 对应文章中的h4重点 */
+        [data-theme="dark"] .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .related-posts {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .related-posts h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .related-posts li {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .comments-section {
+            border-top-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comments-section h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment-form {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: #000000;
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] p {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .exercise {
+            background: var(--card-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .exercise-answer {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-dark);
+        }
+        
+        /* 文章容器样式 */
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        /* 暗模式下标题样式 - 创建视觉层次 */
+        [data-theme="dark"] h1 {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #f0f0f0 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 暗模式下重点标题特殊颜色 */
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(100, 181, 246, 0.3) !important;
+            background: linear-gradient(90deg, rgba(100,181,246,0.1), transparent) !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            display: inline-block !important;
+        }
+        
+        /* 确保重点标题颜色不被覆盖 */
+        [data-theme="dark"] .article-content h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #c0c0c0 !important;
+        }
+        
+        [data-theme="dark"] h6 {
+            color: #b0b0b0 !important;
+        }
+        
+        /* 文章页面按钮样式 */
+        .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        /* 目录一级标题样式 */
+        .toc-sidebar .toc > ul > li > a {
+            font-weight: 600;
+            color: var(--primary-darker);
+            font-size: 1.05rem;
+        }
+        
+        /* 暗模式下目录一级标题 */
+        [data-theme="dark"] .toc-sidebar .toc > ul > li > a {
+            color: #e0e0e0;
+        }
+        
+        .toc-sidebar .toc-level-2 {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+        
+        .toc-sidebar .toc-level-3 {
+            padding-left: 2.4rem;
+        }
+        
+        /* 目录样式 */
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .toc-level-2 {
+            padding-left: 1.5rem;
+        }
+        
+        .toc-level-3 {
+            padding-left: 3rem;
+        }
+        
+        /* 推荐文章样式 */
+        .related-posts {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .related-posts h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .related-posts ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .related-posts li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .related-posts a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .related-posts a:hover {
+            color: var(--primary-darker);
+            text-decoration: underline;
+        }
+        
+        /* 评论区样式 */
+        .comments-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        .comment-form {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .comment-author {
+            font-weight: 500;
+            color: var(--primary-darker);
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+        }
+        
+        /* 代码块样式优化 */
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        /* 标题样式优化 */
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        h1.article-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+            border-radius: 2px;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            font-weight: 600;
+        }
+        
+        /* 重点标题样式 */
+        h4 {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        h4::before {
+            content: '📌';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1rem;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        /* 确保暗模式下标题可见 */
+        [data-theme="dark"] h1.article-title {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        /* 段落和列表样式优化 */
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        /* 练习和答案样式 */
+        .exercise {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .exercise-answer {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-dark);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        /* 暗模式下blockquote样式优化 */
+        [data-theme="dark"] .article-content blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <div id="mainContent">
+        <!-- 悬浮目录 -->
+        <div class="toc-sidebar" id="tocSidebar">
+            <div class="toc-content">
+                <div class="toc">
+                    <h3>目录</h3>
+                    <ul>
+                        <li><a href="#section1">1. JS 基础 认识数据</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section1-1">1.1 认识变量</a></li>
+                                <li><a href="#section1-2">1.2 JS 基础 变量</a></li>
+                                <li><a href="#section1-3">1.3 JS 基础 变量命名的规则与规范</a></li>
+                                <li><a href="#section1-4">1.4 JS 基础 var 和 let 的区别？</a></li>
+                                <li><a href="#section1-5">1.5 JS 基础 数组的基本使用</a></li>
+                                <li><a href="#section1-6">1.6 JS 基础 认识常数</a></li>
+                                <li><a href="#section1-7">1.7 JS 基础 数据类型</a></li>
+                                <li><a href="#section1-8">1.8 JS 基础 数据类型检测</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#section2">2. JS 基础 运算符和语句</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section2-1">2.1 赋值运算符</a></li>
+                                <li><a href="#section2-2">2.2 JS 基础 语句</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#section3">3. JS 基础 循环</a>
+                        <ul class="toc-level-2">
+                            <li><a href="#section3-1">3.1 for 循环语法</a></li>
+                            <li><a href="#section3-2">3.2 for 循环的最大价值: 循环数组</a></li>
+                            <li><a href="#section3-3">3.3 for 循环—基本使用</a></li>
+                            <li><a href="#section3-4">3.4 for 循环嵌套</a></li>
+                            <li><a href="#section3-5">3.5 数组</a></li>
+                            <li><a href="#section3-6">3.6 实战案例</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section4">4. JS 基础 函数</a>
+                        <ul class="toc-level-2">
+                            <li><a href="#section4-1">4.1 函数的用法</a></li>
+                            <li><a href="#section4-2">4.2 函数传参</a></li>
+                            <li><a href="#section4-3">4.3 函数传参-参数默认值</a></li>
+                            <li><a href="#section4-4">4.4 函数的封装数组求和</a></li>
+                            <li><a href="#section4-5">4.5 函数的返回值</a></li>
+                            <li><a href="#section4-6">4.6 函数-作用域</a></li>
+                            <li><a href="#section4-7">4.7 转换为布尔型</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section5">5. 对象</a>
+                        <ul class="toc-level-2">
+                            <li><a href="#section5-1">5.1 对象是什么？</a></li>
+                            <li><a href="#section5-2">5.2 对象的使用</a></li>
+                            <li><a href="#section5-3">5.3 对象的增删改查</a></li>
+                            <li><a href="#section5-4">5.4 对象的方法和使用</a></li>
+                            <li><a href="#section5-5">5.5 内置对象</a></li>
+                            <li><a href="#section5-6">5.6 随机数函数</a></li>
+                        </ul>
+                    </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 目录切换按钮 -->
+        <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+        
+        <div class="article-container">
+            <button class="btn btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+            <h1 class="article-title">JS基础笔记</h1>
+            <div class="post-meta">
+                <span class="post-date">2025-10-15</span>
+                <span class="post-author">Cyinc</span>
+                <span class="post-category">技术</span>
+            </div>
+            
+            <div class="article-content">
+                <p>🖊 慢慢来，一步一步来。</p>
+
+                <h2 id="section1">1.JS 基础 认识数据</h2>
+
+                <h3 id="section1-1">1.1 认识变量</h3>
+
+                <h4>重点 1：文档输出内容</h4>
+                <pre><code class="javascript">document.write("Hello World!")
+
+document.write('&lt;h1&gt;你好，世界！&lt;/h1&gt;')</code></pre>
+
+                <h4>重点 2：控制台打印输出 给 程序员</h4>
+                <pre><code class="javascript">console.log('zaoshanghao')
+
+console.log('rizhi')</code></pre>
+
+                <h4>重点 3：输入语句</h4>
+                <pre><code class="javascript">prompt('请输入你的名字：')</code></pre>
+
+                <h4>重点 4：变量声明</h4>
+                <pre><code class="javascript">let age = 25  // 同时声明和赋值</code></pre>
+
+                <div class="exercise">
+                    <h4>变量声明练习</h4>
+                    <p>// 1.声明一个变量，用于存放用户购买的商品 数量(num)为 20 件</p>
+                    <p>// 2.声明一个变量，用于存放用户的 姓名(uname)为'张三</p>
+                    <p>// 3.依次控制台打印输出两个变量</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let num = 20
+
+- let uname = '张三'
+
+- console.log(num)
+
+- console.log(uname)</code></pre>
+                </div>
+
+                <h3 id="section1-2">1.2 JS 基础 变量</h3>
+
+                <h4>重点 1：用户输入</h4>
+                <pre><code class="javascript">prompt('请输入你的名字：')</code></pre>
+
+                <h4>重点 2：内部处理保存数据</h4>
+                <pre><code class="javascript">let uname = prompt('请输入你的姓名：')</code></pre>
+
+                <h4>重点 3：打印输出</h4>
+                <pre><code class="javascript">- let A = 10
+
+- document.write(A)</code></pre>
+
+                <div class="exercise">
+                    <h4>练习 1：变量练习-弹出姓名</h4>
+                    <p>// 1.浏览器中弹出对话框: 请输入姓名</p>
+                    <p>// 2.页面中输出: 刚才输入的姓名</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let uname = prompt('请输入你的姓名：')
+
+- document.write(uname)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 2：变量案例-交换变量的值</h4>
+                    <p>- 需求:</p>
+                    <p>- 有 2 个变量: num1 里面放的是 10，num2 里面放的是 20</p>
+                    <p>- 最后变为 num1 里面放的是 20，num2 里面放的是 10</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let num1 = 10
+
+- let num2 = 20
+
+- let temp
+
+- temp = num1
+
+- num1 = num2
+
+- num2 = temp
+
+- console.log(num1,num2)</code></pre>
+                </div>
+
+                <h3 id="section1-3">1.3 JS 基础 变量命名的规则与规范</h3>
+
+                <h4>重点：变量命名的规则与规范</h4>
+                <h5>1.规则</h5>
+                <ul>
+                    <li>关键字: 有特殊含义的字符，JavaScript 内置的一些英语词汇。例如: let、var、if、for 等</li>
+                    <li>只能用下划线、字母、数字、$组成，且数字不能开头</li>
+                    <li>字母严格区分大小写，如 Age 和 age 是不同的变量</li>
+                </ul>
+
+                <h5>2.规范</h5>
+                <ul>
+                    <li>起名要有意义</li>
+                    <li>小驼峰命名法</li>
+                    <ul>
+                        <li>第一个单词首字母小写，后面每个单词首字母大写。例: userName</li>
+                    </ul>
+                </ul>
+
+                <h3 id="section1-4">1.4 JS 基础 var 和 let 的区别？</h3>
+
+                <h4>var 声明:</h4>
+                <ul>
+                    <li>可以先使用 在声明(不合理)</li>
+                    <li>var 声明过的变量可以重复声明(不合理)</li>
+                    <li>比如变量提升、全局变量、没有块级作用域等等</li>
+                </ul>
+
+                <h4>例如：</h4>
+                <pre><code class="javascript">- var num = 10
+
+- var num = 20
+
+- console.log(num)
+
+//结果打印出来为20</code></pre>
+
+                <h3 id="section1-5">1.5 JS 基础 数组的基本使用</h3>
+
+                <h4>重点 1：声明数组</h4>
+                <pre><code class="javascript">let arr = ["白子","星野","野宫"]</code></pre>
+
+                <h4>重点 2：使用数组 数组名 [索引号] 从 0 开始 以此类推</h4>
+                <pre><code class="javascript">- console.log(arr)
+
+- console.log(arr[1])</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：数组取值案例</h4>
+                    <p>需求: 定义一个数组，里面存放星期一、星期二… 直到星期日(共 7 天)，在控制台输出: 星期日</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let arr = ["星期一","星期二","星期三","星期四","星期五","星期六","星期日"]
+
+- console.log(arr[6])</code></pre>
+                </div>
+
+                <h3 id="section1-6">1.6 JS 基础 认识常数</h3>
+
+                <h4>重点 1：常量 不允许更改值</h4>
+                <pre><code class="javascript">- const PI = 3.14
+
+- console.log(PI)
+
+- PI = 3.15
+
+- console.log(PI)</code></pre>
+
+                <h4>重点 2：常量声明必须赋值</h4>
+                <pre><code class="javascript">- const A = 9.9
+
+- 不可以写成const A</code></pre>
+
+                <h3 id="section1-7">1.7 JS 基础 数据类型</h3>
+
+                <h4>重点 1：数字类型（Number）</h4>
+                <p>可以是整数，小数，正数，负数</p>
+                <p>算术运算符 + - * / %</p>
+
+                <div class="exercise">
+                    <h4>练习：计算圆的面积</h4>
+                    <p>需求: 对话框中输入圆的半径，算出圆的面积并显示到页面</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let r = prompt("请输入圆的半径：")
+
+- let re = 3.14*r*r
+
+- document.write(re)</code></pre>
+                </div>
+
+                <h4>重点 2：NaN</h4>
+                <ul>
+                    <li>NaN 代表一个计算错误。</li>
+                    <li>它是一个不正确的或者一个未定义的数学操作所得到的结果</li>
+                    <li>NaN 是粘性的。任何对 NaN 的操作都会返回 NaN</li>
+                    <li>甚至 NaN 不等于自己 打印结果会是 false</li>
+                </ul>
+
+                <h4>重点 3：字符串类型</h4>
+                <p>知识 1.通过单引号("')、双引号(" ")或反引号(`)包裹的数据都叫字符串、单双引号没本质上的区别</p>
+                <p>知识 2.单引号/双引号可以互相嵌套，但是不以自已嵌套自己(口诀: 外双内单，或者外单内双)</p>
+                <p>知识 3.必要时可以使用转义符\，输出单引号或双引号</p>
+
+                <pre><code class="javascript">- let str = "白子"
+
+- let str1 = '黑子'
+
+- let str2 = '123'
+  // 用引号包裹了就是字符串了</code></pre>
+
+                <h4>知识 4.字符串拼接</h4>
+                <p>用法："字符串 1"+"字符串 2"</p>
+                <p>例如：</p>
+                <pre><code class="javascript">- document.write("你好"+"世界")
+
+- let uname = "碧蓝"
+
+- let uuname = "档案"
+
+- document.write(uname + uuname)</code></pre>
+
+                <h4>知识 5.模板字符串</h4>
+                <p>拼接字符串和变量</p>
+                <pre><code class="javascript">document.write(`大家好，我叫`+ name +`,今年`+ age + `岁`)</code></pre>
+
+                <p>语法：</p>
+                <ul>
+                    <li>内容拼接变量时，用 ${}包住变量</li>
+                </ul>
+                <p>例如：</p>
+                <pre><code class="javascript">document.write("大家好，我叫${name},今年${age}岁")</code></pre>
+
+                <h3 id="section1-8">1.8 JS 基础 数据类型检测</h3>
+
+                <h4>重点 1：通过 typeof 关键字检测数据类型</h4>
+                <p>typeof 运算符可以返回被检测的数据类型，它支持两种语法形式</p>
+                <ul>
+                    <li>1.作为运算符： typeof x</li>
+                    <li>2.typeof(x)</li>
+                </ul>
+
+                <h4>例如：</h4>
+                <pre><code class="javascript">- let num = 10
+
+- console.log (typeof num) 打印结果为 number （数字型）
+
+- let str = "你好"
+
+- console.log (typeof str) 打印结果为 string （字符型）</code></pre>
+
+                <h2 id="section2">2.JS 基础 运算符和语句</h2>
+
+                <h3 id="section2-1">2.1 赋值运算符</h3>
+
+                <h4>重点 1：赋值运算符</h4>
+                <p>等号 : 将等号右边的值赋予给左边，要求左边必须是一个容器</p>
+                <pre><code class="javascript">let num = 1
+// num = num + 1
+num += 1
+console.log(num)</code></pre>
+
+                <h4>重点 2：一元运算符</h4>
+                <p>正号和负号 就是一元运算符</p>
+
+                <h4>前置自增：</h4>
+                <pre><code class="javascript">let num = 1
+++num  //让num的值加 1变2
+
+let i = 1
+console.log(++i + 2)  // 结果为4</code></pre>
+                <p>前置自增：先自加再使用</p>
+
+                <h4>后置自增：</h4>
+                <pre><code class="javascript">let num = 1
+num++ //让num的值加 1变2
+
+let i = 1
+console.log(i++ + 2) // 结果为3 先用 i 和 2 相加 等于 3
+console.log(i) // 结果为2</code></pre>
+                <p>后置自增：先使用再自加</p>
+                <p>前置自增和后置自增独立使用时二者并没有差别</p>
+
+                <h3 id="section2-2">2.2 JS 基础 语句</h3>
+
+                <p>语句是一段可以执行的代码</p>
+                <p>表达式和语句的区别：</p>
+                <ul>
+                    <li>表达式: 因为表达式可被求值，所以它可以写在赋值语句的右侧</li>
+                    <li>而语句不一定有值，所以比如 alert()for 和 break 等语句就不能被用于赋值</li>
+                </ul>
+
+                <p>程序三大流程控制语句</p>
+                <ul>
+                    <li>顺序结构</li>
+                    <li>分支结构</li>
+                    <ul>
+                        <li>if 分支语句</li>
+                        <li>三元运算符</li>
+                        <li>switch 语句</li>
+                    </ul>
+                    <li>循环结构</li>
+                </ul>
+
+                <h2 id="section3">3.JS 基础 循环</h2>
+
+                <h3 id="section3-1">3.1 for 循环语法</h3>
+
+                <p>作用: 重复执行代码</p>
+                <p>好处: 把声明起始值、循环条件、变化值写到一起，让人一目了然，它是最常使用的循环形式</p>
+
+                <pre><code class="javascript">for (let i = 0; i <= 3; i++) {
+    document.write("你好,js")
+}</code></pre>
+
+                <h3 id="section3-2">3.2 for 循环的最大价值: 循环数组</h3>
+
+                <div class="exercise">
+                    <h4>练习：</h4>
+                    <p>请将 数组 ["小白", "小黑", "小红", "小蓝", "小绿"] 依次打印 出来</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = ["小白","小黑","小红","小蓝","小绿"]
+for (let i = 0;i <= arr.length - 1; i++) {
+  document.write(`${arr[i]}<br>`)
+}</code></pre>
+                </div>
+
+                <h3 id="section3-3">3.3 for 循环—基本使用</h3>
+
+                <h4>退出循环</h4>
+                <p>continue ：退出本次循环，一般用于排除或者跳过某一个选项的时候，可以使用 continue</p>
+                <p>break ：退出整个 for 循环，一般用于结果已经得到, 后续的循环不需要的时候可以使用</p>
+
+                <h5>例如 continue：</h5>
+                <pre><code class="javascript">for(let i = 1; i <= 5; i++) {
+  if (i === 3) {
+      continue
+  }
+  console.log(i)
+}  // i 等于3的时候 3不会在控制台打印出来</code></pre>
+
+                <h5>例如 break：</h5>
+                <pre><code class="javascript">for(let i = 1; i <= 5; i++) {
+  if (i === 3) {
+      break
+  }
+  console.log(i)
+}  // i 等于3的时候  剩下的都不打印了 包括3</code></pre>
+
+                <blockquote>
+                    <p>for 循环和 while 循环有什么区别呢:</p>
+                    <p>当如果明确了循环的次数的时候推荐使用 for 循环，当不明确循环的次数的时候推荐使用 while 循环</p>
+                </blockquote>
+
+                <div class="exercise">
+                    <h4>练习：打印 5 行 5 列的星星</h4>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">for (let i = 0;i <= 4 ;i++) {
+  document.write(`<br>`)
+  for (let j = 1; j<= 5;j++)
+  document.write(`⭐`)
+}</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：打印倒三角形星星</h4>
+                    <p>如图所示：</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">for (let i = 0;i <= 4 ;i++) {
+    document.write(`<br>`)
+  for (let j = 0;j <= i ;j++) {
+    document.write(`⭐`)
+  }
+}</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：九九乘法表</h4>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">&lt;style&gt;
+    span {
+      display: inline-block;
+      text-align: center;
+      padding: 5px 10px;
+      border : 1px solid pink;
+      width: 60px;
+      margin: 0px 2px ; 
+      border-radius: 5px;
+      box-shadow: 2px 2px 2px rgba(250, 198, 207, 0.859);
+      background-color: rgba(255, 96, 122, 0.117);
+    }
+  &lt;/style&gt;
+  &lt;script&gt;
+    for (let i = 1;i &lt;= 9 ;i++) {
+        document.write(`&lt;br&gt;`)
+
+      for (let j = 1;j &lt;= i ;j++) {
+        document.write(`&lt;span&gt;${j}*${i}=${j*i}&lt;/span&gt;`)
+      }
+    }
+  &lt;/script&gt;</code></pre>
+                </div>
+
+                <h3 id="section3-4">3.4 for 循环嵌套</h3>
+
+                <p>循环嵌套就是 for 里面有个 for</p>
+
+                <pre><code class="javascript">for (let i = 1;i <= 3 ;i++) {
+  document.write(`你好啊，${i}<br>`)
+  for (let j = 1; j<= 5;j++)
+  document.write(`谢谢，${j}<br>`)
+}</code></pre>
+
+                <h3 id="section3-5">3.5 数组</h3>
+
+                <h4>数组：Array</h4>
+                <p>是一种可以按顺序保存数据的数据类型</p>
+
+                <p>声明语法：</p>
+                <p>let 数组名 = [数据 1，数据 2，数据 3，……, 数据 n]</p>
+
+                <pre><code class="javascript">let arr = [1,2,"ping",true]
+// 计算机中的编号从0开始，所以1的编号为0，2编号为1，以此类推</code></pre>
+
+                <h4>数组操作 —— 修改</h4>
+                <p>数组本质是 数据集合，操作数据无非就是 增 删 改 查 语法:</p>
+
+                <h5>数组的增：</h5>
+                <p>数组名字.push() 方法将一个或多个元素添加到数组的 末尾，并返回该数组的新长度</p>
+
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.push("green")
+arr.push("1","2")
+console.log(arr)</code></pre>
+
+                <p>数组名字.unshift 方法将一个或多个元素添加到数组的 开头，并返回该数组的新长度</p>
+
+                <h5>数组的删：</h5>
+                <p>数组.pop() 方法 从数组中 删除最后一个元素，并返回该元素的值</p>
+                <p>数组.shift() 方法 从数组中 删除第一个元素，并返回该元素的值</p>
+
+                <h5>数组的改：</h5>
+                <pre><code class="javascript">let arr = ['pink','red','green']
+for (let i = 0; i < arr.length; i++) {
+  arr[i] = arr[i] + '劳斯' //改值了
+}
+console.log(arr)</code></pre>
+
+                <h5>数组的查：</h5>
+                <pre><code class="javascript">let arr = ['pink','red','green']
+console.log(arr[1])
+console.log(arr)</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：求和以及平均值</h4>
+                    <p>需求: 求数组 [2,6,1,7,4] 里面所有元素的和以及平均值</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let sum = 0
+let ave = 0
+let arr = [2,6,1,7,4]
+for (let i = 0;i <= arr.length-1; i++) {
+  sum = sum + arr[i]
+  ave = sum/arr.length
+}
+alert(`和为：${sum}`)
+alert(`平均值：${ave}`)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：求最大值最小值</h4>
+                    <p>需求: 求数组 [2,6,1,77,52,25,7] 中的最大值和最小值</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">// 最大值
+let max = 0
+let arr = [2,6,1,77,52,25,7]
+for (let i = 1;i <= arr.length;i++)  {
+  max = max > arr[i-1] ? max : arr[i-1]  
+}
+alert(`最大值为：${max}`)
+
+// 最小值
+let arr = [2,6,1,77,52,25,7]
+let min = arr[0]
+for (let i = 1;i <= arr.length;i++)  {
+  min = min < arr[i-1] ? min : arr[i-1]  
+}
+alert(`最小值为：${min}`)</code></pre>
+                </div>
+
+                <h4>数组操作 —— 详细说明</h4>
+                <p>数组本质是数据集合，操作数据无非就是 增 删 改 查</p>
+
+                <h5>数组的增：</h5>
+                <p>数组名字.push() 方法将一个或多个元素添加到数组的 末尾，并返回该数组的新长度</p>
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.push("green")
+arr.push("1","2")
+console.log(arr)</code></pre>
+
+                <p>数组名字.unshift() 方法将一个或多个元素添加到数组的 开头，并返回该数组的新长度</p>
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.unshift("green")
+arr.unshift("1","2")
+console.log(arr)</code></pre>
+
+                <h5>数组的删：</h5>
+                <p>数组.pop() 方法 从数组中 删除最后一个元素，并返回该元素的值</p>
+                <p>数组.shift() 方法 从数组中 删除第一个元素，并返回该元素的值</p>
+                <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+arr.pop()
+arr.shift()
+console.log(arr)</code></pre>
+
+                <h5>数组 splice：</h5>
+                <p>语法：arr.splice(start, deleteCount) - splice(起始位置，删除几个)</p>
+                <pre><code class="javascript">let arr = [2,0,6,1,7]
+arr.splice(1,2)
+console.log(arr) // 剩下2，1，7</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：数组筛选</h4>
+                    <p>需求: 将数组 [2,0,6,1,77,0,52,0,25,7] 中大于等于 10 的元素选出来，放入新数组</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+let arr2 = []
+for (let i = 0; i < arr.length; i++) {
+  if (arr[i] >= 10) {
+    arr2.push(arr[i])
+  }
+}
+console.log(arr2)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：数组去 0 案例</h4>
+                    <p>需求: 将数组 [2,0,6,1,77,0,52,0,25,7] 中的 0 去掉后，形成一个不包含 0 的新数组</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+let arr2 = []
+for (let i = 0; i < arr.length; i++) {
+  if (arr[i] !== 0) {
+    arr2.push(arr[i])
+  }
+}
+console.log(arr2)</code></pre>
+                </div>
+
+                <h4>冒泡排序</h4>
+                <p>冒泡排序是一种简单的排序算法。它重复地走访过要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。走访数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。这个算法的名字由来是因为越小的元素会经由交换慢慢"浮"到数列的顶端。</p>
+                <p>比如数组 [2,3,1,4,5] 经过排序成为了 [1,2,3,4,5] 或者 [5,4,3,2,1]</p>
+
+                <h5>第一种：手动实现冒泡排序</h5>
+                <pre><code class="javascript">let arr = [1,4,3,5,2]
+for (let i = 0; i < arr.length-1; i++) {
+  for (let j = 0; j < arr.length -i-1; j++) {
+    if (arr[j] > arr[j+1]) {
+      let temp = arr[j]
+      arr[j] = arr[j+1]
+      arr[j+1] = temp
+    }
+  }
+}
+document.write(arr) // 1,2,3,4,5</code></pre>
+
+                <h5>第二种：使用 sort() 方法</h5>
+                <pre><code class="javascript">// 升序 从小到大
+let arr = [1,4,3,5,2]
+arr.sort(function(a,b) { 
+  return a - b
+})
+document.write(arr)
+
+// 降序 从大到小
+let arr = [1,4,3,5,2]
+arr.sort(function(a,b) {
+  return b - a
+})
+document.write(arr)</code></pre>
+
+                <h3 id="section3-6">3.6 实战案例</h3>
+
+                <div class="exercise">
+                    <h4>练习 1：根据数据生成柱形图</h4>
+                    <p>需求: 用户输入四个季度的数据，可以生成柱形图</p>
+                    <p>分析:</p>
+                    <ul>
+                        <li>需要输入 4 次，所以可以把 4 个数据放到一个数组里面。利用循环，弹出 4 次框，同时存到数组里面</li>
+                        <li>遍历改数组，根据数据生成 4 个柱形图，渲染打印到页面中。柱形图就是 div 盒子，设置宽度固定，高度是用户输入的数据，div 里面包含显示的数字和 第 n 季度</li>
+                    </ul>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;柱形图&lt;/title&gt;
+    &lt;style&gt;
+        .box {
+            display: flex;
+            width: 700px;
+            height: 300px;
+            border-left: 1px solid pink;
+            border-bottom: 1px solid pink;
+            margin: 50px auto;
+            justify-content: space-around;
+            align-items: flex-end;
+            text-align: center;
+        }
+        .box&gt;div {
+            display: flex;
+            width: 50px;
+            background-color: pink;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .box div span {
+            margin-top: -20px;
+        }
+        .box div h4 {
+            margin-bottom: -35px;
+            width: 70px;
+            margin-left: -10px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;script&gt;
+      let arr = []
+      for (let i = 1; i &lt;= 4; i++) {
+        arr.push(prompt(`请输入第${i}季度的数据：`))
+      }
+      document.write(`&lt;div class="box"&gt;`)
+      for (let i = 0;i &lt; arr.length;i++) {
+        document.write(`
+        &lt;div style="height: ${arr[i]}px;"&gt;
+          &lt;span&gt;${arr[i]}&lt;/span&gt;
+          &lt;h4&gt;第${i+1}季度&lt;/h4&gt;
+        &lt;/div&gt;
+        `)
+      }
+      document.write(`&lt;/div&gt;`)
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h4>综合大练习：</h4>
+                <p>写一个程序，要求如下：</p>
+                <ul>
+                    <li>需求 1：让用户输入五个有效年龄（0-100 之间），放入数组中。必须输入五个有效年龄年龄，如果是无效年龄，则不能放入数组中</li>
+                    <li>需求 2：打印出所有成年人的年龄 (数组筛选)</li>
+                    <li>需求 3：打印出所有人总年龄 （累加）</li>
+                    <li>需求 4：打印出所有人的平均年龄 （累加）</li>
+                    <li>需求 5：打印出最大年龄和最小年龄 （最大值）</li>
+                </ul>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">// 1.让用户输入五个有效年龄（0-100 之间），放入数组中
+let arr = []
+while( arr.length &lt; 5 ){
+    let num = +prompt(`请输入第${arr.length+1}个人有效年龄`)
+    if( num &gt; 0 && num &lt; 100){
+        arr.push(num)
+    }
+}
+console.log(arr)
+
+// 2. 打印输出成人的年龄  年龄 &gt; 18 
+for (let i = 0; i &lt; arr.length; i++) {
+  if (arr [i] &gt;= 18) {
+    document.write(`已经成人的年龄是: ${arr[i]} &lt;br&gt;`)
+  }
+}
+
+// 需求 3：打印出所有人总年龄 （累加）
+let sum = 0
+for (let i = 0; i &lt; arr.length; i++) {
+  sum += arr [i]
+}
+document.write(`所有人的年龄是: ${sum} &lt;br&gt;`)
+
+// 需求 4：打印出所有人的平均年龄 （累加）
+let average = 0
+average = sum / arr.length
+document.write(`所有人的年龄是: ${average} &lt;br&gt;`)
+
+// 需求 5：打印出最大年龄和最小年龄 （最大值）   假设法
+let max = arr [0]
+let min = arr [0]
+for (let i = 1; i &lt; arr.length; i++) {
+  if (max &lt; arr [i]) {
+    max = arr [i]
+  }
+  if (min &gt; arr [i]) {
+    min = arr [i]
+  }
+}
+document.write(`最大值是: ${max} &lt;br&gt;`)
+document.write(`最小值是: ${min} &lt;br&gt;`)
+
+// 需求 5：打印出最大年龄和最小年龄 （最大值）   排序法
+arr.sort(function (a, b) {
+  return a - b;
+}) // 升序
+let min = arr [0]  
+let max = arr [arr.length - 1]</code></pre>
+                </div>
+            </div>
+
+            <!-- 第4章 函数 -->
+            <div class="section" id="section4">
+                <h2>4. JS 基础 函数</h2>
+
+                <h3 id="section4-1">4.1 函数的用法</h3>
+                <p>函数可以把具有相同或相似逻辑的代码“包裹”起来，通过函数调用执行这些被“包裹”的代码逻辑，这么做的优势是有利于精简代码方便复用。</p>
+                <p>比如我们前面使用的 alert()、prompt()和 console.log()都是一些 js 函数，只不过已经封装好了，我们直接使用的。</p>
+
+                <pre><code class="javascript">function 函数名() {
+	函数体
+}
+
+function sayHi() {
+  console.log(`hi`)
+}
+sayHi() //调用才会执行</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：</h4>
+                    <p>需求:</p>
+                    <ol>
+                        <li>写一个打招呼的函数 hi~</li>
+                        <li>把 99 乘法表封装到函数里面，重复调用 3 次</li>
+                    </ol>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">function sayHi() {
+  console.log(`hi`)
+}
+sayHi()</code></pre>
+                    <pre><code class="javascript">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+  &lt;style&gt;
+    span {
+      display: inline-block;
+      text-align: center;
+      padding: 5px 10px;
+      border : 1px solid pink;
+      width: 60px;
+      margin: 0px 2px ; 
+      border-radius: 5px;
+      box-shadow: 2px 2px 2px rgba(250, 198, 207, 0.859);
+      background-color: rgba(255, 96, 122, 0.117);
+    }
+  &lt;/style&gt;
+&lt;body&gt;
+  &lt;script&gt;
+    function jiuJiu() {
+    for (let i = 1;i &lt;= 9 ;i++) {
+        document.write(`&lt;br&gt;`)
+
+      for (let j = 1;j &lt;= i ;j++) {
+        document.write(`&lt;span&gt;${j}*${i}=${j*i}&lt;/span&gt;`)
+        }
+      }
+    }
+    jiuJiu()
+    jiuJiu()
+    jiuJiu()
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 2：</h4>
+                    <p>需求:</p>
+                    <ol>
+                        <li>封装一个函数，计算两个数的和</li>
+                        <li>封装一个函数，计算 1-100 之间所有数的和</li>
+                    </ol>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">function sum() {
+  let num1 = +prompt(`第一个数：`)
+  let num2 = +prompt(`第二个数：`)
+  alert(num1 + num2)
+}
+sum()</code></pre>
+                    <pre><code class="javascript">function sum() {
+  let sum = 0
+  for (let i = 1;i &lt;= 100;i++) {
+    sum = i + sum
+  }
+  alert(sum)
+}
+sum()</code></pre>
+                </div>
+
+                <h3 id="section4-2">4.2 函数传参</h3>
+                <p>上个知识点的函数是写死的，函数传参是可以让用户输入一定的值，让函数更灵活。</p>
+
+                <pre><code class="javascript">function sum(start，end) { // end叫 形参
+  let sum = 0
+  for (let i = start;i &lt;= end;i++) {
+    sum = i + sum
+  }
+  alert(sum) 
+}
+sum(1，50) // 50叫 实参 本质是和形参是一样的</code></pre>
+
+                <h3 id="section4-3">4.3 函数传参-参数默认值</h3>
+                <pre><code class="javascript">function sum(start = 0,end = 0) { // 通常会给形参默认值
+  let sum = 0
+  for (let i = start;i &lt;= end;i++) {
+    sum = i + sum
+  }
+  console.log(sum)
+}
+sum()
+sum(10,50)</code></pre>
+
+                <h3 id="section4-4">4.4 函数的封装数组求和</h3>
+                <h4>练习 1：函数封装-求学生总分</h4>
+                <p>需求: 学生的分数是一个数组, 计算每个学生的总分</p>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">function getArrSum (arr=[]) {
+  let sum = 0
+  for (let i = 0; i &lt; arr.length;i++) {
+    sum += arr[i]
+  }
+  console.log(sum);
+  
+}
+getArrSum([1,2,3,4,5])
+getArrSum()</code></pre>
+                </div>
+
+                <p>实参可以是变量</p>
+                <pre><code class="javascript">function getArrSum (n = 0,m = 0) {
+  let sum = 0
+  for (let i = n; i &lt; m;i++) {
+    sum += i
+  }
+  console.log(sum);
+  
+}
+let num1 = +prompt(`请输入起始值：`)
+let num2 = +prompt(`请输入结束值：`)
+getArrSum(num1,num2)</code></pre>
+
+                <h3 id="section4-5">4.5 函数的返回值</h3>
+                <p>函数是被设计为执行特定任务的代码块。执行完特定任务之后，应该把任务的结果给我们。</p>
+
+                <pre><code class="javascript">function fn() {
+  return 20
+}
+let re = fn()
+console.log(re)</code></pre>
+
+                <p>返回值还有三个特点：</p>
+                <ol>
+                    <li>在函数体中使用 return 关键字能将内部的执行结果交给函数外部使用</li>
+                    <li>return 后面代码不会再被执行，会立即结束当前函数，所以 return 后面的数据不要换行写</li>
+                    <li>return 函数可以没有 return，这种情况函数默认返回值为 undefined</li>
+                </ol>
+
+                <div class="exercise">
+                    <h4>练习：函数返回值</h4>
+                    <ol>
+                        <li>求任意 2 个数中的最大值, 并返回</li>
+                        <li>求任意数组中的最大值并返回这个最大值</li>
+                        <li>求任意数组中的最小值并返回这个最小值</li>
+                    </ol>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <h6>1 两数比较最大值</h6>
+                    <pre><code class="javascript">function getZmax (a,b) {
+  let max = a > b ? a : b
+  console.log(max)
+  return max
+}
+let a = +prompt(`A的值是:`)
+let b = +prompt(`B的值是:`)
+getZmax(a,b)</code></pre>
+
+                    <h6>2 最大值</h6>
+                    <pre><code class="javascript">function getMax(arr=[]) {
+  let max = 0
+  for (let i = 0; i < arr.length-1;i++) {
+    max = max > arr[i]? max : arr[i]
+  }
+  console.log(max);
+  
+  return max
+}
+let arr =[4,34,3,6,29,31]
+getMax()</code></pre>
+
+                    <h6>3 最小值</h6>
+                    <pre><code class="javascript">function getMin(arr=[]) {
+  let min = arr[0]
+  for (let i = 0; i < arr.length-1;i++) {
+    min = min < arr[i]? min : arr[i]
+  }
+  console.log(min);
+  
+  return min
+}
+let arr =[4,34,3,6,29,31]
+getMin()</code></pre>
+                </div>
+
+                <h3 id="section4-6">4.6 函数-作用域</h3>
+                <p>通常来说，一段程序代码中所用到的名字并不总是有效和可用的，而限定这个名字的可用性的代码范围就是这个名字的作用域。</p>
+
+                <h4>全局作用域 和 局部作用域</h4>
+                <p>全局作用域：</p>
+                <p>作用于所有代码执行的环境或者一个独立的 js 文件。</p>
+
+                <p>局部作用域：</p>
+                <p>作用于函数内的代码环境，就是局部作用域。因为跟函数有关系所以也称为函数作用域。</p>
+
+                <h4>匿名函数</h4>
+                <p>函数可以分为具名函数和匿名函数。</p>
+                <p>匿名函数：没有名字的函数, 无法直接使用。</p>
+
+                <h5>函数表达式</h5>
+                <pre><code class="javascript">// 声明
+let fn = function() { 
+   console.log('函数表达式')
+}
+// 调用
+fn()</code></pre>
+
+                <h5>立即执行函数</h5>
+                <pre><code class="javascript">(function(){ xxx  })();
+(function(){xxxx}());
+
+// 无需调用，立即执行，其实本质已经调用了
+// 多个立即执行函数之间用分号隔开</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：转换时间案例</h4>
+                    <p>需求: 用户输入秒数，可以自动转换为时分秒。</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">// age = age + 1
+// 1. 用户输入
+let second = +prompt('请输入秒数:')
+// 2.封装函数
+function getTime(t) {
+  // console.log(t)  // 总的秒数
+  // 3. 转换
+  // 小时：  h = parseInt(总秒数 / 60 / 60 % 24)
+  // 分钟：  m = parseInt(总秒数 / 60 % 60)
+  // 秒数: s = parseInt(总秒数 % 60) 
+  let h = parseInt(t / 60 / 60 % 24)
+  let m = parseInt(t / 60 % 60)
+  let s = parseInt(t % 60)
+  h = h < 10 ? '0' + h : h
+  m = m < 10 ? '0' + m : m
+  s = s < 10 ? '0' + s : s
+  // console.log(h, m, s)
+  return `转换完毕之后是${h}小时${m}分${s}秒`
+}
+let str = getTime(second)
+document.write(str)
+console.log(h)</code></pre>
+                </div>
+
+                <h3 id="section4-7">4.7 转换为布尔型</h3>
+                <h4>1.显示转换:</h4>
+                <p>Boolean(内容)</p>
+                <p>记忆:”、0、undefined、null、false、NaN 转换为布尔值后都是 false, 其余则为 true。</p>
+
+                <pre><code class="javascript">console.log(Boolean(null)) // false
+console.log(Boolean("")) // f
+console.log(Boolean(NaN)) // f 
+console.log(Boolean(123)) // true
+console.log(Boolean("123")) //t
+
+console.log (false && 20) // false
+console.log(5 < 3 && 20)  // false
+console.log(undefined && 20) // undefined 
+console.log(null && 20) // null
+console.log(0 && 20) // 0
+console.log(10 && 20) // 20
+
+console.log(false || 20) // 20
+console.log(5 < 3 || 20) // 20
+console.log(undefined || 20) //20
+console.log(null || 20) //20
+console.log(0 || 20) //20
+console.log(10 || 20) //10</code></pre>
+
+                <h4>隐式转换:</h4>
+                <ol>
+                    <li>有字符串的加法 “ ” + 1，结果是 “1”</li>
+                    <li>减法 - (像大多数数学运算一样)只能用于数字，它会使空字符串 " " 转换为 0</li>
+                    <li>null 经过数字转换之后会变为 0</li>
+                    <li>undefined 经过数字转换之后会变为 NaN</li>
+                </ol>
+
+                <pre><code class="javascript">console.log("" - 1) // -1
+console.log("pink老师" - 1) // NaN
+console.log(null + 1) // 1
+console.log(undefined + 1) // NaN
+console.log(NaN + 1) // NaN</code></pre>
+
+                <!-- 第4章实战案例 -->
+                <h3>4.8 实战案例</h3>
+                <h4>主观题</h4>
+
+                <div class="exercise">
+                    <h5>练习题 1：</h5>
+                    <p>请看以下代码，并说出执行的流程</p>
+                    <pre><code class="javascript">function printfInput(content) { 
+    // 将用户输入的内容, 在页面中显示
+    document.write(content)
+}
+let constr = prompt('请输入内容')
+printfInput(constr)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题 2：</h5>
+                    <p>目标：求和函数封装练习</p>
+                    <p>要求:</p>
+                    <ol>
+                        <li>封装函数, 名字为 sum</li>
+                        <li>功能: 根据传入的两个数, 求和并且返回求和的结果（函数必须有 return 返回值）</li>
+                    </ol>
+                    <pre><code class="javascript">function getsum(a , b) {
+  let sum = a + b
+  return sum
+}
+let re = getsum(1,3)
+document.write(`和为：${re}`)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题 3：</h5>
+                    <p>目的: 封装函数, 复习函数的基本写法。</p>
+                    <p>需求：实现两个数的值交换(函数版本)</p>
+                    <p>分析:</p>
+                    <ol>
+                        <li>函数名为 changeNum()</li>
+                        <li>调用函数时,  `changeNum(1，2)`</li>
+                        <li>经过函数内部处理后, 输出  `第一个值的结果是2  第二个值的结果是1`</li>
+                        <li>可以多调用两次</li>
+                    </ol>
+                    <pre><code class="javascript">function changeNum(a,b) {
+  let c = a
+  a = b
+  b = c
+  console.log(a,b)
+}
+changeNum(1,2)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题 4：</h5>
+                    <p>目的: 复习函数的声明与调用</p>
+                    <p>题目：封装余额函数</p>
+                    <p>要求:</p>
+                    <ol>
+                        <li>运行程序后, 浏览器显示输入确认框(prompt)</li>
+                        <li>第一个输入确认框提示输入银行卡余额</li>
+                        <li>第二个输入确认框提示输入当月食宿消费金额</li>
+                        <li>第三个输入确认框提示输入当月生活消费金额</li>
+                        <li>输入完毕后, 在页面中显示银行卡剩余金额</li>
+                        <li>提示: 所有功能代码封装在函数内部（函数需要把余额返回）</li>
+                    </ol>
+                    <pre><code class="javascript">function getQian () {
+  let yuEr = +prompt(`输入银行卡余额:`)
+  let shiTang = +prompt(`当月食宿消费金额:`)
+  let shangHou = +prompt(`当月生活消费金额:`)
+  let re = yuEr - shiTang - shangHou
+  return re
+}
+let money = getQian()
+document.write(`我的银行卡余额还有${money}元`)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题 5:</h5>
+                    <p>目标：封装一个函数, 可以求任意数组的和 或 平均值</p>
+                    <p>要求：</p>
+                    <ul>
+                        <li>函数可以传递 2 个参数，比如  handleData(arr, true)      `handleData 处理数据的意思`</li>
+                        <li>参数一： 接受实参传递过来的数组</li>
+                        <li>参数二: 布尔类型  如果是 true 或者不传递参数 是求和操作， 如果传递过来的参数是 false 则是求平均值</li>
+                    </ul>
+                    <pre><code class="javascript">function handleData (arr = [], buer = true) {
+  let sum = 0
+  for (let i = 0 ; i < arr.length ; i++) { 
+    sum = arr[i] + sum
+  }
+  if (buer) { 
+    return sum
+  } else {
+    return  sum / arr.length
+  }}
+console.log(handleData([2,3,5,2],true))
+console.log(handleData([2,3,5,2],false))</code></pre>
+                </div>
+
+                <h4>拓展题</h4>
+                <div class="exercise">
+                    <h5>拓展题 1</h5>
+                    <p>需求：封装 some 函数查看数组是否存在某个元素。</p>
+                    <ul>
+                        <li>要传递 2 个参数 元素、数组</li>
+                        <li>如果数组存在元素则返回 true，如果没有存在元素就返回 false</li>
+                    </ul>
+                    <p>例如检测 香蕉  是否存在于  数组 ['苹果', '香蕉', '橘子', '荔枝', '梨子'] 中， 返回结果是 true</p>
+                    <pre><code class="javascript">function some (yuanShu, arr = []) {
+  for (let i = 0 ; i < arr.length; i++) {
+      if (arr [i] === yuanShu) {
+        return true
+      } else {
+        continue
+      }
+  }
+  return false
+}
+let re = some("星野", ["白子", "星野", "野宫", "芹香"])
+let re2 = some("星野", ["白子", "野宫", "芹香"])
+console.log(re)
+console.log(re2)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>拓展题 2</h5>
+                    <p>需求：封装 findeIndex 函数返回查找元素在数组中的索引号。</p>
+                    <ul>
+                        <li>要传递 2 个参数 元素、数组</li>
+                        <li>如果找到，则返回查找元素在数组中的索引号，如果查找不到，则返回 -1</li>
+                    </ul>
+                    <p>例如检测 香蕉    数组 ['苹果', '香蕉', '橘子', '荔枝', '梨子'] 中， 返回结果是  1</p>
+                    <pre><code class="javascript">function findeIndex(yuanShu, arr = []) {
+  for (let i = 0; i < arr.length ; i++) {
+    if (arr [i] === yuanShu) {
+      return i
+    } else {
+      continue
+    }
+  }
+  return -1
+}
+let re = findeIndex("星野", ["白子", "星野", "野宫", "芹香"])
+let re1 = findeIndex("星野", ["白子", "野宫", "芹香"])
+console.log(re)
+console.log(re1)</code></pre>
+                </div>
+
+                <h4>排错题</h4>
+                <div class="exercise">
+                    <h5>排错题 1</h5>
+                    <pre><code class="html"><!-- bug:请你找到代码返回NaN的原因,并进行修改 -->
+<body>
+  <script>
+    // 请返回一个数字型的结果 可以使用默认参数或者逻辑中断都可以
+    function fn(x, y) {  // 错误 因为 y 没有参数传递过来所以是 undefined 相加结果是 NaN 可以给 y 设置默认参数
+      console.log(x + y)
+    }
+    fn(1)  
+  </script>
+</body></code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>排错题 2</h5>
+                    <pre><code class="html"><!-- bug:请你找到下面代码的2处错误,并进行修改过来-->
+<body>
+  <script>
+    // 任意数组求和案例
+    function getsumArr(arr) {
+      let sum = 0
+      for (let i = 0; i < arr.legnth; i++) {  // 错误 1： length 写错了这是很多同学容易犯错误的地方
+        sum + arr [i]  // 错误 2： 是 sum += arr [i]  很多同学不小心把 = 给丢了
+      }
+      return sum
+    }
+    console.log(getsumArr([10, 20, 30, 40]))
+  </script>
+</body></code></pre>
+                </div>
+            </div>
+
+            <!-- 第5章 对象 -->
+            <div class="section" id="section5">
+                <h2>5. 对象</h2>
+
+                <h3 id="section5-1">5.1 对象是什么？</h3>
+                <p>对象(object): JavaScript 里的一种数据类型。</p>
+                <p>可以理解为是一种无序的数据集合，注意 数组是有序的数据集合。</p>
+                <p>用来描述某个事物，例如描述一个人 ：</p>
+                <p>人有姓名、年龄、性别等信息、还有吃饭睡觉打代码等功能。</p>
+
+                <h3 id="section5-2">5.2 对象的使用</h3>
+                <h4>1.对象声明的语法</h4>
+                <pre><code class="javascript">let A = {}</code></pre>
+
+                <h4>2.对象有属性和方法组成</h4>
+                <p>属性: 信息或叫特征(名词)。比如 手机尺寸、颜色、重量等..</p>
+                <pre><code class="javascript">let obj = {
+  uname:'pink老师' ,
+  age: 18 ,
+  gender : "男"
+}
+console.log(obj)</code></pre>
+
+                <p>方法: 功能或叫行为(动词)。比如 手机打电话、发短信、玩游戏.</p>
+
+                <div class="exercise">
+                    <h4>练习：声明一个产品对象</h4>
+                    <p>请声明一个产品对象，里面包如下信息:</p>
+                    <p>要求:</p>
+                    <ul>
+                        <li>商品对象名字: goods</li>
+                        <li>商品名称命名为: name 商品编号: num</li>
+                        <li>商品毛重: weight</li>
+                        <li>商品产地: address</li>
+                    </ul>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let obj = {
+  goods:'xiaomi17',
+  name: 'shouji' ,
+  num: 18 ,
+  weight : 100 ,
+  address : "zhongshan" 
+}
+console.log(obj)</code></pre>
+                </div>
+
+                <h3 id="section5-3">5.3 对象的增删改查</h3>
+                <h4>对象的查找</h4>
+                <pre><code class="javascript">let obj = {
+  'get - name' :'nihao'
+  goods:'xiaomi17',
+  name: 'shouji' 
+}
+console.log(obj.goods) //
+console.log(obj['get - name'])</code></pre>
+
+                <h4>对象的修改</h4>
+                <pre><code class="javascript">let obj = {
+  goods:'xiaomi17',
+  name: 'shouji' ,
+  num: 18 ,
+  weight : 100 ,
+  address : "zhongshan" 
+}
+obj.num = '20' //
+obj.weight = '200' //
+console.log(obj)</code></pre>
+
+                <h4>对象的增加</h4>
+                <pre><code class="javascript">let obj = {
+  goods:'xiaomi17',
+  name: 'shouji' ,
+  num: 18 ,
+  weight : 100 ,
+  address : "zhongshan" 
+}
+obj.hobby = '篮球' //
+console.log(obj)</code></pre>
+
+                <h4>对象的删除</h4>
+                <pre><code class="javascript">let obj = {
+  goods:'xiaomi17',
+  name: 'shouji' ,
+  num: 18 ,
+  weight : 100 ,
+  address : "zhongshan" 
+}
+delete obj.goods //
+console.log(obj)</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：对产品对象进行操作</h4>
+                    <p>要求:</p>
+                    <ol>
+                        <li>请将商品名称里面的值修改为: 小米 10 PLUS</li>
+                        <li>新增一个属性颜色 color 为'粉色</li>
+                        <li>请依次页面打印输出所有的属性值</li>
+                    </ol>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let obj = {
+  goods:'xiaomi',
+  name: 'xiaomi 10' ,
+  num: 1001212 ,
+  weight : '0.55kg' ,
+  address : "zhonggou" 
+}
+obj.name = 'xiaomi 10 PLUS'
+obj.color = '粉色'
+console.log(obj)</code></pre>
+                </div>
+
+                <h3 id="section5-4">5.4 对象的方法和使用</h3>
+                <p>方法就是 在对象里面写了个函数。</p>
+                <pre><code class="javascript">let obj = {
+  goods: 'xiaomi',
+  name: 'xiaomi 10',
+  song: function(x,y) {
+    console.log(x + y)
+  }
+}
+obj.song(1,2)  // 3
+console.log(obj)</code></pre>
+
+                <h4>遍历对象</h4>
+                <p>for 遍历对象的问题:</p>
+                <ul>
+                    <li>对象没有像数组一样的 length 属性, 所以无法确定长度</li>
+                    <li>对象里面是无序的键值对，没有规律 不像数组里面有规律的下标</li>
+                </ul>
+
+                <pre><code class="javascript">let obj = {
+  goods: 'xiaomi',
+  name: 'xiaomi 10',
+  age : '18'
+}
+for (let k in obj) {
+  console.log(k)
+  console.log(obj[k])
+}
+// 打印结果：
+// goods
+// xiaomi
+// name
+// xiaomi 10
+// age
+// 18</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：遍历数组对象 1</h4>
+                    <p>需求: 请把下面数据中的对象打印出来</p>
+                    <pre><code class="javascript">let students =[
+  {name:'小明', age: 18, gender:'男', hometown:'河北省'},
+  {name:'小红', age: 19, gender:'女', hometown:'河南省'},
+  {name:'小刚', age: 17, gender:'男', hometown:'山西省'},
+  {name:'小丽', age: 18, gender:'女', hometown:'山东省'}
+]</code></pre>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let students =[
+  {name:'小明',age:18, gender:'男',hometown:'河北省'},
+  {name:'小红',age:19,gender:'女',hometown:'河南省'},
+  {name:'小刚',age:17, gender:'男',hometown:'山西省'},
+  {name:'小丽',age:18,gender:'女',hometown:'山东省'}
+]
+for (let i = 0 ; i < students.length ;i++) {
+  console.log(i)
+  console.log(students[i]) 
+  // console.log(students[i].name)
+}</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 2：遍历数组对象 2</h4>
+                    <p>根据以下数据渲染生成表格</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  th{
+    width: 80px;
+    height: 40px;
+  }
+  table,tr,th{
+    border: 1px solid #000;
+    border-collapse: collapse;
+  }
+  table tr:nth-child(1) {
+    background-color: #888888;
+  }
+
+  table th:not(:first-child):hover {
+    background-color: #888888;
+  }
+
+  caption {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+&lt;/style&gt;
+  &lt;table&gt;
+    &lt;caption&gt;列表&lt;/caption&gt;
+    &lt;tr&gt;
+      &lt;th&gt;序号&lt;/th&gt;
+      &lt;th&gt;姓名&lt;/th&gt;
+      &lt;th&gt;年龄&lt;/th&gt;
+      &lt;th&gt;性别&lt;/th&gt;
+      &lt;th&gt;家乡&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;script&gt;
+      let students =[
+        {name:'小明',age:18, gender:'男',hometown:'河北省'},
+        {name:'小红',age:19,gender:'女',hometown:'河南省'},
+        {name:'小刚',age:17, gender:'男',hometown:'山西省'},
+        {name:'小丽',age:18,gender:'女',hometown:'山东省'}
+      ]
+      for (let i = 0; i < students.length;i++) {
+        document.write(`
+        &lt;tr&gt;
+          &lt;th&gt;${i + 1}&lt;/th&gt;
+          &lt;th&gt;${students[i].name}&lt;/th&gt;
+          &lt;th&gt;${students[i].age}&lt;/th&gt;
+          &lt;th&gt;${students[i].gender}&lt;/th&gt;
+          &lt;th&gt;${students[i].hometown}&lt;/th&gt;
+        &lt;/tr&gt;
+        `)
+      }
+    &lt;/script&gt;
+  &lt;/table&gt;
+&lt;body&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h3 id="section5-5">5.5 内置对象</h3>
+                <p>回想一下我们曾经使用过的 `console.log`，`console` 其实就是 JavaScript 中内置的对象，该对象中存在一个方法叫 `log`，然后调用 `log` 这个方法，即 `console.log()`。</p>
+                <p>除了 `console` 对象外，JavaScritp 还有其它的内置的对象。</p>
+
+                <h4>Math</h4>
+                <p>`Math` 是 JavaScript 中内置的对象，称为数学对象，这个对象下即包含了属性，也包含了许多的方法。</p>
+
+                <h5>属性</h5>
+                <ul>
+                    <li>Math.PI，获取圆周率</li>
+                </ul>
+                <pre><code class="javascript">// 圆周率
+console.log(Math.PI);</code></pre>
+
+                <h5>方法</h5>
+                <ul>
+                    <li>Math.random，生成 0 到 1 间的随机数</li>
+                </ul>
+                <pre><code class="javascript">// 0 ~ 1 之间的随机数, 包含 0 不包含 1
+Math.random()</code></pre>
+
+                <ul>
+                    <li>Math.ceil，数字向上取整</li>
+                </ul>
+                <pre><code class="javascript">// 舍弃小数部分，整数部分加1
+Math.ceil(3.4)</code></pre>
+
+                <ul>
+                    <li>Math.floor，数字向下取整</li>
+                </ul>
+                <pre><code class="javascript">// 舍弃小数部分，整数部分不变
+Math.floor(4.68)</code></pre>
+
+                <ul>
+                    <li>Math.round，四舍五入取整</li>
+                </ul>
+                <pre><code class="javascript">// 取整，四舍五入原则
+Math.round(5.46539)
+Math.round(4.849)</code></pre>
+
+                <ul>
+                    <li>Math.max，在一组数中找出最大的</li>
+                </ul>
+                <pre><code class="javascript">// 找出最大值
+Math.max(10, 21, 7, 24, 13)</code></pre>
+
+                <ul>
+                    <li>Math.min，在一组数中找出最小的</li>
+                </ul>
+                <pre><code class="javascript">// 找出最小值
+Math.min(24, 18, 6, 19, 21)</code></pre>
+
+                <ul>
+                    <li>Math.pow，幂方法</li>
+                </ul>
+                <pre><code class="javascript">// 求某个数的多少次方
+Math.pow(4, 2) // 求 4 的 2 次方
+Math.pow(2, 3) // 求 2 的 3 次方</code></pre>
+
+                <ul>
+                    <li>Math.sqrt，平方根</li>
+                </ul>
+                <pre><code class="javascript">// 求某数的平方根
+Math.sqrt(16)</code></pre>
+
+                <p>数学对象提供了比较多的方法，这里不要求强记，通过演示数学对象的使用，加深对对象的理解。</p>
+
+                <h3 id="section5-6">5.6 随机数函数</h3>
+                <p>如何生成 0-10 的随机数呢?</p>
+                <pre><code class="javascript">Math.floor(Math.random()*(10 + 1))</code></pre>
+
+                <p>如何生成 5-10 的随机数?</p>
+                <pre><code class="javascript">Math.floor(Math.random()*(5 + 1)) + 5</code></pre>
+
+                <p>如何生成 N - M 之间的随机数?</p>
+                <pre><code class="javascript">Math.floor(Math.random()*(M - N + 1)) + N</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：随机点名案例</h4>
+                    <p>请把 ['白子','星野','野宫','芹香','绫音'] 随机显示一个名字到页面中</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = ['白子','星野','野宫','芹香','绫音']
+let i = Math.floor(Math.random() * arr.length )
+document.write(arr[i])</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 2：随机点名案例 但是不允许重复显示</h4>
+                    <p>请把 ['白子','星野','野宫','芹香','绫音'] 随机显示一个名字到页面中，不允许重复显示</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = ['白子','星野','野宫','芹香','绫音']
+let random = Math.floor(Math.random() * arr.length )
+  document.write(arr[random])
+  arr.splice(random , 1)
+  console.log(arr)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 3：猜数字游戏</h4>
+                    <p>需求: 程序随机生成 1~10 之间的一个数字，用户输入一个数字</p>
+                    <ol>
+                        <li>如果大于该数字，就提示，数字猜大了，继续猜</li>
+                        <li>如果小于该数字，就提示，数字猜小了，继续猜</li>
+                        <li>如果猜对了，就提示猜对了，程序结束</li>
+                    </ol>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let num = +prompt("请输入一个数字：")
+let random = Math.floor(Math.random() * (10 + 1) + 1)
+while (true) {
+  if (num === random) {
+    alert(`对了`)
+    break
+  } else if (num < random) {
+    alert(`小了`)
+    num = +prompt("继续猜：")
+    continue
+  } else if (num > random) {
+    alert(`大了`)
+    num = +prompt("继续猜：")
+    continue
+  }
+}</code></pre>
+                </div>
+
+                <!-- 第5章实战案例 -->
+                <h3>5.7 实战案例</h3>
+                <h4>主观题</h4>
+
+                <div class="exercise">
+                    <h5>练习题1：</h5>
+                    <p>点名: 每次刷新网页运行, 在控制台 随机输出一位同学的名字 ["老赵", "老李", "小传", "小黑"]，如果输出了，则数组中删除这个名字</p>
+                    <pre><code class="javascript">let arr = ["老赵", "老李", "小传", "小黑"]
+let j = Math.floor(Math.random() * arr.length)
+console.log(arr[j])
+arr.splice(j, 1)
+console.log(arr)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题2：</h5>
+                    <p>声明对象</p>
+                    <p>目的: 复习对象的声明</p>
+                    <p>要求:</p>
+                    <ol>
+                        <li>声明一个变量per, 类型为对象类型</li>
+                        <li>该对象的属性为性别,年龄,爱好(3个)</li>
+                        <li>该对象的方法有 说话, 吃饭(2个)</li>
+                        <li>在控制台分别调用该对象的属性和方法</li>
+                    </ol>
+                    <pre><code class="javascript">let per = {
+  gat : "男",
+  age : 25,
+  hibbits : ['打游戏', '看电影', '旅游'],
+  sayHello : function () {
+    console.log('你好')
+  },
+  getEat : function () {
+    console.log('吃饭')
+  }
+}
+console.log(per.gat)
+console.log(per.age)
+console.log(per.hibbits)
+
+per.sayHello()
+per.getEat()</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题3：</h5>
+                    <p>调用对象的方法</p>
+                    <p>目的: 复习对象的使用</p>
+                    <p>要求:</p>
+                    <ol>
+                        <li>对象声明完毕后, 调用对象中的吃饭的方法</li>
+                        <li>提示: 对象中的方法本质是函数, 调用需要加()</li>
+                        <li>方法也可以传递参数的</li>
+                    </ol>
+                    <pre><code class="javascript">let per = {
+  sex: 'man', // 年龄,
+  age: 18, // 性别,
+  hobby: 'studyAndGame', // 爱好
+  speak: function () {
+    // 说话,
+     document.write(`speak方法被调用了---<br>`)
+   },
+   eat: function (f) {
+    // 吃饭
+    document.write(`我今天吃的是${f}`)
+   }
+}
+// 下面是调用部分
+document.write(`姓名:${per.sex} <br>`)
+document.write(`姓名:${per.age}<br>`)
+document.write(`姓名:${per.hobby}<br>`)
+
+// 调用方法
+per.speak()
+per.eat('苹果')</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>练习题4：</h5>
+                    <p>猜数字游戏，设定次数，最多猜8次</p>
+                    <pre><code class="javascript">let num = Math.floor(Math.random()* 10)
+let guess = +prompt("请输入一个数字：")
+for (let i = 0; i < 8; i++) {
+  if (guess === num) {
+  alert("恭喜你，猜对了！")
+  break
+  }  else if (guess < num) {
+  alert("猜小了！")
+  }  else if (guess > num) {
+  alert("猜大了！")
+  }
+  guess = +prompt(`你剩下${8 - i}次机会，请输入一个数字：`)
+  if (i === 7) {
+  alert("很遗憾，你用完了8次机会，游戏结束！")
+  }
+}</code></pre>
+                </div>
+
+                <h4>拓展</h4>
+                <div class="exercise">
+                    <h5>拓展：利用对象数组渲染学生列表案例</h5>
+                    <p>需求：利用对象数组渲染学生列表案例</p>
+                    <p>展示效果：如下：</p>
+                    <p>功能1：</p>
+                    <ol>
+                        <li>利用对象数组里面的数据来渲染页面，渲染多个数据</li>
+                        <li>鼠标经过停留会显示`学生名字`</li>
+                    </ol>
+                    <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  .box {
+    height: 50px;
+    display: flex;
+    width: 50px;
+    margin: 10px auto ;
+    padding: 0px;
+    justify-content: center;
+  }
+  img {
+    height: 100px;
+    padding: 0px;
+    margin: 0px;
+    transition: 0.3s ease;
+  }
+  img:hover {
+    height: 125px;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;script&gt;
+    let datas = [
+      { name: '日奈', imgSrc: '/text/img/10004.webp' },
+      { name: '星野', imgSrc: '/text/img/10005.webp' },
+      { name: '瞬', imgSrc: '/text/img/10011.webp' },
+      { name: '泉奈', imgSrc: '/text/img/10014.webp' },
+      { name: '野宫', imgSrc: '/text/img/13004.webp' },
+      { name: '睦月', imgSrc: '/text/img/13006.webp' },
+      { name: '纯子', imgSrc: '/text/img/13007.webp' },
+      { name: '椿', imgSrc: '/text/img/13009.webp' },
+      { name: '优香', imgSrc: '/text/img/13010.webp' },
+      { name: '响', imgSrc: '/text/img/20000.webp' },
+      { name: '真白', imgSrc: '/text/img/20003.webp' },
+      { name: '晴', imgSrc: '/text/img/23003.webp' },
+      { name: '绫音', imgSrc: '/text/img/23005.webp' }
+    ]
+    
+      for(let i = 0; i < datas.length; i++){
+        document.write(`
+          &lt;img src="${datas[i].imgSrc}" title="${datas[i].name}"&gt;&lt;/img&gt;
+        `)
+      }
+    
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h4>排错题</h4>
+                <div class="exercise">
+                    <h5>排错题1</h5>
+                    <pre><code class="html">&lt;!-- bug:请你找到下面代码的2处BUG进行修改 --&gt;
+
+&lt;body&gt;
+  &lt;script&gt;
+    let obj = {
+      name: '张三',
+      age: 20,
+      sex: '男',
+      address: '中国人'
+    }
+    // 获取姓名
+    console.log(obj.['name'])  // 错误1： 没有点
+
+    // 获取地址
+    console.log(obj.addres)  // 错误2： addres写错了，单词拼错
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h5>排错题2</h5>
+                    <pre><code class="html">&lt;!-- 请你找到下面代码的3处bug进行修改 --&gt;
+
+&lt;body&gt;
+  &lt;script&gt;
+    let obj = {
+      name: '张三',
+      age: 20,
+      sex: '男',
+      address: '中国人',
+      sing: function () {
+        console.log('我会唱歌')
+      }   // 错误3： 这里少了一个逗号
+      sum: function (x, y) {
+       return x + y
+      }
+    }
+
+    console.log(obj.sing)   // 错误1： 方法调用是  obj.sing()
+    console.log(obj.sum) // 错误2： 方法调用是  obj.sum()
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+                </div>
+            </div>
+
+            <!-- 推荐文章 -->
+            <div class="related-posts">
+                <h3>推荐阅读</h3>
+                <ul>
+                    <li><a href="JS进阶.html">JS进阶笔记</a> - 学习JavaScript进阶知识，包括作用域、闭包、异步编程等</li>
+                    <li><a href="Web API.html">Web API笔记</a> - 学习Web API，包括DOM操作、事件处理、BOM操作等</li>
+                    <li><a href="前端核心学习表.html">前端核心学习表</a> - 前端开发核心学习路径和知识点总结</li>
+                </ul>
+            </div>
+            
+            <!-- 评论区 -->
+            <div class="comments-section">
+                <h3>评论区</h3>
+                
+                <!-- 评论表单 -->
+                <div class="comment-form">
+                    <h4>添加评论</h4>
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="name">用户名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容</label>
+                            <textarea id="comment" name="comment" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交评论</button>
+                    </form>
+                </div>
+                
+                <!-- 评论列表 -->
+                <div class="comment-list" id="commentList">
+                    <!-- 评论将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Cyinc的个人博客. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="../index.html">首页</a>
+                    <a href="#about">关于</a>
+                    <a href="#archive">归档</a>
+                    <a href="mailto:cyinc@example.com">联系我</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，初始化脚本');
+            
+            // 主题切换功能
+            const themeToggle = document.getElementById('theme-toggle');
+            console.log('主题切换按钮:', themeToggle);
+            const html = document.documentElement;
+            
+            // 从本地存储加载主题
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                if (themeToggle) {
+                    if (savedTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                }
+                console.log('从本地存储加载主题:', savedTheme);
+            }
+            
+            // 添加点击事件监听器
+            if (themeToggle) {
+                console.log('主题切换按钮存在，添加点击事件');
+                themeToggle.addEventListener('click', function() {
+                    console.log('主题切换按钮被点击 (addEventListener)');
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    // 更新主题属性
+                    html.setAttribute('data-theme', newTheme);
+                    console.log('主题已切换为:', newTheme);
+                    
+                    // 保存主题偏好到本地存储
+                    localStorage.setItem('theme', newTheme);
+                    
+                    // 更新图标
+                    if (newTheme === 'dark') {
+                        themeToggle.textContent = '☀️';
+                        themeToggle.title = '切换到浅色模式';
+                    } else {
+                        themeToggle.textContent = '🌙';
+                        themeToggle.title = '切换到深色模式';
+                    }
+                });
+            }
+            
+            // 目录收缩/展开功能
+            const tocSidebar = document.getElementById('tocSidebar');
+            const tocToggleBtn = document.getElementById('tocToggleBtn');
+            console.log('目录侧边栏:', tocSidebar);
+            console.log('目录切换按钮:', tocToggleBtn);
+            
+            if (tocToggleBtn && tocSidebar) {
+                console.log('目录切换按钮存在，添加点击事件');
+                tocToggleBtn.addEventListener('click', function() {
+                    console.log('目录切换按钮被点击 (addEventListener)');
+                    if (tocSidebar.classList.contains('collapsed')) {
+                        tocSidebar.classList.remove('collapsed');
+                        tocToggleBtn.innerHTML = '✕';
+                        tocToggleBtn.title = '收起目录';
+                        console.log('目录已展开');
+                    } else {
+                        tocSidebar.classList.add('collapsed');
+                        tocToggleBtn.innerHTML = '☰';
+                        tocToggleBtn.title = '展开目录';
+                        console.log('目录已收起');
+                    }
+                });
+                
+                // 初始化按钮图标
+                tocToggleBtn.innerHTML = '✕';
+                tocToggleBtn.title = '收起目录';
+            }
+            
+            // 代码块复制功能
+            const codeBlocks = document.querySelectorAll('pre code');
+            console.log('找到代码块数量:', codeBlocks.length);
+            
+            codeBlocks.forEach(function(codeBlock) {
+                const preElement = codeBlock.parentElement;
+                
+                // 创建复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '复制';
+                copyBtn.title = '复制代码';
+                
+                // 添加点击事件
+                copyBtn.addEventListener('click', function() {
+                    const code = codeBlock.textContent;
+                    
+                    // 复制到剪贴板
+                    navigator.clipboard.writeText(code).then(function() {
+                        copyBtn.textContent = '已复制';
+                        copyBtn.classList.add('copied');
+                        
+                        // 2秒后恢复原状
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('复制失败:', err);
+                        copyBtn.textContent = '失败';
+                        
+                        setTimeout(function() {
+                            copyBtn.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+                
+                // 将按钮添加到代码块
+                preElement.appendChild(copyBtn);
+            });
+            
+            // 评论功能
+            const commentForm = document.getElementById('commentForm');
+            const commentList = document.getElementById('commentList');
+            
+            // 加载评论函数
+            function loadComments() {
+                // 获取评论
+                let comments = JSON.parse(localStorage.getItem('js-basic-comments')) || [];
+                
+                // 清空评论列表
+                commentList.innerHTML = '';
+                
+                // 如果没有评论，显示提示
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                    return;
+                }
+                
+                // 添加评论到列表
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.name}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-content">${comment.comment}</div>
+                    `;
+                    commentList.appendChild(commentElement);
+                });
+            }
+            
+            if (commentForm && commentList) {
+                // 加载评论
+                loadComments();
+                
+                // 提交评论
+                commentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('name').value;
+                    const comment = document.getElementById('comment').value;
+                    const date = new Date().toLocaleString();
+                    
+                    // 创建评论对象
+                    const newComment = {
+                        id: Date.now(),
+                        name: name,
+                        comment: comment,
+                        date: date
+                    };
+                    
+                    // 获取现有评论
+                    let comments = JSON.parse(localStorage.getItem('js-basic-comments')) || [];
+                    
+                    // 添加新评论
+                    comments.push(newComment);
+                    
+                    // 保存评论到localStorage
+                    localStorage.setItem('js-basic-comments', JSON.stringify(comments));
+                    
+                    // 清空表单
+                    commentForm.reset();
+                    
+                    // 重新加载评论
+                    loadComments();
+                });
+            }
+        });
+    </script>
+    <script src="../js/static-blog.js"></script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

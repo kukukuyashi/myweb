@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue3学习笔记 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        .toc-sidebar .toc-level-2 {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+        
+        .toc-sidebar .toc-level-3 {
+            padding-left: 2.4rem;
+        }
+        
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] p,
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        .btn-outline {
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        [data-theme="dark"] .feature-card {
+            background: rgba(45, 55, 72, 0.8);
+        }
+        
+        .vue-logo {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .vue-logo img {
+            max-width: 200px;
+            height: auto;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #42b883 0%, #35495e 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .highlight-box code {
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .toc-sidebar {
+                width: 200px;
+                right: 40px;
+            }
+            
+            .toc-toggle-btn {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">Cyinc<span>的博客</span></div>
+                    <nav>
+                        <ul>
+                            <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                            <li><a href="../about.html" data-icon="👤">关于</a></li>
+                            <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                            <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <div class="header-controls">
+            <button class="toggle-btn" @click="toggleSidebar" title="隐藏/显示导航栏">{{ sidebarVisible ? '◀' : '☰' }}</button>
+            <button id="theme-toggle" @click="toggleTheme" title="切换主题">{{ theme === 'light' ? '🌙' : '☀️' }}</button>
+        </div>
+
+        <main>
+            <div class="container">
+                <div class="main-wrapper">
+                    <div id="mainContent">
+                        <div class="toc-sidebar" :class="{ collapsed: !tocVisible }">
+                            <div class="toc-content">
+                                <div class="toc">
+                                    <h3>目录</h3>
+                                    <ul>
+                                        <li v-for="section in sections" :key="section.id">
+                                            <a :href="'#' + section.id">{{ section.title }}</a>
+                                            <ul v-if="section.children" class="toc-level-2">
+                                                <li v-for="child in section.children" :key="child.id">
+                                                    <a :href="'#' + child.id">{{ child.title }}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="toc-toggle-btn" @click="toggleToc" title="切换目录">{{ tocVisible ? '✕' : '☰' }}</button>
+
+                        <div class="article-container">
+                            <button class="btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                            <h1 class="article-title">{{ articleTitle }}</h1>
+                            <div class="post-meta">
+                                <span class="post-date">{{ publishDate }}</span>
+                                <span class="post-author">{{ author }}</span>
+                                <span class="post-category">{{ category }}</span>
+                            </div>
+                            <div class="article-content">
+                                <div class="vue-logo">
+                                    <img src="https://vuejs.org/images/logo.png" alt="Vue.js Logo">
+                                </div>
+                                
+                                <div class="highlight-box">
+                                    <strong>Vue3 简介：</strong> 2020年9月18日，Vue.js发布3.0版本，代号：One Piece。经历了4800+次提交、40+个RFC、600+次PR、300+贡献者。截止2023年10月，最新版本为3.3.4。
+                                </div>
+
+                                <h2 id="section1">1. Vue3简介</h2>
+                                
+                                <h3 id="section1-1">1.1 性能的提升</h3>
+                                <div class="feature-card">
+                                    <ul>
+                                        <li>打包大小减少 <strong>41%</strong></li>
+                                        <li>初次渲染快 <strong>55%</strong>，更新渲染快 <strong>133%</strong></li>
+                                        <li>内存减少 <strong>54%</strong></li>
+                                    </ul>
+                                </div>
+
+                                <h3 id="section1-2">1.2 源码的升级</h3>
+                                <ul>
+                                    <li>使用 <code>Proxy</code> 代替 <code>defineProperty</code> 实现响应式</li>
+                                    <li>重写虚拟 <code>DOM</code> 的实现和 <code>Tree-Shaking</code></li>
+                                </ul>
+
+                                <h3 id="section1-3">1.3 拥抱TypeScript</h3>
+                                <p>Vue3 可以更好的支持 TypeScript。</p>
+
+                                <h3 id="section1-4">1.4 新的特性</h3>
+                                <div class="feature-card">
+                                    <p><strong>1. Composition API（组合API）：</strong></p>
+                                    <ul>
+                                        <li><code>setup</code></li>
+                                        <li><code>ref</code> 与 <code>reactive</code></li>
+                                        <li><code>computed</code> 与 <code>watch</code></li>
+                                    </ul>
+                                    <p><strong>2. 新的内置组件：</strong></p>
+                                    <ul>
+                                        <li><code>Fragment</code></li>
+                                        <li><code>Teleport</code></li>
+                                        <li><code>Suspense</code></li>
+                                    </ul>
+                                    <p><strong>3. 其他改变：</strong></p>
+                                    <ul>
+                                        <li>新的生命周期钩子</li>
+                                        <li><code>data</code> 选项应始终被声明为一个函数</li>
+                                        <li>移除 <code>keyCode</code> 支持作为 <code>v-on</code> 的修饰符</li>
+                                    </ul>
+                                </div>
+
+                                <h2 id="section2">2. 创建Vue3工程</h2>
+
+                                <h3 id="section2-1">2.1 基于 vue-cli 创建</h3>
+                                <blockquote>
+                                    <p>备注：目前 vue-cli 已处于维护模式，官方推荐基于 Vite 创建项目。</p>
+                                </blockquote>
+                                <pre><code class="language-powershell">## 查看@vue/cli版本，确保@vue/cli版本在4.5.0以上
+vue --version
+
+## 安装或者升级你的@vue/cli 
+npm install -g @vue/cli
+
+## 执行创建命令
+vue create vue_test
+
+## 启动
+cd vue_test
+npm run serve</code></pre>
+
+                                <h3 id="section2-2">2.2 基于 vite 创建（推荐）</h3>
+                                <p><code>vite</code> 是新一代前端构建工具，官网地址：<a href="https://vitejs.cn" target="_blank">https://vitejs.cn</a></p>
+                                <div class="feature-card">
+                                    <p><strong>vite 的优势：</strong></p>
+                                    <ul>
+                                        <li>轻量快速的热重载（HMR），能实现极速的服务启动</li>
+                                        <li>对 TypeScript、JSX、CSS 等支持开箱即用</li>
+                                        <li>真正的按需编译，不再等待整个应用编译完成</li>
+                                    </ul>
+                                </div>
+                                <pre><code class="language-powershell">## 1.创建命令
+npm create vue@latest
+
+## 2.具体配置
+√ Project name: vue3_test
+√ Add TypeScript?  Yes
+√ Add JSX Support?  No
+√ Add Vue Router for Single Page Application development?  No
+√ Add Pinia for state management?  No
+√ Add Vitest for Unit Testing?  No
+√ Add an End-to-End Testing Solution?  No
+√ Add ESLint for code quality?  Yes
+√ Add Prettier for code formatting?  No</code></pre>
+
+                                <h3 id="section2-3">2.3 一个简单的效果</h3>
+                                <p>Vue3 向下兼容 Vue2 语法，且 Vue3 中的模板中可以没有根标签</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="person"&gt;
+    &lt;h2&gt;姓名：{{name}}&lt;/h2&gt;
+    &lt;h2&gt;年龄：{{age}}&lt;/h2&gt;
+    &lt;button @click="changeName"&gt;修改名字&lt;/button&gt;
+    &lt;button @click="changeAge"&gt;年龄+1&lt;/button&gt;
+    &lt;button @click="showTel"&gt;点我查看联系方式&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script lang="ts"&gt;
+  export default {
+    name:'App',
+    data() {
+      return {
+        name:'张三',
+        age:18,
+        tel:'13888888888'
+      }
+    },
+    methods:{
+      changeName(){
+        this.name = 'zhang-san'
+      },
+      changeAge(){
+        this.age += 1
+      },
+      showTel(){
+        alert(this.tel)
+      }
+    },
+  }
+&lt;/script&gt;</code></pre>
+
+                                <h2 id="section3">3. Vue3核心语法</h2>
+
+                                <h3 id="section3-1">3.1 OptionsAPI 与 CompositionAPI</h3>
+                                <ul>
+                                    <li>Vue2 的 API 设计是 Options（配置）风格的</li>
+                                    <li>Vue3 的 API 设计是 Composition（组合）风格的</li>
+                                </ul>
+
+                                <h4>Options API 的弊端</h4>
+                                <p>Options 类型的 API，数据、方法、计算属性等，是分散在：data、methods、computed 中的，若想新增或者修改一个需求，就需要分别修改：data、methods、computed，不便于维护和复用。</p>
+
+                                <h4>Composition API 的优势</h4>
+                                <p>可以用函数的方式，更加优雅的组织代码，让相关功能的代码更加有序的组织在一起。</p>
+
+                                <h3 id="section3-2">3.2 拉开序幕的 setup</h3>
+                                <p><code>setup</code> 是 Vue3 中一个新的配置项，值是一个函数，它是 Composition API "表演的舞台"，组件中所用到的：数据、方法、计算属性、监视......等等，均配置在 setup 中。</p>
+                                <div class="feature-card">
+                                    <p><strong>特点如下：</strong></p>
+                                    <ul>
+                                        <li>setup 函数返回的对象中的内容，可直接在模板中使用</li>
+                                        <li>setup 中访问 this 是 undefined</li>
+                                        <li>setup 函数会在 beforeCreate 之前调用，它是"领先"所有钩子执行的</li>
+                                    </ul>
+                                </div>
+                                <pre><code class="language-vue">&lt;script lang="ts"&gt;
+  export default {
+    name:'Person',
+    setup(){
+      // 数据
+      let name = '张三'
+      let age = 18
+      let tel = '13888888888'
+
+      // 方法
+      function changeName(){
+        name = 'zhang-san'
+      }
+      function changeAge(){
+        age += 1
+      }
+      function showTel(){
+        alert(tel)
+      }
+
+      // 返回一个对象
+      return {name,age,tel,changeName,changeAge,showTel}
+    }
+  }
+&lt;/script&gt;</code></pre>
+
+                                <h4>setup 语法糖</h4>
+                                <pre><code class="language-vue">&lt;script setup lang="ts"&gt;
+  // 数据
+  let name = '张三'
+  let age = 18
+  let tel = '13888888888'
+
+  // 方法
+  function changeName(){
+    name = '李四'
+  }
+  function changeAge(){
+    age += 1
+  }
+  function showTel(){
+    alert(tel)
+  }
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-3">3.3 ref 创建：基本类型的响应式数据</h3>
+                                <ul>
+                                    <li><strong>作用：</strong>定义响应式变量</li>
+                                    <li><strong>语法：</strong><code>let xxx = ref(初始值)</code></li>
+                                    <li><strong>返回值：</strong>一个 RefImpl 的实例对象，简称 ref 对象，ref 对象的 value 属性是响应式的</li>
+                                </ul>
+                                <pre><code class="language-vue">&lt;script setup lang="ts" name="Person"&gt;
+  import {ref} from 'vue'
+  
+  // name和age是一个RefImpl的实例对象
+  let name = ref('张三')
+  let age = ref(18)
+  let tel = '13888888888'
+
+  function changeName(){
+    // JS中操作ref对象时候需要.value
+    name.value = '李四'
+  }
+  function changeAge(){
+    age.value += 1 
+  }
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-4">3.4 reactive 创建：对象类型的响应式数据</h3>
+                                <ul>
+                                    <li><strong>作用：</strong>定义一个响应式对象（基本类型不要用它，要用 ref）</li>
+                                    <li><strong>语法：</strong><code>let 响应式对象 = reactive(源对象)</code></li>
+                                    <li><strong>返回值：</strong>一个 Proxy 的实例对象，简称：响应式对象</li>
+                                    <li><strong>注意点：</strong>reactive 定义的响应式数据是"深层次"的</li>
+                                </ul>
+                                <pre><code class="language-vue">&lt;script lang="ts" setup name="Person"&gt;
+import { reactive } from 'vue'
+
+// 数据
+let car = reactive({ brand: '奔驰', price: 100 })
+let games = reactive([
+  { id: 'ahsgdyfa01', name: '英雄联盟' },
+  { id: 'ahsgdyfa02', name: '王者荣耀' },
+  { id: 'ahsgdyfa03', name: '原神' }
+])
+
+function changeCarPrice() {
+  car.price += 10
+}
+function changeFirstGame() {
+  games[0].name = '流星蝴蝶剑'
+}
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-5">3.5 ref 创建：对象类型的响应式数据</h3>
+                                <p>其实 ref 接收的数据可以是：基本类型、对象类型。若 ref 接收的是对象类型，内部其实也是调用了 reactive 函数。</p>
+                                <pre><code class="language-vue">&lt;script lang="ts" setup name="Person"&gt;
+import { ref } from 'vue'
+
+// 数据
+let car = ref({ brand: '奔驰', price: 100 })
+let games = ref([
+  { id: 'ahsgdyfa01', name: '英雄联盟' },
+  { id: 'ahsgdyfa02', name: '王者荣耀' },
+  { id: 'ahsgdyfa03', name: '原神' }
+])
+
+function changeCarPrice() {
+  car.value.price += 10
+}
+function changeFirstGame() {
+  games.value[0].name = '流星蝴蝶剑'
+}
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-6">3.6 ref 对比 reactive</h3>
+                                <div class="feature-card">
+                                    <p><strong>宏观角度看：</strong></p>
+                                    <ul>
+                                        <li>ref 用来定义：基本类型数据、对象类型数据</li>
+                                        <li>reactive 用来定义：对象类型数据</li>
+                                    </ul>
+                                    <p><strong>区别：</strong></p>
+                                    <ul>
+                                        <li>ref 创建的变量必须使用 .value</li>
+                                        <li>reactive 重新分配一个新对象，会失去响应式（可以使用 Object.assign 去整体替换）</li>
+                                    </ul>
+                                    <p><strong>使用原则：</strong></p>
+                                    <ul>
+                                        <li>若需要一个基本类型的响应式数据，必须使用 ref</li>
+                                        <li>若需要一个响应式对象，层级不深，ref、reactive 都可以</li>
+                                        <li>若需要一个响应式对象，且层级较深，推荐使用 reactive</li>
+                                    </ul>
+                                </div>
+
+                                <h3 id="section3-7">3.7 toRefs 与 toRef</h3>
+                                <ul>
+                                    <li><strong>作用：</strong>将一个响应式对象中的每一个属性，转换为 ref 对象</li>
+                                    <li><strong>备注：</strong>toRefs 与 toRef 功能一致，但 toRefs 可以批量转换</li>
+                                </ul>
+                                <pre><code class="language-vue">&lt;script lang="ts" setup name="Person"&gt;
+  import {ref,reactive,toRefs,toRef} from 'vue'
+
+  // 数据
+  let person = reactive({name:'张三', age:18, gender:'男'})
+  
+  // 通过toRefs将person对象中的n个属性批量取出
+  let {name,gender} = toRefs(person)
+  
+  // 通过toRef将person对象中的gender属性取出
+  let age = toRef(person,'age')
+
+  // 方法
+  function changeName(){
+    name.value += '~'
+  }
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-8">3.8 computed</h3>
+                                <p>作用：根据已有数据计算出新数据（和 Vue2 中的 computed 作用一致）。</p>
+                                <pre><code class="language-vue">&lt;script setup lang="ts" name="App"&gt;
+  import {ref,computed} from 'vue'
+
+  let firstName = ref('zhang')
+  let lastName = ref('san')
+
+  // 计算属性——既读取又修改
+  let fullName = computed({
+    // 读取
+    get(){
+      return firstName.value + '-' + lastName.value
+    },
+    // 修改
+    set(val){
+      firstName.value = val.split('-')[0]
+      lastName.value = val.split('-')[1]
+    }
+  })
+
+  function changeFullName(){
+    fullName.value = 'li-si'
+  } 
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section3-9">3.9 watch</h3>
+                                <p>作用：监视数据的变化（和 Vue2 中的 watch 作用一致）</p>
+                                <div class="feature-card">
+                                    <p><strong>Vue3 中的 watch 只能监视以下四种数据：</strong></p>
+                                    <ul>
+                                        <li>ref 定义的数据</li>
+                                        <li>reactive 定义的数据</li>
+                                        <li>函数返回一个值（getter 函数）</li>
+                                        <li>一个包含上述内容的数组</li>
+                                    </ul>
+                                </div>
+
+                                <h4>情况一：监视 ref 定义的【基本类型】数据</h4>
+                                <pre><code class="language-vue">&lt;script lang="ts" setup name="Person"&gt;
+  import {ref,watch} from 'vue'
+  
+  let sum = ref(0)
+  
+  function changeSum(){
+    sum.value += 1
+  }
+  
+  // 监视
+  const stopWatch = watch(sum,(newValue,oldValue)=>{
+    console.log('sum变化了',newValue,oldValue)
+    if(newValue >= 10){
+      stopWatch()
+    }
+  })
+&lt;/script&gt;</code></pre>
+
+                                <h4>情况二：监视 ref 定义的【对象类型】数据</h4>
+                                <pre><code class="language-vue">&lt;script lang="ts" setup name="Person"&gt;
+  import {ref,watch} from 'vue'
+  
+  let person = ref({
+    name:'张三',
+    age:18
+  })
+  
+  // 监视对象类型数据，需要手动开启深度监视
+  watch(person,(newValue,oldValue)=>{
+    console.log('person变化了',newValue,oldValue)
+  },{deep:true})
+&lt;/script&gt;</code></pre>
+
+                                <h4>情况三：监视 reactive 定义的【对象类型】数据</h4>
+                                <p>监视 reactive 定义的【对象类型】数据，且默认开启了深度监视。</p>
+
+                                <h4>情况四：监视 ref 或 reactive 定义的对象类型数据中的某个属性</h4>
+                                <pre><code class="language-vue">watch(()=>person.name,(newValue,oldValue)=>{
+  console.log('person.name变化了',newValue,oldValue)
+})</code></pre>
+
+                                <h4>情况五：监视上述多个数据</h4>
+                                <pre><code class="language-vue">watch([()=>person.name,()=>person.age],(newValue,oldValue)=>{
+  console.log('person.name或person.age变化了',newValue,oldValue)
+})</code></pre>
+
+                                <h2 id="section4">4. 路由</h2>
+
+                                <h3 id="section4-1">4.1 对路由的理解</h3>
+                                <p>路由是 Vue 中用于实现单页面应用（SPA）的核心功能，通过 URL 的变化来切换不同的组件视图。</p>
+
+                                <h3 id="section4-2">4.2 基本切换效果</h3>
+                                <p>Vue3 中要使用 vue-router 的最新版本，目前是 4 版本。</p>
+                                <p>路由配置文件代码如下：</p>
+                                <pre><code class="language-js">import {createRouter,createWebHistory} from 'vue-router'
+import Home from '@/pages/Home.vue'
+import News from '@/pages/News.vue'
+import About from '@/pages/About.vue'
+
+const router = createRouter({
+	history:createWebHistory(),
+	routes:[
+		{
+			path:'/home',
+			component:Home
+		},
+		{
+			path:'/about',
+			component:About
+		}
+	]
+})
+export default router</code></pre>
+                                <p>main.ts 代码如下：</p>
+                                <pre><code class="language-js">import router from './router/index'
+app.use(router)
+
+app.mount('#app')</code></pre>
+                                <p>App.vue 代码如下：</p>
+                                <pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="app"&gt;
+    &lt;h2 class="title"&gt;Vue路由测试&lt;/h2&gt;
+    &lt;!-- 导航区 --&gt;
+    &lt;div class="navigate"&gt;
+      &lt;RouterLink to="/home" active-class="active"&gt;首页&lt;/RouterLink&gt;
+      &lt;RouterLink to="/news" active-class="active"&gt;新闻&lt;/RouterLink&gt;
+      &lt;RouterLink to="/about" active-class="active"&gt;关于&lt;/RouterLink&gt;
+    &lt;/div&gt;
+    &lt;!-- 展示区 --&gt;
+    &lt;div class="main-content"&gt;
+      &lt;RouterView&gt;&lt;/RouterView&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script lang="ts" setup name="App"&gt;
+  import {RouterLink,RouterView} from 'vue-router'  
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section4-3">4.3 两个注意点</h3>
+                                <ol>
+                                    <li>路由组件通常存放在 pages 或 views 文件夹，一般组件通常存放在 components 文件夹</li>
+                                    <li>通过点击导航，视觉效果上"消失"了的路由组件，默认是被卸载掉的，需要的时候再去挂载</li>
+                                </ol>
+
+                                <h3 id="section4-4">4.4 路由器工作模式</h3>
+                                <h4>1. history 模式</h4>
+                                <p>优点：URL 更加美观，不带有 #，更接近传统的网站 URL</p>
+                                <p>缺点：后期项目上线，需要服务端配合处理路径问题，否则刷新会有 404 错误</p>
+                                <pre><code class="language-js">const router = createRouter({
+  	history:createWebHistory(), //history模式
+  	/******/
+})</code></pre>
+
+                                <h4>2. hash 模式</h4>
+                                <p>优点：兼容性更好，因为不需要服务器端处理路径</p>
+                                <p>缺点：URL 带有 # 不太美观，且在 SEO 优化方面相对较差</p>
+                                <pre><code class="language-js">const router = createRouter({
+  	history:createWebHashHistory(), //hash模式
+  	/******/
+})</code></pre>
+
+                                <h3 id="section4-5">4.5 to 的两种写法</h3>
+                                <pre><code class="language-vue">&lt;!-- 第一种：to的字符串写法 --&gt;
+&lt;router-link active-class="active" to="/home"&gt;主页&lt;/router-link&gt;
+
+&lt;!-- 第二种：to的对象写法 --&gt;
+&lt;router-link active-class="active" :to="{path:'/home'}"&gt;Home&lt;/router-link&gt;</code></pre>
+
+                                <h3 id="section4-6">4.6 命名路由</h3>
+                                <p>作用：可以简化路由跳转及传参</p>
+                                <p>给路由规则命名：</p>
+                                <pre><code class="language-js">routes:[
+  {
+    name:'zhuye',
+    path:'/home',
+    component:Home
+  },
+  {
+    name:'xinwen',
+    path:'/news',
+    component:News,
+  },
+  {
+    name:'guanyu',
+    path:'/about',
+    component:About
+  }
+]</code></pre>
+                                <p>跳转路由：</p>
+                                <pre><code class="language-vue">&lt;!--简化前：需要写完整的路径（to的字符串写法） --&gt;
+&lt;router-link to="/news/detail"&gt;跳转&lt;/router-link&gt;
+
+&lt;!--简化后：直接通过名字跳转（to的对象写法配合name属性） --&gt;
+&lt;router-link :to="{name:'guanyu'}"&gt;跳转&lt;/router-link&gt;</code></pre>
+
+                                <h3 id="section4-7">4.7 嵌套路由</h3>
+                                <p>编写 News 的子路由：Detail.vue</p>
+                                <p>配置路由规则，使用 children 配置项：</p>
+                                <pre><code class="language-ts">const router = createRouter({
+  history:createWebHistory(),
+	routes:[
+		{
+			name:'zhuye',
+			path:'/home',
+			component:Home
+		},
+		{
+			name:'xinwen',
+			path:'/news',
+			component:News,
+			children:[
+				{
+					name:'xiang',
+					path:'detail',
+					component:Detail
+				}
+			]
+		},
+		{
+			name:'guanyu',
+			path:'/about',
+			component:About
+		}
+	]
+})
+export default router</code></pre>
+                                <p>跳转路由（记得要加完整路径）：</p>
+                                <pre><code class="language-vue">&lt;router-link to="/news/detail"&gt;xxxx&lt;/router-link&gt;
+&lt;!-- 或 --&gt;
+&lt;router-link :to="{path:'/news/detail'}"&gt;xxxx&lt;/router-link&gt;</code></pre>
+                                <p>记得去 Home 组件中预留一个 &lt;router-view&gt;</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="news"&gt;
+    &lt;nav class="news-list"&gt;
+      &lt;RouterLink v-for="news in newsList" :key="news.id" :to="{path:'/news/detail'}"&gt;
+        {{news.name}}
+      &lt;/RouterLink&gt;
+    &lt;/nav&gt;
+    &lt;div class="news-detail"&gt;
+      &lt;RouterView/&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+                                <h3 id="section4-8">4.8 路由传参</h3>
+                                <h4>query 参数</h4>
+                                <p>传递参数：</p>
+                                <pre v-pre><code class="language-vue">&lt;!-- 跳转并携带query参数（to的字符串写法） --&gt;
+&lt;router-link to="/news/detail?a=1&amp;b=2&amp;content=欢迎你"&gt;
+	跳转
+&lt;/router-link&gt;
+				
+&lt;!-- 跳转并携带query参数（to的对象写法） --&gt;
+&lt;RouterLink 
+  :to="{
+    path:'/news/detail',
+    query:{
+      id:news.id,
+      title:news.title,
+      content:news.content
+    }
+  }"
+&gt;
+  {{news.title}}
+&lt;/RouterLink&gt;</code></pre>
+                                <p>接收参数：</p>
+                                <pre><code class="language-js">import {useRoute} from 'vue-router'
+const route = useRoute()
+console.log(route.query)</code></pre>
+
+                                <h4>params 参数</h4>
+                                <p>传递参数：</p>
+                                <pre v-pre><code class="language-vue">&lt;!-- 跳转并携带params参数（to的字符串写法） --&gt;
+&lt;RouterLink :to="`/news/detail/001/新闻001/内容001`"&gt;{{news.title}}&lt;/RouterLink&gt;
+				
+&lt;!-- 跳转并携带params参数（to的对象写法） --&gt;
+&lt;RouterLink 
+  :to="{
+    name:'xiang',
+    params:{
+      id:news.id,
+      title:news.title,
+      content:news.title
+    }
+  }"
+&gt;
+  {{news.title}}
+&lt;/RouterLink&gt;</code></pre>
+                                <p>接收参数：</p>
+                                <pre><code class="language-js">import {useRoute} from 'vue-router'
+const route = useRoute()
+console.log(route.params)</code></pre>
+                                <p>备注1：传递 params 参数时，若使用 to 的对象写法，必须使用 name 配置项，不能用 path</p>
+                                <p>备注2：传递 params 参数时，需要提前在规则中占位</p>
+
+                                <h3 id="section4-9">4.9 路由的 props 配置</h3>
+                                <p>作用：让路由组件更方便的收到参数（可以将路由参数作为 props 传给组件）</p>
+                                <pre><code class="language-js">{
+	name:'xiang',
+	path:'detail/:id/:title/:content',
+	component:Detail,
+
+  // props的对象写法，作用：把对象中的每一组key-value作为props传给Detail组件
+  // props:{a:1,b:2,c:3}, 
+
+  // props的布尔值写法，作用：把收到了每一组params参数，作为props传给Detail组件
+  // props:true
+  
+  // props的函数写法，作用：把返回的对象中每一组key-value作为props传给Detail组件
+  props(route){
+    return route.query
+  }
+}</code></pre>
+
+                                <h3 id="section4-10">4.10 replace 属性</h3>
+                                <p>作用：控制路由跳转时操作浏览器历史记录的模式</p>
+                                <p>浏览器的历史记录有两种写入方式：分别为 push 和 replace</p>
+                                <ul>
+                                    <li>push 是追加历史记录（默认值）</li>
+                                    <li>replace 是替换当前记录</li>
+                                </ul>
+                                <p>开启 replace 模式：</p>
+                                <pre><code class="language-vue">&lt;RouterLink replace .......&gt;News&lt;/RouterLink&gt;</code></pre>
+
+                                <h3 id="section4-11">4.11 编程式导航</h3>
+                                <p>路由组件的两个重要的属性：$route 和 $router 变成了两个 hooks</p>
+                                <pre><code class="language-js">import {useRoute,useRouter} from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+
+console.log(route.query)
+console.log(route.parmas)
+console.log(router.push)
+console.log(router.replace)</code></pre>
+
+                                <h3 id="section4-12">4.12 重定向</h3>
+                                <p>作用：将特定的路径，重新定向到已有路由</p>
+                                <p>具体编码：</p>
+                                <pre><code class="language-js">{
+    path:'/',
+    redirect:'/about'
+}</code></pre>
+
+                                <h2 id="section5">5. Pinia</h2>
+
+                                <h3 id="section5-1">5.1 准备一个效果</h3>
+                                <p>Pinia 是 Vue 的状态管理库，用于在组件之间共享状态。</p>
+
+                                <h3 id="section5-2">5.2 搭建 pinia 环境</h3>
+                                <p>第一步：<code>npm install pinia</code></p>
+                                <p>第二步：操作 src/main.ts</p>
+                                <pre><code class="language-ts">import { createApp } from 'vue'
+import App from './App.vue'
+
+import { createPinia } from 'pinia'
+
+const pinia = createPinia()
+const app = createApp(App)
+
+app.use(pinia)
+app.mount('#app')</code></pre>
+
+                                <h3 id="section5-3">5.3 存储+读取数据</h3>
+                                <p>Store 是一个保存：状态、业务逻辑 的实体，每个组件都可以读取、写入它</p>
+                                <p>它有三个概念：state、getter、action，相当于组件中的： data、 computed 和 methods</p>
+                                <p>具体编码：src/store/count.ts</p>
+                                <pre><code class="language-ts">import {defineStore} from 'pinia'
+
+export const useCountStore = defineStore('count',{
+  actions:{},
+  state(){
+    return {
+      sum:6
+    }
+  },
+  getters:{}
+})</code></pre>
+                                <p>具体编码：src/store/talk.ts</p>
+                                <pre><code class="language-js">import {defineStore} from 'pinia'
+
+export const useTalkStore = defineStore('talk',{
+  actions:{},
+  state(){
+    return {
+      talkList:[
+        {id:'yuysada01',content:'你今天有点怪，哪里怪？怪好看的！'},
+    		{id:'yuysada02',content:'草莓、蓝莓、蔓越莓，你想我了没？'},
+        {id:'yuysada03',content:'心里给你留了一块地，我的死心塌地'}
+      ]
+    }
+  },
+  getters:{}
+})</code></pre>
+                                <p>组件中使用 state 中的数据：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;h2&gt;当前求和为：{{ sumStore.sum }}&lt;/h2&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Count"&gt;
+  import {useSumStore} from '@/store/sum'
+  const sumStore = useSumStore()
+&lt;/script&gt;</code></pre>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+	&lt;ul&gt;
+    &lt;li v-for="talk in talkStore.talkList" :key="talk.id"&gt;
+      {{ talk.content }}
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Count"&gt;
+  import axios from 'axios'
+  import {useTalkStore} from '@/store/talk'
+
+  const talkStore = useTalkStore()
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section5-4">5.4 修改数据（三种方式）</h3>
+                                <p>第一种修改方式，直接修改：</p>
+                                <pre><code class="language-ts">countStore.sum = 666</code></pre>
+                                <p>第二种修改方式：批量修改：</p>
+                                <pre><code class="language-ts">countStore.$patch({
+  sum:999,
+  school:'atguigu'
+})</code></pre>
+                                <p>第三种修改方式：借助 action 修改（action 中可以编写一些业务逻辑）</p>
+                                <pre><code class="language-js">import { defineStore } from 'pinia'
+
+export const useCountStore = defineStore('count', {
+  actions: {
+    increment(value:number) {
+      if (this.sum < 10) {
+        this.sum += value
+      }
+    },
+    decrement(value:number){
+      if(this.sum > 1){
+        this.sum -= value
+      }
+    }
+  },
+})</code></pre>
+                                <p>组件中调用 action 即可：</p>
+                                <pre><code class="language-js">const countStore = useCountStore()
+countStore.incrementOdd(n.value)</code></pre>
+
+                                <h3 id="section5-5">5.5 storeToRefs</h3>
+                                <p>借助 storeToRefs 将 store 中的数据转为 ref 对象，方便在模板中使用</p>
+                                <p>注意：pinia 提供的 storeToRefs 只会将数据做转换，而 Vue 的 toRefs 会转换 store 中数据</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+	&lt;div class="count"&gt;
+		&lt;h2&gt;当前求和为：{{sum}}&lt;/h2&gt;
+	&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Count"&gt;
+  import { useCountStore } from '@/store/count'
+  import { storeToRefs } from 'pinia'
+
+  const countStore = useCountStore()
+  const {sum} = storeToRefs(countStore)
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section5-6">5.6 getters</h3>
+                                <p>概念：当 state 中的数据，需要经过处理后再使用时，可以使用 getters 配置</p>
+                                <p>追加 getters 配置：</p>
+                                <pre><code class="language-js">import {defineStore} from 'pinia'
+
+export const useCountStore = defineStore('count',{
+  actions:{},
+  state(){
+    return {
+      sum:1,
+      school:'atguigu'
+    }
+  },
+  getters:{
+    bigSum:(state):number => state.sum *10,
+    upperSchool():string{
+      return this. school.toUpperCase()
+    }
+  }
+})</code></pre>
+                                <p>组件中读取数据：</p>
+                                <pre><code class="language-js">const {increment,decrement} = countStore
+let {sum,school,bigSum,upperSchool} = storeToRefs(countStore)</code></pre>
+
+                                <h3 id="section5-7">5.7 $subscribe</h3>
+                                <p>通过 store 的 $subscribe() 方法侦听 state 及其变化</p>
+                                <pre><code class="language-ts">talkStore.$subscribe((mutate,state)=>{
+  console.log('LoveTalk',mutate,state)
+  localStorage.setItem('talk',JSON.stringify(talkList.value))
+})</code></pre>
+
+                                <h3 id="section5-8">5.8 store 组合式写法</h3>
+                                <pre><code class="language-ts">import {defineStore} from 'pinia'
+import axios from 'axios'
+import {nanoid} from 'nanoid'
+import {reactive} from 'vue'
+
+export const useTalkStore = defineStore('talk',()=>{
+  const talkList = reactive(
+    JSON.parse(localStorage.getItem('talkList') as string) || []
+  )
+
+  async function getATalk(){
+    let {data:{content:title}} = await axios.get('https://api.uomg.com/api/rand.qinghua?format=json')
+    let obj = {id:nanoid(),title}
+    talkList.unshift(obj)
+  }
+  return {talkList,getATalk}
+})</code></pre>
+
+                                <h2 id="section6">6. 组件通信</h2>
+
+                                <p>Vue3 组件通信和 Vue2 的区别：</p>
+                                <ul>
+                                    <li>移出事件总线，使用 mitt 代替</li>
+                                    <li>vuex 换成了 pinia</li>
+                                    <li>把 .sync 优化到了 v-model 里面了</li>
+                                    <li>把 $listeners 所有的东西，合并到 $attrs 中了</li>
+                                    <li>$children 被砍掉了</li>
+                                </ul>
+
+                                <h3 id="section6-1">6.1 props</h3>
+                                <p>概述：props 是使用频率最高的一种通信方式，常用于：父 ↔ 子</p>
+                                <ul>
+                                    <li>若 父传子：属性值是非函数</li>
+                                    <li>若 子传父：属性值是函数</li>
+                                </ul>
+                                <p>父组件：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="father"&gt;
+    &lt;h3&gt;父组件，&lt;/h3&gt;
+		&lt;h4&gt;我的车：{{ car }}&lt;/h4&gt;
+		&lt;h4&gt;儿子给的玩具：{{ toy }}&lt;/h4&gt;
+		&lt;Child :car="car" :getToy="getToy"/&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Father"&gt;
+	import Child from './Child.vue'
+	import { ref } from "vue";
+	const car = ref('奔驰')
+	const toy = ref()
+	function getToy(value:string){
+		toy.value = value
+	}
+&lt;/script&gt;</code></pre>
+                                <p>子组件：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="child"&gt;
+    &lt;h3&gt;子组件&lt;/h3&gt;
+		&lt;h4&gt;我的玩具：{{ toy }}&lt;/h4&gt;
+		&lt;h4&gt;父给我的车：{{ car }}&lt;/h4&gt;
+		&lt;button @click="getToy(toy)"&gt;玩具给父亲&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Child"&gt;
+	import { ref } from "vue";
+	const toy = ref('奥特曼')
+	
+	defineProps(['car','getToy'])
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section6-2">6.2 自定义事件</h3>
+                                <p>概述：自定义事件常用于：子 => 父</p>
+                                <p>注意区分好：原生事件、自定义事件</p>
+                                <ul>
+                                    <li>原生事件：
+                                        <ul>
+                                            <li>事件名是特定的（click、mosueenter 等等）</li>
+                                            <li>事件对象 $event: 是包含事件相关信息的对象（pageX、pageY、target、keyCode）</li>
+                                        </ul>
+                                    </li>
+                                    <li>自定义事件：
+                                        <ul>
+                                            <li>事件名是任意名称</li>
+                                            <li>事件对象 $event: 是调用 emit 时所提供的数据，可以是任意类型</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <p>示例：</p>
+                                <pre><code class="language-html">&lt;!--在父组件中，给子组件绑定自定义事件：--&gt;
+&lt;Child @send-toy="toy = $event"/&gt;
+
+&lt;!--注意区分原生事件与自定义事件中的$event--&gt;
+&lt;button @click="toy = $event"&gt;测试&lt;/button&gt;</code></pre>
+                                <pre><code class="language-js">//子组件中，触发事件：
+this.$emit('send-toy', 具体数据)</code></pre>
+
+                                <h3 id="section6-3">6.3 mitt</h3>
+                                <p>概述：与消息订阅与发布（pubsub）功能类似，可以实现任意组件间通信</p>
+                                <p>安装 mitt：</p>
+                                <pre><code class="language-shell">npm i mitt</code></pre>
+                                <p>新建文件：src\utils\emitter.ts</p>
+                                <pre><code class="language-javascript">import mitt from "mitt";
+
+const emitter = mitt()
+
+export default emitter</code></pre>
+                                <p>接收数据的组件中：绑定事件、同时在销毁前解绑事件：</p>
+                                <pre><code class="language-typescript">import emitter from "@/utils/emitter";
+import { onUnmounted } from "vue";
+
+emitter.on('send-toy',(value)=>{
+  console.log('send-toy事件被触发',value)
+})
+
+onUnmounted(()=>{
+  emitter.off('send-toy')
+})</code></pre>
+                                <p>提供数据的组件，在合适的时候触发事件：</p>
+                                <pre><code class="language-javascript">import emitter from "@/utils/emitter";
+
+function sendToy(){
+  emitter.emit('send-toy',toy.value)
+}</code></pre>
+
+                                <h3 id="section6-4">6.4 v-model</h3>
+                                <p>概述：实现 父↔子 之间相互通信</p>
+                                <p>前序知识 —— v-model 的本质：</p>
+                                <pre><code class="language-vue">&lt;!-- 使用v-model指令 --&gt;
+&lt;input type="text" v-model="userName"&gt;
+
+&lt;!-- v-model的本质是下面这行代码 --&gt;
+&lt;input 
+  type="text" 
+  :value="userName" 
+  @input="userName =(&lt;HTMLInputElement&gt;$event.target).value"
+&gt;</code></pre>
+                                <p>组件标签上的 v-model 的本质：:moldeValue ＋ update:modelValue 事件：</p>
+                                <pre><code class="language-vue">&lt;!-- 组件标签上使用v-model指令 --&gt;
+&lt;AtguiguInput v-model="userName"/&gt;
+
+&lt;!-- 组件标签上v-model的本质 --&gt;
+&lt;AtguiguInput :modelValue="userName" @update:model-value="userName = $event"/&gt;</code></pre>
+                                <p>AtguiguInput 组件中：</p>
+                                <pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="box"&gt;
+    &lt;input 
+      type="text" 
+      :value="modelValue" 
+      @input="emit('update:model-value',$event.target.value)"
+    &gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="AtguiguInput"&gt;
+  defineProps(['modelValue'])
+  const emit = defineEmits(['update:model-value'])
+&lt;/script&gt;</code></pre>
+                                <p>也可以更换 value，例如改成 abc：</p>
+                                <pre><code class="language-vue">&lt;!-- 也可以更换value，例如改成abc--&gt;
+&lt;AtguiguInput v-model:abc="userName"/&gt;
+
+&lt;!-- 上面代码的本质如下 --&gt;
+&lt;AtguiguInput :abc="userName" @update:abc="userName = $event"/&gt;</code></pre>
+                                <p>如果 value 可以更换，那么就可以在组件标签上多次使用 v-model：</p>
+                                <pre><code class="language-vue">&lt;AtguiguInput v-model:abc="userName" v-model:xyz="password"/&gt;</code></pre>
+
+                                <h3 id="section6-5">6.5 $attrs</h3>
+                                <p>概述：$attrs 用于实现当前组件的父组件，向当前组件的子组件通信（祖→孙）</p>
+                                <p>具体说明：$attrs 是一个对象，包含所有父组件传入的标签属性</p>
+                                <p>注意：$attrs 会自动排除 props 中声明的属性(可以认为声明过的 props 被子组件自己"消费"了)</p>
+                                <p>父组件：</p>
+                                <pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="father"&gt;
+    &lt;h3&gt;父组件&lt;/h3&gt;
+		&lt;Child :a="a" :b="b" :c="c" :d="d" v-bind="{x:100,y:200}" :updateA="updateA"/&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Father"&gt;
+	import Child from './Child.vue'
+	import { ref } from "vue";
+	let a = ref(1)
+	let b = ref(2)
+	let c = ref(3)
+	let d = ref(4)
+
+	function updateA(value){
+		a.value = value
+	}
+&lt;/script&gt;</code></pre>
+                                <p>子组件：</p>
+                                <pre><code class="language-vue">&lt;template&gt;
+	&lt;div class="child"&gt;
+		&lt;h3&gt;子组件&lt;/h3&gt;
+		&lt;GrandChild v-bind="$attrs"/&gt;
+	&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Child"&gt;
+	import GrandChild from './GrandChild.vue'
+&lt;/script&gt;</code></pre>
+                                <p>孙组件：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+	&lt;div class="grand-child"&gt;
+		&lt;h3&gt;孙组件&lt;/h3&gt;
+		&lt;h4&gt;a：{{ a }}&lt;/h4&gt;
+		&lt;h4&gt;b：{{ b }}&lt;/h4&gt;
+		&lt;h4&gt;c：{{ c }}&lt;/h4&gt;
+		&lt;h4&gt;d：{{ d }}&lt;/h4&gt;
+		&lt;h4&gt;x：{{ x }}&lt;/h4&gt;
+		&lt;h4&gt;y：{{ y }}&lt;/h4&gt;
+		&lt;button @click="updateA(666)"&gt;点我更新A&lt;/button&gt;
+	&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="GrandChild"&gt;
+	defineProps(['a','b','c','d','x','y','updateA'])
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section6-6">6.6 $refs、$parent</h3>
+                                <p>概述：</p>
+                                <ul>
+                                    <li>$refs 用于：父→子</li>
+                                    <li>$parent 用于：子→父</li>
+                                </ul>
+                                <p>原理如下：</p>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>属性</th>
+                                            <th>说明</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>$refs</code></td>
+                                            <td>值为对象，包含所有被 ref 属性标识的 DOM 元素或组件实例</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>$parent</code></td>
+                                            <td>值为对象，当前组件的父组件实例对象</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <h3 id="section6-7">6.7 provide、inject</h3>
+                                <p>概述：实现祖孙组件直接通信</p>
+                                <p>具体使用：</p>
+                                <ul>
+                                    <li>在祖先组件中通过 provide 配置向后代组件提供数据</li>
+                                    <li>在后端组件中通过 inject 配置来声明接收数据</li>
+                                </ul>
+                                <p>父组件中，使用 provide 提供数据：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="father"&gt;
+    &lt;h3&gt;父组件&lt;/h3&gt;
+    &lt;h4&gt;资产：{{ money }}&lt;/h4&gt;
+    &lt;h4&gt;汽车：{{ car }}&lt;/h4&gt;
+    &lt;button @click="money += 1"&gt;资产+1&lt;/button&gt;
+    &lt;button @click="car.price += 1"&gt;汽车价格+1&lt;/button&gt;
+    &lt;Child/&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Father"&gt;
+  import Child from './Child.vue'
+  import { ref,reactive,provide } from "vue";
+  let money = ref(100)
+  let car = reactive({
+    brand:'奔驰',
+    price:100
+  })
+  function updateMoney(value:number){
+    money.value += value
+  }
+  provide('moneyContext',{money,updateMoney})
+  provide('car',car)
+&lt;/script&gt;</code></pre>
+                                <p>孙组件中使用 inject 配置项接受数据：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="grand-child"&gt;
+    &lt;h3&gt;我是孙组件&lt;/h3&gt;
+    &lt;h4&gt;资产：{{ money }}&lt;/h4&gt;
+    &lt;h4&gt;汽车：{{ car }}&lt;/h4&gt;
+    &lt;button @click="updateMoney(6)"&gt;点我&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="GrandChild"&gt;
+  import { inject } from 'vue'
+  let {money,updateMoney} = inject('moneyContext')
+  let car = inject('car')
+&lt;/script&gt;</code></pre>
+
+                                <h3 id="section6-8">6.8 pinia</h3>
+                                <p>概述：Pinia 是 Vue 的状态管理库，用于在组件之间共享状态</p>
+                                <p>使用步骤：</p>
+                                <ol>
+                                    <li>定义 store</li>
+                                    <li>在组件中使用 store</li>
+                                </ol>
+
+                                <h3 id="section6-9">6.9 slot</h3>
+                                <h4>1. 默认插槽</h4>
+                                <p>父组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;Category title="今日热门游戏"&gt;
+  &lt;ul&gt;
+    &lt;li v-for="g in games" :key="g.id"&gt;{{ g.name }}&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/Category&gt;</code></pre>
+                                <p>子组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="item"&gt;
+    &lt;h3&gt;{{ title }}&lt;/h3&gt;
+    &lt;!-- 默认插槽 --&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+                                <h4>2. 具名插槽</h4>
+                                <p>父组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;Category title="今日热门游戏"&gt;
+  &lt;template v-slot:s1&gt;
+    &lt;ul&gt;
+      &lt;li v-for="g in games" :key="g.id"&gt;{{ g.name }}&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/template&gt;
+  &lt;template #s2&gt;
+    &lt;a href=""&gt;更多&lt;/a&gt;
+  &lt;/template&gt;
+&lt;/Category&gt;</code></pre>
+                                <p>子组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="item"&gt;
+    &lt;h3&gt;{{ title }}&lt;/h3&gt;
+    &lt;slot name="s1"&gt;&lt;/slot&gt;
+    &lt;slot name="s2"&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+                                <h4>3. 作用域插槽</h4>
+                                <p>理解：数据在组件的自身，但根据数据生成的结构需要组件的使用者来决定</p>
+                                <p>父组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;Game v-slot="params"&gt;
+  &lt;ul&gt;
+    &lt;li v-for="g in params.games" :key="g.id"&gt;{{ g.name }}&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/Game&gt;</code></pre>
+                                <p>子组件中：</p>
+                                <pre v-pre><code class="language-vue">&lt;template&gt;
+  &lt;div class="category"&gt;
+    &lt;h2&gt;今日游戏榜单&lt;/h2&gt;
+    &lt;slot :games="games" a="哈哈"&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts" name="Category"&gt;
+  import {reactive} from 'vue'
+  let games = reactive([
+    {id:'asgdytsa01',name:'英雄联盟'},
+    {id:'asgdytsa02',name:'王者荣耀'},
+    {id:'asgdytsa03',name:'红色警戒'},
+    {id:'asgdytsa04',name:'斗罗大陆'}
+  ])
+&lt;/script&gt;</code></pre>
+
+                                <h2 id="section7">7. 其它 API</h2>
+
+                                <h3 id="section7-1">7.1 shallowRef 与 shallowReactive</h3>
+                                <h4>shallowRef</h4>
+                                <ul>
+                                    <li>作用：创建一个响应式数据，但只对顶层属性进行响应式处理</li>
+                                    <li>用法：<code>let myVar = shallowRef(initialValue);</code></li>
+                                    <li>特点：只跟踪引用值的变化，不关心值内部的属性变化</li>
+                                </ul>
+
+                                <h4>shallowReactive</h4>
+                                <ul>
+                                    <li>作用：创建一个浅层响应式对象，只会使对象的最顶层属性变成响应式的，对象内部的嵌套属性则不会变成响应式的</li>
+                                    <li>用法：<code>const myObj = shallowReactive({ ... });</code></li>
+                                    <li>特点：对象的顶层属性是响应式的，但嵌套对象的属性不是</li>
+                                </ul>
+
+                                <p><strong>总结：</strong></p>
+                                <p>通过使用 shallowRef() 和 shallowReactive() 来绕开深度响应。浅层式 API 创建的状态只在其顶层是响应式的，对所有深层的对象不会做任何处理，避免了对每一个内部属性做响应式所带来的性能成本，这使得属性的访问变得更快，可提升性能。</p>
+
+                                <h3 id="section7-2">7.2 readonly 与 shallowReadonly</h3>
+                                <h4>readonly</h4>
+                                <ul>
+                                    <li>作用：用于创建一个对象的深只读副本</li>
+                                    <li>用法：<code>const original = reactive({ ... }); const readOnlyCopy = readonly(original);</code></li>
+                                    <li>特点：
+                                        <ul>
+                                            <li>对象的所有嵌套属性都将变为只读</li>
+                                            <li>任何尝试修改这个对象的操作都会被阻止（在开发模式下，还会在控制台中发出警告）</li>
+                                        </ul>
+                                    </li>
+                                    <li>应用场景：
+                                        <ul>
+                                            <li>创建不可变的状态快照</li>
+                                            <li>保护全局状态或配置不被修改</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <h4>shallowReadonly</h4>
+                                <ul>
+                                    <li>作用：与 readonly 类似，但只作用于对象的顶层属性</li>
+                                    <li>用法：<code>const original = reactive({ ... }); const shallowReadOnlyCopy = shallowReadonly(original);</code></li>
+                                    <li>特点：
+                                        <ul>
+                                            <li>只将对象的顶层属性设置为只读，对象内部的嵌套属性仍然是可变的</li>
+                                            <li>适用于只需保护对象顶层属性的场景</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <h3 id="section7-3">7.3 toRaw 与 markRaw</h3>
+                                <h4>toRaw</h4>
+                                <ul>
+                                    <li>作用：用于获取一个响应式对象的原始对象，toRaw 返回的对象不再是响应式的，不会触发视图更新</li>
+                                    <li>何时使用？—— 在需要将响应式对象传递给非 Vue 的库或外部系统时，使用 toRaw 可以确保它们收到的是普通对象</li>
+                                </ul>
+                                <pre><code class="language-js">import { reactive,toRaw,markRaw,isReactive } from "vue";
+
+let person = reactive({name:'tony',age:18})
+let rawPerson = toRaw(person)</code></pre>
+
+                                <h4>markRaw</h4>
+                                <ul>
+                                    <li>作用：标记一个对象，使其永远不会变成响应式的</li>
+                                    <li>例如使用 mockjs 时，为了防止误把 mockjs 变为响应式对象，可以使用 markRaw 去标记 mockjs</li>
+                                </ul>
+                                <pre><code class="language-js">let citys = markRaw([
+  {id:'asdda01',name:'北京'},
+  {id:'asdda02',name:'上海'},
+  {id:'asdda03',name:'天津'},
+  {id:'asdda04',name:'重庆'}
+])
+let citys2 = reactive(citys)</code></pre>
+
+                                <h3 id="section7-4">7.4 customRef</h3>
+                                <p>作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行逻辑控制</p>
+                                <p>实现防抖效果（useSumRef.ts）：</p>
+                                <pre><code class="language-typescript">import {customRef } from "vue";
+
+export default function(initValue:string,delay:number){
+  let msg = customRef((track,trigger)=>{
+    let timer:number
+    return {
+      get(){
+        track() 
+        return initValue
+      },
+      set(value){
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+          initValue = value
+          trigger() 
+        }, delay);
+      }
+    }
+  }) 
+  return {msg}
+}</code></pre>
+
+                                <h2 id="section8">8. Vue3新组件</h2>
+
+                                <h3 id="section8-1">8.1 Teleport</h3>
+                                <p>什么是 Teleport？—— Teleport 是一种能够将我们的组件 html 结构移动到指定位置的技术。</p>
+                                <pre><code class="language-html">&lt;teleport to='body' &gt;
+    &lt;div class="modal" v-show="isShow"&gt;
+      &lt;h2&gt;我是一个弹窗&lt;/h2&gt;
+      &lt;p&gt;我是弹窗中的一些内容&lt;/p&gt;
+      &lt;button @click="isShow = false"&gt;关闭弹窗&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/teleport&gt;</code></pre>
+
+                                <h3 id="section8-2">8.2 Suspense</h3>
+                                <p>等待异步组件时渲染一些额外内容，让应用有更好的用户体验</p>
+                                <p>使用步骤：</p>
+                                <ol>
+                                    <li>异步引入组件</li>
+                                    <li>使用 Suspense 包裹组件，并配置好 default 与 fallback</li>
+                                </ol>
+                                <pre><code class="language-tsx">import { defineAsyncComponent,Suspense } from "vue";
+const Child = defineAsyncComponent(()=>import('./Child.vue'))</code></pre>
+                                <pre><code class="language-vue">&lt;template&gt;
+    &lt;div class="app"&gt;
+        &lt;h3&gt;我是App组件&lt;/h3&gt;
+        &lt;Suspense&gt;
+          &lt;template v-slot:default&gt;
+            &lt;Child/&gt;
+          &lt;/template&gt;
+          &lt;template v-slot:fallback&gt;
+            &lt;h3&gt;加载中.......&lt;/h3&gt;
+          &lt;/template&gt;
+        &lt;/Suspense&gt;
+    &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+                                <h3 id="section8-3">8.3 全局API转移到应用对象</h3>
+                                <ul>
+                                    <li>app.component</li>
+                                    <li>app.config</li>
+                                    <li>app.directive</li>
+                                    <li>app.mount</li>
+                                    <li>app.unmount</li>
+                                    <li>app.use</li>
+                                </ul>
+
+                                <h3 id="section8-4">8.4 其他</h3>
+                                <ul>
+                                    <li>过渡类名 v-enter 修改为 v-enter-from、过渡类名 v-leave 修改为 v-leave-from</li>
+                                    <li>keyCode 作为 v-on 修饰符的支持</li>
+                                    <li>v-model 指令在组件上的使用已经被重新设计，替换掉了 v-bind.sync</li>
+                                    <li>v-if 和 v-for 在同一个元素身上使用时的优先级发生了变化</li>
+                                    <li>移除了 $on、$off 和 $once 实例方法</li>
+                                    <li>移除了过滤器 filter</li>
+                                    <li>移除了 $children 实例 property</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <p>&copy; 2025 Cyinc的个人博客. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <div id="volumeControl" class="volume-control-widget">
+            <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+            <div id="volumePanel" class="volume-panel">
+                <div class="volume-panel-content">
+                    <span class="volume-label">音量</span>
+                    <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" :value="volume" @input="updateVolume">
+                    <span id="globalVolumeValue" class="volume-value">{{ volume }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed, onMounted, watch } = Vue
+
+        createApp({
+            setup() {
+                const articleTitle = ref('Vue3学习笔记')
+                const publishDate = ref('2025-02-27')
+                const author = ref('Cyinc')
+                const category = ref('技术')
+                const theme = ref(localStorage.getItem('theme') || 'light')
+                const sidebarVisible = ref(true)
+                const tocVisible = ref(true)
+                const volume = ref(parseInt(localStorage.getItem('globalVolume') || '80'))
+
+                const sections = reactive([
+                    { id: 'section1', title: '1. Vue3简介', children: [
+                        { id: 'section1-1', title: '1.1 性能的提升' },
+                        { id: 'section1-2', title: '1.2 源码的升级' },
+                        { id: 'section1-3', title: '1.3 拥抱TypeScript' },
+                        { id: 'section1-4', title: '1.4 新的特性' }
+                    ]},
+                    { id: 'section2', title: '2. 创建Vue3工程', children: [
+                        { id: 'section2-1', title: '2.1 基于 vue-cli 创建' },
+                        { id: 'section2-2', title: '2.2 基于 vite 创建' },
+                        { id: 'section2-3', title: '2.3 一个简单的效果' }
+                    ]},
+                    { id: 'section3', title: '3. Vue3核心语法', children: [
+                        { id: 'section3-1', title: '3.1 OptionsAPI 与 CompositionAPI' },
+                        { id: 'section3-2', title: '3.2 setup' },
+                        { id: 'section3-3', title: '3.3 ref 基本类型' },
+                        { id: 'section3-4', title: '3.4 reactive 对象类型' },
+                        { id: 'section3-5', title: '3.5 ref 对象类型' },
+                        { id: 'section3-6', title: '3.6 ref 对比 reactive' },
+                        { id: 'section3-7', title: '3.7 toRefs 与 toRef' },
+                        { id: 'section3-8', title: '3.8 computed' },
+                        { id: 'section3-9', title: '3.9 watch' }
+                    ]},
+                    { id: 'section4', title: '4. 路由', children: [
+                        { id: 'section4-1', title: '4.1 对路由的理解' },
+                        { id: 'section4-2', title: '4.2 基本切换效果' },
+                        { id: 'section4-3', title: '4.3 两个注意点' },
+                        { id: 'section4-4', title: '4.4 路由器工作模式' },
+                        { id: 'section4-5', title: '4.5 to的两种写法' },
+                        { id: 'section4-6', title: '4.6 命名路由' },
+                        { id: 'section4-7', title: '4.7 嵌套路由' },
+                        { id: 'section4-8', title: '4.8 路由传参' },
+                        { id: 'section4-9', title: '4.9 路由的props配置' },
+                        { id: 'section4-10', title: '4.10 replace属性' },
+                        { id: 'section4-11', title: '4.11 编程式导航' },
+                        { id: 'section4-12', title: '4.12 重定向' }
+                    ]},
+                    { id: 'section5', title: '5. Pinia', children: [
+                        { id: 'section5-1', title: '5.1 准备一个效果' },
+                        { id: 'section5-2', title: '5.2 搭建pinia环境' },
+                        { id: 'section5-3', title: '5.3 存储+读取数据' },
+                        { id: 'section5-4', title: '5.4 修改数据（三种方式）' },
+                        { id: 'section5-5', title: '5.5 storeToRefs' },
+                        { id: 'section5-6', title: '5.6 getters' },
+                        { id: 'section5-7', title: '5.7 $subscribe' },
+                        { id: 'section5-8', title: '5.8 store组合式写法' }
+                    ]},
+                    { id: 'section6', title: '6. 组件通信', children: [
+                        { id: 'section6-1', title: '6.1 props' },
+                        { id: 'section6-2', title: '6.2 自定义事件' },
+                        { id: 'section6-3', title: '6.3 mitt' },
+                        { id: 'section6-4', title: '6.4 v-model' },
+                        { id: 'section6-5', title: '6.5 $attrs' },
+                        { id: 'section6-6', title: '6.6 $refs、$parent' },
+                        { id: 'section6-7', title: '6.7 provide、inject' },
+                        { id: 'section6-8', title: '6.8 pinia' },
+                        { id: 'section6-9', title: '6.9 slot' }
+                    ]},
+                    { id: 'section7', title: '7. 其它 API', children: [
+                        { id: 'section7-1', title: '7.1 shallowRef 与 shallowReactive' },
+                        { id: 'section7-2', title: '7.2 readonly 与 shallowReadonly' },
+                        { id: 'section7-3', title: '7.3 toRaw 与 markRaw' },
+                        { id: 'section7-4', title: '7.4 customRef' }
+                    ]},
+                    { id: 'section8', title: '8. Vue3新组件', children: [
+                        { id: 'section8-1', title: '8.1 Teleport' },
+                        { id: 'section8-2', title: '8.2 Suspense' },
+                        { id: 'section8-3', title: '8.3 全局API转移到应用对象' },
+                        { id: 'section8-4', title: '8.4 其他' }
+                    ]}
+                ])
+
+                const toggleTheme = () => {
+                    theme.value = theme.value === 'light' ? 'dark' : 'light'
+                    document.documentElement.setAttribute('data-theme', theme.value)
+                    localStorage.setItem('theme', theme.value)
+                }
+
+                const toggleSidebar = () => {
+                    sidebarVisible.value = !sidebarVisible.value
+                    const header = document.querySelector('header')
+                    if (header) {
+                        header.classList.toggle('hidden')
+                    }
+                }
+
+                const toggleToc = () => {
+                    tocVisible.value = !tocVisible.value
+                }
+
+                const updateVolume = (e) => {
+                    volume.value = e.target.value
+                    localStorage.setItem('globalVolume', volume.value)
+                    if (window.globalMusicPlayer) {
+                        window.globalMusicPlayer.setVolume(volume.value / 100)
+                    }
+                }
+
+                onMounted(() => {
+                    document.documentElement.setAttribute('data-theme', theme.value)
+                    
+                    const codeBlocks = document.querySelectorAll('pre code')
+                    codeBlocks.forEach(codeBlock => {
+                        const preElement = codeBlock.parentElement
+                        const copyBtn = document.createElement('button')
+                        copyBtn.className = 'copy-btn'
+                        copyBtn.textContent = '复制'
+                        copyBtn.addEventListener('click', function() {
+                            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                                copyBtn.textContent = '已复制'
+                                copyBtn.classList.add('copied')
+                                setTimeout(() => {
+                                    copyBtn.textContent = '复制'
+                                    copyBtn.classList.remove('copied')
+                                }, 2000)
+                            })
+                        })
+                        preElement.appendChild(copyBtn)
+                    })
+                })
+
+                return {
+                    articleTitle,
+                    publishDate,
+                    author,
+                    category,
+                    theme,
+                    sidebarVisible,
+                    tocVisible,
+                    volume,
+                    sections,
+                    toggleTheme,
+                    toggleSidebar,
+                    toggleToc,
+                    updateVolume
+                }
+            }
+        }).mount('#app')
+    </script>
+    <script src="../js/static-blog.js"></script>
+</body>
+</html>

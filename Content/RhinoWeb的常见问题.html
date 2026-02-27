@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RhinoWeb的常见问题 - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        /* 悬浮目录样式 */
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .toc-content {
+            transition: all 0.3s ease;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 1rem;
+            margin: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.2rem 0;
+        }
+        
+        .toc a:hover {
+            color: #007bff;
+        }
+        
+        .toc-level-2 {
+            padding-left: 1rem;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        /* 代码块样式优化 */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        /* 评论区域样式 */
+        .comments {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        
+        .comment-form h4 {
+            margin-bottom: 1rem;
+            color: #343a40;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            padding: 1rem;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .comment-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .comment-content {
+            color: #212529;
+            line-height: 1.6;
+        }
+        
+        /* 暗模式评论样式 */
+        [data-theme="dark"] .comments {
+            background: rgba(45, 55, 72, 0.8);
+        }
+        
+        [data-theme="dark"] .comment-form h4 {
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #dee2e6;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #475569;
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #e9ecef;
+        }
+        
+        [data-theme="dark"] .comment-date {
+            color: #94a3b8;
+        }
+        
+        [data-theme="dark"] .comment-content {
+            color: #cbd5e1;
+        }
+        
+        /* 暗模式样式 */
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] pre {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: #d4d4d4;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4;
+        }
+        
+        [data-theme="dark"] blockquote {
+            background-color: rgba(100, 181, 246, 0.1) !important;
+            border-left: 4px solid #64b5f6 !important;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote p {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .toc-sidebar {
+                width: 200px;
+                right: 40px;
+            }
+            
+            .toc-toggle-btn {
+                right: 10px;
+            }
+        }
+    </style>
+    <script src="../js/static-blog.js"></script>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <!-- 主内容 -->
+                <div id="mainContent">
+                    <!-- 悬浮目录 -->
+                    <div class="toc-sidebar" id="tocSidebar">
+                        <div class="toc-content">
+                            <div class="toc">
+                                <h3>目录</h3>
+                                <ul>
+                                    <li><a href="#section1">1. 常见"看不见模型"的补充检查</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+
+                    <div class="article-container">
+                        <button class="btn btn-outline" onclick="location.href='../index.html'" style="margin-bottom: 1rem;">&larr; 返回首页</button>
+                        <h1 class="article-title">RhinoWeb的常见问题</h1>
+                        <div class="post-meta">
+                            <span class="post-date">2025-12-21</span>
+                            <span class="post-author">Cyinc</span>
+                            <span class="post-category">小知识</span>
+                        </div>
+                        <div class="article-content">
+                            <h2 id="section1">常见"看不见模型"的补充检查</h2>
+                            <p>如果修改完代码后，画面还是黑的或者没东西，请检查以下三点：</p>
+
+                            <h3>1. 模型比例 (Scale)</h3>
+                            <p>Rhino 导出的模型如果单位是毫米，在 Three.js 里会变得巨大无比（你会发现自己在模型"肚子"里，四周都是黑的）。 尝试缩小模型：</p>
+                            <pre><code>myModel.scale.set(0.01, 0.01, 0.01);</code></pre>
+                            <p>在 <code>scene.add(myModel);</code> 前加上上面的代码。</p>
+                            <p><strong>有可能是模型太小了</strong>，在 <code>scene.add(myModel);</code> 前加上：</p>
+                            <pre><code>myModel.scale.set(50, 50, 50);</code></pre>
+
+                            <h3>2. 相机位置</h3>
+                            <p>你的相机在 <code>z = 5</code>。如果你的模型中心点不在 (0,0,0) 或者尺寸很大，相机可能拍不到它。 尝试后退相机：</p>
+                            <pre><code>camera.position.z = 5;</code></pre>
+                            <p>改成 50 或 100 看看。</p>
+                            <p><strong>有可能是模型太小了</strong>，将 <code>camera.position.z = 5;</code> 改成 1 或 0.1 看看。</p>
+
+                            <h3>3. 坐标轴转向</h3>
+                            <p>Rhino 是 Z 轴向上。加载后模型可能是躺着的。 尝试旋转：</p>
+                            <pre><code>myModel.rotation.x = -Math.PI / 2;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论区域 -->
+            <div class="comments">
+                <!-- 评论表单 -->
+                <div class="comment-form">
+                    <h4>添加评论</h4>
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="name">用户名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容</label>
+                            <textarea id="comment" name="comment" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交评论</button>
+                    </form>
+                </div>
+                
+                <!-- 评论列表 -->
+                <div class="comment-list" id="commentList">
+                    <!-- 评论将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // 从 localStorage 读取主题
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+        
+        // 目录切换功能
+        const tocToggleBtn = document.getElementById('tocToggleBtn');
+        const tocSidebar = document.getElementById('tocSidebar');
+        
+        tocToggleBtn.addEventListener('click', () => {
+            tocSidebar.classList.toggle('collapsed');
+            tocToggleBtn.textContent = tocSidebar.classList.contains('collapsed') ? '☰' : '✕';
+        });
+        
+        // 代码块复制功能
+        const codeBlocks = document.querySelectorAll('pre code');
+        console.log('找到代码块数量:', codeBlocks.length);
+        
+        codeBlocks.forEach(function(codeBlock) {
+            const preElement = codeBlock.parentElement;
+            
+            // 创建复制按钮
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = '复制';
+            copyBtn.title = '复制代码';
+            
+            // 添加点击事件
+            copyBtn.addEventListener('click', function() {
+                const code = codeBlock.textContent;
+                
+                // 复制到剪贴板
+                navigator.clipboard.writeText(code).then(function() {
+                    copyBtn.textContent = '已复制';
+                    copyBtn.classList.add('copied');
+                    
+                    // 2秒后恢复原状
+                    setTimeout(function() {
+                        copyBtn.textContent = '复制';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('复制失败:', err);
+                    copyBtn.textContent = '失败';
+                    
+                    setTimeout(function() {
+                        copyBtn.textContent = '复制';
+                    }, 2000);
+                });
+            });
+            
+            // 将按钮添加到代码块
+            preElement.appendChild(copyBtn);
+        });
+        
+        // 评论功能
+        const commentForm = document.getElementById('commentForm');
+        const commentList = document.getElementById('commentList');
+        
+        // 加载评论函数
+        function loadComments() {
+            // 获取评论
+            let comments = JSON.parse(localStorage.getItem('rhinoweb-comments')) || [];
+            
+            // 清空评论列表
+            commentList.innerHTML = '';
+            
+            // 如果没有评论，显示提示
+            if (comments.length === 0) {
+                commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                return;
+            }
+            
+            // 添加评论到列表
+            comments.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment';
+                commentElement.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.name}</span>
+                        <span class="comment-date">${comment.date}</span>
+                    </div>
+                    <div class="comment-content">${comment.comment}</div>
+                `;
+                commentList.appendChild(commentElement);
+            });
+        }
+        
+        if (commentForm && commentList) {
+            // 加载评论
+            loadComments();
+            
+            // 提交评论
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const comment = document.getElementById('comment').value;
+                const date = new Date().toLocaleString();
+                
+                // 创建评论对象
+                const newComment = {
+                    id: Date.now(),
+                    name: name,
+                    comment: comment,
+                    date: date
+                };
+                
+                // 获取现有评论
+                let comments = JSON.parse(localStorage.getItem('rhinoweb-comments')) || [];
+                
+                // 添加新评论
+                comments.push(newComment);
+                
+                // 保存评论到localStorage
+                localStorage.setItem('rhinoweb-comments', JSON.stringify(comments));
+                
+                // 清空表单
+                commentForm.reset();
+                
+                // 重新加载评论
+                loadComments();
+        });
+    }
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

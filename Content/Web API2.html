@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web API笔记（二） - Cyinc的个人博客</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/Content.css">
+    <script src="../js/global-music-player.js"></script>
+    <style>
+        .toc-sidebar {
+            position: fixed;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .toc-toggle-btn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .toc-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .toc-sidebar .toc {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .toc-sidebar .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        .toc-sidebar .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .toc-sidebar .toc li {
+            margin-bottom: 0.4rem;
+        }
+        
+        .toc-sidebar .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--primary-lighter);
+            text-decoration: none;
+        }
+        
+        .toc-sidebar .toc-level-2 {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+        
+        .toc-sidebar .toc-level-3 {
+            padding-left: 2.4rem;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .toc-level-2 {
+            padding-left: 1.5rem;
+        }
+        
+        .toc-level-3 {
+            padding-left: 3rem;
+        }
+        
+        .related-posts {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .related-posts h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-darker);
+        }
+        
+        .related-posts ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .related-posts li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .related-posts a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .related-posts a:hover {
+            color: var(--primary-darker);
+            text-decoration: underline;
+        }
+        
+        .comments-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        .comment-form {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .comment-list {
+            margin-top: 2rem;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .comment-author {
+            font-weight: 500;
+            color: var(--primary-darker);
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+        }
+        
+        pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* 代码块复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(46, 204, 113, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+        
+        [data-theme="dark"] .copy-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+        
+        [data-theme="dark"] .toc-sidebar {
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc h3 {
+            color: #ffffff;
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc a:hover {
+            color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        [data-theme="dark"] .toc {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .toc h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc a {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .toc-level-2 a {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] .toc a:hover {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .related-posts {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .related-posts h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .related-posts li {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .comments-section {
+            border-top-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comments-section h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment-form {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea {
+            background: #000000;
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .comment {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .comment-author {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] pre {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+        }
+        
+        [data-theme="dark"] code {
+            color: #d4d4d4 !important;
+        }
+        
+        [data-theme="dark"] h1.article-title,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h5 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] p {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] ul,
+        [data-theme="dark"] ol {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .exercise {
+            background: var(--card-bg);
+            border-left-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .exercise-answer {
+            background: var(--hover-bg);
+            border-left-color: var(--primary-dark);
+        }
+        
+        .article-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        
+        [data-theme="dark"] .article-container {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] h1 {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] h2 {
+            color: #f0f0f0 !important;
+        }
+        
+        [data-theme="dark"] h3 {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(100, 181, 246, 0.3) !important;
+            background: linear-gradient(90deg, rgba(100,181,246,0.1), transparent) !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            display: inline-block !important;
+        }
+        
+        [data-theme="dark"] .article-content h4 {
+            color: #64b5f6 !important;
+            font-weight: 600 !important;
+        }
+        
+        [data-theme="dark"] h5 {
+            color: #c0c0c0 !important;
+        }
+        
+        [data-theme="dark"] h6 {
+            color: #b0b0b0 !important;
+        }
+        
+        .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .article-container .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .toc-sidebar .toc > ul > li > a {
+            font-weight: 600;
+            color: var(--primary-darker);
+            font-size: 1.05rem;
+        }
+        
+        [data-theme="dark"] .toc-sidebar .toc > ul > li > a {
+            color: #e0e0e0;
+        }
+        
+        h1.article-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-darker);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary-darker);
+            border-bottom: 2px solid var(--primary-lighter);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        .exercise {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .exercise-answer {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-dark);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        [data-theme="dark"] .article-content blockquote {
+            background: rgba(100, 181, 246, 0.1) !important;
+            border-left-color: #64b5f6 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote ul,
+        [data-theme="dark"] .article-content blockquote ol {
+            color: #e0e0e0 !important;
+        }
+        
+        [data-theme="dark"] .article-content blockquote li {
+            color: #d0d0d0 !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Cyinc<span>的博客</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="../index.html" data-icon="🏠">首页</a></li>
+                        <li><a href="../about.html" data-icon="👤">关于</a></li>
+                        <li><a href="../archive.html" data-icon="📚">归档</a></li>
+                        <li><a href="../music.html" data-icon="🎵">音乐室</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="header-controls">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="隐藏/显示导航栏">◀</button>
+        <button id="theme-toggle" title="切换主题">🌙</button>
+    </div>
+
+    <main>
+        <div class="container">
+            <div class="main-wrapper">
+                <div id="mainContent">
+        <div class="toc-sidebar" id="tocSidebar">
+            <div class="toc-content">
+                <div class="toc">
+                    <h3>目录</h3>
+                    <ul>
+                        <li><a href="#section2">2. Web API 事件</a>
+                            <ul class="toc-level-2">
+                                <li><a href="#section2-1">2.1 事件监听（绑定）</a></li>
+                                <li><a href="#section2-2">2.2 随机点名案例</a></li>
+                                <li><a href="#section2-3">2.3 焦点事件</a></li>
+                                <li><a href="#section2-4">2.4 键盘事件</a></li>
+                                <li><a href="#section2-5">2.5 事件对象</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <button class="toc-toggle-btn" id="tocToggleBtn" title="切换目录">☰</button>
+
+        <div class="article-container">
+            <button class="btn btn-outline" onclick="location.href='Web API.html'" style="margin-bottom: 1rem;">&larr; 上一篇</button>
+            <button class="btn btn-outline" onclick="location.href='Web API3.html'" style="margin-bottom: 1rem; margin-left: 1rem;">下一篇 &rarr;</button>
+            <h1 class="article-title">Web API笔记（二）</h1>
+            <div class="post-meta">
+                <span class="post-date">2025-12-13</span>
+                <span class="post-author">Cyinc</span>
+                <span class="post-category">技术</span>
+            </div>
+            <div class="article-content">
+                <h2 id="section2">2 Web API 事件</h2>
+
+                <h3 id="section2-1">2.1 事件监听（绑定）</h3>
+
+                <h4>事件</h4>
+                <p>事件是编程语言中的术语，它是用来描述程序的行为或状态的，<strong>一旦行为或状态发生改变，便立即调用一个函数。</strong></p>
+                <p>例如：用户使用【鼠标点击】网页中的一个按钮、用户使用【鼠标拖拽】网页中的一张图片</p>
+
+                <h4>事件监听</h4>
+                <p>结合 DOM 使用事件时，需要为 DOM 对象添加事件监听，等待事件发生（触发）时，便立即调用一个函数。</p>
+                <p><code>addEventListener</code> 是 DOM 对象专门用来添加事件监听的方法，它的两个参数分别为【事件类型】和【事件回调】。</p>
+
+                <p>语法：</p>
+                <pre><code class="html">&lt;body&gt;
+  &lt;button&gt;按钮&lt;/button&gt;
+  &lt;script&gt;
+    const button = document.queryselector('button')
+    button.addEventListener('click',function() {
+      alert('按钮被点击了')
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h4>网页中广告的写法</h4>
+                <pre><code class="html">&lt;style&gt;
+  .box {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(248, 194, 194);
+    position: relative;
+    text-align: center;
+    line-height: 100px;
+    margin: 100px auto;
+  }
+  .box2 {
+    width: 20px;
+    height: 20px;
+    background-color: #a59898;
+    top: 0px;
+    right: 0px;
+    line-height: 20px;
+    position: absolute;
+    cursor: pointer;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;div class="box"&gt;
+    广告
+    &lt;div class="box2"&gt;X&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const close = document.querySelector('.box2')
+    close.addEventListener('click',function(){
+      document.querySelector(".box").style.display = "none" 
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h3 id="section2-2">2.2 随机点名案例</h3>
+
+                <h4>练习：</h4>
+                <p>随机点名案例效果展示</p>
+
+                <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  .box {
+    width: 300px;
+    height: 300px;
+    background-color: #ffffff;
+    margin: 80px auto;
+    position: relative;
+    border: #c3c3c3 solid 1px;
+  }
+  .box span {
+    display: block;
+    text-align: center;
+  }
+  .box img {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    width: 40%;
+  }
+  .ks {
+    position: absolute;
+    top: 80%;
+    left: 20%;
+    background-color: #c8c8c8;
+    border: #545050 solid 0.5px;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .js { 
+    position: absolute;
+    top: 80%;
+    right: 20%;
+    padding: 5px 15px;
+    background-color: #c8c8c8;
+    border: #545050 solid 0.5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;div class="box"&gt;
+    &lt;span&gt;随机图片&lt;/span&gt;
+    &lt;img src="img/1.jfif" alt=""&gt;
+    &lt;div class="ks"&gt;开始&lt;/div&gt;
+    &lt;div class="js"&gt;结束&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const Data =  [
+      { url: "img/1.jfif"},
+      { url: "img/2.jfif"},
+      { url: "img/3.jfif"},
+      { url: "img/4.jfif"},
+      { url: "img/5.jfif"},
+      { url: "img/6.jfif"},
+      { url: "img/7.jfif"},
+      { url: "img/8.jfif"}
+    ]
+    const ks = document.querySelector('.ks')
+    const js = document.querySelector('.js')
+    const img = document.querySelector('div img')
+    let time = 0
+    let ran = 0
+    ks.addEventListener("click",function() {
+      
+      time = setInterval(function() {
+        ran = parseInt(Math.random() * Data.length)
+        img.src = Data[ran].url
+      }, 100)
+
+      if (Data.length === 1) {
+        ks.disabled = js.disabled = true
+      }
+      
+    })
+    js.addEventListener("click",function() {
+        clearInterval(time)
+        Data.splice(ran, 1)
+        console.log(ran)
+        console.log(Data)
+      })
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <p>完成事件监听分成3个步骤：</p>
+                <ol>
+                    <li>获取 DOM 元素</li>
+                    <li>通过 <code>addEventListener</code> 方法为 DOM 节点添加事件监听</li>
+                    <li>等待事件触发，如用户点击了某个按钮时便会触发 <code>click</code> 事件类型</li>
+                    <li>事件触发后，相对应的回调函数会被执行</li>
+                </ol>
+
+                <p>大白话描述：所谓的事件无非就是找个机会（事件触发）调用一个函数（回调函数）。</p>
+
+                <h4>事件类型</h4>
+                <p><code>click</code> 译成中文是【点击】的意思，它的含义是监听（等着）用户鼠标的单击操作，除了【单击】还有【双击】<code>dblclick</code></p>
+
+                <pre><code class="javascript">&lt;script&gt;
+  // 双击事件类型
+  btn.addEventListener('dblclick', function () {
+    console.log('等待事件被触发...');
+    // 改变 p 标签的文字颜色
+    const text = document.querySelector('.text')
+    text.style.color = 'red'
+  })
+
+  // 只要用户双击击了按钮，事件便触发了！！！
+&lt;/script&gt;</code></pre>
+
+                <p>结论：【事件类型】决定了事件被触发的方式，如 <code>click</code> 代表鼠标单击，<code>dblclick</code> 代表鼠标双击。</p>
+
+                <h4>鼠标经过，鼠标离开 事件</h4>
+                <p>语法如下：</p>
+
+                <pre><code class="html">&lt;style&gt;
+  .box {
+    width: 200px;
+    height: 200px;
+    background-color: pink;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;div class="box"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    const box = document.querySelector('.box');
+    box.addEventListener('mouseleave',function() {
+      console.log('鼠标离开了盒子')
+    })
+    box.addEventListener('mouseenter',function() {
+      console.log('鼠标进入了盒子')
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h4>案例 轮播图点击切换</h4>
+                <p>需求:当点击左右的按钮，可以切换轮播图</p>
+
+                <p>分析:</p>
+                <ol>
+                    <li>右侧按钮点击，变量++，如果大于等于8，则复原0左侧按钮点击，变量--，如果小于0，则复原最后一张</li>
+                    <li>鼠标经过暂停定时器</li>
+                    <li>鼠标离开开启定时器</li>
+                </ol>
+
+                <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  /* 设置所有元素的盒模型为border-box，使元素的宽度和高度包括内边距和边框 */
+  * {
+    box-sizing: border-box; 
+  }
+  
+  /* 定义滑块容器的样式，包括宽度、高度和溢出处理 */
+  .slider {
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+  }
+
+  /* 定义滑块图片的样式，使其适应容器且保持宽高比 */
+  .slider-wrapper img{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 定义滑块底部区域的样式，包括高度、背景颜色、内边距和相对定位 */
+  .slider-footer {
+    height: 80px ;
+    background-color: #c56464;
+    padding: 12px 12px 0px 12px;
+    position: relative;
+  }
+
+  /* 定义控制按钮区域的样式，使其绝对定位在右上角 */
+  .slider-footer .toggle {
+    position: absolute;
+    right: 0;
+    top: 12px;
+    display: flex;
+  }
+
+  /* 定义控制按钮的样式，包括大小、外观、背景颜色、文字颜色、圆角和鼠标样式 */
+  .slider-footer .toggle button {
+    margin-right: 12px;
+    width: 28px;
+    height: 28px;
+    appearance: none;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /* 定义控制按钮在鼠标悬停时的背景颜色变化 */
+  .slider-footer .toggle button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* 定义滑块底部文本的样式，包括颜色、字体大小和底部外边距 */
+  .slider-footer p {
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  /* 定义指示器列表的样式，移除默认样式并使其水平排列 */
+  .slider-indicator {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+  }
+
+  /* 定义指示器列表项的样式，包括大小、间距、形状、背景颜色、透明度和鼠标样式 */
+  .slider-indicator li {
+    width: 8px;
+    height: 8px;
+    margin: 4px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);  
+    opacity: 0.5; 
+    cursor: pointer;
+  }
+
+  /* 定义指示器列表项在激活状态时的样式变化，包括大小、透明度和背景颜色 */
+  .slider-indicator li.active {
+    width: 12px;
+    height: 12px;
+    opacity: 1; 
+    background: #e0e0e0;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;!-- 滑块整体容器 --&gt;
+  &lt;div class="slider"&gt;
+    &lt;!-- 滑块图片展示区域 --&gt;
+    &lt;div class="slider-wrapper"&gt;
+      &lt;img src="img/1.jfif" alt=""&gt;
+    &lt;/div&gt;
+    &lt;!-- 滑块底部区域，包含标题和指示器 --&gt;
+    &lt;div class="slider-footer"&gt;
+      &lt;!-- 滑块图片的标题 --&gt;
+      &lt;p&gt;阿达达瓦的大卫带&lt;/p&gt;
+      &lt;!-- 滑块指示器列表 --&gt;
+      &lt;ul class="slider-indicator"&gt;
+        &lt;li class="active"&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;!-- 滑块控制按钮区域 --&gt;
+      &lt;div class="toggle"&gt;
+        &lt;!-- 上一张图片按钮 --&gt;
+        &lt;button class="prev"&gt;&amp;lt;&lt;/button&gt;
+        &lt;!-- 下一张图片按钮 --&gt;
+        &lt;button class="next"&gt;&amp;gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;script&gt;
+    // 定义图片数据数组，包含图片URL、标题和背景颜色
+    const Data =  [
+      { url: "img/1.jfif", title: "阿达达瓦的大卫带", color: "rgb(240, 128, 128)" },
+      { url: "img/2.jfif", title: "分外附加赛", color: "rgb(135, 206, 250)" },
+      { url: "img/3.jfif", title: "动物很费解啊我就", color: "rgb(144, 238, 144)" },
+      { url: "img/4.jfif", title: "如图一哦请问你", color: "rgb(255, 182, 193)" },
+      { url: "img/5.jfif", title: "挖到了叽歪了", color: "rgb(221, 160, 221)" },
+      { url: "img/6.jfif", title: "提取哦i祭扫", color: "rgb(255, 228, 181)" },
+      { url: "img/7.jfif", title: "期间地区建设的", color: "rgb(176, 224, 230)" },
+      { url: "img/8.jfif", title: "纪念他们单位挖的", color: "rgb(152, 251, 152)" },
+    ]
+
+    // 生成一个随机数，用于选择一个随机的图片数据
+    const slider = document.querySelector('.slider')
+    const img = document.querySelector('.slider-wrapper img')
+    const title = document.querySelector('.slider-footer p')
+    const indicator = document.querySelectorAll('.slider-indicator li')
+    const color = document.querySelector('.slider-footer')
+    const prev = document.querySelector('.prev')
+    const next = document.querySelector('.next')
+
+    function getranyuan( ) {
+      document.querySelector('.slider-indicator li.active').classList.remove('active')
+      indicator[m].classList.toggle('active')
+      img.src = Data[m].url
+      title.innerHTML = Data[m].title
+      color.style.backgroundColor = Data[m].color
+    }
+
+    let m = 0
+    let i = 0
+    prev.addEventListener('click', function() {
+      m -= 1
+      if(m &lt; 0){
+        m = Data.length - 1
+      }
+      getranyuan()
+      
+    })
+    next.addEventListener('click',function() {
+      m += 1
+      if(m === Data.length) {
+        m = 0
+      }
+      getranyuan()
+    })
+
+    function getks () {
+      i = setInterval(function() {
+        m += 1
+        if(m === Data.length){
+          m = 0
+        }
+        getranyuan()
+      },1000)
+    }
+    getks()
+    slider.addEventListener('mouseenter',function() {
+      clearInterval(i)
+      console.log('鼠标进入了盒子')
+      
+    }) 
+    slider.addEventListener('mouseleave',function() {
+      getks()
+      console.log('鼠标离开了盒子')
+    })
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <h3 id="section2-3">2.3 焦点事件</h3>
+
+                <h4>焦点事件</h4>
+                <ul>
+                    <li>focus  获得焦点</li>
+                    <li>blur 失去焦点</li>
+                </ul>
+
+                <pre><code class="html">&lt;body&gt;
+  &lt;input type="text"&gt;
+  &lt;script&gt;
+    const input = document.querySelector ('input')
+    input.addEventListener ('focus', function () {
+      console.log("有焦点触发")
+    })
+    input.addEventListener ('blur', function () {
+      console.log("失焦点触发")
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h4>案例：小米搜索框</h4>
+                <p>小米搜索框案例</p>
+                <p>需求:当表单得到焦点，显示下拉菜单，失去焦点隐藏下来菜单</p>
+
+                <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  ul {
+    list-style: none;
+  }
+  .mi {
+    width: 230px;
+    margin: 100px auto;
+  }
+
+  .mi input {
+    width: 230px;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid rgb(18, 18, 18);
+  }
+  .result-list {
+    position: absolute;
+    display: block;
+    padding: 6px 15px;
+    color: rgb(234, 245, 255);
+
+    outline: none;
+    border-top: 0px;
+    background: #ffffff;
+    display: none;
+  }
+  .result-list a {
+    display: block;
+    padding: 6px 15px;
+    font-size: 12px;
+    text-decoration: none;
+    color: #424242;
+    cursor: pointer;
+  }
+  .result-list a:hover { 
+    background-color: rgb(250, 177, 138);
+  }
+
+  .active {
+    position: relative;
+    border: 1px solid rgb(250, 177, 138);
+  }
+  input:focus {
+    outline:none;
+  }
+
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;div class="mi"&gt;
+    &lt;input type="search" class="input" placeholder="小米笔记本"&gt;
+    &lt;ul class="result-list"&gt;
+      &lt;li&gt;&lt;a href="#"&gt;全部商品&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11 Pro&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11 Ultra&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11 Pro Max&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11 Ultra Max&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;小米11 SE&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const input = document.querySelector("[type='search']")
+    const caidan = document.querySelector(".result-list")
+    
+    input.addEventListener("focus",function(){
+      caidan.style.display = "block"
+      input.style.border = "1px solid rgb(250, 177, 138)"
+      caidan.classList.add("active")     
+      
+    })
+
+    input.addEventListener("blur",function(){
+      input.style.border = "1px solid #484747"
+      caidan.classList.remove("active")
+      caidan.style.display = "none"
+    })
+    
+    
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <blockquote>
+                    <p><strong>浏览器默认焦点样式覆盖:</strong> 浏览器（如 Chrome）为 &lt;input&gt; 的 :focus 状态默认添加了 outline（轮廓线）和边框颜色，若未覆盖这些样式，自定义边框颜色会被遮盖 ==看完 一定要重视==</p>
+                </blockquote>
+
+                <h3 id="section2-4">2.4 键盘事件</h3>
+                <ul>
+                    <li>keydown   键盘按下触发</li>
+                    <li>keyup   键盘抬起触发</li>
+                </ul>
+
+                <pre><code class="html">&lt;body&gt;
+  &lt;input type="text"&gt;
+  &lt;script&gt;
+    const input = document.querySelector ('input')
+    input.addEventListener ('keydown', function () {
+      console.log("键盘按下了")
+    })
+    input.addEventListener ('keyup', function () {
+      console.log("键盘松开了")
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h4>文本框输入事件</h4>
+                <p>input  用户输入什么就能检测到什么</p>
+
+                <pre><code class="html">&lt;body&gt;
+  &lt;input type="text"&gt;
+  &lt;script&gt;
+    const input = document.querySelector('input')
+    input.addEventListener('input',function() {
+      console.log(input.value);
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <h4>案例：评论字数统计</h4>
+                <p>需求：用户输入文字，可以计算用户输入的字数</p>
+                <ol>
+                    <li>判断用输入事件input</li>
+                    <li>不断取得文本框里面的字符长度，文本域.value.length</li>
+                    <li>把获得数字给下面文本框</li>
+                </ol>
+
+                <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;style&gt;
+  .box{
+    position: relative;
+    width: 240px;
+  }
+  .box input{ 
+    border-radius: 3px;
+    height: 50px;
+    border: 1px solid #c9c9c9;
+    outline: none;
+    font-size: 12px;
+  }
+  .Anniu{
+    width: 50px;
+    height: 54px;
+    background-color: #7ec3f8;
+    color:rgb(239, 255, 254);
+    border: 1px solid #7ec3f8;
+    font-size: 12px;
+    border-radius: 3px;
+  }
+  span {
+    position: absolute;
+    font-size: 11px;
+    color: #959595;
+    right: 73px;
+    bottom: -14px;
+  }
+&lt;/style&gt;
+&lt;body&gt;
+  &lt;div class="box"&gt;
+    &lt;input type="text" placeholder="发布一条新动态"&gt;
+    &lt;button class="Anniu"&gt;发布&lt;/button&gt;
+    &lt;span&gt;&lt;/span&gt;
+    
+  &lt;/div&gt;
+  &lt;script&gt;
+    const input = document.querySelector('input')
+    const button = document.querySelector('.Anniu')
+    const zi = document.querySelector('span')
+    input.addEventListener('input', function() {
+      zi.innerHTML = input.value.length + '/200字'
+    })
+    
+    input.addEventListener('focus', function() {
+      zi.style.opacity = 1
+    })
+    
+    input.addEventListener('blur', function() {
+      if (input.value.length === 0) {
+        zi.style.opacity = 0
+      }
+    })
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <h3 id="section2-5">2.5 事件对象</h3>
+                <p>任意事件类型被触发时与事件相关的信息会被以对象的形式记录下来，我们称这个对象为事件对象。</p>
+
+                <pre><code class="html">&lt;body&gt;
+  &lt;h3&gt;事件对象&lt;/h3&gt;
+  &lt;p&gt;任意事件类型被触发时与事件相关的信息会被以对象的形式记录下来，我们称这个对象为事件对象。&lt;/p&gt;
+  &lt;hr&gt;
+  &lt;div class="box"&gt;&lt;/div&gt;
+  &lt;script&gt;
+    // 获取 .box 元素
+    const box = document.querySelector('.box')
+
+    // 添加事件监听
+    box.addEventListener('click', function (e) {
+      console.log('任意事件类型被触发后，相关信息会以对象形式被记录下来...');
+
+      // 事件回调函数的第1个参数即所谓的事件对象
+      console.log(e)
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <p>事件回调函数的【第1个参数】即所谓的事件对象，通常习惯性的将这个对数命名为 <code>event</code>、<code>evt</code> 、<code>e</code></p>
+
+                <pre><code class="html">&lt;body&gt;
+  &lt;input type="text"&gt;
+  &lt;script&gt;
+    const input = document.querySelector('input')
+    input.addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        console.log('按下了回车键')
+      }
+    })
+  &lt;/script&gt;
+&lt;/body&gt;</code></pre>
+
+                <p>接下来简单看一下事件对象中包含了哪些有用的信息：</p>
+                <ol>
+                    <li><code>e.type</code> 当前事件的类型</li>
+                    <li><code>e.clientX/Y</code> 光标相对浏览器窗口的位置</li>
+                    <li><code>e.offsetX/Y</code> 光标相于当前 DOM 元素的位置</li>
+                </ol>
+
+                <p>注：在事件回调函数内部通过 window.event 同样可以获取事件对象。</p>
+
+                <h4>练习：评论回车发布（可以发布信息）</h4>
+                <p>需求：按下回车键盘，可以发布信息</p>
+                <p>分析：</p>
+                <ol>
+                    <li>用到按下键盘事件 keydown 或者keyup 都可以</li>
+                    <li>如果用户按下的是回车键盘，则发布信息</li>
+                    <li>让留言信息模块显示，把拿到的数据渲染到对应标签内部</li>
+                </ol>
+
+                <pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;评论回车发布&lt;/title&gt;
+  &lt;style&gt;
+    .wrapper {
+      min-width: 400px;
+      max-width: 800px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: url(img/1.jfif) no-repeat center / cover;
+      margin-right: 20px;
+    }
+
+    .wrapper textarea {
+      outline: none;
+      border-color: transparent;
+      resize: none;
+      background: #f5f5f5;
+      border-radius: 4px;
+      flex: 1;
+      padding: 10px;
+      transition: all 0.5s;
+      height: 30px;
+    }
+
+    .wrapper textarea:focus {
+      border-color: #e4e4e4;
+      background: #fff;
+      height: 50px;
+    }
+
+    .wrapper button {
+      background: #00aeec;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      margin-left: 10px;
+      width: 70px;
+      cursor: pointer;
+    }
+
+    .wrapper .total {
+      margin-right: 80px;
+      color: #999;
+      margin-top: 5px;
+      opacity: 0;
+      transition: all 0.5s;
+    }
+
+    .list {
+      min-width: 400px;
+      max-width: 800px;
+      display: flex;
+    }
+
+    .list .item {
+      width: 100%;
+      display: flex;
+    }
+
+    .list .item .info {
+      flex: 1;
+      border-bottom: 1px dashed #e4e4e4;
+      padding-bottom: 10px;
+    }
+
+    .list .item p {
+      margin: 0;
+    }
+
+    .list .item .name {
+      color: #FB7299;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .list .item .text {
+      color: #333;
+      padding: 10px 0;
+    }
+
+    .list .item .time {
+      color: #999;
+      font-size: 12px;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+  &lt;div class="wrapper"&gt;
+    &lt;i class="avatar"&gt;&lt;/i&gt;
+    &lt;textarea id="tx" placeholder="发一条友善的评论" rows="2" maxlength="200"&gt;&lt;/textarea&gt;
+    &lt;button&gt;发布&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="wrapper"&gt;
+    &lt;span class="total"&gt;0/200字&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="list"&gt;
+    &lt;div class="item" style="display: none;"&gt;
+      &lt;i class="avatar"&gt;&lt;/i&gt;</code></pre>
+            </div>
+        </div>
+                </div>
+            </div>
+            
+            <!-- 评论区域 -->
+            <div class="comments">
+                <!-- 评论表单 -->
+                <div class="comment-form">
+                    <h4>添加评论</h4>
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="name">用户名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容</label>
+                            <textarea id="comment" name="comment" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交评论</button>
+                    </form>
+                </div>
+                
+                <!-- 评论列表 -->
+                <div class="comment-list" id="commentList">
+                    <!-- 评论将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const tocToggleBtn = document.getElementById('tocToggleBtn');
+        const tocSidebar = document.getElementById('tocSidebar');
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        tocToggleBtn.addEventListener('click', () => {
+            tocSidebar.classList.toggle('collapsed');
+        });
+        
+        function toggleSidebar() {
+            const nav = document.querySelector('nav');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            nav.classList.toggle('collapsed');
+            toggleBtn.textContent = nav.classList.contains('collapsed') ? '▶' : '◀';
+        }
+        
+        document.querySelectorAll('.toc a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // 代码块复制功能
+        const codeBlocks = document.querySelectorAll('pre code');
+        console.log('找到代码块数量:', codeBlocks.length);
+        
+        codeBlocks.forEach(function(codeBlock) {
+            const preElement = codeBlock.parentElement;
+            
+            // 创建复制按钮
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = '复制';
+            copyBtn.title = '复制代码';
+            
+            // 添加点击事件
+            copyBtn.addEventListener('click', function() {
+                const code = codeBlock.textContent;
+                
+                // 复制到剪贴板
+                navigator.clipboard.writeText(code).then(function() {
+                    copyBtn.textContent = '已复制';
+                    copyBtn.classList.add('copied');
+                    
+                    // 2秒后恢复原状
+                    setTimeout(function() {
+                        copyBtn.textContent = '复制';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('复制失败:', err);
+                    copyBtn.textContent = '失败';
+                    
+                    setTimeout(function() {
+                        copyBtn.textContent = '复制';
+                    }, 2000);
+                });
+            });
+            
+            // 将按钮添加到代码块
+            preElement.appendChild(copyBtn);
+        });
+        
+        // 评论功能
+        const commentForm = document.getElementById('commentForm');
+        const commentList = document.getElementById('commentList');
+        
+        // 加载评论函数
+        function loadComments() {
+            // 获取评论
+            let comments = JSON.parse(localStorage.getItem('webapi2-comments')) || [];
+            
+            // 清空评论列表
+            commentList.innerHTML = '';
+            
+            // 如果没有评论，显示提示
+            if (comments.length === 0) {
+                commentList.innerHTML = '<p>暂无评论，快来发表第一条评论吧！</p>';
+                return;
+            }
+            
+            // 添加评论到列表
+            comments.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment';
+                commentElement.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.name}</span>
+                        <span class="comment-date">${comment.date}</span>
+                    </div>
+                    <div class="comment-content">${comment.comment}</div>
+                `;
+                commentList.appendChild(commentElement);
+            });
+        }
+        
+        if (commentForm && commentList) {
+            // 加载评论
+            loadComments();
+            
+            // 提交评论
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const comment = document.getElementById('comment').value;
+                const date = new Date().toLocaleString();
+                
+                // 创建评论对象
+                const newComment = {
+                    id: Date.now(),
+                    name: name,
+                    comment: comment,
+                    date: date
+                };
+                
+                // 获取现有评论
+                let comments = JSON.parse(localStorage.getItem('webapi2-comments')) || [];
+                
+                // 添加新评论
+                comments.push(newComment);
+                
+                // 保存评论到localStorage
+                localStorage.setItem('webapi2-comments', JSON.stringify(comments));
+                
+                // 清空表单
+                commentForm.reset();
+                
+                // 重新加载评论
+                loadComments();
+        });
+    }
+    </script>
+    
+    <!-- 音量控制 -->
+    <div id="volumeControl" class="volume-control-widget">
+        <button id="volumeToggle" class="volume-toggle-btn">🔊</button>
+        <div id="volumePanel" class="volume-panel">
+            <div class="volume-panel-content">
+                <span class="volume-label">音量</span>
+                <input type="range" id="globalVolumeSlider" class="volume-slider" min="0" max="100" value="80">
+                <span id="globalVolumeValue" class="volume-value">80%</span>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .volume-control-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+        
+        .volume-toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] .volume-toggle-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .volume-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .volume-panel {
+            background: var(--card-bg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        
+        .volume-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .volume-panel-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .volume-label {
+            font-weight: 600;
+            color: var(--primary-darker);
+            min-width: 40px;
+        }
+        
+        [data-theme="dark"] .volume-label {
+            color: #f0f0f0;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        [data-theme="dark"] .volume-slider {
+            background: #4a5568;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .volume-value {
+            color: #64b5f6;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const volumeToggle = document.getElementById('volumeToggle');
+            const volumePanel = document.getElementById('volumePanel');
+            const globalVolumeSlider = document.getElementById('globalVolumeSlider');
+            const globalVolumeValue = document.getElementById('globalVolumeValue');
+            
+            const savedVolume = localStorage.getItem('musicVolume');
+            const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+            globalVolumeSlider.value = initialVolume * 100;
+            globalVolumeValue.textContent = Math.round(initialVolume * 100) + '%';
+            
+            function updateVolumeIcon(volume) {
+                if (volume === 0) {
+                    volumeToggle.textContent = '🔇';
+                } else if (volume < 0.3) {
+                    volumeToggle.textContent = '🔈';
+                } else if (volume < 0.7) {
+                    volumeToggle.textContent = '🔉';
+                } else {
+                    volumeToggle.textContent = '🔊';
+                }
+            }
+            
+            updateVolumeIcon(initialVolume);
+            
+            volumeToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                volumePanel.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!volumePanel.contains(e.target) && !volumeToggle.contains(e.target)) {
+                    volumePanel.classList.remove('show');
+                }
+            });
+            
+            globalVolumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                globalVolumeValue.textContent = this.value + '%';
+                localStorage.setItem('musicVolume', volume);
+                updateVolumeIcon(volume);
+                
+                // 更新全局音乐播放器的音量
+                if (window.globalMusicPlayer) {
+                    window.globalMusicPlayer.setVolume(volume);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

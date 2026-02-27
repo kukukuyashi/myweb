@@ -1,0 +1,43 @@
+#plugin-markdownlint {
+    top: 10%;
+    left: calc(100vw - 625px);
+    width: 600px;
+    min-width: 380px;
+    max-height: 500px;
+    z-index: 9993;
+}
+
+#plugin-markdownlint::part(content-area) {
+    padding: 0;
+}
+
+.plugin-markdownlint-table-wrap {
+    overflow: auto;
+    flex-grow: 1;
+}
+
+.plugin-markdownlint-table {
+    --header-bg: transparent;
+    --row-border-color: transparent;
+    --even-row-bg: transparent;
+    --odd-row-bg: #fff;
+    --row-hover-bg: #eee;
+    --padding-vertical: 4px;
+    --header-padding-vertical: 4px;
+}
+
+#plugin-markdownlint-button {
+    position: fixed;
+    right: 10px;
+    width: ${this.config.button_width};
+    height: ${this.config.button_height};
+    border-radius: ${this.config.button_border_radius};
+    background-color: ${this.config.pass_color};
+    cursor: pointer;
+    transition: background-color 0.1s ease 0s;
+    z-index: 9992;
+}
+
+#plugin-markdownlint-button[lint-check-failed] {
+    background-color: ${this.config.error_color};
+}
