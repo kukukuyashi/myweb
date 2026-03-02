@@ -162,7 +162,7 @@ const posts = ref([
     excerpt: '前端开发核心知识点学习表，包含HTML、CSS、JavaScript等核心内容',
     tags: ['前端', '学习', 'HTML', 'CSS', 'JavaScript'],
     url: '/content/前端核心学习表',
-    image: 'img/1.jfif'
+    image: '/myweb/img/1.jfif'
   },
   {
     id: 2,
@@ -172,7 +172,7 @@ const posts = ref([
     excerpt: '详细介绍Vue.js、Three.js和Node.js的区别和应用场景',
     tags: ['Vue.js', 'Three.js', 'Node.js', '前端', '技术'],
     url: '/content/Vue.js,Three.js和Node.js的区别',
-    image: 'img/2.jfif'
+    image: '/myweb/img/2.jfif'
   },
   {
     id: 3,
@@ -182,7 +182,7 @@ const posts = ref([
     excerpt: 'RhinoWeb使用过程中常见问题的解决方案',
     tags: ['Rhino', 'Web', '问题解决'],
     url: '/content/RhinoWeb的常见问题',
-    image: 'img/3.jfif'
+    image: '/myweb/img/3.jfif'
   },
   {
     id: 4,
@@ -192,7 +192,7 @@ const posts = ref([
     excerpt: 'Vue3核心知识点学习笔记，包含Composition API等新特性',
     tags: ['Vue3', '前端', '技术', '学习'],
     url: '/content/Vue3学习笔记',
-    image: 'img/4.jfif'
+    image: '/myweb/img/4.jfif'
   },
   {
     id: 5,
@@ -202,7 +202,7 @@ const posts = ref([
     excerpt: 'JavaScript进阶知识点学习笔记，包含闭包、原型链等内容',
     tags: ['JavaScript', '前端', '技术', '学习'],
     url: '/content/JS进阶笔记（一）',
-    image: 'img/5.jfif'
+    image: '/myweb/img/5.jfif'
   },
   {
     id: 6,
@@ -212,7 +212,7 @@ const posts = ref([
     excerpt: 'JavaScript进阶知识点学习笔记，包含异步编程、Promise等内容',
     tags: ['JavaScript', '前端', '技术', '学习'],
     url: '/content/JS进阶笔记（二）',
-    image: 'img/1.jfif'
+    image: '/myweb/img/1.jfif'
   },
   {
     id: 7,
@@ -222,7 +222,7 @@ const posts = ref([
     excerpt: 'Web API核心知识点学习笔记，包含DOM操作、事件监听、定时器等内容',
     tags: ['JavaScript', 'Web API', 'DOM', '前端', '技术'],
     url: '/content/Web API学习笔记',
-    image: 'img/2.jfif'
+    image: '/myweb/img/2.jfif'
   },
   {
     id: 8,
@@ -232,7 +232,7 @@ const posts = ref([
     excerpt: 'Web API进阶学习笔记，包含事件流、事件委托、页面加载等内容',
     tags: ['JavaScript', 'Web API', '事件', '前端', '技术'],
     url: '/content/Web API笔记（二）',
-    image: 'img/3.jfif'
+    image: '/myweb/img/3.jfif'
   },
   {
     id: 9,
@@ -242,7 +242,7 @@ const posts = ref([
     excerpt: 'Web API进阶学习笔记，包含BOM操作、本地存储、正则表达式等内容',
     tags: ['JavaScript', 'Web API', 'BOM', '前端', '技术'],
     url: '/content/Web API笔记（三）',
-    image: 'img/4.jfif'
+    image: '/myweb/img/4.jfif'
   },
   {
     id: 10,
@@ -252,7 +252,7 @@ const posts = ref([
     excerpt: 'Web API进阶学习笔记，包含综合案例、实战练习等内容',
     tags: ['JavaScript', 'Web API', '实战', '前端', '技术'],
     url: '/content/Web API笔记（四）',
-    image: 'img/5.jfif'
+    image: '/myweb/img/5.jfif'
   },
   {
     id: 11,
@@ -262,7 +262,7 @@ const posts = ref([
     excerpt: 'JavaScript基础知识点学习笔记，包含变量、数据类型、运算符、流程控制等核心内容',
     tags: ['JavaScript', '前端', '技术', '学习', '基础'],
     url: '/content/JS基础笔记',
-    image: 'img/1.jfif'
+    image: '/myweb/img/1.jfif'
   }
 ])
 
@@ -464,7 +464,7 @@ main {
   padding: 2.5rem 0;
   min-height: 100vh;
   flex: 1;
-  background-image: url('../img/1.jfif');
+  background-image: url('..//myweb/img/1.jfif');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
