@@ -145,12 +145,12 @@ import NavBar from '../components/NavBar.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, onMounted, computed } from 'vue'
 
-// 导入图片
-import img1 from '../../img/1.jfif'
-import img2 from '../../img/2.jfif'
-import img3 from '../../img/3.jfif'
-import img4 from '../../img/4.jfif'
-import img5 from '../../img/5.jfif'
+// 图片路径 - 使用绝对路径引用public目录下的资源
+const img1 = '/img/1.jfif'
+const img2 = '/img/2.jfif'
+const img3 = '/img/3.jfif'
+const img4 = '/img/4.jfif'
+const img5 = '/img/5.jfif'
 
 // 日历数据
 const currentDate = new Date()
