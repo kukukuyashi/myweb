@@ -95,7 +95,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import NavBar from '../components/Navbar.vue'
+import NavBar from '../components/NavBar.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 
 // 日历相关
