@@ -145,6 +145,13 @@ import NavBar from '../components/NavBar.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, onMounted, computed } from 'vue'
 
+// 导入图片
+import img1 from '/img/1.jfif'
+import img2 from '/img/2.jfif'
+import img3 from '/img/3.jfif'
+import img4 from '/img/4.jfif'
+import img5 from '/img/5.jfif'
+
 // 日历数据
 const currentDate = new Date()
 const currentYear = ref(currentDate.getFullYear())
@@ -162,7 +169,7 @@ const posts = ref([
     excerpt: '前端开发核心知识点学习表，包含HTML、CSS、JavaScript等核心内容',
     tags: ['前端', '学习', 'HTML', 'CSS', 'JavaScript'],
     url: '/content/前端核心学习表',
-    image: '/myweb/img/1.jfif'
+    image: img1
   },
   {
     id: 2,
@@ -172,7 +179,7 @@ const posts = ref([
     excerpt: '详细介绍Vue.js、Three.js和Node.js的区别和应用场景',
     tags: ['Vue.js', 'Three.js', 'Node.js', '前端', '技术'],
     url: '/content/Vue.js,Three.js和Node.js的区别',
-    image: '/myweb/img/2.jfif'
+    image: img2
   },
   {
     id: 3,
@@ -182,7 +189,7 @@ const posts = ref([
     excerpt: 'RhinoWeb使用过程中常见问题的解决方案',
     tags: ['Rhino', 'Web', '问题解决'],
     url: '/content/RhinoWeb的常见问题',
-    image: '/myweb/img/3.jfif'
+    image: img3
   },
   {
     id: 4,
@@ -192,7 +199,7 @@ const posts = ref([
     excerpt: 'Vue3核心知识点学习笔记，包含Composition API等新特性',
     tags: ['Vue3', '前端', '技术', '学习'],
     url: '/content/Vue3学习笔记',
-    image: '/myweb/img/4.jfif'
+    image: img4
   },
   {
     id: 5,
@@ -202,7 +209,7 @@ const posts = ref([
     excerpt: 'JavaScript进阶知识点学习笔记，包含闭包、原型链等内容',
     tags: ['JavaScript', '前端', '技术', '学习'],
     url: '/content/JS进阶笔记（一）',
-    image: '/myweb/img/5.jfif'
+    image: img5
   },
   {
     id: 6,
