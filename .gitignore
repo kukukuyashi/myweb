@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# 不需要的文件和目录
+笔记/
+backup-html/
+Music/
+css/
+js/
+404.html
+archive.html
+about.html
+music.html
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
