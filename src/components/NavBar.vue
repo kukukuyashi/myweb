@@ -75,7 +75,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('../../img/5.jpg') center/cover no-repeat;
+  background: url('/myweb/img/5.jpg') center/cover no-repeat;
   opacity: 0.1;
   z-index: -1;
   mix-blend-mode: overlay;
