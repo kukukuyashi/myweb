@@ -1,0 +1,54 @@
+<h2 id="section1">1. Vue.js —— 网页的"骨架与皮肤"（前端框架）</h2>
+                            <ul>
+                                <li><strong>类型：</strong> <strong>前端 JavaScript 框架</strong> (Frontend Framework)</li>
+                                <li><strong>它是干什么的：</strong> 负责管理整个网页的<strong>布局、按钮、输入框和数据展示</strong>。
+                                    <ul>
+                                        <li>比如：你网页左边的聊天窗口、顶部的导航栏、点击按钮时的弹窗，这些都是由 Vue 来管理的。</li>
+                                        <li><strong>特点：</strong> 它非常擅长"数据绑定"。当 AI 给出了回复，Vue 会自动把文字更新在屏幕上，不需要你手动去刷新页面。</li>
+                                    </ul>
+                                </li>
+                                <li><strong>在你的项目里：</strong> Vue 负责搭建那个漂亮、现代化的操作界面，让你能在这个界面里输入文字，并看到 AI 的回复。</li>
+                            </ul>
+
+                            <h2 id="section2">2. Three.js —— 网页的"3D 引擎"（3D 图形库）</h2>
+                            <ul>
+                                <li><strong>类型：</strong> <strong>3D 渲染库</strong> (3D Library / WebGL Wrapper)</li>
+                                <li><strong>它是干什么的：</strong> 它是网页里的"虚拟实验室"，专门负责<strong>在浏览器里显示和控制 3D 模型</strong>。
+                                    <ul>
+                                        <li>浏览器本身不认识 Rhino 的模型，Three.js 就像一个翻译官，把 <code>.glb</code> 模型画在屏幕上。</li>
+                                        <li>它负责光影（环境光、点光源）、材质（金属、塑料感）、相机视角（旋转、缩放）以及动画（比如旋钮转动）。</li>
+                                    </ul>
+                                </li>
+                                <li><strong>在你的项目里：</strong> 它是核心。你的 <strong>Rhino 模型</strong>就是通过 Three.js 呈现在网页中央的。如果没有它，网页就只是平面图，没有 3D 交互。</li>
+                            </ul>
+
+                            <h2 id="section3">3. Node.js —— 网页的"大脑与桥梁"（后端环境）</h2>
+                            <ul>
+                                <li><strong>类型：</strong> <strong>后端 JavaScript 运行环境</strong> (Backend Runtime)</li>
+                                <li><strong>它是干什么的：</strong> JavaScript 通常只能跑在浏览器里，而 Node.js 让 JavaScript 可以跑在你的<strong>电脑/服务器</strong>上。
+                                    <ul>
+                                        <li>它负责处理那些"见不得光"的操作：比如读写电脑里的文件、连接数据库、或者<strong>通过 API 去调用你本地的 Ollama (AI)</strong>。</li>
+                                        <li><strong>核心逻辑：</strong> 浏览器（前端）因为安全原因，不能直接控制你的本地软件。所以你需要一个"中间人"——Node.js 写的服务器。</li>
+                                    </ul>
+                                </li>
+                                <li><strong>在你的项目里：</strong> 当你点击网页上的"发送"按钮时：
+                                    <ol>
+                                        <li><strong>Vue</strong> 把文字传给 <strong>Node.js</strong>。</li>
+                                        <li><strong>Node.js</strong> 转身把文字喂给 <strong>Ollama (AI)</strong>。</li>
+                                        <li><strong>Ollama</strong> 回答后，<strong>Node.js</strong> 再把答案传回给 <strong>Vue</strong>。</li>
+                                    </ol>
+                                </li>
+                            </ul>
+
+                            <h2 id="section4">4. 它们是如何"协同工作"的？（以你的项目为例）</h2>
+                            <p>想象用户在你网页上操作的流程：</p>
+                            <ol>
+                                <li><strong>Vue</strong> 渲染出一个精美的网页，中间留了一块地方给 <strong>Three.js</strong>。</li>
+                                <li><strong>Three.js</strong> 把你做的 <strong>Rhino 模型</strong> 加载出来，用户可以用鼠标转动它。</li>
+                                <li>用户在 <strong>Vue</strong> 的输入框写下："把灯光调成红色"，点击发送。</li>
+                                <li>这个指令飞向了后台的 <strong>Node.js</strong>。</li>
+                                <li><strong>Node.js</strong> 告诉 <strong>Ollama</strong>："用户想改灯光颜色，请给我指令"。</li>
+                                <li><strong>Ollama</strong> 回复："好的，颜色代码是 #FF0000"。</li>
+                                <li><strong>Node.js</strong> 把这个颜色代码传回给前端。</li>
+                                <li><strong>Three.js</strong> 接收到颜色代码，立刻把你模型里的灯带材质变成了红色。</li>
+                            </ol>
