@@ -287,7 +287,7 @@ main {
   padding: 2.5rem 0;
   min-height: 100vh;
   flex: 1;
-  background-image: url('../img/1.jfif');
+  background-image: url('/myweb/img/1.jfif');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
