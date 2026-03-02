@@ -97,7 +97,7 @@ async function loadArticleContent() {
   
   try {
     // 从Content目录加载HTML文件
-    const response = await fetch(`/Content/${htmlFile}`)
+    const response = await fetch(`/myweb/Content/${htmlFile}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
