@@ -146,11 +146,11 @@ import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, onMounted, computed } from 'vue'
 
 // 图片路径 - 使用绝对路径引用public目录下的资源
-const img1 = '/img/1.jfif'
-const img2 = '/img/2.jfif'
-const img3 = '/img/3.jfif'
-const img4 = '/img/4.jfif'
-const img5 = '/img/5.jfif'
+const img1 = '/myweb/img/1.jfif'
+const img2 = '/myweb/img/2.jfif'
+const img3 = '/myweb/img/3.jfif'
+const img4 = '/myweb/img/4.jfif'
+const img5 = '/myweb/img/5.jfif'
 
 // 日历数据
 const currentDate = new Date()
