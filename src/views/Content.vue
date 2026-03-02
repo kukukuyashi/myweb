@@ -96,19 +96,20 @@ async function loadArticleContent() {
   }
   
   try {
+    // 使用 build 时的 base URL 动态前缀
+    const base = import.meta.env.BASE_URL || '/'
     // 从Content目录加载HTML文件
-    const response = await fetch(`/myweb/Content/${htmlFile}`)
+    const response = await fetch(`${base}Content/${htmlFile}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     let content = await response.text()
     
-    // 修复相对路径链接
-    content = content.replace(/href="\.\.\//g, 'href="/')
-    content = content.replace(/href="\.\//g, 'href="/')
-    content = content.replace(/src="\.\.\//g, 'src="/')
-    content = content.replace(/src="\.\//g, 'src="/')
-    
+    // 修复相对路径链接，将路径前缀改为 base
+    content = content.replace(/href="\.\.\//g, `href="${base}`)
+    content = content.replace(/href="\.\//g, `href="${base}`)
+    content = content.replace(/src="\.\.\//g, `src="${base}`)
+    content = content.replace(/src="\.\//g, `src="${base}`)
     articleContent.value = content
     
     // 等待DOM更新后生成目录
