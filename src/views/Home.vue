@@ -270,6 +270,58 @@ const posts = ref([
     tags: ['JavaScript', '前端', '技术', '学习', '基础'],
     url: '/content/JS基础笔记',
     image: '/myweb/img/1.jfif'
+  },
+  // Java笔记
+  {
+    id: 12,
+    title: 'JAVA笔记一(基本语法)',
+    date: '2026-04-03',
+    category: 'Java',
+    excerpt: 'Java基本语法学习笔记，包含HelloWorld、基本语法规则、数据类型等核心内容',
+    tags: ['Java', '学习', '基本语法', '数据类型'],
+    url: '/content/JAVA笔记一(基本语法)',
+    image: '/myweb/img/2.jfif'
+  },
+  {
+    id: 13,
+    title: 'JAVA笔记二(流程控制语句)',
+    date: '2026-04-03',
+    category: 'Java',
+    excerpt: 'Java流程控制语句学习笔记，包含条件语句、循环语句、跳转语句等内容',
+    tags: ['Java', '学习', '流程控制', '条件语句', '循环语句'],
+    url: '/content/JAVA笔记二(流程控制语句)',
+    image: '/myweb/img/3.jfif'
+  },
+  {
+    id: 14,
+    title: 'JAVA笔记三(数组)',
+    date: '2026-04-03',
+    category: 'Java',
+    excerpt: 'Java数组学习笔记，包含数组的定义、访问、遍历、二维数组等内容',
+    tags: ['Java', '学习', '数组', '二维数组'],
+    url: '/content/JAVA笔记三(数组)',
+    image: '/myweb/img/4.jfif'
+  },
+  {
+    id: 15,
+    title: 'JAVA笔记四（方法）',
+    date: '2026-04-03',
+    category: 'Java',
+    excerpt: 'Java方法学习笔记，包含方法的定义、调用、重载、递归等内容',
+    tags: ['Java', '学习', '方法', '重载', '递归'],
+    url: '/content/JAVA笔记四（方法）',
+    image: '/myweb/img/5.jfif'
+  },
+
+  {
+    id: 17,
+    title: 'Java的运行原理',
+    date: '2026-04-03',
+    category: 'Java',
+    excerpt: 'Java运行原理学习笔记，包含JVM、内存结构、垃圾回收、跨平台特性等内容',
+    tags: ['Java', '学习', 'JVM', '运行原理', '垃圾回收'],
+    url: '/content/Java的运行原理',
+    image: '/myweb/img/2.jfif'
   }
 ])
 

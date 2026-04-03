@@ -67,7 +67,13 @@ const articleFiles = {
   'Web API学习笔记': 'Web API.html',
   'Web API笔记（二）': 'Web API2.html',
   'Web API笔记（三）': 'Web API3.html',
-  'Web API笔记（四）': 'Web API4.html'
+  'Web API笔记（四）': 'Web API4.html',
+  'JAVA笔记一(基本语法)': 'JAVA笔记一(基本语法).html',
+  'JAVA笔记二(流程控制语句)': 'JAVA笔记二(流程控制语句).html',
+  'JAVA笔记三(数组)': 'JAVA笔记三(数组).html',
+  'JAVA笔记四（方法）': 'JAVA笔记四（方法）.html',
+
+  'Java的运行原理': 'Java的运行原理.html'
 }
 
 // 加载文章内容
