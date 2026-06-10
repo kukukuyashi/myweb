@@ -1,3 +1,0 @@
-*.sh  text eol=lf
-*.ps1 text eol=crlf
-*.{toml,json} text eol=lf
