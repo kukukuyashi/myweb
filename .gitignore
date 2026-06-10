@@ -11,8 +11,10 @@ node_modules
 dist-ssr
 *.local
 
-# 不需要的文件和目录
+# 本地 Markdown 原稿，不发布到 GitHub
 笔记/
+
+# 不需要的文件和目录
 backup-html/
 Music/
 css/
