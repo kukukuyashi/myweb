@@ -11,19 +11,13 @@ node_modules
 dist-ssr
 *.local
 
-# 本地 Markdown 原稿，不发布到 GitHub
+# 设计草稿 / 本地原稿，不发布
+drafts/
 笔记/
 
 # 不需要的文件和目录
 backup-html/
 Music/
-css/
-js/
-404.html
-archive.html
-about.html
-music.html
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,865 @@
+<h2>JAVA</h2>
+
+<h3>第一章 语法</h3>
+
+<h4>1.经典HelloWorld</h4>
+
+<p>第一个 JAVA 程序，创建文件 <strong>HelloWorld.java(文件名需与类名一致)</strong>, 代码如下：</p>
+
+<pre><code class="language-java">package com.itheima.test;
+// package: 表示当前的类定义在那个包下
+// 这段代码不用自己写，是IDEA自动生成的
+
+public class HelloWorld2 {
+    // class: 表示一个类
+    // HelloWorld: 类的名字
+    // public: 表示当前类是公开的，可以被其他类访问
+    // {}：表示类的范围，类的开始和结束
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+        System.out.println("231");
+
+    }
+}</code></pre>
+
+<p><img src="/myweb/img/1.jpg" alt="Java HelloWorld"></p>
+
+<hr>
+
+<p><strong>注：</strong><em><strong>String args[]</strong> 与 <strong>String[] args</strong> 都可以执行，但推荐使用 <strong>String[] args</strong>，这样可以避免歧义和误读。</em></p>
+
+<h4>2.基本语法</h4>
+
+<p>编写 Java 程序时，应注意以下几点：</p>
+
+<ul>
+<li><strong>大小写敏感</strong>：Java 是大小写敏感的，这就意味着标识符 Hello 与 hello 是不同的。</li>
+<li><strong>类名</strong>：对于所有的类来说，类名的首字母应该大写。如果类名由若干单词组成，那么每个单词的首字母应该大写，例如 <strong>MyFirstJavaClass</strong> 。</li>
+<li><strong>方法名</strong>：所有的方法名都应该以小写字母开头。如果方法名含有若干单词，则后面的每个单词首字母大写。</li>
+<li><strong>源文件名</strong>：源文件名必须和类名相同。当保存文件的时候，你应该使用类名作为文件名保存（切记 Java 是大小写敏感的），文件名的后缀为 <strong>.java</strong>。（如果文件名和类名不相同则会导致编译错误）。</li>
+<li><strong>主方法入口</strong>：所有的 Java 程序由 <strong>public static void main(String[] args)</strong> 方法开始执行。</li>
+</ul>
+
+<h4>3.数据类型</h4>
+
+<p>Java语言提供了<strong>八</strong>种基本类型。六种数字类型（四个整数型，两个浮点型），一种字符类型，还有一种布尔型。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>数据类型</th>
+      <th>关键字</th>
+      <th>内存占用</th>
+      <th>取值范围</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>整数</td>
+      <td>byte</td>
+      <td>1</td>
+      <td>负的2的7次方 ~ 2的7次方-1(-128~127)</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>short</td>
+      <td>2</td>
+      <td>负的2的15次方 ~ 2的15次方-1(-32768~32767)</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>int</td>
+      <td>4</td>
+      <td>负的2的31次方 ~ 2的31次方-1</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>long</td>
+      <td>8</td>
+      <td>负的2的63次方 ~ 2的63次方-1</td>
+    </tr>
+    <tr>
+      <td>浮点数</td>
+      <td>float</td>
+      <td>4</td>
+      <td>1.401298e-45 ~ 3.402823e+38</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>double</td>
+      <td>8</td>
+      <td>4.9000000e-324 ~ 1.797693e+308</td>
+    </tr>
+    <tr>
+      <td>字符</td>
+      <td>char</td>
+      <td>2</td>
+      <td>0-65535</td>
+    </tr>
+    <tr>
+      <td>布尔</td>
+      <td>boolean</td>
+      <td>1</td>
+      <td>true，false</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>byte：</strong></p>
+
+<ul>
+<li>byte 数据类型是8位、有符号的，以二进制补码表示的整数；</li>
+<li>最小值是 <strong>-128（-2^7）</strong>；</li>
+<li>最大值是 <strong>127（2^7-1）</strong>；</li>
+<li>默认值是 <strong>0</strong>；</li>
+<li>byte 类型用在大型数组中节约空间，主要代替整数，因为 byte 变量占用的空间只有 int 类型的四分之一；</li>
+<li>例子：byte a = 100，byte b = -50。</li>
+</ul>
+
+<p><strong>short：</strong></p>
+
+<ul>
+<li>short 数据类型是 16 位、有符号的以二进制补码表示的整数</li>
+<li>最小值是 <strong>-32768（-2^15）</strong>；</li>
+<li>最大值是 <strong>32767（2^15 - 1）</strong>；</li>
+<li>Short 数据类型也可以像 byte 那样节省空间。一个short变量是int型变量所占空间的二分之一；</li>
+<li>默认值是 <strong>0</strong>；</li>
+<li>例子：short s = 1000，short r = -20000。</li>
+</ul>
+
+<p><strong>int：</strong></p>
+
+<ul>
+<li>int 数据类型是32位、有符号的以二进制补码表示的整数；</li>
+<li>最小值是 <strong>-2,147,483,648（-2^31）</strong>；</li>
+<li>最大值是 <strong>2,147,483,647（2^31 - 1）</strong>；</li>
+<li>一般地整型变量默认为 int 类型；</li>
+<li>默认值是 <strong>0</strong> ；</li>
+<li>例子：int a = 100000, int b = -200000。</li>
+</ul>
+
+<p><strong>long：</strong></p>
+
+<ul>
+<li>long 数据类型是 64 位、有符号的以二进制补码表示的整数；</li>
+<li>最小值是 <strong>-9,223,372,036,854,775,808（-2^63）</strong>；</li>
+<li>最大值是 <strong>9,223,372,036,854,775,807（2^63 -1）</strong>；</li>
+<li>这种类型主要使用在需要比较大整数的系统上；</li>
+<li>默认值是 <strong>0L</strong>；</li>
+<li>例子： <strong>long a = 100000L</strong>，<strong>long b = -200000L</strong>。</li>
+</ul>
+
+<p>"L"理论上不分大小写，但是若写成"l"容易与数字"1"混淆，不容易分辩。所以最好大写。</p>
+
+<p><strong>float：</strong></p>
+
+<ul>
+<li>float 数据类型是单精度、32位、符合IEEE 754标准的浮点数；</li>
+<li>float 在储存大型浮点数组的时候可节省内存空间；</li>
+<li>默认值是 <strong>0.0f</strong>；</li>
+<li>浮点数不能用来表示精确的值，如货币；</li>
+<li>例子：float f1 = 234.5f。</li>
+</ul>
+
+<p><strong>double：</strong></p>
+
+<ul>
+<li>double 数据类型是双精度、64 位、符合 IEEE 754 标准的浮点数；</li>
+<li>浮点数的默认类型为 double 类型；</li>
+<li>double类型同样不能表示精确的值，如货币；</li>
+<li>默认值是 <strong>0.0d</strong>；</li>
+<li>例子：</li>
+</ul>
+
+<pre><code class="language-java">double   d1  = 7D ;
+double   d2  = 7.; 
+double   d3  =  8.0; 
+double   d4  =  8.D; 
+double   d5  =  12.9867; </code></pre>
+
+<p>7 是一个 int 字面量，而 7D，7. 和 8.0 是 double 字面量。</p>
+
+<p><img src="/myweb/img/2.png" alt="Double Literals"></p>
+
+<pre><code class="language-java">package com.itheima.variable;
+
+public class VariableDemo3 {
+    static void main(String[] args) {
+        //定义8种数据类型的变量:
+        //整数类型:byte、short、int、long
+        // 浮点数类型:float、double
+        // 字符类型:char布尔类型:boolean
+
+        //1.定义byte类型的变量
+        byte b = 10;
+        System.out.println(b);
+        //2.定义short类型的变量
+        short s = 32767;
+        System.out.println(s);
+        //3.定义int类型的变量
+        int i = 2147483647;
+        System.out.println(i);
+        //4.定义long类型的变量
+        long l = 9223372036854775807L;
+        System.out.println(l);
+        //5.定义float类型的变量
+        float f = 3.14f;
+        System.out.println(f);
+        //6.定义double类型的变量
+        double d = 3.14;
+        System.out.println(d);
+        //7.定义char类型的变量
+        char c = 'a';
+        System.out.println(c);
+        //8.定义boolean类型的变量
+        boolean bool = true;
+        System.out.println(bool);
+    }
+}</code></pre>
+
+<h4>小练习：计算BMI</h4>
+
+<pre><code class="language-java">package com.itheima.variable;
+
+public class VariableDemo4 {
+    static void main(String[] args) {
+        // BMI = 体重 / 身高的平方
+        double weight = 55;
+        double height = 1.63;
+
+        double bmi = weight / (height * height);
+        System.out.println(bmi);
+        double kg = bmi * (height * height);
+        System.out.println(kg);
+    }
+}
+</code></pre>
+
+<h4>4.标识符</h4>
+
+<p>业内大多数程序员都在遵守阿里巴巴的命名规则。</p>
+
+<h5>1.硬性要求</h5>
+
+<p><strong>注意</strong>：必须要这么做，否则代码会报错。</p>
+
+<ul>
+<li>必须由数字、字母、下划线_、美元符号$组成</li>
+<li>数字不能开头</li>
+<li>不能是关键字</li>
+<li>区分大小写的</li>
+</ul>
+
+<h5>2.小驼峰命名法</h5>
+
+<p>适用于变量名和方法名</p>
+
+<ul>
+<li>如果是一个单词，那么全部小写，比如：name</li>
+<li>如果是多个单词，那么从第二个单词开始，首字母大写，比如：firstName、maxAge</li>
+</ul>
+
+<h5>3.大驼峰命名法</h5>
+
+<p>适用于类名</p>
+
+<ul>
+<li>如果是一个单词，那么首字母大写。比如：Demo、Test。</li>
+<li>如果是多个单词，那么每一个单词首字母都需要大写。比如：HelloWorld</li>
+</ul>
+
+<p>不管起什么名字，都要做到见名知意。</p>
+
+<h4>5.键盘录入</h4>
+
+<p>键盘录入的实际功能 Java 已经帮我们写好了，不需要我们自己再实现了，而 Java 写好的功能都放在了 Scanner 这个类中，所以，我们只要直接使用 Scanner 这个类就可以了。</p>
+
+<p><strong>使用步骤</strong></p>
+
+<ol>
+<li><strong>导包（这一步可以忽略idea自动生成）</strong>：确定Scanner的位置</li>
+<li><strong>创建对象</strong>：其实就表示申明一下，我准备开始用Scanner这个类了。</li>
+<li><strong>接收数据</strong>：也是真正干活的代码。</li>
+</ol>
+
+<pre><code class="language-java">package com.itheima.variable;
+
+// //导包，其实就是先找到Scanner这个类在哪
+import java.util.Scanner;
+
+public class VariableDemo5 {
+    static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // 接收键盘输入文本
+        String name = sc.next();
+        System.out.println(name);
+
+        // 接收键盘录入的小数
+        double num = sc.nextDouble();
+        System.out.println(num);
+
+        // 接收键盘的整数
+        int age = sc.nextInt();
+        System.out.println(age);
+    }
+}</code></pre>
+
+<h5>小练习1：</h5>
+
+<p>定义两个整数类型的变量num1和num2，键盘录入数据分别为两个变量赋值。求两个数的和并进行打印。</p>
+
+<pre><code class="language-java">import java.util.Scanner;
+
+public class VariableDemo6_qiuhe {
+    static void main(String[] args) {
+        // 定义两个整数类型的变量num1和num2，键盘录入数据分别为两个变量赋值。
+        // 求两个数的和并进行打印。
+        
+        // 创建Scanner对象,获取键盘录入数据
+        Scanner sc = new Scanner(System.in);
+        // 获取键盘录入数据
+        int num1 = sc.nextInt();
+        int num2 = sc.nextInt();
+        
+        int sum = num1 + num2;
+        System.out.println(sum);
+    }
+}</code></pre>
+
+<h5>小练习2：</h5>
+
+<p>键盘录入你的身高和体重，计算BMI</p>
+
+<pre><code class="language-java">import java.util.Scanner;
+
+public class VariableDemo8 {
+    public static void main(String[] args) {
+
+        // BMI = 体重 / 身高的平方
+
+
+        // 1. 键盘录入体重 KG  69.3
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入您的体重：");
+        double weight = sc.nextDouble();
+
+        // 2. 键盘录入身高 M
+        System.out.println("请输入您的身高：");
+        double height = sc.nextDouble();
+
+        // 3. 计算BMI
+        double bmi = weight / (height * height);
+        System.out.println(bmi);
+    }
+}</code></pre>
+
+<h4>6.算术运算符</h4>
+
+<h5>1.基本介绍</h5>
+
+<p><strong>分类</strong>：+  -  *  /  %</p>
+
+<p><strong>运算特点：</strong></p>
+
+<p>+ - * ：跟小学数学中一模一样没有任何区别</p>
+
+<p>/：</p>
+
+<ol>
+<li>整数相除结果只能得到整数，如果结果想要是小数，必须要有小数参数</li>
+<li>小数直接参与运算，得到的结果有可能是不精确的</li>
+</ol>
+
+<p><strong>代码：</strong></p>
+
+<pre><code class="language-java">public class VariableDemo8 {
+    static void main(String[] args) {
+        double a = 10.0;
+        double b = 20.0;
+        System.out.println(a + b);
+        System.out.println(a - b);
+        System.out.println(a * b);
+        System.out.println(a / b);
+        System.out.println(a % b);
+    }
+}</code></pre>
+
+<h5>2.练习1 - 数值拆分</h5>
+
+<p><strong>需求：</strong>键盘录入一个三位数，将其拆分为个位、十位、百位后，打印在控制台</p>
+
+<pre><code class="language-java">//1.键盘录入一个三位数
+//导包 --- 创建对象 --- 接收数据
+Scanner sc = new Scanner(System.in);
+System.out.println("请输入一个三位数");
+int number = sc.nextInt();//123
+
+//2.获取这个三位数的个位、十位、百位并打印出来
+//公式：
+//针对于任意的一个数而言
+//个位： 数字 % 10
+int ones = number % 10;
+//十位： 数字 / 10 % 10
+int tens = number / 10 % 10;
+//百位： 数字 / 100 % 10
+int hundreds = number / 100  % 10;
+
+//输出结果
+System.out.println(ones);
+System.out.println(tens);
+System.out.println(hundreds);</code></pre>
+
+<h5>3.练习2 - 时间转换</h5>
+
+<p><strong>需求：时间拆分</strong></p>
+
+<pre><code class="language-java">public class OperatorDemo3 {
+    public static void main(String[] args) {
+        // 1. 定义变量记录秒数
+        int seconds = 7242;
+        // 2. 获取小时数
+        int hours = seconds / 3600; //3661 / 3600 = 1 .... 61
+        System.out.println(hours);
+        // 3. 获取分钟数
+        //    总秒数 - 小时数 3661 - 3600 = 61
+        //    61 / 60 = 1分钟 ... 1秒钟
+        //  3661 % 3600 = 1 ... 61
+        //  7220 % 3600 = 2 ... 20
+        int min = seconds % 3600 / 60;
+        System.out.println(min);
+        // 4. 获取秒数
+        int second = seconds % 3600 % 60;
+        System.out.println(second);
+        // 字符串拼接的形式打印数据
+        // 2小时0分42秒
+        System.out.println(hours + "小时" + min + "分" + second + "秒");
+    }
+}</code></pre>
+
+<h4>7.隐式转换</h4>
+
+<p><strong>概念：</strong>也叫自动类型提升。就是把一个取值范围小的数据或者变量，赋值给另一个取值范围大的变量。此时不需要我们额外写代码单独实现，是程序自动帮我们完成的。</p>
+
+<ul>
+<li><strong>规则一：</strong>如有byte short类型的数据，先提升为int类型</li>
+<li><strong>规则二：</strong>把取值范围小的提升为取值范围大的，再进行运算</li>
+<li><strong>取值范围从小到大的关系：</strong>byte short int long float double</li>
+</ul>
+
+<pre><code class="language-java">byte b = 10;
+short s = 20;
+long n = 100L;
+??? result = b + s + n;
+问变量result是什么类型的？long</code></pre>
+
+<p>检查下面代码，程序运行的时候是否会报错，如果会，请说明错误原因</p>
+
+<pre><code class="language-java">short s1 = 100;
+short s2 = 200;
+byte result1 = s1 + s2;
+System.out.println(result1);</code></pre>
+
+<p><strong>解释：</strong></p>
+
+<pre><code class="language-java">short s1 = 100;
+short s2 = 200;
+// 修改方案1：
+//      300 ：二进制 00000000 00000000 00000001 00101100
+//      强制转换byte: 00101100(44)
+byte result1 = (byte) (s1 + s2);
+System.out.println(result1);
+
+
+// 修改方案2：
+int result2 = s1 + s2;
+System.out.println(result2); // 300</code></pre>
+
+<h4>8.字符串的"+"操作</h4>
+
+<p>当+操作中出现字符串时，此时就是字符串的连接符，会将前后的数据进行拼接，并产生一个<strong>新的字符串</strong></p>
+
+<pre><code class="language-java">1 + "abc" + 1
+// 结果："1abc1"</code></pre>
+
+<pre><code class="language-java">String name = "黑默丁格";
+System.out.println("我的名字是" + name);
+// 结果： 我的名字是黑默丁格</code></pre>
+
+<p>当字符串跟变量相加的时候，实际上是跟变量里面的值进行拼接</p>
+
+<h4>9.字符的+操作</h4>
+
+<p>当+操作中出现了字符，会拿着字符到计算机内置的<strong>ASCII码表中去查对应的数字</strong>，然后再进行计算。</p>
+
+<pre><code class="language-java">char c = 'a';
+int result = c + 0;
+System.out.println(result);//97</code></pre>
+
+<p>ASCII码表中：</p>
+
+<ul>
+<li>'a'   -----    97</li>
+<li>'A'   -----    65</li>
+</ul>
+
+<h4>10.自增自减运算符</h4>
+
+<p><strong>分类：</strong></p>
+
+<ul>
+<li>++  自增运算符</li>
+<li>--  自减运算符</li>
+</ul>
+
+<p>++：就是把变量里面的值+1</p>
+
+<p>--：就是把变量里面的值-1</p>
+
+<p><strong>使用方式：</strong></p>
+
+<ul>
+<li>放在变量的前面，我们叫做先++。 比如：++a</li>
+<li>放在变量的后面，我们叫做后++。 比如：a++</li>
+</ul>
+
+<p><strong>注意：</strong>不管是先++，还是后++。单独写在一行的时候，运算结果是一模一样的。</p>
+
+<p><strong>案例：</strong></p>
+
+<pre><code class="language-java">//++
+int a = 10;
+a++;//就是让变量a里面的值 + 1
+System.out.println(a);//11
+++a;//就是让变量a里面的值 + 1
+System.out.println(a);//12</code></pre>
+
+<h4>11.赋值运算符</h4>
+
+<p><strong>最为常用的：</strong>=</p>
+
+<p><strong>运算过程：</strong>就是把等号右边的结果赋值给左边的变量</p>
+
+<pre><code class="language-java">int a = 10;
+int b = 20;
+c = a + b;
+System.out.println(a); // 10
+System.out.println(b); // 20
+System.out.println(c); // 30</code></pre>
+
+<h4>12.扩展赋值运算符</h4>
+
+<p><strong>分类：</strong>+=、-=、*=、/=、%=</p>
+
+<p><strong>运算规则：</strong>就是把左边跟右边进行运算，把最终的结果赋值给左边，对右边没有任何影响。</p>
+
+<p><strong>案例：</strong></p>
+
+<pre><code class="language-java">public class OperatorDemo7 {
+    public static void main(String[] args) {
+        //扩展赋值运算符
+        int a = 10;
+        int b = 20;
+        a += b;//把左边和右边相加，再把最终的结果赋值给左边，对右边没有任何影响
+        // 相当于 a = a + b;
+        System.out.println(a);//30
+        System.out.println(b);//20
+    }
+}</code></pre>
+
+<p><strong>注意：</strong>扩展的赋值运算符中隐层还包含了一个强制转换。以+=为例。a += b ;实际上相当于 a = (byte)(a + b);</p>
+
+<h4>13.关系运算符</h4>
+
+<p>又叫比较运算符，其实就是拿着左边跟右边进行了判断而已。</p>
+
+<h5>1.分类</h5>
+
+<table>
+  <thead>
+    <tr>
+      <th>符号</th>
+      <th>解释</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>==</td>
+      <td>就是判断左边跟右边是否相等，如果成立就是true，如果不成立就是false</td>
+    </tr>
+    <tr>
+      <td>!=</td>
+      <td>就是判断左边跟右边是否不相等，如果成立就是true，如果不成立就是false</td>
+    </tr>
+    <tr>
+      <td>&gt;</td>
+      <td>就是判断左边是否大于右边，如果成立就是true，如果不成立就是false</td>
+    </tr>
+    <tr>
+      <td>&gt;=</td>
+      <td>就是判断左边是否大于等于右边，如果成立就是true，如果不成立就是false</td>
+    </tr>
+    <tr>
+      <td>&lt;</td>
+      <td>就是判断左边是否小于右边，如果成立就是true，如果不成立就是false</td>
+    </tr>
+    <tr>
+      <td>&lt;=</td>
+      <td>就是判断左边是否小于等于右边，如果成立就是true，如果不成立就是false</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>注意：</strong></p>
+
+<ul>
+<li>关系运算符最终的结果一定是布尔类型的。要么是true，要么是false</li>
+<li>在写==的时候，千万不要写成=</li>
+</ul>
+
+<p>练习1：</p>
+
+<pre><code class="language-java">public class OperatorDemo8 {
+    public static void main(String[] args) {
+        // 练习1：键盘录入你和你好基友的身高，比一比谁更高？
+        // 1. 键盘录入两个小数，分别表示我和好基友的身高
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入我的身高：");
+        double myHeight = sc.nextDouble();
+        System.out.println("请输入我好基友的身高：");
+        double friendHeight = sc.nextDouble();
+        // 2.比较
+        boolean result = myHeight &gt;= friendHeight;
+        System.out.println(result);
+    }
+}</code></pre>
+
+<p>练习2：</p>
+
+<pre><code class="language-java">public class OperatorDemo5 {
+    static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        double num = sc.nextDouble();
+        boolean result = num % 3 == 0;
+        System.out.println(result);
+    }
+}</code></pre>
+
+<h4>14.逻辑运算符</h4>
+
+<h5>1.&amp; 和 | 的使用</h5>
+
+<p><strong>&amp;：逻辑与（而且）</strong></p>
+
+<p>两边都为真，结果才是真，只要有一个为假，那么结果就是假。</p>
+
+<p><strong>|：逻辑或（或者）</strong></p>
+
+<p>两边都为假，结果才是假，只要有一个为真，那么结果就是真。</p>
+
+<pre><code class="language-java">// &amp;  //两边都是真，结果才是真。
+System.out.println(true &amp; true);//true
+System.out.println(false &amp; false);//false
+System.out.println(true &amp; false);//false
+System.out.println(false &amp; true);//false
+
+System.out.println("===================================");
+
+// | 或  //两边都是假，结果才是假，如果有一个为真，那么结果就是真。
+System.out.println(true | true);//true
+System.out.println(false | false);//false
+System.out.println(true | false);//true
+System.out.println(false | true);//true</code></pre>
+
+<h5>2.!（取反）的使用</h5>
+
+<p>是取反，也叫做非。</p>
+
+<p><strong>计算规则：</strong>false取反就是true，true取反就是false</p>
+
+<pre><code class="language-java">System.out.println(!false);//true
+System.out.println(!true);//false
+
+System.out.println(!!false);//注意点：取反最多只用一个。</code></pre>
+
+<h4>15.短路逻辑运算符</h4>
+
+<p><strong>分类：</strong>  &amp;&amp;   ||</p>
+
+<p><strong>&amp;&amp;：</strong>运算结果跟&amp;是一模一样的，只不过具有短路效果。</p>
+
+<p><strong>||：</strong>运算结果跟|是一模一样的。只不过具有短路效果。</p>
+
+<p><strong>逻辑核心：</strong></p>
+
+<ul>
+<li>当左边不能确定整个表达式的结果，右边才会执行。</li>
+<li>当左边能确定整个表达式的结果，那么右边就不会执行了。从而提高了代码的运行效率。</li>
+</ul>
+
+<p><strong>举例：</strong></p>
+
+<ul>
+<li><strong>用户登录案例</strong></li>
+</ul>
+
+<p><strong>用户名正确  &amp; 密码正确</strong></p>
+
+<p>如果使用一个&amp;，不管用户名是否正确都会去验证密码。</p>
+
+<p><strong>思考：</strong></p>
+
+<p>如果用户名输入正确了，那么我们再判断密码是否正确，是符合业务逻辑的。但是如果用户名输入错误了，那么现在还有必要去比较密码吗？没有不要了。</p>
+
+<p>如果使用一个&amp;，那么左边和右边不管什么情况下，都会执行。</p>
+
+<p><strong>用户名正确  &amp;&amp;  密码正确</strong></p>
+
+<p>如果用户名输入正确了，那么才会验证密码是否输入正确。如果用户名输入错误了，那么就不会再去验证密码是否正确，最终的结果直接为false。从而提高了程序运行的效率。</p>
+
+<blockquote>
+  <ul>
+  <li>&amp;&amp; 和 &amp; 、||和|的运行结果都是一模一样的。</li>
+  <li>但是短路逻辑运算符可以提高程序的运行效率。</li>
+  </ul>
+</blockquote>
+
+<h5>1.练习1 - 判断范围</h5>
+
+<p><strong>需求</strong>：</p>
+
+<p>键盘录入一个整数，判断这个数字是否在1~10之间</p>
+
+<p><strong>代码解析</strong>：</p>
+
+<pre><code class="language-java">public class OperatorDemo10 {
+    public static void main(String[] args) {
+
+      /*
+            练习1：键盘录入一个整数，判断这个数字是否在1~10之间
+       */
+        // 1. 键盘录入一个整数
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入一个整数：");
+        int number = sc.nextInt();
+
+        // 2. 判断这个数字是否在1~10之间
+        // number &gt; 1   number &lt; 10 同时满足 &amp;
+        boolean result1 = number &gt; 1 &amp; number &lt; 10;
+        System.out.println(result1);
+    }
+}</code></pre>
+
+<h5>2.练习2 - 判断范围</h5>
+
+<p><strong>需求</strong>：</p>
+
+<p>键盘录入一个整数，判断这个数字是否不在1~10之间</p>
+
+<p><strong>代码解析</strong>：</p>
+
+<pre><code class="language-java">public class OperatorDemo11 {
+    public static void main(String[] args) {
+        // 练习2：键盘录入一个整数，判断这个数字是否不在1~10之间
+
+        // 1. 键盘录入一个整数
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入一个整数：");
+        int number = sc.nextInt();
+        // 2. 判断这个数字是否不在1~10之间
+        boolean result = number &lt;= 1 | number &gt;= 10;
+        System.out.println(result);
+
+    }
+}</code></pre>
+
+<h5>3.练习3 - 回文数</h5>
+
+<p><strong>需求</strong>：</p>
+
+<p>键盘录入一个四位整数，判断这个数字是否为回文数。</p>
+
+<p><strong>代码解析</strong>：</p>
+
+<pre><code class="language-java">public class OperatorDemo12 {
+    public static void main(String[] args) {
+        // 键盘录入一个四位整数，判断这个数字是否为回文数
+        // 1. 键盘录入一个四位整数
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入一个四位整数：");
+        int number = sc.nextInt();
+        // 2. 数字拆分
+        int ge = number % 10;
+        int shi = number / 10 % 10;
+        int bai = number / 100 % 10;
+        int qian = number / 1000 % 10;
+        System.out.println(ge);
+        System.out.println(shi);
+        System.out.println(bai);
+        System.out.println(qian);
+        // 3. 判断是否为回文数
+        //   qian == ge  &amp;&amp;  bai == shi
+        System.out.println(qian == ge &amp;&amp; bai == shi);
+    }
+}</code></pre>
+
+<h5>4.练习4 - 7的有缘数</h5>
+
+<p><strong>需求</strong>：</p>
+
+<p>寻找7的有缘数，定义一个两位整数，只要该数字包含7或者是7的倍数，就是7的有缘数</p>
+
+<p><strong>代码解析</strong>：</p>
+
+<pre><code class="language-java">public class OperatorDemo13 {
+    public static void main(String[] args) {
+        // 寻找7的有缘数，定义一个两位整数，只要该数字包含7或者是7的倍数，就是7的有缘数
+        // 1. 定义一个两位整数
+        int number = 22;
+
+        // 包含7: 个位或者十位是7即可
+        // 7的倍数：number % 7 == 0
+        // 2. 获取个位、十位
+        int ge = number % 10;
+        int shi = number / 10;
+
+        // 3. 判断当前数字是否是7的有缘数
+        // ge == 7  ||  shi == 7  || number % 7 == 0
+        System.out.println(ge == 7 || shi == 7  || number % 7 == 0);
+    }
+}</code></pre>
+
+<h4>16.三元运算符</h4>
+
+<p><strong>格式：</strong>关系表达式 ？ 表达式1 ：表达式2 ；</p>
+
+<p><strong>计算规则：</strong></p>
+
+<ul>
+<li>计算关系表达式的值。</li>
+<li>如果关系表达式的值为真，那么执行表达式1。</li>
+<li>如果关系表达式的值为假，那么执行表达式2。</li>
+</ul>
+
+<p><strong>注意：</strong>三元运算符的最终结果一定要被使用，要么赋值给一个变量，要么直接打印出来。</p>
+
+<pre><code class="language-java">public class OperatorDemo12 {
+    public static void main(String[] args) {
+        //需求：求两个数的较大值
+        int a = 10;
+        int b = 20;
+
+        //格式：关系表达式 ？ 表达式1 ： 表达式2 ；
+        //注意点：
+        //三元运算符的最终结果一定要被使用。
+        //要么赋值给一个变量，要么直接输出。
+       int max =  a &gt; b ? a : b ;
+        System.out.println(max);
+
+
+        System.out.println(a &gt; b ? a : b);
+    }
+}</code></pre>
+
+<h4>17.运算符的优先级</h4>
+
+<p>在Java中涉及了很多的运算符，每一种运算符都有各自的优先级。但是这些优先级不需要记忆。咱们只要知道其中一点：<strong>小括号优先于所有。</strong></p>

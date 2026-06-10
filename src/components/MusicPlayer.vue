@@ -6,11 +6,11 @@
         <button @click="togglePlay" class="play-btn">
           {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
         </button>
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.1" 
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
           v-model="musicStore.volume"
           class="volume-slider"
           @input="updateVolume"
@@ -27,19 +27,15 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 const musicStore = useMusicStore()
 const audio = ref(null)
 
-// 创建全局 Audio 对象（如果还没有创建）
 if (!window.globalAudio) {
   window.globalAudio = new Audio()
 }
 audio.value = window.globalAudio
 
-// 初始化Audio对象
 onMounted(() => {
   audio.value.volume = musicStore.volume
-  
-  // 加载之前的播放状态
+
   if (musicStore.currentSong) {
-    // 检查是否需要重新设置src
     if (audio.value.src !== musicStore.currentSong.src) {
       audio.value.src = musicStore.currentSong.src
       audio.value.currentTime = musicStore.currentTime
@@ -48,13 +44,11 @@ onMounted(() => {
       audio.value.play().catch(err => console.error('播放失败:', err))
     }
   }
-  
-  // 监听事件
+
   audio.value.addEventListener('timeupdate', updateTime)
   audio.value.addEventListener('ended', handleEnded)
   audio.value.addEventListener('loadedmetadata', updateDuration)
-  
-  // 监听store变化
+
   watch(() => musicStore.isPlaying, (newValue) => {
     if (newValue) {
       audio.value.play().catch(err => console.error('播放失败:', err))
@@ -62,7 +56,7 @@ onMounted(() => {
       audio.value.pause()
     }
   })
-  
+
   watch(() => musicStore.currentSong, (newSong) => {
     if (newSong) {
       audio.value.src = newSong.src
@@ -79,8 +73,6 @@ onUnmounted(() => {
     audio.value.removeEventListener('ended', handleEnded)
     audio.value.removeEventListener('loadedmetadata', updateDuration)
   }
-  
-  // 保存状态到sessionStorage
   sessionStorage.setItem('musicState', JSON.stringify({
     currentSong: musicStore.currentSong,
     isPlaying: musicStore.isPlaying,
@@ -89,20 +81,14 @@ onUnmounted(() => {
   }))
 })
 
-const togglePlay = () => {
-  musicStore.setPlaying(!musicStore.isPlaying)
-}
+const togglePlay = () => musicStore.setPlaying(!musicStore.isPlaying)
 
 const updateVolume = () => {
-  if (audio.value) {
-    audio.value.volume = musicStore.volume
-  }
+  if (audio.value) audio.value.volume = musicStore.volume
 }
 
 const updateTime = () => {
-  if (audio.value) {
-    musicStore.setCurrentTime(audio.value.currentTime)
-  }
+  if (audio.value) musicStore.setCurrentTime(audio.value.currentTime)
 }
 
 const handleEnded = () => {
@@ -111,9 +97,7 @@ const handleEnded = () => {
 }
 
 const updateDuration = () => {
-  if (audio.value) {
-    musicStore.setDuration(audio.value.duration)
-  }
+  if (audio.value) musicStore.setDuration(audio.value.duration)
 }
 </script>
 
@@ -121,17 +105,21 @@ const updateDuration = () => {
 .music-player {
   position: fixed;
   bottom: 0;
-  left: var(--sidebar-width);
+  left: 0;
   right: 0;
-  background: #f6f8fa;
-  color: var(--primary-darker);
-  padding: 1rem;
+  background: var(--topbar-bg);
+  color: #fff;
+  padding: 0.6rem 1.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-top: 2px solid var(--primary-color);
+  border-top: 2px solid var(--orange);
   z-index: 1003;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+  font-family: var(--mono);
+}
+
+[data-theme="dark"] .music-player {
+  background: #0d0d0d;
 }
 
 .player-info {
@@ -139,18 +127,16 @@ const updateDuration = () => {
   align-items: center;
   gap: 1.5rem;
   width: 100%;
-  max-width: 1200px;
-  padding: 0 1rem;
+  max-width: 1100px;
 }
 
 .song-title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  color: var(--primary-darker);
+  opacity: 0.85;
 }
 
 .controls {
@@ -160,93 +146,31 @@ const updateDuration = () => {
 }
 
 .play-btn {
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 0.35rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
 }
 
 .play-btn:hover {
-  background: var(--primary-darker);
-  transform: translateY(-2px);
-}
-
-.play-btn:active {
-  transform: translateY(0);
+  background: var(--orange);
+  border-color: var(--orange);
 }
 
 .volume-slider {
-  width: 120px;
+  width: 100px;
   cursor: pointer;
-  accent-color: var(--primary-color);
+  accent-color: var(--orange);
 }
 
-/* 深色模式样式 */
-[data-theme="dark"] .music-player {
-  background: #1a1a1a;
-  border-top-color: #4a90e2;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
-}
-
-[data-theme="dark"] .song-title {
-  color: #ffffff;
-}
-
-[data-theme="dark"] .play-btn {
-  background: #4a90e2;
-}
-
-[data-theme="dark"] .play-btn:hover {
-  background: #3a7bc8;
-}
-
-[data-theme="dark"] .volume-slider {
-  accent-color: #4a90e2;
-}
-
-/* 响应式设计 */
 @media (max-width: 768px) {
-  .music-player {
-    padding: 0.75rem 0.5rem;
-  }
-  
-  .song-title {
-    font-size: 0.9rem;
-    max-width: 120px;
-  }
-  
-  .play-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  .volume-slider {
-    width: 80px;
-  }
-  
-  .player-info {
-    gap: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .song-title {
-    font-size: 0.8rem;
-    max-width: 80px;
-  }
-  
-  .play-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-  
-  .volume-slider {
-    width: 60px;
-  }
+  .music-player { padding: 0.5rem 1rem; }
+  .song-title { max-width: 120px; font-size: 0.7rem; }
+  .volume-slider { width: 70px; }
 }
 </style>
