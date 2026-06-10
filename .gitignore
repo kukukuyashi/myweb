@@ -12,6 +12,7 @@ dist-ssr
 *.local
 
 # 不需要的文件和目录
+笔记/
 backup-html/
 Music/
 css/
