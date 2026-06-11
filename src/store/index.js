@@ -9,7 +9,7 @@ export const useMusicStore = defineStore('music', {
       return {
         currentSong: parsedState.currentSong,
         isPlaying: parsedState.isPlaying,
-        volume: parsedState.volume || localStorage.getItem('volume') || 0.5,
+        volume: Number(parsedState.volume ?? localStorage.getItem('volume') ?? 0.5),
         currentTime: parsedState.currentTime || 0,
         duration: 0
       }
@@ -17,7 +17,7 @@ export const useMusicStore = defineStore('music', {
     return {
       currentSong: null,
       isPlaying: false,
-      volume: localStorage.getItem('volume') || 0.5,
+      volume: Number(localStorage.getItem('volume') ?? 0.5),
       currentTime: 0,
       duration: 0
     }
@@ -41,11 +41,16 @@ export const useMusicStore = defineStore('music', {
     },
     setCurrentTime(time) {
       this.currentTime = time
-      // 保存状态到sessionStorage
-      this.saveState()
     },
     setDuration(duration) {
       this.duration = duration
+    },
+    resetPlayback() {
+      this.currentSong = null
+      this.isPlaying = false
+      this.currentTime = 0
+      this.duration = 0
+      this.saveState()
     },
     saveState() {
       sessionStorage.setItem('musicState', JSON.stringify({

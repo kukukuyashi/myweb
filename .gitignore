@@ -16,7 +16,8 @@ dist-ssr
 
 # 设计草稿 / 本地原稿，不发布
 drafts/
-笔记/
+笔记/*
+!笔记/留言板 Twikoo 部署笔记.md
 
 # 不需要的文件和目录
 backup-html/

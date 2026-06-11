@@ -3,6 +3,14 @@
  */
 export const posts = [
   {
+    id: 19,
+    title: '留言板 Twikoo 部署笔记',
+    date: '2026-06-11',
+    category: '部署',
+    excerpt: 'Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。',
+    file: '留言板 Twikoo 部署笔记.html'
+  },
+  {
     id: 18,
     title: '从 LLM 到 Agent Skill 笔记',
     date: '2026-06-09',

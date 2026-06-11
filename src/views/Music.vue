@@ -6,12 +6,10 @@
         <div class="page-content music-room">
           <h1 class="page-title">音乐室</h1>
           <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
-          <!--
-            注意：音乐文件 (Music/) 体积过大 (~163MB)，不随构建部署到 GitHub Pages。
-            音乐功能仅在本地 phpStudy 环境下可用。
-            如需线上播放，建议将音乐文件托管到外部存储（如 OSS/CDN），
-            然后将下方 track.url 改为外部链接。
-          -->
+          <p v-if="!musicBase" class="music-notice">
+            本地播放需项目根目录有 <code>Music/</code> 文件夹；GitHub Pages 需配置
+            <code>VITE_MUSIC_BASE_URL</code>（OSS/CDN）。
+          </p>
 
           <div class="player-panel">
             <div class="player-screen">
@@ -69,14 +67,16 @@ const musicStore = useMusicStore()
 const musicBase = (import.meta.env.VITE_MUSIC_BASE_URL || '').replace(/\/$/, '')
 
 function musicUrl(relativePath) {
-  return musicBase ? `${musicBase}${relativePath}` : relativePath
+  if (musicBase) return `${musicBase}${relativePath}`
+  const base = import.meta.env.BASE_URL || '/'
+  const clean = relativePath.replace(/^\//, '')
+  return base + encodeURI(clean)
 }
 
 const tracks = ref([
   { name: 'SANBAI OST - Ending Means Starting Again', source: musicBase ? 'CDN' : 'Local', path: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
   { name: 'りりあ。 - あんたなんて。', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
-  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Local', path: '/Music/小林家的龙女仆/0018865633.flac' },
-  { name: '超かぐや姫！ - IROHA\'S Dancing All Night', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' },
+  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Local', path: '/Music/小林家的龙女仆/愛のシュプリーム!.flac' },
   { name: '超かぐや姫！ - ヤチヨ絵巻', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
 ].map(t => ({ ...t, url: musicUrl(t.path) })))
 
@@ -108,8 +108,9 @@ function togglePlay() {
 }
 
 function stopPlay() {
-  musicStore.setPlaying(false)
-  musicStore.setCurrentSong(null)
+  musicStore.resetPlayback()
+  currentTrackIndex.value = -1
+  currentTrack.value = null
   playerStatus.value = '▶ STOPPED'
   systemStatus.value = 'PLAYBACK STOPPED'
 }
@@ -132,7 +133,21 @@ onMounted(() => {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin: -1rem 0 1.5rem;
+  margin: -1rem 0 0.5rem;
+}
+
+.music-notice {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.music-notice code {
+  font-size: 0.65rem;
+  background: var(--orange-light);
+  padding: 0.1rem 0.35rem;
 }
 
 .player-panel {

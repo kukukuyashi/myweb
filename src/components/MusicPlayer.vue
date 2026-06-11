@@ -2,6 +2,23 @@
   <div class="music-player">
     <div v-if="musicStore.currentSong" class="player-info">
       <span class="song-title">{{ musicStore.currentSong.title }}</span>
+      <div class="progress-wrap">
+        <span class="time">{{ formatTime(sliderTime) }}</span>
+        <input
+          type="range"
+          class="progress-slider"
+          min="0"
+          :max="sliderMax"
+          step="0.01"
+          :value="sliderTime"
+          :disabled="!sliderMax"
+          @input="onSeekInput"
+          @pointerdown="onDragStart"
+          @pointerup="onSeekEnd"
+          @pointercancel="onSeekEnd"
+        >
+        <span class="time">{{ formatTime(musicStore.duration) }}</span>
+      </div>
       <div class="controls">
         <button @click="togglePlay" class="play-btn">
           {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
@@ -11,47 +28,88 @@
           min="0"
           max="1"
           step="0.1"
-          v-model="musicStore.volume"
+          v-model.number="musicStore.volume"
           class="volume-slider"
           @input="updateVolume"
         >
       </div>
     </div>
+    <p v-if="loadError && musicStore.currentSong" class="load-error">{{ loadError }}</p>
   </div>
 </template>
 
 <script setup>
 import { useMusicStore } from '../store'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 
 const musicStore = useMusicStore()
 const audio = ref(null)
+const loadError = ref('')
+const sliderTime = ref(0)
+const isDragging = ref(false)
 
 if (!window.globalAudio) {
   window.globalAudio = new Audio()
 }
 audio.value = window.globalAudio
 
+const sliderMax = computed(() => {
+  const d = musicStore.duration
+  return d && Number.isFinite(d) ? d : 0
+})
+
+function onDragStart() {
+  isDragging.value = true
+}
+
+function onSeekInput(e) {
+  isDragging.value = true
+  sliderTime.value = Number(e.target.value)
+}
+
+function onSeekEnd(e) {
+  if (!isDragging.value && !e) return
+  isDragging.value = false
+  if (!audio.value || !musicStore.currentSong || !sliderMax.value) return
+  const t = Number(e?.target?.value ?? sliderTime.value)
+  if (!Number.isFinite(t)) return
+  sliderTime.value = t
+  audio.value.currentTime = t
+  musicStore.setCurrentTime(t)
+  musicStore.saveState()
+}
+
+function formatTime(sec) {
+  if (!sec || !Number.isFinite(sec)) return '0:00'
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 onMounted(() => {
-  audio.value.volume = musicStore.volume
+  audio.value.volume = Number(musicStore.volume) || 0.5
+  sliderTime.value = musicStore.currentTime
 
   if (musicStore.currentSong) {
-    if (audio.value.src !== musicStore.currentSong.src) {
-      audio.value.src = musicStore.currentSong.src
-      audio.value.currentTime = musicStore.currentTime
-    }
-    if (musicStore.isPlaying && audio.value.paused) {
-      audio.value.play().catch(err => console.error('播放失败:', err))
-    }
+    loadSong(musicStore.currentSong.src, musicStore.currentTime, musicStore.isPlaying)
   }
 
   audio.value.addEventListener('timeupdate', updateTime)
   audio.value.addEventListener('ended', handleEnded)
   audio.value.addEventListener('loadedmetadata', updateDuration)
+  audio.value.addEventListener('error', onAudioError)
+
+  watch(() => musicStore.currentTime, (t) => {
+    if (!isDragging.value) sliderTime.value = t
+  })
 
   watch(() => musicStore.isPlaying, (newValue) => {
+    if (!musicStore.currentSong) return
     if (newValue) {
-      audio.value.play().catch(err => console.error('播放失败:', err))
+      audio.value.play().catch(err => {
+        console.error('播放失败:', err)
+        loadError.value = '播放被浏览器阻止，请再点一次播放'
+      })
     } else {
       audio.value.pause()
     }
@@ -59,10 +117,9 @@ onMounted(() => {
 
   watch(() => musicStore.currentSong, (newSong) => {
     if (newSong) {
-      audio.value.src = newSong.src
-      if (musicStore.isPlaying) {
-        audio.value.play().catch(err => console.error('播放失败:', err))
-      }
+      loadSong(newSong.src, 0, musicStore.isPlaying)
+    } else {
+      resetAudio()
     }
   })
 })
@@ -72,6 +129,7 @@ onUnmounted(() => {
     audio.value.removeEventListener('timeupdate', updateTime)
     audio.value.removeEventListener('ended', handleEnded)
     audio.value.removeEventListener('loadedmetadata', updateDuration)
+    audio.value.removeEventListener('error', onAudioError)
   }
   sessionStorage.setItem('musicState', JSON.stringify({
     currentSong: musicStore.currentSong,
@@ -81,19 +139,71 @@ onUnmounted(() => {
   }))
 })
 
+function loadSong(src, startTime = 0, autoplay = false) {
+  loadError.value = ''
+  const resolved = resolveSrc(src)
+  if (!audio.value.src || !sameSrc(audio.value.src, resolved)) {
+    audio.value.src = resolved
+  }
+  audio.value.currentTime = startTime
+  sliderTime.value = startTime
+  if (autoplay) {
+    audio.value.play().catch(err => {
+      console.error('播放失败:', err)
+      loadError.value = '无法播放，请检查音乐文件是否存在'
+    })
+  }
+}
+
+function resolveSrc(src) {
+  try {
+    return new URL(src, window.location.origin).href
+  } catch {
+    return src
+  }
+}
+
+function sameSrc(a, b) {
+  try {
+    return new URL(a).href === new URL(b).href
+  } catch {
+    return a === b || a.endsWith(b) || b.endsWith(a)
+  }
+}
+
+function resetAudio() {
+  loadError.value = ''
+  isDragging.value = false
+  sliderTime.value = 0
+  audio.value.pause()
+  audio.value.removeAttribute('src')
+  audio.value.load()
+  musicStore.setCurrentTime(0)
+  musicStore.setDuration(0)
+}
+
+function onAudioError() {
+  loadError.value = '音频加载失败（线上需配置 CDN，本地需 Music/ 文件夹）'
+  musicStore.setPlaying(false)
+}
+
 const togglePlay = () => musicStore.setPlaying(!musicStore.isPlaying)
 
 const updateVolume = () => {
-  if (audio.value) audio.value.volume = musicStore.volume
+  if (audio.value) audio.value.volume = Number(musicStore.volume) || 0.5
 }
 
 const updateTime = () => {
-  if (audio.value) musicStore.setCurrentTime(audio.value.currentTime)
+  if (!audio.value || isDragging.value) return
+  const t = audio.value.currentTime
+  musicStore.setCurrentTime(t)
+  sliderTime.value = t
 }
 
 const handleEnded = () => {
   musicStore.setPlaying(false)
   musicStore.setCurrentTime(0)
+  sliderTime.value = 0
 }
 
 const updateDuration = () => {
@@ -111,7 +221,7 @@ const updateDuration = () => {
   color: #fff;
   padding: 0.6rem 1.5rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   border-top: 2px solid var(--orange);
   z-index: 1003;
@@ -125,9 +235,10 @@ const updateDuration = () => {
 .player-info {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   width: 100%;
   max-width: 1100px;
+  flex-wrap: wrap;
 }
 
 .song-title {
@@ -135,8 +246,31 @@ const updateDuration = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  min-width: 120px;
+  max-width: 220px;
   opacity: 0.85;
+}
+
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.time {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.progress-slider {
+  flex: 1;
+  cursor: pointer;
+  accent-color: var(--orange);
+  min-width: 80px;
 }
 
 .controls {
@@ -163,14 +297,23 @@ const updateDuration = () => {
 }
 
 .volume-slider {
-  width: 100px;
+  width: 80px;
   cursor: pointer;
   accent-color: var(--orange);
 }
 
+.load-error {
+  font-size: 0.7rem;
+  color: #ff8a80;
+  margin: 0.25rem 0 0;
+  max-width: 1100px;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .music-player { padding: 0.5rem 1rem; }
-  .song-title { max-width: 120px; font-size: 0.7rem; }
-  .volume-slider { width: 70px; }
+  .song-title { max-width: 100px; font-size: 0.7rem; }
+  .progress-wrap { order: 3; width: 100%; }
+  .volume-slider { width: 60px; }
 }
 </style>
