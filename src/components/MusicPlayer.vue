@@ -91,7 +91,7 @@ onMounted(() => {
   sliderTime.value = musicStore.currentTime
 
   if (musicStore.currentSong) {
-    loadSong(musicStore.currentSong.src, musicStore.currentTime, musicStore.isPlaying)
+    loadSong(musicStore.currentSong.src, musicStore.currentTime)
   }
 
   audio.value.addEventListener('timeupdate', updateTime)
@@ -106,10 +106,7 @@ onMounted(() => {
   watch(() => musicStore.isPlaying, (newValue) => {
     if (!musicStore.currentSong) return
     if (newValue) {
-      audio.value.play().catch(err => {
-        console.error('播放失败:', err)
-        loadError.value = '播放被浏览器阻止，请再点一次播放'
-      })
+      playWhenReady()
     } else {
       audio.value.pause()
     }
@@ -117,7 +114,7 @@ onMounted(() => {
 
   watch(() => musicStore.currentSong, (newSong) => {
     if (newSong) {
-      loadSong(newSong.src, 0, musicStore.isPlaying)
+      loadSong(newSong.src, 0)
     } else {
       resetAudio()
     }
@@ -139,19 +136,56 @@ onUnmounted(() => {
   }))
 })
 
-function loadSong(src, startTime = 0, autoplay = false) {
-  loadError.value = ''
-  const resolved = resolveSrc(src)
-  if (!audio.value.src || !sameSrc(audio.value.src, resolved)) {
-    audio.value.src = resolved
-  }
-  audio.value.currentTime = startTime
-  sliderTime.value = startTime
-  if (autoplay) {
+function applySeek(time) {
+  const d = audio.value.duration
+  const t = d && Number.isFinite(d) ? Math.min(Math.max(0, time), d) : Math.max(0, time)
+  audio.value.currentTime = t
+  sliderTime.value = t
+  musicStore.setCurrentTime(t)
+}
+
+function playWhenReady() {
+  if (!audio.value?.src) return
+  const run = () => {
     audio.value.play().catch(err => {
       console.error('播放失败:', err)
-      loadError.value = '无法播放，请检查音乐文件是否存在'
+      if (err?.name === 'NotAllowedError') {
+        loadError.value = '播放被浏览器阻止，请再点一次播放'
+      } else if (audio.value?.error) {
+        showLoadFailure()
+      }
     })
+  }
+  if (audio.value.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    run()
+  } else {
+    audio.value.addEventListener('canplay', run, { once: true })
+  }
+}
+
+function showLoadFailure() {
+  loadError.value = import.meta.env.DEV
+    ? '音频加载失败，请确认 Music/ 文件夹及文件名正确'
+    : '音频加载失败，请稍后再试或刷新页面'
+  musicStore.setPlaying(false)
+}
+
+function loadSong(src, startTime = 0) {
+  loadError.value = ''
+  const resolved = resolveSrc(src)
+
+  const onReady = () => {
+    applySeek(startTime)
+    if (musicStore.isPlaying) playWhenReady()
+  }
+
+  if (!audio.value.src || !sameSrc(audio.value.src, resolved)) {
+    audio.value.pause()
+    audio.value.addEventListener('canplay', onReady, { once: true })
+    audio.value.src = resolved
+    audio.value.load()
+  } else {
+    onReady()
   }
 }
 
@@ -183,8 +217,7 @@ function resetAudio() {
 }
 
 function onAudioError() {
-  loadError.value = '音频加载失败（线上需配置 CDN，本地需 Music/ 文件夹）'
-  musicStore.setPlaying(false)
+  showLoadFailure()
 }
 
 const togglePlay = () => musicStore.setPlaying(!musicStore.isPlaying)

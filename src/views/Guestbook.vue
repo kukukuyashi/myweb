@@ -61,4 +61,9 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 .guestbook-hint.error { color: #c0392b; }
+
+/* 不展示 Twikoo 评论里的设备/浏览器信息（tk-extras） */
+.guestbook :deep(.tk-extras) {
+  display: none;
+}
 </style>

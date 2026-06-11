@@ -6,9 +6,8 @@
         <div class="page-content music-room">
           <h1 class="page-title">音乐室</h1>
           <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
-          <p v-if="!musicBase" class="music-notice">
-            本地播放需项目根目录有 <code>Music/</code> 文件夹；GitHub Pages 需配置
-            <code>VITE_MUSIC_BASE_URL</code>（OSS/CDN）。
+          <p v-if="showMusicNotice" class="music-notice">
+            {{ musicNoticeText }}
           </p>
 
           <div class="player-panel">
@@ -59,12 +58,15 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useMusicStore } from '../store'
 
 const musicStore = useMusicStore()
 
 const musicBase = (import.meta.env.VITE_MUSIC_BASE_URL || '').replace(/\/$/, '')
+
+const showMusicNotice = computed(() => import.meta.env.DEV && !musicBase)
+const musicNoticeText = '本地 dev 需项目根目录有 Music/ 文件夹。'
 
 function musicUrl(relativePath) {
   if (musicBase) return `${musicBase}${relativePath}`
@@ -74,10 +76,10 @@ function musicUrl(relativePath) {
 }
 
 const tracks = ref([
-  { name: 'SANBAI OST - Ending Means Starting Again', source: musicBase ? 'CDN' : 'Local', path: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
-  { name: 'りりあ。 - あんたなんて。', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
-  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Local', path: '/Music/小林家的龙女仆/愛のシュプリーム!.flac' },
-  { name: '超かぐや姫！ - ヤチヨ絵巻', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
+  { name: 'SANBAI OST - Ending Means Starting Again', source: musicBase ? 'CDN' : 'Site', path: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
+  { name: 'りりあ。 - あんたなんて。', source: musicBase ? 'CDN' : 'Site', path: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
+  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Site', path: '/Music/小林家的龙女仆/愛のシュプリーム!.flac' },
+  { name: '超かぐや姫！ - ヤチヨ絵巻', source: musicBase ? 'CDN' : 'Site', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
 ].map(t => ({ ...t, url: musicUrl(t.path) })))
 
 const currentTrackIndex = ref(-1)

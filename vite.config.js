@@ -14,7 +14,7 @@ function serveLocalMusic() {
     name: 'serve-local-music',
     configureServer(server) {
       server.middlewares.use(`${base}Music`, (req, res, next) => {
-        const rel = decodeURIComponent(req.url || '/')
+        const rel = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '')
         const filePath = path.join(__dirname, 'Music', rel)
         if (!filePath.startsWith(path.join(__dirname, 'Music'))) {
           res.statusCode = 403
@@ -55,6 +55,10 @@ export default defineConfig({
         },
         {
           src: 'img',
+          dest: ''
+        },
+        {
+          src: 'Music',
           dest: ''
         }
       ]

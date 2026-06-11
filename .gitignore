@@ -21,7 +21,8 @@ drafts/
 
 # 不需要的文件和目录
 backup-html/
-Music/
+# Music/ 已纳入 Git；build 时复制到 docs/Music/ 供 GitHub Pages 使用
+docs/Music/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
