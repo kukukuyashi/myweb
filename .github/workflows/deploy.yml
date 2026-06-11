@@ -25,6 +25,9 @@ jobs:
     
     - name: Build project
       run: npm run build
+      env:
+        # Twikoo envId 会打进前端 bundle，非密钥；CI 无 .env.local 需在此注入
+        VITE_TWIKOO_ENV_ID: https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
