@@ -16,7 +16,7 @@
               <ul class="archive-items">
                 <li v-for="post in month.posts" :key="post.id">
                   <span class="date">{{ post.date }}</span>
-                  <router-link :to="postUrl(post.title)">{{ post.title }}</router-link>
+                  <router-link :to="postUrl(post.id)">{{ post.title }}</router-link>
                 </li>
               </ul>
             </template>

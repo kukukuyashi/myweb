@@ -141,11 +141,16 @@ export const posts = [
 ]
 
 /** 文章详情页路由 */
-export function postUrl(title) {
-  return `/content/${title}`
+export function postUrl(id) {
+  return `/content/${id}`
 }
 
-/** 按标题查找文章 */
+/** 按 id 查找文章 */
+export function getPostById(id) {
+  return posts.find(p => p.id === Number(id))
+}
+
+/** 按标题查找文章（保留兼容） */
 export function getPostByTitle(title) {
   return posts.find(p => p.title === title)
 }
@@ -195,5 +200,5 @@ export function buildArchive() {
 
 /** 带 url 字段的列表，供首页使用 */
 export function postsWithUrl() {
-  return posts.map(p => ({ ...p, url: postUrl(p.title) }))
+  return posts.map(p => ({ ...p, url: postUrl(p.id) }))
 }

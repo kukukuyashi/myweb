@@ -1,1 +1,12 @@
 DirectoryIndex docs/index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /gerenboke/
+
+  # 如果请求的文件存在，直接返回
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  # 否则交给 SPA 入口
+  RewriteRule ^ docs/index.html [L]
+</IfModule>

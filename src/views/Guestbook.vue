@@ -26,8 +26,13 @@ onMounted(() => {
   script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.32/dist/twikoo.all.min.js'
   script.async = true
   script.onload = () => {
+    const envId = import.meta.env.VITE_TWIKOO_ENV_ID
+    if (!envId || envId === 'your-env-id') {
+      console.warn('Twikoo 未配置：在 .env.local 中设置 VITE_TWIKOO_ENV_ID')
+      return
+    }
     window.twikoo.init({
-      envId: 'your-env-id',
+      envId,
       el: '#tcomment',
       lang: 'zh-CN',
     })

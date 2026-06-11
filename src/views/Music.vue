@@ -6,6 +6,12 @@
         <div class="page-content music-room">
           <h1 class="page-title">音乐室</h1>
           <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
+          <!--
+            注意：音乐文件 (Music/) 体积过大 (~163MB)，不随构建部署到 GitHub Pages。
+            音乐功能仅在本地 phpStudy 环境下可用。
+            如需线上播放，建议将音乐文件托管到外部存储（如 OSS/CDN），
+            然后将下方 track.url 改为外部链接。
+          -->
 
           <div class="player-panel">
             <div class="player-screen">
@@ -60,13 +66,19 @@ import { useMusicStore } from '../store'
 
 const musicStore = useMusicStore()
 
+const musicBase = (import.meta.env.VITE_MUSIC_BASE_URL || '').replace(/\/$/, '')
+
+function musicUrl(relativePath) {
+  return musicBase ? `${musicBase}${relativePath}` : relativePath
+}
+
 const tracks = ref([
-  { name: 'SANBAI OST - Ending Means Starting Again', source: 'Local', url: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
-  { name: 'りりあ。 - あんたなんて。', source: 'Local', url: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
-  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: 'Local', url: '/Music/小林家的龙女仆/0018865633.flac' },
-  { name: '超かぐや姫！ - IROHA\'S Dancing All Night', source: 'Local', url: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' },
-  { name: '超かぐや姫！ - ヤチヨ絵巻', source: 'Local', url: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
-])
+  { name: 'SANBAI OST - Ending Means Starting Again', source: musicBase ? 'CDN' : 'Local', path: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
+  { name: 'りりあ。 - あんたなんて。', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
+  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Local', path: '/Music/小林家的龙女仆/0018865633.flac' },
+  { name: '超かぐや姫！ - IROHA\'S Dancing All Night', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' },
+  { name: '超かぐや姫！ - ヤチヨ絵巻', source: musicBase ? 'CDN' : 'Local', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
+].map(t => ({ ...t, url: musicUrl(t.path) })))
 
 const currentTrackIndex = ref(-1)
 const currentTrack = ref(null)

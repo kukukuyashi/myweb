@@ -43,7 +43,7 @@ import NavBar from '../components/NavBar.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getPostByTitle } from '../data/posts'
+import { getPostById } from '../data/posts'
 
 const route = useRoute()
 const currentDate = ref('')
@@ -57,13 +57,7 @@ const activeSection = ref('')
 const articleBodyRef = ref(null)
 let observer = null
 
-const routeTitle = computed(() => {
-  try {
-    return decodeURIComponent(route.params.id)
-  } catch {
-    return route.params.id
-  }
-})
+const postId = computed(() => route.params.id)
 
 async function loadArticleContent() {
   loading.value = true
@@ -71,13 +65,12 @@ async function loadArticleContent() {
   articleContent.value = ''
   tocItems.value = []
 
-  const title = routeTitle.value
-  const post = getPostByTitle(title)
+  const post = getPostById(postId.value)
 
   if (!post) {
     loading.value = false
-    error.value = `文章不存在：${title}`
-    articleTitle.value = title
+    error.value = '文章不存在或已被移除'
+    articleTitle.value = '404'
     return
   }
 
@@ -143,7 +136,7 @@ function setupIntersectionObserver() {
 }
 
 onMounted(() => loadArticleContent())
-watch(routeTitle, () => loadArticleContent())
+watch(postId, () => loadArticleContent())
 onUnmounted(() => { if (observer) observer.disconnect() })
 </script>
 

@@ -39,9 +39,8 @@
                   placeholder="搜索文章..."
                   class="search-input"
                   v-model="searchQuery"
-                  @keyup.enter="searchPosts"
                 >
-                <button class="search-btn" @click="searchPosts">搜索</button>
+                <button class="search-btn" @click="searchQuery = ''">清除</button>
               </div>
             </div>
 
@@ -132,6 +131,4 @@ const listPosts = computed(() =>
 function filterByCategory(category) {
   selectedCategory.value = category
 }
-
-function searchPosts() {}
 </script>
