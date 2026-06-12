@@ -17,7 +17,6 @@ const gallery = files.map((file, i) => {
   return {
     path: `img/关于/${file}`,
     label: num,
-    sub: '收藏',
   }
 })
 
@@ -30,7 +29,7 @@ export const aboutGallery = ${JSON.stringify(gallery, null, 2).replace(/"([^"]+)
 
 // Fix JSON.stringify output to use unquoted keys properly - simpler approach:
 const lines = gallery.map(item =>
-  `  { path: '${item.path}', label: '${item.label}', sub: '${item.sub}' },`
+  `  { path: '${item.path}', label: '${item.label}' },`
 )
 
 const finalContent = `/**

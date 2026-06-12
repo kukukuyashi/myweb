@@ -60,11 +60,8 @@
             </div>
           </section>
 
-          <section class="about-block sticker-wall-block">
-            <h2>贴纸墙 / 收藏</h2>
-            <p class="gallery-note">
-              绝区零档案式排版 · 悬停高亮 · 点击查看大图。图片来自 <code>img/关于/</code>。
-            </p>
+          <section class="about-block">
+            <h2>贴纸墙</h2>
             <StickerWall :items="aboutGallery" />
           </section>
 
@@ -105,29 +102,6 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
 <style scoped>
 .about-layout {
   max-width: 960px;
-}
-
-.sticker-wall-block {
-  padding: 1.25rem 1rem 1.5rem;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
-}
-
-.sticker-wall-block h2 {
-  color: #f5f5f5;
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-.sticker-wall-block .gallery-note {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.sticker-wall-block .gallery-note code {
-  font-size: 0.75em;
-  color: var(--orange);
-  background: rgba(232, 93, 4, 0.12);
-  padding: 0.1rem 0.35rem;
 }
 
 .about-hero {
@@ -202,12 +176,6 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
   display: inline-block;
   min-width: 5rem;
   margin-right: 0.5rem;
-}
-
-.gallery-note {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-bottom: 1rem;
 }
 
 @media (max-width: 560px) {

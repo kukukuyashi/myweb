@@ -1,30 +1,26 @@
 <template>
   <div class="sticker-wall">
-    <div class="sticker-grid">
+    <div class="sticker-masonry">
       <article
         v-for="(item, index) in items"
         :key="item.path"
         class="sticker-card"
-        :class="{ active: activeIndex === index }"
+        :class="[`sticker-card--${sizeClass(index)}`, { active: activeIndex === index }]"
         @mouseenter="activeIndex = index"
         @mouseleave="activeIndex = -1"
         @click="openLightbox(index)"
       >
-        <span class="sticker-badge">
-          <span class="badge-icon">◉</span>
-          <span class="badge-num">{{ item.label }}</span>
-        </span>
+        <span class="sticker-badge">{{ item.label }}</span>
         <div class="sticker-img">
           <img
             :src="imgUrl(item.path)"
-            :alt="`收藏 ${item.label}`"
+            :alt="item.label"
             loading="lazy"
             decoding="async"
           >
         </div>
-        <footer class="sticker-foot">
+        <footer v-if="item.label" class="sticker-foot">
           <div class="sticker-title">[ {{ item.label }} ]</div>
-          <div class="sticker-sub">{{ item.sub || 'ACG · 收藏' }}</div>
         </footer>
       </article>
     </div>
@@ -35,7 +31,7 @@
         <button type="button" class="lb-nav lb-prev" @click.stop="shiftLightbox(-1)">‹</button>
         <figure class="lb-figure">
           <img :src="imgUrl(items[lightboxIndex].path)" :alt="items[lightboxIndex].label">
-          <figcaption>[ {{ items[lightboxIndex].label }} ] · {{ items[lightboxIndex].sub }}</figcaption>
+          <figcaption v-if="items[lightboxIndex].label">[ {{ items[lightboxIndex].label }} ]</figcaption>
         </figure>
         <button type="button" class="lb-nav lb-next" @click.stop="shiftLightbox(1)">›</button>
       </div>
@@ -53,6 +49,14 @@ const props = defineProps({
 
 const activeIndex = ref(-1)
 const lightboxIndex = ref(-1)
+
+/** 错落高度：按序号轮换 tall / mid / short */
+function sizeClass(index) {
+  const m = index % 5
+  if (m === 0 || m === 3) return 'tall'
+  if (m === 2) return 'short'
+  return 'mid'
+}
 
 function openLightbox(i) {
   lightboxIndex.value = i
@@ -85,108 +89,107 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.sticker-wall {
-  margin: 0 -0.5rem;
-}
-
-.sticker-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+.sticker-masonry {
+  columns: 5 148px;
+  column-gap: 12px;
 }
 
 .sticker-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  aspect-ratio: 3 / 4.35;
-  background: #121212;
-  border: 2px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
+.sticker-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--orange);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+
 .sticker-card:hover,
 .sticker-card.active {
   border-color: var(--orange);
-  box-shadow: 0 0 0 1px var(--orange), 0 8px 24px rgba(232, 93, 4, 0.22);
+  box-shadow: 0 4px 16px rgba(232, 93, 4, 0.12);
   transform: translateY(-2px);
   z-index: 1;
 }
 
-.sticker-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.4rem;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(4px);
+.sticker-card:hover::after,
+.sticker-card.active::after {
+  opacity: 1;
 }
 
-.badge-icon {
-  color: var(--orange);
-  font-size: 0.45rem;
+.sticker-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  padding: 0.12rem 0.35rem;
+  background: var(--topbar-bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.04em;
 }
 
 .sticker-img {
-  flex: 1;
-  min-height: 0;
   overflow: hidden;
-  background: #1a1a1a;
+  background: var(--bg);
 }
+
+.sticker-card--tall .sticker-img { max-height: 280px; }
+.sticker-card--mid .sticker-img { max-height: 220px; }
+.sticker-card--short .sticker-img { max-height: 165px; }
 
 .sticker-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  filter: saturate(0.72) brightness(0.95);
+  display: block;
+  filter: saturate(0.88);
   transition: filter 0.25s ease, transform 0.3s ease;
 }
 
 .sticker-card:hover .sticker-img img,
 .sticker-card.active .sticker-img img {
-  filter: saturate(1) brightness(1);
-  transform: scale(1.03);
+  filter: saturate(1);
+  transform: scale(1.02);
 }
 
 .sticker-foot {
-  flex-shrink: 0;
-  padding: 0.45rem 0.55rem 0.5rem;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.4rem 0.5rem;
+  background: var(--bg-paper);
+  border-top: 1px dashed var(--border);
 }
 
 .sticker-title {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 500;
-  color: #f0f0f0;
+  color: var(--text);
   letter-spacing: 0.04em;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.sticker-sub {
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.42);
-  margin-top: 0.15rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
 }
 
 /* Lightbox */
@@ -194,7 +197,7 @@ onUnmounted(() => {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.82);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +205,7 @@ onUnmounted(() => {
 }
 
 .lb-figure {
-  max-width: min(420px, 90vw);
+  max-width: min(440px, 92vw);
   max-height: 85vh;
   margin: 0;
   text-align: center;
@@ -213,13 +216,13 @@ onUnmounted(() => {
   max-height: calc(85vh - 3rem);
   object-fit: contain;
   border: 2px solid var(--orange);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  background: var(--bg-paper);
 }
 
 .lb-figure figcaption {
   font-family: var(--mono);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
   margin-top: 0.75rem;
 }
 
@@ -257,15 +260,17 @@ onUnmounted(() => {
 .lb-nav:hover { border-color: var(--orange); color: var(--orange); }
 
 @media (max-width: 900px) {
-  .sticker-grid { grid-template-columns: repeat(4, 1fr); }
+  .sticker-masonry { columns: 4 140px; }
 }
 
 @media (max-width: 680px) {
-  .sticker-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .sticker-masonry { columns: 3 130px; column-gap: 10px; }
+  .sticker-card--tall .sticker-img { max-height: 240px; }
+  .sticker-card--mid .sticker-img { max-height: 190px; }
+  .sticker-card--short .sticker-img { max-height: 140px; }
 }
 
 @media (max-width: 460px) {
-  .sticker-grid { grid-template-columns: repeat(2, 1fr); }
-  .sticker-card { aspect-ratio: 3 / 4.1; }
+  .sticker-masonry { columns: 2 140px; }
 }
 </style>
