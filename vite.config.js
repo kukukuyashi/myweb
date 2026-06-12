@@ -86,8 +86,13 @@ export default defineConfig(({ mode }) => {
     { src: 'Content', dest: '' },
     { src: 'img', dest: '' },
   ]
-  if (!musicCdn) {
+  const musicDir = path.join(__dirname, 'Music')
+  if (!musicCdn && fs.existsSync(musicDir)) {
     staticTargets.push({ src: 'Music', dest: '' })
+  } else if (!musicCdn) {
+    console.warn(
+      '[vite] Music/ 不存在且未设置 VITE_MUSIC_BASE_URL，构建产物不含音频（线上需配置 CDN）'
+    )
   }
 
   return {

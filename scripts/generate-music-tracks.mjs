@@ -6,6 +6,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const musicRoot = path.join(__dirname, '../Music')
 const outFile = path.join(__dirname, '../src/data/musicTracks.js')
 
+if (!fs.existsSync(musicRoot)) {
+  console.log(`Music/ 不存在，保留现有曲目表 → ${outFile}`)
+  process.exit(0)
+}
+
 const AUDIO_RE = /\.(flac|mp3)$/i
 
 /** 专辑文件夹排序：葬送のフリーレン优先，其余按路径 */

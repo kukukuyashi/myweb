@@ -23,13 +23,20 @@ jobs:
     - name: Install dependencies
       run: npm install
     
+    - name: Check music CDN config
+      run: |
+        if [ -z "${VITE_MUSIC_BASE_URL}" ]; then
+          echo "::warning::未设置 VITE_MUSIC_BASE_URL，音乐室将无音频（Music/ 已不纳入 Git，需 CDN）"
+        fi
+      env:
+        VITE_MUSIC_BASE_URL: ${{ vars.VITE_MUSIC_BASE_URL }}
+
     - name: Build project
       run: npm run build
       env:
         # Twikoo envId 会打进前端 bundle，非密钥；CI 无 .env.local 需在此注入
         VITE_TWIKOO_ENV_ID: https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
-        # 音乐 CDN（GitHub 仓库 Settings → Secrets and variables → Actions → Variables）
-        # 设置后构建跳过复制 Music/，音频从 CDN 加载
+        # 音乐 CDN（GitHub → Settings → Secrets and variables → Actions → Variables）
         VITE_MUSIC_BASE_URL: ${{ vars.VITE_MUSIC_BASE_URL }}
     
     - name: Deploy to GitHub Pages

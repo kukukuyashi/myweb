@@ -21,7 +21,8 @@ drafts/
 
 # 不需要的文件和目录
 backup-html/
-# Music/ 已纳入 Git；build 时复制到 docs/Music/ 供 GitHub Pages 使用
+# 音乐源文件放本地 Music/，用 npm run music:upload 上传到 CDN；不纳入 Git
+Music/
 docs/Music/
 # Editor directories and files
 .vscode/*
