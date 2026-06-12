@@ -7,6 +7,15 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 24,
+    title: '首页墨染晕染：鼠标 hover 显现线稿',
+    date: '2026-06-16',
+    category: '前端',
+    tags: ['Vue', 'Canvas', 'CSS', '交互', '博客'],
+    excerpt: 'InkRevealPanel + Canvas destination-out 遮罩：鼠标划过纸面晕开线稿的实现与参数说明。',
+    file: '首页墨染晕染 Canvas 鼠标显现线稿.html'
+  },
+  {
     id: 23,
     title: '陈皮有多陈：Flask + AI 鉴陈项目笔记',
     date: '2026-06-15',

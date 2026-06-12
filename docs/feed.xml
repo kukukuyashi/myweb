@@ -5,7 +5,15 @@
     <link>https://kukukuyashi.github.io/myweb/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 12 Jun 2026 06:57:12 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jun 2026 12:15:08 GMT</lastBuildDate>
+  <item>
+    <title>首页墨染晕染：鼠标 hover 显现线稿</title>
+    <link>https://kukukuyashi.github.io/myweb/myweb/content/24</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/myweb/content/24</guid>
+    <pubDate>Tue, 16 Jun 2026 00:00:00 GMT</pubDate>
+    <description>InkRevealPanel + Canvas destination-out 遮罩：鼠标划过纸面晕开线稿的实现与参数说明。</description>
+    <category>前端</category>
+  </item>
   <item>
     <title>陈皮有多陈：Flask + AI 鉴陈项目笔记</title>
     <link>https://kukukuyashi.github.io/myweb/myweb/content/23</link>

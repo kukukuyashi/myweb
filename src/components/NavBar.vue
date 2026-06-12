@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -44,6 +44,10 @@ const isDarkMode = ref(false)
 const menuOpen = ref(false)
 
 watch(() => route.path, () => { menuOpen.value = false })
+
+watch(menuOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
@@ -63,6 +67,10 @@ onMounted(() => {
     document.documentElement.setAttribute('data-theme', 'dark')
   }
 })
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <style scoped>
@@ -70,8 +78,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  height: var(--topbar-height);
+  padding: var(--safe-top) 0 0;
+  height: calc(var(--topbar-height) + var(--safe-top));
   background: var(--topbar-bg);
   color: #fff;
   font-family: var(--mono);
@@ -163,18 +171,15 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .topbar-inner { padding: 0 1rem; }
-  .topbar-nav a { padding: 0 0.6rem; font-size: 0.7rem; }
-}
-
-@media (max-width: 640px) {
   .menu-btn { display: flex; }
 
   .topbar-nav {
     position: fixed;
-    top: var(--topbar-height);
+    top: calc(var(--topbar-height) + var(--safe-top));
     right: 0;
     left: 0;
     flex-direction: column;
+    margin-left: 0;
     background: var(--topbar-bg);
     border-bottom: 2px solid var(--orange);
     transform: translateY(-110%);
@@ -194,13 +199,14 @@ onMounted(() => {
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     height: auto;
-    padding: 0.85rem 1.25rem;
+    padding: 0.9rem 1.25rem;
+    font-size: 0.8rem;
   }
 
   .nav-overlay {
     display: block;
     position: fixed;
-    inset: var(--topbar-height) 0 0 0;
+    inset: calc(var(--topbar-height) + var(--safe-top)) 0 0 0;
     background: rgba(0, 0, 0, 0.35);
     z-index: 999;
   }

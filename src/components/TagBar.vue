@@ -97,4 +97,12 @@ const isExpanded = ref(false)
   font-size: 0.65rem !important;
   color: var(--text-muted) !important;
 }
+
+@media (max-width: 640px) {
+  .tag-btn,
+  .tag-clear,
+  .tag-toggle {
+    min-height: 32px;
+  }
+}
 </style>

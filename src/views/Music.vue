@@ -262,4 +262,25 @@ onMounted(() => {
   color: var(--text-muted);
   margin-top: 1rem;
 }
+
+@media (max-width: 640px) {
+  .player-btns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ctrl-btn {
+    width: 100%;
+    text-align: center;
+    min-height: 40px;
+  }
+
+  .album-title {
+    flex-wrap: wrap;
+  }
+
+  .player-screen {
+    font-size: 0.72rem;
+  }
+}
 </style>

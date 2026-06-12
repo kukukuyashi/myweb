@@ -22,6 +22,24 @@
           </aside>
 
           <div class="article-wrap">
+            <div v-if="tocItems.length" class="toc-mobile">
+              <button type="button" class="toc-mobile-toggle" @click="tocOpen = !tocOpen">
+                目录
+                <span class="toc-mobile-icon">{{ tocOpen ? '▲' : '▼' }}</span>
+              </button>
+              <ul v-show="tocOpen" class="toc-mobile-list">
+                <li v-for="item in tocItems" :key="item.id" :class="'toc-level-' + item.level">
+                  <a
+                    :href="`#${item.id}`"
+                    :class="{ active: activeSection === item.id }"
+                    @click.prevent="scrollToSection(item.id); tocOpen = false"
+                  >
+                    {{ item.text }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
             <div class="article-content">
               <h1 class="article-title">{{ articleTitle }}</h1>
               <div class="article-meta">
@@ -104,6 +122,7 @@ const error = ref('')
 const readingMinutes = ref(0)
 const tocItems = ref([])
 const activeSection = ref('')
+const tocOpen = ref(false)
 const articleBodyRef = ref(null)
 const adjacent = ref({ newer: null, older: null })
 const relatedPosts = ref([])
@@ -396,5 +415,72 @@ onUnmounted(() => { if (observer) observer.disconnect() })
 @media (max-width: 640px) {
   .article-nav { grid-template-columns: 1fr; }
   .nav-next { text-align: left; }
+
+  .related-posts li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .article-body :deep(table) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.toc-mobile {
+  display: none;
+  margin-bottom: 1rem;
+}
+
+.toc-mobile-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--topbar-bg);
+  color: #fff;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.toc-mobile-icon {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.toc-mobile-list {
+  list-style: none;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  border-top: none;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.toc-mobile-list a {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.45rem 0.85rem;
+  border-left: 2px solid transparent;
+}
+
+.toc-mobile-list a.active,
+.toc-mobile-list a:hover {
+  color: var(--orange);
+  border-left-color: var(--orange);
+  background: var(--orange-light);
+}
+
+@media (max-width: 768px) {
+  .toc-mobile { display: block; }
 }
 </style>

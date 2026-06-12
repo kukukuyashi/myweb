@@ -94,6 +94,18 @@ const rssUrl = `${import.meta.env.BASE_URL}feed.xml`
 }
 
 @media (max-width: 768px) {
-  .site-footer { padding-bottom: 6rem; }
+  .site-footer {
+    padding: 1.5rem 0 calc(6rem + var(--safe-bottom));
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .footer-links {
+    gap: 0.5rem 1rem;
+  }
 }
 </style>

@@ -1,5 +1,24 @@
 import { defineStore } from 'pinia'
 
+function clampVolume(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return 0.5
+  return Math.min(1, Math.max(0, n))
+}
+
+function readStoredVolume(fallback = 0.5) {
+  const fromSession = sessionStorage.getItem('musicState')
+  if (fromSession) {
+    try {
+      const v = JSON.parse(fromSession).volume
+      if (v !== undefined && v !== null) return clampVolume(v)
+    } catch { /* ignore */ }
+  }
+  const fromLocal = localStorage.getItem('volume')
+  if (fromLocal !== null && fromLocal !== '') return clampVolume(fromLocal)
+  return fallback
+}
+
 export const useMusicStore = defineStore('music', {
   state: () => {
     // 从sessionStorage加载之前的状态
@@ -9,7 +28,9 @@ export const useMusicStore = defineStore('music', {
       return {
         currentSong: parsedState.currentSong,
         isPlaying: parsedState.isPlaying,
-        volume: Number(parsedState.volume ?? localStorage.getItem('volume') ?? 0.5),
+        volume: parsedState.volume != null
+          ? clampVolume(parsedState.volume)
+          : readStoredVolume(),
         currentTime: parsedState.currentTime || 0,
         duration: 0,
         playlist: [],
@@ -19,7 +40,7 @@ export const useMusicStore = defineStore('music', {
     return {
       currentSong: null,
       isPlaying: false,
-      volume: Number(localStorage.getItem('volume') ?? 0.5),
+      volume: readStoredVolume(),
       currentTime: 0,
       duration: 0,
       playlist: [],
@@ -75,9 +96,9 @@ export const useMusicStore = defineStore('music', {
       this.saveState()
     },
     setVolume(volume) {
-      this.volume = volume
-      localStorage.setItem('volume', volume)
-      // 保存状态到sessionStorage
+      const v = clampVolume(volume)
+      this.volume = v
+      localStorage.setItem('volume', String(v))
       this.saveState()
     },
     setCurrentTime(time) {

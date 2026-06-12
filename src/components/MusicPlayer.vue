@@ -54,10 +54,11 @@
           type="range"
           min="0"
           max="1"
-          step="0.1"
-          v-model.number="musicStore.volume"
+          step="0.01"
           class="volume-slider"
-          @input="updateVolume"
+          :value="musicStore.volume"
+          aria-label="音量"
+          @input="onVolumeInput"
         >
       </div>
     </div>
@@ -188,6 +189,7 @@ function loadSong(src, startTime = 0) {
   const resolved = resolveSrc(src)
 
   const onReady = () => {
+    applyVolume()
     applySeek(startTime)
     if (musicStore.isPlaying) playWhenReady()
   }
@@ -207,6 +209,7 @@ function resumeExistingPlayback() {
   if (!musicStore.currentSong || !audio.src) return false
   if (!sameSrc(audio.src, resolveSrc(musicStore.currentSong.src))) return false
 
+  applyVolume()
   syncFromAudio()
   if (musicStore.isPlaying && audio.paused) {
     playWhenReady()
@@ -233,8 +236,13 @@ function onAudioError() {
 
 const togglePlay = () => musicStore.setPlaying(!musicStore.isPlaying)
 
-const updateVolume = () => {
-  audio.volume = Number(musicStore.volume) || 0.5
+function applyVolume(vol = musicStore.volume) {
+  musicStore.setVolume(vol)
+  audio.volume = musicStore.volume
+}
+
+function onVolumeInput(e) {
+  applyVolume(Number(e.target.value))
 }
 
 const updateTime = () => {
@@ -298,7 +306,7 @@ onMounted(() => {
     musicStore.setPlaylist(buildTrackList(musicTracks))
   }
 
-  audio.volume = Number(musicStore.volume) || 0.5
+  applyVolume()
 
   if (resumeExistingPlayback()) return
 
@@ -464,9 +472,48 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .music-player { padding: 0.5rem 1rem; }
-  .song-title { max-width: 100px; font-size: 0.7rem; }
-  .progress-wrap { order: 3; width: 100%; }
-  .volume-slider { width: 60px; }
+  .music-player {
+    padding: 0.5rem 0.875rem calc(0.5rem + var(--safe-bottom));
+  }
+
+  .song-title {
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.7rem;
+  }
+
+  .player-info {
+    gap: 0.5rem;
+  }
+
+  .progress-wrap {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .controls {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .play-btn,
+  .nav-btn {
+    padding: 0.45rem 0.75rem;
+    min-height: 36px;
+  }
+
+  .volume-slider { display: none; }
+
+  .collapse-btn { right: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .music-player.collapsed {
+    padding: 0.35rem 0.75rem calc(0.35rem + var(--safe-bottom));
+  }
+
+  .player-mini { gap: 0.5rem; }
 }
 </style>

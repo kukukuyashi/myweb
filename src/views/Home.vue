@@ -282,4 +282,23 @@ watch(() => route.query.tag, (t) => {
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+@media (max-width: 640px) {
+  .hero-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-avatar-link {
+    align-self: flex-end;
+  }
+
+  .search-row {
+    flex-direction: column;
+  }
+
+  .search-row .search-btn {
+    align-self: flex-start;
+  }
+}
 </style>
