@@ -5,8 +5,15 @@
       <div class="container">
         <div class="layout">
           <div class="main-col">
-            <section class="hero">
-              <div class="hero-coord">ACG · LEARNING · AGENT · NOTES</div>
+            <InkRevealPanel
+              tag="section"
+              root-class="hero hero--ink"
+              image="img/关于/FrhwkwYaMAE2R6L.jfif"
+              position="85% center"
+              :r-end="128"
+              :max-stamps="150"
+            >
+              <div class="hero-coord">ACG · LEARNING · AGENT · NOTES · <span class="ink-hint">hover 晕染</span></div>
               <div class="hero-row">
                 <div class="hero-text">
                   <h1>写给自己的<br><em>技术学习</em>日志</h1>
@@ -36,7 +43,7 @@
                   <div class="stat-label">Online</div>
                 </div>
               </div>
-            </section>
+            </InkRevealPanel>
 
             <div class="filter-bar">
               <label>分类</label>
@@ -109,7 +116,6 @@
       </div>
     </main>
     <SiteFooter />
-    <MusicPlayer />
   </div>
 </template>
 
@@ -117,8 +123,8 @@
 import NavBar from '../components/NavBar.vue'
 import BlogAside from '../components/BlogAside.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import MusicPlayer from '../components/MusicPlayer.vue'
 import TagBar from '../components/TagBar.vue'
+import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { postsWithUrl, getLatestPost, getCategories, getTags, SITE_DESCRIPTION } from '../data/posts'

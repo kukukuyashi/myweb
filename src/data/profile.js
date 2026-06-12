@@ -4,16 +4,16 @@
 export const profile = {
   name: 'Cyinc',
   handle: 'CYINC.LOG',
-  tagline: '写代码，也写番剧观后感；Agent 在学，京吹永远进行中。',
+  tagline: '写代码，也写番剧观后感；Agent 在学，芙莉莲旅途进行中。',
   avatar: 'img/xiaoqing.png',
   email: '1344908013@qq.com',
   github: 'https://github.com/kukukuyashi/myweb',
   blog: 'https://kukukuyashi.github.io/myweb/',
 
-  acgTags: ['京吹', 'Galgame', 'OST 厨', 'MAD / AMV', 'Vtuber 切片', '轻小说'],
+  acgTags: ['葬送のフリーレン', 'MyGO!!!!!', '碧蓝档案', 'OST 厨', 'MAD / AMV', 'Agent'],
 
   favorites: [
-    { label: '最近在听', text: '音乐室里的 SANABI / 京吹 / 龙女仆 OST' },
+    { label: '最近在听', text: '音乐室里的 葬送のフリーレン OST Disc 1' },
     { label: '最近在看', text: 'Agent 文档比番剧更新还勤（但两者都在追）' },
     { label: '入坑作', text: '从浏览器 F12 到 LLM — 跨度很大，但都很好玩' },
   ],

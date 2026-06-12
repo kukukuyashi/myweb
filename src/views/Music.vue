@@ -4,8 +4,19 @@
     <main class="page-main">
       <div class="container layout-single">
         <div class="page-content music-room">
-          <h1 class="page-title">音乐室</h1>
-          <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
+          <InkRevealPanel
+            tag="header"
+            root-class="page-ink-header"
+            image="img/关于/FjtOo61UoAAWpMY.jfif"
+            position="82% center"
+            :r-end="125"
+            fade-direction="left"
+          >
+            <p class="page-ink-coord">MUSIC · OST · FLAC · <span class="ink-hint">hover 晕染</span></p>
+            <h1 class="page-title">音乐室</h1>
+            <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
+          </InkRevealPanel>
+
           <p v-if="showMusicNotice" class="music-notice">
             {{ musicNoticeText }}
           </p>
@@ -52,19 +63,19 @@
       </div>
     </main>
     <SiteFooter />
-    <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useMusicStore } from '../store'
 import { usePageMeta } from '../composables/usePageMeta'
+import { musicTracks } from '../data/musicTracks'
+import InkRevealPanel from '../components/InkRevealPanel.vue'
 
-usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，SANABI、动漫 OST 等。' })
+usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，葬送のフリーレン OST、SANABI 等。' })
 
 const musicStore = useMusicStore()
 
@@ -80,12 +91,13 @@ function musicUrl(relativePath) {
   return base + encodeURI(clean)
 }
 
-const tracks = ref([
-  { name: 'SANBAI OST - Ending Means Starting Again', source: musicBase ? 'CDN' : 'Site', path: '/Music/SANABI/SANBAI OST  Ending Means Starting Again.mp3' },
-  { name: 'りりあ。 - あんたなんて。', source: musicBase ? 'CDN' : 'Site', path: '/Music/[Hi-Res][241013]TVアニメ『らんま1／2』EDテーマ「あんたなんて。」／りりあ。[48kHz／24bit][FLAC]/01.あんたなんて。.flac' },
-  { name: '小林家的龙女仆 - 愛のシュプリーム!', source: musicBase ? 'CDN' : 'Site', path: '/Music/小林家的龙女仆/愛のシュプリーム!.flac' },
-  { name: '超かぐや姫！ - ヤチヨ絵巻', source: musicBase ? 'CDN' : 'Site', path: '/Music/[Hi-Res][260123]映画『超かぐや姫！』オリジナル・サウンドトラック[48kHz／24bit][FLAC]/33.ヤチヨ絵巻.flac' }
-].map(t => ({ ...t, url: musicUrl(t.path) })))
+const tracks = ref(
+  musicTracks.map(t => ({
+    ...t,
+    source: musicBase ? 'CDN' : t.source,
+    url: musicUrl(t.path),
+  }))
+)
 
 const currentTrackIndex = ref(-1)
 const currentTrack = ref(null)
@@ -140,7 +152,7 @@ onMounted(() => {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin: -1rem 0 0.5rem;
+  margin: 0;
 }
 
 .music-notice {

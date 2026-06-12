@@ -5,7 +5,39 @@
     <link>https://kukukuyashi.github.io/myweb/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 12 Jun 2026 03:01:32 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jun 2026 06:04:41 GMT</lastBuildDate>
+  <item>
+    <title>陈皮有多陈：Flask + AI 鉴陈项目笔记</title>
+    <link>https://kukukuyashi.github.io/myweb/myweb/content/23</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/myweb/content/23</guid>
+    <pubDate>Mon, 15 Jun 2026 00:00:00 GMT</pubDate>
+    <description>传智杯项目复盘：Flask 单体 + 通义千问视觉鉴定陈皮，页面结构、API 流程与降级策略。</description>
+    <category>项目</category>
+  </item>
+  <item>
+    <title>博客音乐室：GitHub Pages 上播 FLAC</title>
+    <link>https://kukukuyashi.github.io/myweb/myweb/content/22</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/myweb/content/22</guid>
+    <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
+    <description>音乐室架构、曲目自动生成、进度条与换页重播 bug 修复，静态站也能当播放器。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>GitHub Actions 自动部署 Vue 博客</title>
+    <link>https://kukukuyashi.github.io/myweb/myweb/content/21</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/myweb/content/21</guid>
+    <pubDate>Sat, 13 Jun 2026 00:00:00 GMT</pubDate>
+    <description>push 即发布：workflow 配置、build 脚本、环境变量与常见故障排查。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>个人博客重构记：Vue3 静态站上线</title>
+    <link>https://kukukuyashi.github.io/myweb/myweb/content/20</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/myweb/content/20</guid>
+    <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+    <description>从老静态页到 Vue3 + Vite 的完整重构历程：选型、目录结构、Pages 踩坑与时间线。</description>
+    <category>前端</category>
+  </item>
   <item>
     <title>留言板 Twikoo 部署笔记</title>
     <link>https://kukukuyashi.github.io/myweb/myweb/content/19</link>

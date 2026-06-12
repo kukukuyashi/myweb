@@ -4,13 +4,21 @@
     <main class="page-main">
       <div class="container layout-single about-layout">
         <div class="page-content">
-          <section class="about-hero">
+          <InkRevealPanel
+            tag="section"
+            root-class="about-hero about-hero--ink"
+            image="img/关于/Fp6MHMdaEAA806l.jfif"
+            position="78% center"
+            :r-end="122"
+            fade-direction="left"
+          >
             <div class="about-hero-main">
               <div class="acg-frame acg-frame--profile">
                 <img :src="avatarUrl" :alt="profile.name" width="140" height="140">
                 <span class="frame-label">ID · CYINC</span>
               </div>
               <div class="about-intro">
+                <p class="page-ink-coord">PROFILE · ACG · <span class="ink-hint">hover 晕染</span></p>
                 <h1 class="page-title about-name">{{ profile.name }}</h1>
                 <p class="about-tagline">{{ profile.tagline }}</p>
                 <div class="acg-chips about-chips">
@@ -22,7 +30,7 @@
               这个站既是<strong>技术笔记本</strong>，也是<strong>ACG 爱好者的自留地</strong>。
               笔记可以查，音乐室可以听，留言板可以聊 — 不必把爱好和技术分开。
             </p>
-          </section>
+          </InkRevealPanel>
 
           <section class="about-block">
             <h2>我是谁</h2>
@@ -76,7 +84,6 @@
       </div>
     </main>
     <SiteFooter />
-    <MusicPlayer />
   </div>
 </template>
 
@@ -84,8 +91,8 @@
 import { computed } from 'vue'
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import MusicPlayer from '../components/MusicPlayer.vue'
 import StickerWall from '../components/StickerWall.vue'
+import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 import { profile, imgUrl } from '../data/profile'
 import { aboutGallery } from '../data/aboutGallery'
@@ -100,11 +107,11 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
 </script>
 
 <style scoped>
-.about-layout {
-  max-width: 960px;
+.about-hero--ink {
+  /* ink panel 样式见 main.css */
 }
 
-.about-hero {
+.about-hero:not(.about-hero--ink) {
   margin-bottom: 2.5rem;
   padding-bottom: 2rem;
   border-bottom: 1px dashed var(--border);

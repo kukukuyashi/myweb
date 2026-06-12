@@ -53,24 +53,23 @@
 
 <script setup>
 import { useMusicStore } from '../store'
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const musicStore = useMusicStore()
-const audio = ref(null)
 const loadError = ref('')
 const sliderTime = ref(0)
 const isDragging = ref(false)
 const isCollapsed = ref(localStorage.getItem('playerCollapsed') === 'true')
 
+if (!window.globalAudio) {
+  window.globalAudio = new Audio()
+}
+const audio = window.globalAudio
+
 function toggleCollapse() {
   isCollapsed.value = !isCollapsed.value
   localStorage.setItem('playerCollapsed', isCollapsed.value ? 'true' : 'false')
 }
-
-if (!window.globalAudio) {
-  window.globalAudio = new Audio()
-}
-audio.value = window.globalAudio
 
 const sliderMax = computed(() => {
   const d = musicStore.duration
@@ -89,11 +88,11 @@ function onSeekInput(e) {
 function onSeekEnd(e) {
   if (!isDragging.value && !e) return
   isDragging.value = false
-  if (!audio.value || !musicStore.currentSong || !sliderMax.value) return
+  if (!musicStore.currentSong || !sliderMax.value) return
   const t = Number(e?.target?.value ?? sliderTime.value)
   if (!Number.isFinite(t)) return
   sliderTime.value = t
-  audio.value.currentTime = t
+  audio.currentTime = t
   musicStore.setCurrentTime(t)
   musicStore.saveState()
 }
@@ -105,80 +104,55 @@ function formatTime(sec) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-onMounted(() => {
-  audio.value.volume = Number(musicStore.volume) || 0.5
-  sliderTime.value = musicStore.currentTime
-
-  if (musicStore.currentSong) {
-    loadSong(musicStore.currentSong.src, musicStore.currentTime)
+function resolveSrc(src) {
+  try {
+    return new URL(src, window.location.origin).href
+  } catch {
+    return src
   }
+}
 
-  audio.value.addEventListener('timeupdate', updateTime)
-  audio.value.addEventListener('ended', handleEnded)
-  audio.value.addEventListener('loadedmetadata', updateDuration)
-  audio.value.addEventListener('error', onAudioError)
-
-  watch(() => musicStore.currentTime, (t) => {
-    if (!isDragging.value) sliderTime.value = t
-  })
-
-  watch(() => musicStore.isPlaying, (newValue) => {
-    if (!musicStore.currentSong) return
-    if (newValue) {
-      playWhenReady()
-    } else {
-      audio.value.pause()
-    }
-  })
-
-  watch(() => musicStore.currentSong, (newSong) => {
-    if (newSong) {
-      loadSong(newSong.src, 0)
-    } else {
-      resetAudio()
-    }
-  })
-})
-
-onUnmounted(() => {
-  if (audio.value) {
-    audio.value.removeEventListener('timeupdate', updateTime)
-    audio.value.removeEventListener('ended', handleEnded)
-    audio.value.removeEventListener('loadedmetadata', updateDuration)
-    audio.value.removeEventListener('error', onAudioError)
+function sameSrc(a, b) {
+  try {
+    return new URL(a).href === new URL(b).href
+  } catch {
+    return a === b || a.endsWith(b) || b.endsWith(a)
   }
-  sessionStorage.setItem('musicState', JSON.stringify({
-    currentSong: musicStore.currentSong,
-    isPlaying: musicStore.isPlaying,
-    currentTime: audio.value ? audio.value.currentTime : 0,
-    volume: musicStore.volume
-  }))
-})
+}
+
+function syncFromAudio() {
+  if (!audio.src) return
+  sliderTime.value = audio.currentTime
+  musicStore.setCurrentTime(audio.currentTime)
+  if (audio.duration && Number.isFinite(audio.duration)) {
+    musicStore.setDuration(audio.duration)
+  }
+}
 
 function applySeek(time) {
-  const d = audio.value.duration
+  const d = audio.duration
   const t = d && Number.isFinite(d) ? Math.min(Math.max(0, time), d) : Math.max(0, time)
-  audio.value.currentTime = t
+  audio.currentTime = t
   sliderTime.value = t
   musicStore.setCurrentTime(t)
 }
 
 function playWhenReady() {
-  if (!audio.value?.src) return
+  if (!audio.src) return
   const run = () => {
-    audio.value.play().catch(err => {
+    audio.play().catch(err => {
       console.error('播放失败:', err)
       if (err?.name === 'NotAllowedError') {
         loadError.value = '播放被浏览器阻止，请再点一次播放'
-      } else if (audio.value?.error) {
+      } else if (audio.error) {
         showLoadFailure()
       }
     })
   }
-  if (audio.value.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+  if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
     run()
   } else {
-    audio.value.addEventListener('canplay', run, { once: true })
+    audio.addEventListener('canplay', run, { once: true })
   }
 }
 
@@ -198,39 +172,37 @@ function loadSong(src, startTime = 0) {
     if (musicStore.isPlaying) playWhenReady()
   }
 
-  if (!audio.value.src || !sameSrc(audio.value.src, resolved)) {
-    audio.value.pause()
-    audio.value.addEventListener('canplay', onReady, { once: true })
-    audio.value.src = resolved
-    audio.value.load()
+  if (!audio.src || !sameSrc(audio.src, resolved)) {
+    audio.pause()
+    audio.addEventListener('canplay', onReady, { once: true })
+    audio.src = resolved
+    audio.load()
   } else {
     onReady()
   }
 }
 
-function resolveSrc(src) {
-  try {
-    return new URL(src, window.location.origin).href
-  } catch {
-    return src
-  }
-}
+/** 同一首歌已在播放时只同步 UI，避免路由切换后重头加载 */
+function resumeExistingPlayback() {
+  if (!musicStore.currentSong || !audio.src) return false
+  if (!sameSrc(audio.src, resolveSrc(musicStore.currentSong.src))) return false
 
-function sameSrc(a, b) {
-  try {
-    return new URL(a).href === new URL(b).href
-  } catch {
-    return a === b || a.endsWith(b) || b.endsWith(a)
+  syncFromAudio()
+  if (musicStore.isPlaying && audio.paused) {
+    playWhenReady()
+  } else if (!musicStore.isPlaying && !audio.paused) {
+    audio.pause()
   }
+  return true
 }
 
 function resetAudio() {
   loadError.value = ''
   isDragging.value = false
   sliderTime.value = 0
-  audio.value.pause()
-  audio.value.removeAttribute('src')
-  audio.value.load()
+  audio.pause()
+  audio.removeAttribute('src')
+  audio.load()
   musicStore.setCurrentTime(0)
   musicStore.setDuration(0)
 }
@@ -242,12 +214,12 @@ function onAudioError() {
 const togglePlay = () => musicStore.setPlaying(!musicStore.isPlaying)
 
 const updateVolume = () => {
-  if (audio.value) audio.value.volume = Number(musicStore.volume) || 0.5
+  audio.volume = Number(musicStore.volume) || 0.5
 }
 
 const updateTime = () => {
-  if (!audio.value || isDragging.value) return
-  const t = audio.value.currentTime
+  if (isDragging.value) return
+  const t = audio.currentTime
   musicStore.setCurrentTime(t)
   sliderTime.value = t
 }
@@ -259,8 +231,55 @@ const handleEnded = () => {
 }
 
 const updateDuration = () => {
-  if (audio.value) musicStore.setDuration(audio.value.duration)
+  if (audio.duration) musicStore.setDuration(audio.duration)
 }
+
+if (!window.__musicPlayerListenersBound) {
+  window.__musicPlayerListenersBound = true
+  audio.addEventListener('timeupdate', updateTime)
+  audio.addEventListener('ended', handleEnded)
+  audio.addEventListener('loadedmetadata', updateDuration)
+  audio.addEventListener('error', onAudioError)
+}
+
+watch(() => musicStore.currentTime, (t) => {
+  if (!isDragging.value) sliderTime.value = t
+})
+
+watch(() => musicStore.isPlaying, (playing) => {
+  if (!musicStore.currentSong) return
+  if (playing) {
+    if (audio.paused) playWhenReady()
+  } else {
+    audio.pause()
+  }
+})
+
+watch(
+  () => musicStore.currentSong,
+  (newSong, oldSong) => {
+    if (!newSong) {
+      resetAudio()
+      return
+    }
+    const newSrc = resolveSrc(newSong.src)
+    const oldSrc = oldSong ? resolveSrc(oldSong.src) : ''
+    if (oldSong && sameSrc(newSrc, oldSrc)) return
+    loadSong(newSong.src, 0)
+  }
+)
+
+onMounted(() => {
+  audio.volume = Number(musicStore.volume) || 0.5
+
+  if (resumeExistingPlayback()) return
+
+  if (musicStore.currentSong) {
+    loadSong(musicStore.currentSong.src, musicStore.currentTime)
+  } else {
+    sliderTime.value = musicStore.currentTime
+  }
+})
 </script>
 
 <style scoped>
@@ -309,7 +328,7 @@ const updateDuration = () => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 1100px;
+  max-width: var(--content-width);
   cursor: pointer;
   font-size: 0.75rem;
   gap: 1rem;
@@ -336,7 +355,7 @@ const updateDuration = () => {
   align-items: center;
   gap: 1rem;
   width: 100%;
-  max-width: 1100px;
+  max-width: var(--content-width);
   flex-wrap: wrap;
 }
 
@@ -405,7 +424,7 @@ const updateDuration = () => {
   font-size: 0.7rem;
   color: #ff8a80;
   margin: 0.25rem 0 0;
-  max-width: 1100px;
+  max-width: var(--content-width);
   width: 100%;
 }
 

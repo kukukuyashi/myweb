@@ -54,7 +54,7 @@ defineProps({
 
 const learningItems = [
   'AI Agent 架构',
-  '京吹 & OST 循环',
+  'MyGO!!!!! / 碧蓝档案',
   'Prompt / Tool Use',
   'Cursor / SDK 实践'
 ]

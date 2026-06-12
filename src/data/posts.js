@@ -7,6 +7,42 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 23,
+    title: '陈皮有多陈：Flask + AI 鉴陈项目笔记',
+    date: '2026-06-15',
+    category: '项目',
+    tags: ['Flask', 'Python', 'AI', 'Qwen', '比赛'],
+    excerpt: '传智杯项目复盘：Flask 单体 + 通义千问视觉鉴定陈皮，页面结构、API 流程与降级策略。',
+    file: '陈皮有多陈 Flask AI 鉴陈项目笔记.html'
+  },
+  {
+    id: 22,
+    title: '博客音乐室：GitHub Pages 上播 FLAC',
+    date: '2026-06-14',
+    category: '前端',
+    tags: ['Vue', '音乐', 'GitHub Pages', 'FLAC', '踩坑'],
+    excerpt: '音乐室架构、曲目自动生成、进度条与换页重播 bug 修复，静态站也能当播放器。',
+    file: '博客音乐室 GitHub Pages 播 FLAC.html'
+  },
+  {
+    id: 21,
+    title: 'GitHub Actions 自动部署 Vue 博客',
+    date: '2026-06-13',
+    category: '部署',
+    tags: ['GitHub Actions', 'CI/CD', 'GitHub Pages', 'Vue', '部署'],
+    excerpt: 'push 即发布：workflow 配置、build 脚本、环境变量与常见故障排查。',
+    file: 'GitHub Actions 自动部署 Vue 博客.html'
+  },
+  {
+    id: 20,
+    title: '个人博客重构记：Vue3 静态站上线',
+    date: '2026-06-12',
+    category: '前端',
+    tags: ['Vue', 'Vite', 'GitHub Pages', '博客', '重构'],
+    excerpt: '从老静态页到 Vue3 + Vite 的完整重构历程：选型、目录结构、Pages 踩坑与时间线。',
+    file: '个人博客重构记 Vue3 静态站上线.html'
+  },
+  {
     id: 19,
     title: '留言板 Twikoo 部署笔记',
     date: '2026-06-11',

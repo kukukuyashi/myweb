@@ -39,8 +39,10 @@ const rssUrl = `${import.meta.env.BASE_URL}feed.xml`
 }
 
 .footer-inner {
-  max-width: 1100px;
+  width: var(--content-width);
+  max-width: none;
   margin: 0 auto;
+  padding: 0 clamp(1.25rem, 2.5vw, 2.5rem);
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;

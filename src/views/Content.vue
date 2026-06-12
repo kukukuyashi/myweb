@@ -72,14 +72,12 @@
       </div>
     </main>
     <SiteFooter />
-    <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {

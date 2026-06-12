@@ -37,14 +37,12 @@
       </div>
     </main>
     <SiteFooter />
-    <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import MusicPlayer from '../components/MusicPlayer.vue'
 import { computed } from 'vue'
 import { posts, buildArchive, getLastUpdateDate, getTags } from '../data/posts'
 import { usePageMeta } from '../composables/usePageMeta'

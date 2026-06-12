@@ -1,5 +1,6 @@
 <template>
   <header class="topbar">
+    <div class="topbar-inner">
     <router-link to="/" class="topbar-logo">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <rect x="3" y="3" width="14" height="14" stroke="#e85d04" stroke-width="1.5" fill="none"/>
@@ -28,6 +29,7 @@
       >
         {{ menuOpen ? '✕' : '☰' }}
       </button>
+    </div>
     </div>
   </header>
   <div v-if="menuOpen" class="nav-overlay" @click="menuOpen = false"></div>
@@ -67,7 +69,8 @@ onMounted(() => {
 .topbar {
   display: flex;
   align-items: center;
-  padding: 0 2rem;
+  justify-content: center;
+  padding: 0;
   height: var(--topbar-height);
   background: var(--topbar-bg);
   color: #fff;
@@ -76,6 +79,14 @@ onMounted(() => {
   position: sticky;
   top: 0;
   z-index: 1001;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  width: var(--content-width);
+  max-width: none;
+  padding: 0 clamp(1.25rem, 2.5vw, 2.5rem);
 }
 
 .topbar-logo {
@@ -151,7 +162,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .topbar { padding: 0 1rem; }
+  .topbar-inner { padding: 0 1rem; }
   .topbar-nav a { padding: 0 0.6rem; font-size: 0.7rem; }
 }
 

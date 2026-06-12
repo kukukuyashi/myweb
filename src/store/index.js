@@ -24,8 +24,15 @@ export const useMusicStore = defineStore('music', {
   },
   actions: {
     setCurrentSong(song) {
+      const changed = !this.currentSong
+        || !song
+        || this.currentSong.src !== song.src
+        || this.currentSong.title !== song.title
       this.currentSong = song
-      // 保存状态到sessionStorage
+      if (changed) {
+        this.currentTime = 0
+        this.duration = 0
+      }
       this.saveState()
     },
     setPlaying(playing) {
