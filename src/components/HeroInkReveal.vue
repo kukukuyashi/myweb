@@ -47,7 +47,8 @@ onUnmounted(() => {
 
 function initInkMask(hero, canvas, { rEnd, maxStamps }) {
   const canHover = window.matchMedia('(hover: hover)').matches
-  if (!canHover) return () => {}
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (!canHover || reduceMotion) return () => {}
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return () => {}
@@ -269,6 +270,16 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-reveal__mask {
+    display: none;
+  }
+
+  .ink-reveal__bg {
+    opacity: 0.45;
+  }
 }
 
 @media (hover: none) {

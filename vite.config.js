@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import fs from 'fs'
@@ -45,7 +45,7 @@ function serveLocalImg() {
   }
 }
 
-/** 开发环境直接读取本地 Music/（不复制 163MB 到 dist） */
+/** 开发环境直接读取本地 Music/（不复制到 dist） */
 function serveLocalMusic() {
   return {
     name: 'serve-local-music',
@@ -79,30 +79,27 @@ function serveLocalMusic() {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  base,
-  plugins: [
-    vue(),
-    serveLocalImg(),
-    serveLocalMusic(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'Content',
-          dest: ''
-        },
-        {
-          src: 'img',
-          dest: ''
-        },
-        {
-          src: 'Music',
-          dest: ''
-        }
-      ]
-    })
-  ],
-  build: {
-    outDir: 'docs'
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const musicCdn = (env.VITE_MUSIC_BASE_URL || '').trim()
+  const staticTargets = [
+    { src: 'Content', dest: '' },
+    { src: 'img', dest: '' },
+  ]
+  if (!musicCdn) {
+    staticTargets.push({ src: 'Music', dest: '' })
+  }
+
+  return {
+    base,
+    plugins: [
+      vue(),
+      serveLocalImg(),
+      serveLocalMusic(),
+      viteStaticCopy({ targets: staticTargets }),
+    ],
+    build: {
+      outDir: 'docs',
+    },
   }
 })

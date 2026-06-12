@@ -9,7 +9,11 @@
               <h3>Contents</h3>
               <ul>
                 <li v-for="item in tocItems" :key="item.id" :class="'toc-level-' + item.level">
-                  <a @click="scrollToSection(item.id)" :class="{ active: activeSection === item.id }">
+                  <a
+                    :href="`#${item.id}`"
+                    :class="{ active: activeSection === item.id }"
+                    @click.prevent="scrollToSection(item.id)"
+                  >
                     {{ item.text }}
                   </a>
                 </li>
@@ -84,9 +88,8 @@ import {
   getPostById,
   getAdjacentPosts,
   getRelatedPosts,
-  SITE_URL,
 } from '../data/posts'
-import { usePageMeta } from '../composables/usePageMeta'
+import { usePageMeta, pageUrl } from '../composables/usePageMeta'
 import { useTwikoo } from '../composables/useTwikoo'
 import { highlightArticle, estimateReadingMinutes } from '../utils/highlightCode'
 
@@ -115,7 +118,7 @@ const pageMeta = computed(() => {
   return {
     title: post.title,
     description: post.excerpt,
-    url: `${SITE_URL}${import.meta.env.BASE_URL}content/${post.id}`.replace(/([^:]\/)\/+/g, '$1'),
+    url: pageUrl(`content/${post.id}`),
     type: 'article',
   }
 })
@@ -166,6 +169,10 @@ async function loadArticleContent() {
     highlightArticle(articleBodyRef.value)
     generateTOC()
     setupIntersectionObserver()
+    if (route.hash) {
+      const id = decodeURIComponent(route.hash.slice(1))
+      scrollToSection(id)
+    }
     await initComments()
   } catch (e) {
     console.error('加载文章失败:', e)
@@ -187,11 +194,15 @@ function generateTOC() {
   })
 }
 
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 function scrollToSection(id) {
   const element = document.getElementById(id)
   if (element) {
     const offset = element.getBoundingClientRect().top + window.pageYOffset - 80
-    window.scrollTo({ top: offset, behavior: 'smooth' })
+    window.scrollTo({ top: offset, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
     activeSection.value = id
   }
 }

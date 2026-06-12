@@ -17,7 +17,7 @@
             <p class="music-sub">收录 Cyinc 最喜欢的曲目</p>
           </InkRevealPanel>
 
-          <p v-if="showMusicNotice" class="music-notice">
+          <p v-if="musicNoticeText" class="music-notice">
             {{ musicNoticeText }}
           </p>
 
@@ -90,8 +90,11 @@ usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，葬�
 
 const musicStore = useMusicStore()
 
-const showMusicNotice = computed(() => import.meta.env.DEV && !getMusicBase())
-const musicNoticeText = '本地 dev 需项目根目录有 Music/ 文件夹。'
+const musicNoticeText = computed(() => {
+  if (getMusicBase()) return ''
+  if (import.meta.env.DEV) return '本地 dev 需项目根目录有 Music/ 文件夹。'
+  return '音频从本站静态资源加载；若播放失败可配置 VITE_MUSIC_BASE_URL 使用 CDN。'
+})
 
 const tracks = ref(buildTrackList(musicTracks))
 const albumGroups = computed(() => groupTracksByAlbum(tracks.value))

@@ -28,6 +28,9 @@ jobs:
       env:
         # Twikoo envId 会打进前端 bundle，非密钥；CI 无 .env.local 需在此注入
         VITE_TWIKOO_ENV_ID: https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
+        # 音乐 CDN（GitHub 仓库 Settings → Secrets and variables → Actions → Variables）
+        # 设置后构建跳过复制 Music/，音频从 CDN 加载
+        VITE_MUSIC_BASE_URL: ${{ vars.VITE_MUSIC_BASE_URL }}
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
