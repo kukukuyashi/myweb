@@ -11,7 +11,9 @@ export const useMusicStore = defineStore('music', {
         isPlaying: parsedState.isPlaying,
         volume: Number(parsedState.volume ?? localStorage.getItem('volume') ?? 0.5),
         currentTime: parsedState.currentTime || 0,
-        duration: 0
+        duration: 0,
+        playlist: [],
+        currentIndex: -1,
       }
     }
     return {
@@ -19,7 +21,9 @@ export const useMusicStore = defineStore('music', {
       isPlaying: false,
       volume: Number(localStorage.getItem('volume') ?? 0.5),
       currentTime: 0,
-      duration: 0
+      duration: 0,
+      playlist: [],
+      currentIndex: -1,
     }
   },
   actions: {
@@ -33,7 +37,37 @@ export const useMusicStore = defineStore('music', {
         this.currentTime = 0
         this.duration = 0
       }
+      if (song && this.playlist.length) {
+        const idx = this.playlist.findIndex(t => t.src === song.src)
+        if (idx !== -1) this.currentIndex = idx
+      }
       this.saveState()
+    },
+    setPlaylist(tracks) {
+      this.playlist = tracks.map(t => ({ title: t.name, src: t.url }))
+      if (this.currentSong) {
+        const idx = this.playlist.findIndex(t => t.src === this.currentSong.src)
+        this.currentIndex = idx
+      }
+    },
+    playAtIndex(index) {
+      if (index < 0 || index >= this.playlist.length) return false
+      this.currentIndex = index
+      this.setCurrentSong(this.playlist[index])
+      this.setPlaying(true)
+      return true
+    },
+    playNext() {
+      return this.playAtIndex(this.currentIndex + 1)
+    },
+    playPrev() {
+      return this.playAtIndex(this.currentIndex - 1)
+    },
+    hasNext() {
+      return this.currentIndex >= 0 && this.currentIndex < this.playlist.length - 1
+    },
+    hasPrev() {
+      return this.currentIndex > 0
     },
     setPlaying(playing) {
       this.isPlaying = playing
@@ -57,6 +91,7 @@ export const useMusicStore = defineStore('music', {
       this.isPlaying = false
       this.currentTime = 0
       this.duration = 0
+      this.currentIndex = -1
       this.saveState()
     },
     saveState() {

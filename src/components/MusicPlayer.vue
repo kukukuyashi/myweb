@@ -29,8 +29,26 @@
         <span class="time">{{ formatTime(musicStore.duration) }}</span>
       </div>
       <div class="controls">
-        <button @click="togglePlay" class="play-btn">
+        <button
+          type="button"
+          class="nav-btn"
+          :disabled="!musicStore.hasPrev()"
+          title="上一首"
+          @click="musicStore.playPrev()"
+        >
+          PREV
+        </button>
+        <button type="button" @click="togglePlay" class="play-btn">
           {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
+        </button>
+        <button
+          type="button"
+          class="nav-btn"
+          :disabled="!musicStore.hasNext()"
+          title="下一首"
+          @click="musicStore.playNext()"
+        >
+          NEXT
         </button>
         <input
           type="range"
@@ -53,6 +71,8 @@
 
 <script setup>
 import { useMusicStore } from '../store'
+import { musicTracks } from '../data/musicTracks'
+import { buildTrackList } from '../utils/music'
 import { ref, computed, onMounted, watch } from 'vue'
 
 const musicStore = useMusicStore()
@@ -225,6 +245,10 @@ const updateTime = () => {
 }
 
 const handleEnded = () => {
+  if (musicStore.hasNext()) {
+    musicStore.playNext()
+    return
+  }
   musicStore.setPlaying(false)
   musicStore.setCurrentTime(0)
   sliderTime.value = 0
@@ -270,6 +294,10 @@ watch(
 )
 
 onMounted(() => {
+  if (!musicStore.playlist.length) {
+    musicStore.setPlaylist(buildTrackList(musicTracks))
+  }
+
   audio.volume = Number(musicStore.volume) || 0.5
 
   if (resumeExistingPlayback()) return
@@ -397,7 +425,8 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.play-btn {
+.play-btn,
+.nav-btn {
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255,255,255,0.3);
@@ -409,9 +438,15 @@ onMounted(() => {
   transition: all 0.15s;
 }
 
-.play-btn:hover {
+.play-btn:hover,
+.nav-btn:hover:not(:disabled) {
   background: var(--orange);
   border-color: var(--orange);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .volume-slider {

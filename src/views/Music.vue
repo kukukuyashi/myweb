@@ -27,34 +27,44 @@
               <span class="screen-line dim">{{ systemStatus }}</span>
             </div>
             <div class="player-btns">
+              <button class="ctrl-btn" :disabled="!musicStore.hasPrev()" @click="playPrev">PREV</button>
               <button class="ctrl-btn" @click="togglePlay" :disabled="!currentTrack">
                 {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
               </button>
+              <button class="ctrl-btn" :disabled="!musicStore.hasNext()" @click="playNext">NEXT</button>
               <button class="ctrl-btn" @click="stopPlay" :disabled="!currentTrack">STOP</button>
             </div>
           </div>
 
-          <table class="post-table music-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Track</th>
-                <th>Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(track, index) in tracks"
-                :key="index"
-                :class="{ active: currentTrackIndex === index }"
-                @click="selectTrack(index)"
-              >
-                <td class="idx">{{ String(index + 1).padStart(2, '0') }}</td>
-                <td>{{ track.name }}</td>
-                <td><span class="tag">{{ track.source }}</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <section
+            v-for="album in albumGroups"
+            :key="album.source"
+            class="album-section"
+          >
+            <h2 class="album-title">
+              <span class="album-tag">{{ album.source }}</span>
+              <span class="album-count">{{ album.tracks.length }} tracks</span>
+            </h2>
+            <table class="post-table music-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Track</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="track in album.tracks"
+                  :key="track.index"
+                  :class="{ active: musicStore.currentIndex === track.index }"
+                  @click="selectTrack(track.index)"
+                >
+                  <td class="idx">{{ String(track.index + 1).padStart(2, '0') }}</td>
+                  <td>{{ track.name }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
 
           <p class="now-playing">
             {{ currentTrack ? '▶ ' + currentTrack.name : 'Select a track →' }}
@@ -73,45 +83,56 @@ import { ref, onMounted, computed } from 'vue'
 import { useMusicStore } from '../store'
 import { usePageMeta } from '../composables/usePageMeta'
 import { musicTracks } from '../data/musicTracks'
+import { buildTrackList, getMusicBase, groupTracksByAlbum } from '../utils/music'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
 
 usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，葬送のフリーレン OST、SANABI 等。' })
 
 const musicStore = useMusicStore()
 
-const musicBase = (import.meta.env.VITE_MUSIC_BASE_URL || '').replace(/\/$/, '')
-
-const showMusicNotice = computed(() => import.meta.env.DEV && !musicBase)
+const showMusicNotice = computed(() => import.meta.env.DEV && !getMusicBase())
 const musicNoticeText = '本地 dev 需项目根目录有 Music/ 文件夹。'
 
-function musicUrl(relativePath) {
-  if (musicBase) return `${musicBase}${relativePath}`
-  const base = import.meta.env.BASE_URL || '/'
-  const clean = relativePath.replace(/^\//, '')
-  return base + encodeURI(clean)
-}
+const tracks = ref(buildTrackList(musicTracks))
+const albumGroups = computed(() => groupTracksByAlbum(tracks.value))
 
-const tracks = ref(
-  musicTracks.map(t => ({
-    ...t,
-    source: musicBase ? 'CDN' : t.source,
-    url: musicUrl(t.path),
-  }))
-)
+const currentTrack = computed(() => {
+  const idx = musicStore.currentIndex
+  if (idx < 0 || idx >= tracks.value.length) return null
+  return tracks.value[idx]
+})
 
-const currentTrackIndex = ref(-1)
-const currentTrack = ref(null)
 const playerStatus = ref('▶ STOPPED')
 const systemStatus = ref('SYSTEM READY...')
 
+function syncPanelFromStore() {
+  if (musicStore.currentIndex >= 0 && musicStore.currentSong) {
+    playerStatus.value = musicStore.isPlaying ? '▶ PLAYING' : '▶ PAUSED'
+    systemStatus.value = `NOW PLAYING: ${musicStore.currentSong.title}`
+  } else {
+    playerStatus.value = '▶ STOPPED'
+    systemStatus.value = 'SYSTEM READY...'
+  }
+}
+
 function selectTrack(index) {
-  currentTrackIndex.value = index
-  currentTrack.value = tracks.value[index]
-  systemStatus.value = 'LOADING TRACK...'
-  musicStore.setCurrentSong({ title: currentTrack.value.name, src: currentTrack.value.url })
-  musicStore.setPlaying(true)
+  musicStore.playAtIndex(index)
   playerStatus.value = '▶ PLAYING'
-  systemStatus.value = `NOW PLAYING: ${currentTrack.value.name}`
+  systemStatus.value = `NOW PLAYING: ${musicStore.currentSong.title}`
+}
+
+function playPrev() {
+  if (musicStore.playPrev()) {
+    playerStatus.value = '▶ PLAYING'
+    systemStatus.value = `NOW PLAYING: ${musicStore.currentSong.title}`
+  }
+}
+
+function playNext() {
+  if (musicStore.playNext()) {
+    playerStatus.value = '▶ PLAYING'
+    systemStatus.value = `NOW PLAYING: ${musicStore.currentSong.title}`
+  }
 }
 
 function togglePlay() {
@@ -122,28 +143,19 @@ function togglePlay() {
   } else {
     musicStore.setPlaying(true)
     playerStatus.value = '▶ PLAYING'
-    systemStatus.value = `NOW PLAYING: ${currentTrack.value.name}`
+    systemStatus.value = `NOW PLAYING: ${musicStore.currentSong.title}`
   }
 }
 
 function stopPlay() {
   musicStore.resetPlayback()
-  currentTrackIndex.value = -1
-  currentTrack.value = null
   playerStatus.value = '▶ STOPPED'
   systemStatus.value = 'PLAYBACK STOPPED'
 }
 
 onMounted(() => {
-  if (musicStore.currentSong) {
-    const idx = tracks.value.findIndex(t => t.name === musicStore.currentSong.title)
-    if (idx !== -1) {
-      currentTrackIndex.value = idx
-      currentTrack.value = tracks.value[idx]
-      playerStatus.value = musicStore.isPlaying ? '▶ PLAYING' : '▶ PAUSED'
-      systemStatus.value = `NOW PLAYING: ${currentTrack.value.name}`
-    }
-  }
+  musicStore.setPlaylist(tracks.value)
+  syncPanelFromStore()
 })
 </script>
 
@@ -192,7 +204,7 @@ onMounted(() => {
 
 .screen-line.dim { opacity: 0.5; font-size: 0.7rem; }
 
-.player-btns { display: flex; gap: 0.5rem; }
+.player-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .ctrl-btn {
   font-family: var(--mono);
@@ -212,6 +224,30 @@ onMounted(() => {
 }
 
 .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.album-section {
+  margin-bottom: 2rem;
+}
+
+.album-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.album-tag {
+  color: var(--orange);
+  letter-spacing: 0.04em;
+}
+
+.album-count {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
 
 .music-table tr { cursor: pointer; }
 .music-table tr.active td { background: var(--orange-light); }
