@@ -10,13 +10,18 @@
         </div>
       </div>
     </main>
+    <SiteFooter />
     <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import { usePageMeta } from '../composables/usePageMeta'
+
+usePageMeta({ title: '404', description: '页面不存在或已被移除。' })
 </script>
 
 <style scoped>

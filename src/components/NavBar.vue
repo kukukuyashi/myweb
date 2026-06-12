@@ -7,23 +7,41 @@
       </svg>
       CYINC.LOG
     </router-link>
-    <nav class="topbar-nav">
-      <router-link to="/">首页</router-link>
-      <router-link to="/about">关于</router-link>
-      <router-link to="/archive">归档</router-link>
-      <router-link to="/music">音乐室</router-link>
-      <router-link to="/guestbook">留言板</router-link>
+
+    <nav class="topbar-nav" :class="{ open: menuOpen }">
+      <router-link to="/" @click="menuOpen = false">首页</router-link>
+      <router-link to="/about" @click="menuOpen = false">关于</router-link>
+      <router-link to="/archive" @click="menuOpen = false">归档</router-link>
+      <router-link to="/music" @click="menuOpen = false">音乐室</router-link>
+      <router-link to="/guestbook" @click="menuOpen = false">留言板</router-link>
     </nav>
-    <button @click="toggleDarkMode" class="theme-btn" :title="isDarkMode ? '浅色模式' : '深色模式'">
-      {{ isDarkMode ? '☀' : '☾' }}
-    </button>
+
+    <div class="topbar-actions">
+      <button @click="toggleDarkMode" class="theme-btn" :title="isDarkMode ? '浅色模式' : '深色模式'">
+        {{ isDarkMode ? '☀' : '☾' }}
+      </button>
+      <button
+        class="menu-btn"
+        :aria-expanded="menuOpen"
+        aria-label="菜单"
+        @click="menuOpen = !menuOpen"
+      >
+        {{ menuOpen ? '✕' : '☰' }}
+      </button>
+    </div>
   </header>
+  <div v-if="menuOpen" class="nav-overlay" @click="menuOpen = false"></div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const isDarkMode = ref(false)
+const menuOpen = ref(false)
+
+watch(() => route.path, () => { menuOpen.value = false })
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
@@ -57,7 +75,7 @@ onMounted(() => {
   font-size: 0.75rem;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1001;
 }
 
 .topbar-logo {
@@ -97,8 +115,15 @@ onMounted(() => {
   box-shadow: inset 0 -2px 0 var(--orange);
 }
 
-.theme-btn {
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-left: 0.5rem;
+}
+
+.theme-btn,
+.menu-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
@@ -113,18 +138,60 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.theme-btn:hover {
+.menu-btn { display: none; font-size: 0.9rem; }
+
+.theme-btn:hover,
+.menu-btn:hover {
   background: var(--orange);
   border-color: var(--orange);
+}
+
+.nav-overlay {
+  display: none;
 }
 
 @media (max-width: 768px) {
   .topbar { padding: 0 1rem; }
   .topbar-nav a { padding: 0 0.6rem; font-size: 0.7rem; }
-  .topbar-logo span { display: none; }
 }
 
-@media (max-width: 520px) {
-  .topbar-nav a:nth-child(n+4) { display: none; }
+@media (max-width: 640px) {
+  .menu-btn { display: flex; }
+
+  .topbar-nav {
+    position: fixed;
+    top: var(--topbar-height);
+    right: 0;
+    left: 0;
+    flex-direction: column;
+    background: var(--topbar-bg);
+    border-bottom: 2px solid var(--orange);
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s, opacity 0.2s;
+    z-index: 1000;
+  }
+
+  .topbar-nav.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .topbar-nav a {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    height: auto;
+    padding: 0.85rem 1.25rem;
+  }
+
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    inset: var(--topbar-height) 0 0 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 999;
+  }
 }
 </style>

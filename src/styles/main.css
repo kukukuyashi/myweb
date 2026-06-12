@@ -688,3 +688,21 @@ body::before {
   flex-shrink: 0;
   width: 90px;
 }
+
+/* Prism 代码高亮 — 文章页 */
+.article-body pre {
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.article-body pre code {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .article-body pre[class*="language-"] {
+  background: #1e1e1e;
+}

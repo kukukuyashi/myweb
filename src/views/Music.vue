@@ -51,15 +51,20 @@
         </div>
       </div>
     </main>
+    <SiteFooter />
     <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useMusicStore } from '../store'
+import { usePageMeta } from '../composables/usePageMeta'
+
+usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，SANABI、动漫 OST 等。' })
 
 const musicStore = useMusicStore()
 

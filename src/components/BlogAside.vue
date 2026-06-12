@@ -37,6 +37,10 @@
           <span class="stats-val">{{ totalCategories }}</span>
         </div>
         <div class="stats-row">
+          <span class="stats-key">Tags</span>
+          <span class="stats-val">{{ totalTags }}</span>
+        </div>
+        <div class="stats-row">
           <span class="stats-key">Online</span>
           <span class="stats-val">{{ siteAge }}</span>
         </div>

@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './styles/main.css'
+import 'prismjs/themes/prism-tomorrow.css'
 
 const app = createApp(App)
 app.use(createPinia())

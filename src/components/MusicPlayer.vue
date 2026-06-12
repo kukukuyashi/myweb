@@ -1,6 +1,15 @@
 <template>
-  <div class="music-player">
-    <div v-if="musicStore.currentSong" class="player-info">
+  <div class="music-player" :class="{ collapsed: isCollapsed, 'has-song': musicStore.currentSong }">
+    <button
+      v-if="musicStore.currentSong"
+      type="button"
+      class="collapse-btn"
+      :title="isCollapsed ? '展开播放器' : '收起播放器'"
+      @click="toggleCollapse"
+    >
+      {{ isCollapsed ? '▲' : '▼' }}
+    </button>
+    <div v-if="musicStore.currentSong && !isCollapsed" class="player-info">
       <span class="song-title">{{ musicStore.currentSong.title }}</span>
       <div class="progress-wrap">
         <span class="time">{{ formatTime(sliderTime) }}</span>
@@ -34,7 +43,11 @@
         >
       </div>
     </div>
-    <p v-if="loadError && musicStore.currentSong" class="load-error">{{ loadError }}</p>
+    <p v-if="loadError && musicStore.currentSong && !isCollapsed" class="load-error">{{ loadError }}</p>
+    <div v-if="musicStore.currentSong && isCollapsed" class="player-mini" @click="isCollapsed = false">
+      <span class="mini-title">{{ musicStore.currentSong.title }}</span>
+      <span class="mini-state">{{ musicStore.isPlaying ? '▶' : '❚❚' }}</span>
+    </div>
   </div>
 </template>
 
@@ -47,6 +60,12 @@ const audio = ref(null)
 const loadError = ref('')
 const sliderTime = ref(0)
 const isDragging = ref(false)
+const isCollapsed = ref(localStorage.getItem('playerCollapsed') === 'true')
+
+function toggleCollapse() {
+  isCollapsed.value = !isCollapsed.value
+  localStorage.setItem('playerCollapsed', isCollapsed.value ? 'true' : 'false')
+}
 
 if (!window.globalAudio) {
   window.globalAudio = new Audio()
@@ -259,6 +278,53 @@ const updateDuration = () => {
   border-top: 2px solid var(--orange);
   z-index: 1003;
   font-family: var(--mono);
+}
+
+.music-player.collapsed {
+  padding: 0.35rem 1rem;
+}
+
+.collapse-btn {
+  position: absolute;
+  top: -14px;
+  right: 1rem;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--orange);
+  background: var(--topbar-bg);
+  color: #fff;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapse-btn:hover {
+  background: var(--orange);
+}
+
+.player-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  gap: 1rem;
+}
+
+.mini-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.mini-state {
+  flex-shrink: 0;
+  color: var(--orange);
 }
 
 [data-theme="dark"] .music-player {

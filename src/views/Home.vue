@@ -19,6 +19,10 @@
                   <div class="stat-label">Categories</div>
                 </div>
                 <div>
+                  <div class="stat-num">{{ totalTags }}</div>
+                  <div class="stat-label">Tags</div>
+                </div>
+                <div>
                   <div class="stat-num">{{ siteAge }}</div>
                   <div class="stat-label">Online</div>
                 </div>
@@ -31,29 +35,44 @@
                 v-for="category in categories"
                 :key="category"
                 :class="['filter-btn', { active: selectedCategory === category }]"
-                @click="filterByCategory(category)"
+                @click="selectCategory(category)"
               >{{ category }}</button>
-              <div class="search-box">
-                <input
-                  type="text"
-                  placeholder="搜索文章..."
-                  class="search-input"
-                  v-model="searchQuery"
-                >
-                <button class="search-btn" @click="searchQuery = ''">清除</button>
-              </div>
+            </div>
+
+            <div v-if="allTags.length" class="tag-bar">
+              <label>标签</label>
+              <button
+                v-for="tag in allTags"
+                :key="tag"
+                :class="['filter-btn tag-btn', { active: selectedTag === tag }]"
+                @click="selectTag(tag)"
+              >#{{ tag }}</button>
+              <button v-if="selectedTag" class="filter-btn" @click="selectedTag = ''">清除标签</button>
+            </div>
+
+            <div class="search-row">
+              <input
+                type="text"
+                placeholder="搜索标题或摘要..."
+                class="search-input"
+                v-model="searchQuery"
+              >
+              <button v-if="searchQuery" class="search-btn" @click="searchQuery = ''">清除</button>
             </div>
 
             <div class="section-head"><h2>精选</h2></div>
-            <article v-if="featuredPost" class="featured">
+            <article v-if="featuredPost && !hasActiveFilter" class="featured">
               <span class="featured-dim">最新</span>
               <h3><router-link :to="featuredPost.url">{{ featuredPost.title }}</router-link></h3>
               <p>{{ featuredPost.excerpt }}</p>
               <div class="featured-meta">{{ featuredPost.date }} / {{ featuredPost.category }}</div>
             </article>
 
-            <div class="section-head"><h2>全部文章</h2></div>
-            <table v-if="listPosts.length" class="post-table">
+            <div class="section-head">
+              <h2>全部文章</h2>
+              <span class="result-count">{{ filteredPosts.length }} 篇</span>
+            </div>
+            <table v-if="paginatedPosts.length" class="post-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -63,8 +82,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(post, index) in listPosts" :key="post.id">
-                  <td class="idx">{{ String(index + 1).padStart(2, '0') }}</td>
+                <tr v-for="(post, index) in paginatedPosts" :key="post.id">
+                  <td class="idx">{{ String(listOffset + index + 1).padStart(2, '0') }}</td>
                   <td><router-link :to="post.url">{{ post.title }}</router-link></td>
                   <td class="hide-mobile">{{ post.date }}</td>
                   <td><span class="tag">{{ post.category }}</span></td>
@@ -72,16 +91,24 @@
               </tbody>
             </table>
             <div v-else class="no-posts">没有找到匹配的文章</div>
+
+            <div v-if="totalPages > 1" class="pagination">
+              <button :disabled="currentPage <= 1" @click="currentPage--">上一页</button>
+              <span>{{ currentPage }} / {{ totalPages }}</span>
+              <button :disabled="currentPage >= totalPages" @click="currentPage++">下一页</button>
+            </div>
           </div>
 
           <BlogAside
             :total-posts="totalPosts"
             :total-categories="totalCategories"
+            :total-tags="totalTags"
             :site-age="siteAge"
           />
         </div>
       </div>
     </main>
+    <SiteFooter />
     <MusicPlayer />
   </div>
 </template>
@@ -89,17 +116,31 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import BlogAside from '../components/BlogAside.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
-import { ref, computed } from 'vue'
-import { postsWithUrl, getLatestPost, getCategories } from '../data/posts'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { postsWithUrl, getLatestPost, getCategories, getTags, SITE_DESCRIPTION } from '../data/posts'
+import { usePageMeta } from '../composables/usePageMeta'
+
+usePageMeta({ title: '', description: SITE_DESCRIPTION })
+
+const route = useRoute()
+const router = useRouter()
+const PAGE_SIZE = 10
 
 const allPosts = postsWithUrl()
 const selectedCategory = ref('全部')
+const selectedTag = ref('')
 const searchQuery = ref('')
+const currentPage = ref(1)
 const siteStartDate = new Date('2024-01-01')
 
 const totalPosts = computed(() => allPosts.length)
 const totalCategories = computed(() => getCategories().length)
+const totalTags = computed(() => getTags().length)
+const allTags = computed(() => getTags())
+const categories = computed(() => ['全部', ...getCategories()])
 
 const siteAge = computed(() => {
   const diffDays = Math.floor((Date.now() - siteStartDate) / (1000 * 60 * 60 * 24))
@@ -108,27 +149,122 @@ const siteAge = computed(() => {
   return `${Math.floor(diffDays / 365)}y`
 })
 
-const categories = computed(() => ['全部', ...getCategories()])
+const hasActiveFilter = computed(() =>
+  selectedCategory.value !== '全部' || !!selectedTag.value || !!searchQuery.value
+)
 
-const filteredPosts = computed(() =>
-  allPosts.filter(post => {
+const filteredPosts = computed(() => {
+  let list = allPosts
+  if (!hasActiveFilter.value) {
+    const latest = getLatestPost()
+    list = list.filter(p => p.id !== latest.id)
+  }
+  return list.filter(post => {
     const cat = selectedCategory.value === '全部' || post.category === selectedCategory.value
+    const tag = !selectedTag.value || (post.tags || []).includes(selectedTag.value)
     const q = searchQuery.value.toLowerCase()
     const search = !q || post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q)
-    return cat && search
+    return cat && tag && search
   })
-)
+})
 
 const featuredPost = computed(() => {
   const latest = getLatestPost()
   return allPosts.find(p => p.id === latest.id)
 })
 
-const listPosts = computed(() =>
-  filteredPosts.value.filter(p => p.id !== featuredPost.value?.id)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredPosts.value.length / PAGE_SIZE)))
+
+const listOffset = computed(() => (currentPage.value - 1) * PAGE_SIZE)
+
+const paginatedPosts = computed(() =>
+  filteredPosts.value.slice(listOffset.value, listOffset.value + PAGE_SIZE)
 )
 
-function filterByCategory(category) {
+watch([selectedCategory, selectedTag, searchQuery], () => { currentPage.value = 1 })
+
+function selectCategory(category) {
   selectedCategory.value = category
 }
+
+function selectTag(tag) {
+  selectedTag.value = selectedTag.value === tag ? '' : tag
+  router.replace({ query: selectedTag.value ? { tag: selectedTag.value } : {} })
+}
+
+onMounted(() => {
+  if (route.query.tag) selectedTag.value = String(route.query.tag)
+})
+
+watch(() => route.query.tag, (t) => {
+  selectedTag.value = t ? String(t) : ''
+})
 </script>
+
+<style scoped>
+.tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.tag-bar label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-right: 0.25rem;
+  text-transform: uppercase;
+}
+
+.tag-btn { font-size: 0.65rem !important; }
+
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-row .search-input { flex: 1; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.result-count {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.pagination button {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pagination button:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+</style>

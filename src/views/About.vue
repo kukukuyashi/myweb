@@ -30,11 +30,16 @@
         </div>
       </div>
     </main>
+    <SiteFooter />
     <MusicPlayer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import { usePageMeta } from '../composables/usePageMeta'
+
+usePageMeta({ title: '关于我', description: 'Cyinc 的前端与 Agent 学习笔记，技术栈与联系方式。' })
 </script>

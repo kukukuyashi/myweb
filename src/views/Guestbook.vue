@@ -13,44 +13,24 @@
         </div>
       </div>
     </main>
+    <SiteFooter />
     <MusicPlayer />
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import NavBar from '../components/NavBar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import { useTwikoo } from '../composables/useTwikoo'
+import { usePageMeta } from '../composables/usePageMeta'
 
-const status = ref('loading')
+usePageMeta({ title: '留言板', description: '欢迎留下想法、建议或打个招呼。' })
 
-onMounted(() => {
-  const envId = import.meta.env.VITE_TWIKOO_ENV_ID
-  if (!envId || envId === 'your-env-id') {
-    status.value = 'error'
-    console.warn('Twikoo 未配置：在 .env.local 中设置 VITE_TWIKOO_ENV_ID')
-    return
-  }
+const { status, init } = useTwikoo('tcomment')
 
-  const script = document.createElement('script')
-  script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.32/dist/twikoo.all.min.js'
-  script.async = true
-  script.onerror = () => { status.value = 'error' }
-  script.onload = () => {
-    window.twikoo.init({
-      envId,
-      el: '#tcomment',
-      lang: 'zh-CN',
-    })
-    // 评论框渲染成功后隐藏提示
-    setTimeout(() => {
-      const el = document.getElementById('tcomment')
-      if (el?.children.length) status.value = 'ok'
-      else status.value = 'error'
-    }, 15000)
-  }
-  document.body.appendChild(script)
-})
+onMounted(() => init())
 </script>
 
 <style scoped>
@@ -62,7 +42,6 @@ onMounted(() => {
 }
 .guestbook-hint.error { color: #c0392b; }
 
-/* 不展示 Twikoo 评论里的设备/浏览器信息（tk-extras） */
 .guestbook :deep(.tk-extras) {
   display: none;
 }

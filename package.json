@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base /myweb/",
+    "build": "vite build --base /myweb/ && node scripts/generate-site-files.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",
     "preview": "vite preview --base /myweb/"
   },
   "dependencies": {
     "pinia": "^3.0.4",
+    "prismjs": "^1.30.0",
     "vue": "^3.5.25",
     "vue-router": "^4.6.4"
   },
