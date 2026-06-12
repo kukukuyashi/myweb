@@ -706,3 +706,90 @@ body::before {
 [data-theme="dark"] .article-body pre[class*="language-"] {
   background: #1e1e1e;
 }
+
+/* ── ACG 档案框：统一处理动漫图，与工业风共存 ── */
+.acg-frame {
+  position: relative;
+  display: inline-block;
+  border: 2px solid var(--border);
+  background: var(--bg-paper);
+  line-height: 0;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+
+.acg-frame::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--orange);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  pointer-events: none;
+}
+
+.acg-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.02);
+  transition: filter 0.2s ease;
+}
+
+.acg-frame:hover img {
+  filter: saturate(1) contrast(1);
+}
+
+.acg-frame--avatar {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.acg-frame--hero {
+  width: 80px;
+  height: 80px;
+}
+
+.acg-frame--profile {
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.acg-frame--profile .frame-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: rgba(26, 26, 26, 0.75);
+  padding: 0.2rem 0.35rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.acg-frame--gallery {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.acg-chip {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--border);
+  color: var(--steel);
+  background: var(--bg);
+}
+
+.acg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}

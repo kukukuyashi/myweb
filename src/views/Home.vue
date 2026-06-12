@@ -6,9 +6,18 @@
         <div class="layout">
           <div class="main-col">
             <section class="hero">
-              <div class="hero-coord">LEARNING · AGENT · NOTES</div>
-              <h1>写给自己的<br><em>技术学习</em>日志</h1>
-              <p class="hero-desc">前端笔记、Agent 探索、踩坑记录。不追热点，只留真正用得上的东西。</p>
+              <div class="hero-coord">ACG · LEARNING · AGENT · NOTES</div>
+              <div class="hero-row">
+                <div class="hero-text">
+                  <h1>写给自己的<br><em>技术学习</em>日志</h1>
+                  <p class="hero-desc">前端笔记、Agent 探索、踩坑记录 — 追番听歌和技术一样认真。</p>
+                </div>
+                <router-link to="/about" class="hero-avatar-link" title="关于 Cyinc">
+                  <div class="acg-frame acg-frame--avatar acg-frame--hero">
+                    <img :src="avatarUrl" alt="Cyinc" width="80" height="80">
+                  </div>
+                </router-link>
+              </div>
               <div class="hero-stats">
                 <div>
                   <div class="stat-num">{{ totalPosts }}</div>
@@ -39,16 +48,7 @@
               >{{ category }}</button>
             </div>
 
-            <div v-if="allTags.length" class="tag-bar">
-              <label>标签</label>
-              <button
-                v-for="tag in allTags"
-                :key="tag"
-                :class="['filter-btn tag-btn', { active: selectedTag === tag }]"
-                @click="selectTag(tag)"
-              >#{{ tag }}</button>
-              <button v-if="selectedTag" class="filter-btn" @click="selectedTag = ''">清除标签</button>
-            </div>
+            <TagBar v-if="allTags.length" v-model="selectedTag" :tags="allTags" @update:model-value="onTagChange" />
 
             <div class="search-row">
               <input
@@ -118,12 +118,16 @@ import NavBar from '../components/NavBar.vue'
 import BlogAside from '../components/BlogAside.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import TagBar from '../components/TagBar.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { postsWithUrl, getLatestPost, getCategories, getTags, SITE_DESCRIPTION } from '../data/posts'
 import { usePageMeta } from '../composables/usePageMeta'
+import { profile, imgUrl } from '../data/profile'
 
 usePageMeta({ title: '', description: SITE_DESCRIPTION })
+
+const avatarUrl = computed(() => imgUrl(profile.avatar))
 
 const route = useRoute()
 const router = useRouter()
@@ -187,9 +191,9 @@ function selectCategory(category) {
   selectedCategory.value = category
 }
 
-function selectTag(tag) {
-  selectedTag.value = selectedTag.value === tag ? '' : tag
-  router.replace({ query: selectedTag.value ? { tag: selectedTag.value } : {} })
+function onTagChange(tag) {
+  selectedTag.value = tag
+  router.replace({ query: tag ? { tag } : {} })
 }
 
 onMounted(() => {
@@ -202,23 +206,28 @@ watch(() => route.query.tag, (t) => {
 </script>
 
 <style scoped>
-.tag-bar {
+.hero-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  margin-bottom: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 0.25rem;
 }
 
-.tag-bar label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin-right: 0.25rem;
-  text-transform: uppercase;
+.hero-text {
+  flex: 1;
+  min-width: 0;
 }
 
-.tag-btn { font-size: 0.65rem !important; }
+.hero-avatar-link {
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.hero-avatar-link:hover {
+  transform: translateY(-2px);
+}
 
 .search-row {
   display: flex;

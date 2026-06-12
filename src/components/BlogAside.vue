@@ -1,16 +1,9 @@
 <template>
   <aside class="blog-aside">
     <div class="panel">
-      <div class="panel-header">About</div>
+      <div class="panel-header">Profile</div>
       <div class="panel-body">
-        <p>前端开发者，正在学 Agent 与 LLM 应用。</p>
-        <div class="skill-tags">
-          <span>Vue</span>
-          <span>Agent</span>
-          <span>LLM</span>
-          <span>Python</span>
-          <span>Node.js</span>
-        </div>
+        <ProfileCard />
       </div>
     </div>
 
@@ -50,6 +43,8 @@
 </template>
 
 <script setup>
+import ProfileCard from './ProfileCard.vue'
+
 defineProps({
   totalPosts: { type: [Number, String], default: 0 },
   totalCategories: { type: [Number, String], default: 0 },
@@ -59,8 +54,8 @@ defineProps({
 
 const learningItems = [
   'AI Agent 架构',
+  '京吹 & OST 循环',
   'Prompt / Tool Use',
-  'RAG 与知识库',
   'Cursor / SDK 实践'
 ]
 </script>
