@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base /myweb/ && node scripts/generate-site-files.mjs docs",
+    "build": "node scripts/generate-about-gallery.mjs && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",
     "preview": "vite preview --base /myweb/"
   },

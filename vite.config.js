@@ -8,6 +8,43 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const base = '/myweb/'
 
+/** 开发环境直接读取本地 img/（含子目录） */
+function serveLocalImg() {
+  const imgRoot = path.join(__dirname, 'img')
+  const types = {
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.jfif': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.ico': 'image/x-icon',
+  }
+  return {
+    name: 'serve-local-img',
+    configureServer(server) {
+      server.middlewares.use(`${base}img`, (req, res, next) => {
+        const rel = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '')
+        const filePath = path.normalize(path.join(imgRoot, rel))
+        if (!filePath.startsWith(imgRoot)) {
+          res.statusCode = 403
+          res.end()
+          return
+        }
+        fs.stat(filePath, (err, stat) => {
+          if (err || !stat.isFile()) {
+            next()
+            return
+          }
+          const ext = path.extname(filePath).toLowerCase()
+          res.setHeader('Content-Type', types[ext] || 'application/octet-stream')
+          fs.createReadStream(filePath).pipe(res)
+        })
+      })
+    },
+  }
+}
+
 /** 开发环境直接读取本地 Music/（不复制 163MB 到 dist） */
 function serveLocalMusic() {
   return {
@@ -46,6 +83,7 @@ export default defineConfig({
   base,
   plugins: [
     vue(),
+    serveLocalImg(),
     serveLocalMusic(),
     viteStaticCopy({
       targets: [

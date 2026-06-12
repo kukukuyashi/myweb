@@ -60,27 +60,12 @@
             </div>
           </section>
 
-          <section class="about-block">
+          <section class="about-block sticker-wall-block">
             <h2>贴纸墙 / 收藏</h2>
             <p class="gallery-note">
-              图片统一加「档案框」处理：硬边框 + 切角 + 悬停才恢复饱和，和站点工业风共存，不会突然变成粉色博客。
+              绝区零档案式排版 · 悬停高亮 · 点击查看大图。图片来自 <code>img/关于/</code>。
             </p>
-            <div class="gallery-grid">
-              <figure
-                v-for="item in profile.gallery"
-                :key="item.path"
-                class="gallery-item"
-              >
-                <div class="acg-frame acg-frame--gallery">
-                  <img
-                    :src="imgUrl(item.path)"
-                    :alt="item.caption"
-                    loading="lazy"
-                  >
-                </div>
-                <figcaption>{{ item.caption }}</figcaption>
-              </figure>
-            </div>
+            <StickerWall :items="aboutGallery" />
           </section>
 
           <section class="about-block">
@@ -103,8 +88,10 @@ import { computed } from 'vue'
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import StickerWall from '../components/StickerWall.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 import { profile, imgUrl } from '../data/profile'
+import { aboutGallery } from '../data/aboutGallery'
 
 usePageMeta({
   title: '关于我',
@@ -117,7 +104,30 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
 
 <style scoped>
 .about-layout {
-  max-width: 900px;
+  max-width: 960px;
+}
+
+.sticker-wall-block {
+  padding: 1.25rem 1rem 1.5rem;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.sticker-wall-block h2 {
+  color: #f5f5f5;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.sticker-wall-block .gallery-note {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.sticker-wall-block .gallery-note code {
+  font-size: 0.75em;
+  color: var(--orange);
+  background: rgba(232, 93, 4, 0.12);
+  padding: 0.1rem 0.35rem;
 }
 
 .about-hero {
@@ -198,20 +208,6 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
   font-size: 0.82rem;
   color: var(--text-muted);
   margin-bottom: 1rem;
-}
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
-}
-
-.gallery-item figcaption {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  margin-top: 0.35rem;
-  text-align: center;
 }
 
 @media (max-width: 560px) {

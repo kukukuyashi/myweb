@@ -18,21 +18,8 @@ export const profile = {
     { label: '入坑作', text: '从浏览器 F12 到 LLM — 跨度很大，但都很好玩' },
   ],
 
-  /** 画廊：path 相对站点根，caption 可自改 */
-  gallery: [
-    { path: 'img/xiaoqing.png', caption: '小清 · 站点头像' },
-    { path: 'img/huiye1.png', caption: '京吹 chibi' },
-    { path: 'img/yuhecy.jpg', caption: '收藏' },
-    { path: 'img/guigui.jpg', caption: '收藏' },
-    { path: 'img/llk1.jpg', caption: '收藏' },
-    { path: 'img/ba2.jpg', caption: '收藏' },
-    { path: 'img/ba1.gif', caption: '收藏 · 动图' },
-    { path: 'img/1.jfif', caption: '相册' },
-    { path: 'img/2.jfif', caption: '相册' },
-    { path: 'img/3.jfif', caption: '相册' },
-    { path: 'img/4.jfif', caption: '相册' },
-    { path: 'img/5.jfif', caption: '相册' },
-  ],
+  /** @deprecated 贴纸墙改用 aboutGallery.js (img/关于/) */
+  gallery: [],
 }
 
 export function imgUrl(relativePath) {
