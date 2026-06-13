@@ -12,6 +12,18 @@ if (!fs.existsSync(musicRoot)) {
 }
 
 const AUDIO_RE = /\.(flac|mp3)$/i
+const COVER_NAMES = ['folder.jpg', 'COVER.jpg', 'cover.jpg', 'Folder.jpg']
+
+function findCoverPath(dirFull, dirRel) {
+  for (const name of COVER_NAMES) {
+    const full = path.join(dirFull, name)
+    if (fs.existsSync(full) && fs.statSync(full).isFile()) {
+      const relPath = dirRel === '.' ? name : `${dirRel}/${name}`
+      return `/Music/${relPath.replace(/\\/g, '/')}`
+    }
+  }
+  return ''
+}
 
 /** 专辑文件夹排序：葬送のフリーレン优先，其余按路径 */
 const ALBUM_PRIORITY = [
@@ -56,10 +68,12 @@ function walkAudio(dir, rel = '') {
       items.push(...walkAudio(full, relPath))
     } else if (AUDIO_RE.test(entry.name)) {
       const dirRel = rel || '.'
+      const dirFull = path.dirname(full)
       items.push({
         name: trackName(entry.name, dirRel),
         source: sourceLabel(dirRel),
         path: `/Music/${relPath.replace(/\\/g, '/')}`,
+        cover: findCoverPath(dirFull, dirRel),
         _dir: dirRel,
         _sort: trackSortKey(entry.name),
       })
@@ -81,9 +95,10 @@ const tracks = walkAudio(musicRoot).sort((a, b) => {
   return a._sort - b._sort
 })
 
-const lines = tracks.map(({ name, source, path: p }) => {
+const lines = tracks.map(({ name, source, path: p, cover }) => {
   const esc = (s) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
-  return `  { name: '${esc(name)}', source: '${esc(source)}', path: '${esc(p)}' },`
+  const coverPart = cover ? `, cover: '${esc(cover)}'` : ''
+  return `  { name: '${esc(name)}', source: '${esc(source)}', path: '${esc(p)}'${coverPart} },`
 })
 
 const content = `/**

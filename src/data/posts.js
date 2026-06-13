@@ -240,6 +240,94 @@ export function getLatestPost() {
   return getPostsSorted()[0]
 }
 
+/** 首页精选文章 id（与 posts 里某篇 id 对应，换精选改这里） */
+export const FEATURED_POST_ID = 24
+
+/** 分类色条 / 图标色 */
+export const CATEGORY_COLORS = {
+  前端: '#e85d04',
+  Java: '#457b9d',
+  Agent: '#7b2cbf',
+  部署: '#2a9d8f',
+  项目: '#e76f51',
+}
+
+export const CATEGORY_ICONS = {
+  前端: 'FE',
+  Java: 'JV',
+  Agent: 'AI',
+  部署: 'OP',
+  项目: 'PJ',
+}
+
+/** PageRails ACG 标签 → 首页 ?tag= 筛选（含别名匹配） */
+export const FAN_TAG_FILTERS = {
+  'フリーレン': ['フリーレン', 'Frieren', '葬送'],
+  'MyGO!!!!!': ['MyGO', 'BanG Dream', 'MyGO!!!!!'],
+  BA: ['碧蓝', 'Blue Archive', 'BA'],
+}
+
+/** 首页精选（带 url） */
+export function getFeaturedPost() {
+  const post = getPostById(FEATURED_POST_ID) ?? getLatestPost()
+  return { ...post, url: postUrl(post.id) }
+}
+
+/** 首页大卡片：精选 + 最新，最多 limit 篇 */
+export function getHighlightPosts(limit = 3) {
+  const sorted = getPostsSorted().map(p => ({ ...p, url: postUrl(p.id) }))
+  const featured = getFeaturedPost()
+  const seen = new Set()
+  const result = []
+
+  if (featured) {
+    result.push({ ...featured, featured: true })
+    seen.add(featured.id)
+  }
+
+  for (const post of sorted) {
+    if (result.length >= limit) break
+    if (!seen.has(post.id)) {
+      result.push({ ...post, featured: false })
+      seen.add(post.id)
+    }
+  }
+
+  return result
+}
+
+export function getRecentPosts(limit = 3) {
+  return getPostsSorted()
+    .slice(0, limit)
+    .map(p => ({ ...p, url: postUrl(p.id) }))
+}
+
+export function getCategoryColor(category) {
+  return CATEGORY_COLORS[category] || '#5c5c5c'
+}
+
+export function getCategoryIcon(category) {
+  return CATEGORY_ICONS[category] || category?.slice(0, 2)?.toUpperCase() || '??'
+}
+
+export function estimateReadingMinutesFromText(text) {
+  const len = String(text || '').replace(/\s+/g, '').length
+  return Math.max(1, Math.ceil(len / 450))
+}
+
+export function imgUrl(relativePath) {
+  const base = import.meta.env.BASE_URL || '/'
+  return base + String(relativePath).replace(/^\//, '')
+}
+
+/** 判断文章是否匹配 ACG 粉丝标签筛选 */
+export function postMatchesFanTag(post, fanTag) {
+  const aliases = FAN_TAG_FILTERS[fanTag]
+  if (!aliases) return (post.tags || []).includes(fanTag)
+  const haystack = `${post.title} ${post.excerpt} ${(post.tags || []).join(' ')}`.toLowerCase()
+  return aliases.some(alias => haystack.includes(alias.toLowerCase()))
+}
+
 /** 所有分类（去重） */
 export function getCategories() {
   return [...new Set(posts.map(p => p.category))]

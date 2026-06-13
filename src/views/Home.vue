@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div ref="homeRef" class="home">
     <NavBar />
     <main class="page-main">
       <div class="container">
@@ -8,18 +8,24 @@
             <InkRevealPanel
               tag="section"
               root-class="hero hero--ink"
-              image="img/关于/FrhwkwYaMAE2R6L.jfif"
-              position="85% center"
+              :image="HOME_INK_IMAGE"
+              :position="HOME_INK_POSITION"
               :r-end="128"
               :max-stamps="150"
             >
-              <div class="hero-coord">ACG · LEARNING · AGENT · NOTES · <span class="ink-hint">hover 晕染</span></div>
+              <HeroTicker :items="tickerItems" />
+              <p class="hero-season">{{ seasonLabel }} · SEASON SKIN</p>
               <div class="hero-row">
                 <div class="hero-text">
-                  <h1>写给自己的<br><em>技术学习</em>日志</h1>
+                  <h1>技术学习日志</h1>
                   <p class="hero-desc">前端笔记、Agent 探索、踩坑记录 — 追番听歌和技术一样认真。</p>
+                  <p class="hero-about">
+                    <router-link to="/about">我是谁</router-link>
+                    <span class="hero-about-sep">·</span>
+                    <span>贴纸墙与 ACG 档案</span>
+                  </p>
                 </div>
-                <router-link to="/about" class="hero-avatar-link" title="关于 Cyinc">
+                <router-link to="/about" class="hero-avatar-link hero-avatar-float" title="关于 Cyinc">
                   <div class="acg-frame acg-frame--avatar acg-frame--hero">
                     <img :src="avatarUrl" alt="Cyinc" width="80" height="80">
                   </div>
@@ -27,25 +33,25 @@
               </div>
               <div class="hero-stats">
                 <div>
-                  <div class="stat-num">{{ totalPosts }}</div>
+                  <div class="stat-num"><StatCounter :value="totalPosts" /></div>
                   <div class="stat-label">Articles</div>
                 </div>
                 <div>
-                  <div class="stat-num">{{ totalCategories }}</div>
+                  <div class="stat-num"><StatCounter :value="totalCategories" /></div>
                   <div class="stat-label">Categories</div>
                 </div>
                 <div>
-                  <div class="stat-num">{{ totalTags }}</div>
+                  <div class="stat-num"><StatCounter :value="totalTags" /></div>
                   <div class="stat-label">Tags</div>
                 </div>
                 <div>
-                  <div class="stat-num">{{ siteAge }}</div>
+                  <div class="stat-num"><StatCounter :value="siteAge" /></div>
                   <div class="stat-label">Online</div>
                 </div>
               </div>
             </InkRevealPanel>
 
-            <div class="filter-bar">
+            <div class="filter-bar reveal-item" data-reveal style="--reveal-delay: 80ms">
               <label>分类</label>
               <button
                 v-for="category in categories"
@@ -67,43 +73,65 @@
               <button v-if="searchQuery" class="search-btn" @click="searchQuery = ''">清除</button>
             </div>
 
-            <div class="section-head"><h2>精选</h2></div>
-            <article v-if="featuredPost && !hasActiveFilter" class="featured">
-              <span class="featured-dim">最新</span>
-              <h3><router-link :to="featuredPost.url">{{ featuredPost.title }}</router-link></h3>
-              <p>{{ featuredPost.excerpt }}</p>
-              <div class="featured-meta">{{ featuredPost.date }} / {{ featuredPost.category }}</div>
-            </article>
+            <div class="section-head reveal-item" data-reveal style="--reveal-delay: 120ms"><h2>精选</h2></div>
+            <div v-if="highlightPosts.length && !hasActiveFilter" class="featured-grid">
+              <PostCard
+                v-for="(post, i) in highlightPosts"
+                :key="post.id"
+                :post="post"
+                :featured="post.featured"
+                :reveal-delay="160 + i * 90"
+              />
+            </div>
 
-            <div class="section-head">
+            <div class="section-head reveal-item" data-reveal style="--reveal-delay: 100ms">
               <h2>全部文章</h2>
               <span class="result-count">{{ filteredPosts.length }} 篇</span>
             </div>
-            <table v-if="paginatedPosts.length" class="post-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>标题</th>
-                  <th class="hide-mobile">日期</th>
-                  <th>分类</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(post, index) in paginatedPosts" :key="post.id">
-                  <td class="idx">{{ String(listOffset + index + 1).padStart(2, '0') }}</td>
-                  <td><router-link :to="post.url">{{ post.title }}</router-link></td>
-                  <td class="hide-mobile">{{ post.date }}</td>
-                  <td><span class="tag">{{ post.category }}</span></td>
-                </tr>
-              </tbody>
-            </table>
-            <div v-else class="no-posts">没有找到匹配的文章</div>
+            <ul v-if="paginatedPosts.length" class="archive-list">
+              <li
+                v-for="(post, index) in paginatedPosts"
+                :key="post.id"
+                class="archive-row reveal-item"
+                data-reveal
+                :style="{ '--reveal-delay': `${120 + index * 45}ms`, '--cat-color': getCategoryColor(post.category) }"
+              >
+                <span class="archive-idx">{{ String(listOffset + index + 1).padStart(2, '0') }}</span>
+                <router-link :to="post.url" class="archive-title">{{ post.title }}</router-link>
+                <span class="archive-date hide-mobile">{{ post.date }}</span>
+                <span class="archive-cat tag">{{ post.category }}</span>
+              </li>
+            </ul>
+            <SystemHaltPanel
+              v-else
+              compact
+              code="EMPTY"
+              headline="NO MATCH"
+              message="没有找到匹配的文章"
+              status="FILTER_IDLE"
+              :lines="emptyDiagLines"
+              :home-link="false"
+            />
 
             <div v-if="totalPages > 1" class="pagination">
               <button :disabled="currentPage <= 1" @click="currentPage--">上一页</button>
               <span>{{ currentPage }} / {{ totalPages }}</span>
               <button :disabled="currentPage >= totalPages" @click="currentPage++">下一页</button>
             </div>
+
+            <section class="about-strip reveal-item" data-reveal style="--reveal-delay: 200ms">
+              <router-link to="/about" class="about-strip-inner">
+                <div class="acg-frame acg-frame--avatar about-strip-avatar">
+                  <img :src="avatarUrl" alt="Cyinc" width="56" height="56">
+                </div>
+                <div class="about-strip-text">
+                  <h3>关于 Cyinc</h3>
+                  <p>写代码，也写番剧观后感；Agent 在学，芙莉莲旅途进行中。</p>
+                  <p class="about-strip-sub">技术笔记本 + ACG 自留地 — 不必把爱好分开。</p>
+                </div>
+                <span class="about-strip-cta">贴纸墙 →</span>
+              </router-link>
+            </section>
           </div>
 
           <BlogAside
@@ -125,13 +153,34 @@ import BlogAside from '../components/BlogAside.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import TagBar from '../components/TagBar.vue'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
-import { ref, computed, watch, onMounted } from 'vue'
+import PostCard from '../components/PostCard.vue'
+import HeroTicker from '../components/HeroTicker.vue'
+import StatCounter from '../components/StatCounter.vue'
+import SystemHaltPanel from '../components/SystemHaltPanel.vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { postsWithUrl, getLatestPost, getCategories, getTags, SITE_DESCRIPTION } from '../data/posts'
+import {
+  postsWithUrl,
+  getHighlightPosts,
+  getCategories,
+  getTags,
+  getCategoryColor,
+  postMatchesFanTag,
+  FAN_TAG_FILTERS,
+  SITE_DESCRIPTION,
+} from '../data/posts'
 import { usePageMeta } from '../composables/usePageMeta'
+import { useRevealOnScroll, observeReveal } from '../composables/useRevealOnScroll'
+import { useSeasonTheme } from '../composables/useSeasonTheme'
+import { HOME_INK_IMAGE, HOME_INK_POSITION } from '../data/inkTheme'
 import { profile, imgUrl } from '../data/profile'
 
 usePageMeta({ title: '', description: SITE_DESCRIPTION })
+
+const { seasonLabel, tickerItems } = useSeasonTheme()
+
+const homeRef = ref(null)
+useRevealOnScroll(homeRef)
 
 const avatarUrl = computed(() => imgUrl(profile.avatar))
 
@@ -163,24 +212,35 @@ const hasActiveFilter = computed(() =>
   selectedCategory.value !== '全部' || !!selectedTag.value || !!searchQuery.value
 )
 
+const highlightPosts = computed(() => getHighlightPosts(3))
+
+const emptyDiagLines = computed(() => {
+  const parts = []
+  if (selectedCategory.value !== '全部') parts.push(`CAT:: ${selectedCategory.value}`)
+  if (selectedTag.value) parts.push(`TAG:: ${selectedTag.value}`)
+  if (searchQuery.value) parts.push(`Q:: ${searchQuery.value}`)
+  parts.push('HINT:: clear filters or try another keyword')
+  return parts
+})
+
 const filteredPosts = computed(() => {
   let list = allPosts
   if (!hasActiveFilter.value) {
-    const latest = getLatestPost()
-    list = list.filter(p => p.id !== latest.id)
+    const excludeIds = new Set(highlightPosts.value.map(p => p.id))
+    list = list.filter(p => !excludeIds.has(p.id))
   }
   return list.filter(post => {
     const cat = selectedCategory.value === '全部' || post.category === selectedCategory.value
-    const tag = !selectedTag.value || (post.tags || []).includes(selectedTag.value)
+    let tag = true
+    if (selectedTag.value) {
+      tag = FAN_TAG_FILTERS[selectedTag.value]
+        ? postMatchesFanTag(post, selectedTag.value)
+        : (post.tags || []).includes(selectedTag.value)
+    }
     const q = searchQuery.value.toLowerCase()
     const search = !q || post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q)
     return cat && tag && search
   })
-})
-
-const featuredPost = computed(() => {
-  const latest = getLatestPost()
-  return allPosts.find(p => p.id === latest.id)
 })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredPosts.value.length / PAGE_SIZE)))
@@ -192,6 +252,10 @@ const paginatedPosts = computed(() =>
 )
 
 watch([selectedCategory, selectedTag, searchQuery], () => { currentPage.value = 1 })
+
+watch([paginatedPosts, currentPage], () => {
+  nextTick(() => observeReveal(homeRef.value))
+})
 
 function selectCategory(category) {
   selectedCategory.value = category
@@ -283,6 +347,36 @@ watch(() => route.query.tag, (t) => {
   cursor: not-allowed;
 }
 
+.hero-about {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.65rem;
+}
+
+.hero-about a {
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.hero-about a:hover {
+  text-decoration: underline;
+}
+
+.hero-about-sep {
+  margin: 0 0.35rem;
+  opacity: 0.5;
+}
+
+.hero-season {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+  opacity: 0.75;
+  margin: -0.35rem 0 0.85rem;
+}
+
 @media (max-width: 640px) {
   .hero-row {
     flex-direction: column;
@@ -299,6 +393,12 @@ watch(() => route.query.tag, (t) => {
 
   .search-row .search-btn {
     align-self: flex-start;
+  }
+
+  .featured-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }
 </style>

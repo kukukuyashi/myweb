@@ -16,6 +16,32 @@ const LANG_MAP = {
   shell: 'bash',
 }
 
+function attachCopyButton(pre) {
+  if (pre.querySelector('.code-copy-btn')) return
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'code-copy-btn'
+  btn.textContent = 'COPY'
+  btn.setAttribute('aria-label', '复制代码')
+  btn.addEventListener('click', async () => {
+    const code = pre.querySelector('code')?.textContent || ''
+    try {
+      await navigator.clipboard.writeText(code)
+      btn.textContent = 'OK'
+      btn.classList.add('code-copy-btn--done')
+      setTimeout(() => {
+        btn.textContent = 'COPY'
+        btn.classList.remove('code-copy-btn--done')
+      }, 1600)
+    } catch {
+      btn.textContent = 'ERR'
+      setTimeout(() => { btn.textContent = 'COPY' }, 1600)
+    }
+  })
+  pre.style.position = 'relative'
+  pre.appendChild(btn)
+}
+
 export function highlightArticle(root) {
   if (!root) return
   root.querySelectorAll('pre code').forEach(block => {
@@ -29,6 +55,8 @@ export function highlightArticle(root) {
     lang = LANG_MAP[lang] || lang
     block.classList.add(`language-${lang}`)
     Prism.highlightElement(block)
+    const pre = block.closest('pre')
+    if (pre) attachCopyButton(pre)
   })
 }
 

@@ -18,6 +18,21 @@ const root = path.join(__dirname, '..')
 const musicRoot = path.join(root, 'Music')
 
 const AUDIO_RE = /\.(flac|mp3|ogg|wav)$/i
+const COVER_RE = /^(folder|cover|COVER|Folder)\.(jpg|jpeg|png|webp)$/i
+
+function walkMusicFiles(dir, rel = '') {
+  const files = []
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const relPath = rel ? `${rel}/${entry.name}` : entry.name
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      files.push(...walkMusicFiles(full, relPath))
+    } else if (AUDIO_RE.test(entry.name) || COVER_RE.test(entry.name)) {
+      files.push({ full, key: `Music/${relPath.replace(/\\/g, '/')}` })
+    }
+  }
+  return files
+}
 
 function loadEnvFile(relPath) {
   const file = path.join(root, relPath)
@@ -40,20 +55,6 @@ function requireEnv(name) {
   const v = (process.env[name] || '').trim()
   if (!v) throw new Error(`缺少环境变量 ${name}（在 .env.local 中配置）`)
   return v
-}
-
-function walkAudio(dir, rel = '') {
-  const files = []
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const relPath = rel ? `${rel}/${entry.name}` : entry.name
-    const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) {
-      files.push(...walkAudio(full, relPath))
-    } else if (AUDIO_RE.test(entry.name)) {
-      files.push({ full, key: `Music/${relPath.replace(/\\/g, '/')}` })
-    }
-  }
-  return files
 }
 
 loadEnvFile('.env.local')
@@ -79,9 +80,9 @@ const client = new S3Client({
   forcePathStyle,
 })
 
-const files = walkAudio(musicRoot)
+const files = walkMusicFiles(musicRoot)
 if (!files.length) {
-  console.error('Music/ 下没有音频文件')
+  console.error('Music/ 下没有音频或封面文件')
   process.exit(1)
 }
 
@@ -96,6 +97,9 @@ for (const { full, key } of files) {
     : ext === '.flac' ? 'audio/flac'
     : ext === '.ogg' ? 'audio/ogg'
     : ext === '.wav' ? 'audio/wav'
+    : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
+    : ext === '.png' ? 'image/png'
+    : ext === '.webp' ? 'image/webp'
     : 'application/octet-stream'
 
   process.stdout.write(`↑ ${objectKey} ... `)

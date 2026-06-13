@@ -1,5 +1,11 @@
 <template>
   <div class="content-page">
+    <div
+      v-if="!loading && !error"
+      class="read-progress"
+      :style="{ width: readProgress + '%' }"
+      aria-hidden="true"
+    />
     <NavBar />
     <main class="page-main">
       <div class="container">
@@ -41,11 +47,22 @@
             </div>
 
             <div class="article-content">
-              <h1 class="article-title">{{ articleTitle }}</h1>
+              <template v-if="!loading && error">
+                <SystemHaltPanel
+                  :code="haltCode"
+                  :message="haltMessage"
+                  status="DOC_FAULT"
+                  :lines="articleErrorLines"
+                  home-label="← 返回首页"
+                />
+              </template>
+              <template v-else>
+              <TypewriterTitle :text="articleTitle" :active="!loading && !error" />
               <div class="article-meta">
                 <span>{{ currentDate }}</span>
                 <span> · {{ articleCategory }}</span>
                 <span v-if="readingMinutes"> · 约 {{ readingMinutes }} 分钟</span>
+                <span v-if="readProgress > 0" class="read-percent"> · 已读 {{ readProgress }}%</span>
               </div>
               <div v-if="articleTags.length" class="article-tags">
                 <router-link
@@ -57,11 +74,11 @@
               </div>
               <div class="article-body" ref="articleBodyRef">
                 <p v-if="loading">加载中...</p>
-                <p v-else-if="error">{{ error }}</p>
                 <div v-else v-html="articleContent"></div>
               </div>
+              </template>
 
-              <nav v-if="adjacent.newer || adjacent.older" class="article-nav">
+              <nav v-if="!error && (adjacent.newer || adjacent.older)" class="article-nav">
                 <router-link v-if="adjacent.newer" :to="adjacent.newer.url" class="nav-prev">
                   <span class="nav-label">← 较新</span>
                   <span class="nav-title">{{ adjacent.newer.title }}</span>
@@ -72,7 +89,7 @@
                 </router-link>
               </nav>
 
-              <section v-if="relatedPosts.length" class="related-posts">
+              <section v-if="!error && relatedPosts.length" class="related-posts">
                 <h3 class="related-head">相关文章</h3>
                 <ul>
                   <li v-for="p in relatedPosts" :key="p.id">
@@ -82,7 +99,8 @@
                 </ul>
               </section>
 
-              <section class="article-comments">
+              <section v-if="!error" class="article-comments">
+                <div v-if="readProgress >= 95" class="read-complete">读完 · 100%</div>
                 <h3 class="comments-head">评论</h3>
                 <p v-if="commentStatus === 'loading'" class="comments-hint">评论加载中…</p>
                 <p v-if="commentStatus === 'error'" class="comments-hint error">评论暂不可用</p>
@@ -100,6 +118,8 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
+import TypewriterTitle from '../components/TypewriterTitle.vue'
+import SystemHaltPanel from '../components/SystemHaltPanel.vue'
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
@@ -126,10 +146,23 @@ const tocOpen = ref(false)
 const articleBodyRef = ref(null)
 const adjacent = ref({ newer: null, older: null })
 const relatedPosts = ref([])
+const readProgress = ref(0)
 let observer = null
+let scrollHandler = null
 
 const postId = computed(() => route.params.id)
 const currentPost = computed(() => getPostById(postId.value))
+
+const articleErrorLines = computed(() => [
+  `ERR:: ${error.value || 'DOCUMENT NOT FOUND'}`,
+  `ID:: content/${postId.value}`,
+  `NODE:: CYINC.LOG / HALT`,
+])
+
+const haltCode = computed(() => (error.value?.startsWith('加载失败') ? 'ERR' : '404'))
+const haltMessage = computed(() =>
+  error.value?.startsWith('加载失败') ? error.value : '文章不存在或已被移除。'
+)
 
 const pageMeta = computed(() => {
   const post = currentPost.value
@@ -155,6 +188,8 @@ async function loadArticleContent() {
   readingMinutes.value = 0
   relatedPosts.value = []
   adjacent.value = { newer: null, older: null }
+  readProgress.value = 0
+  teardownScrollProgress()
 
   const post = currentPost.value
 
@@ -188,6 +223,7 @@ async function loadArticleContent() {
     highlightArticle(articleBodyRef.value)
     generateTOC()
     setupIntersectionObserver()
+    setupScrollProgress()
     if (route.hash) {
       const id = decodeURIComponent(route.hash.slice(1))
       scrollToSection(id)
@@ -239,12 +275,69 @@ function setupIntersectionObserver() {
   })
 }
 
+function setupScrollProgress() {
+  teardownScrollProgress()
+  scrollHandler = () => {
+    const el = articleBodyRef.value
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const start = window.scrollY + rect.top - 80
+    const end = start + el.offsetHeight - window.innerHeight * 0.35
+    if (end <= start) {
+      readProgress.value = 100
+      return
+    }
+    const ratio = (window.scrollY - start) / (end - start)
+    readProgress.value = Math.min(100, Math.max(0, Math.round(ratio * 100)))
+  }
+  scrollHandler()
+  window.addEventListener('scroll', scrollHandler, { passive: true })
+}
+
+function teardownScrollProgress() {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', scrollHandler)
+    scrollHandler = null
+  }
+}
+
 onMounted(() => loadArticleContent())
 watch(postId, () => loadArticleContent())
-onUnmounted(() => { if (observer) observer.disconnect() })
+onUnmounted(() => {
+  if (observer) observer.disconnect()
+  teardownScrollProgress()
+})
 </script>
 
 <style scoped>
+.read-progress {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  height: 2px;
+  background: var(--orange);
+  z-index: 200;
+  transition: width 0.12s linear;
+  pointer-events: none;
+}
+
+.read-percent {
+  font-family: var(--mono);
+  font-size: 0.75em;
+  color: var(--steel);
+}
+
+.read-complete {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--orange);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px dashed var(--orange);
+  display: inline-block;
+}
+
 .article-tags {
   display: flex;
   flex-wrap: wrap;

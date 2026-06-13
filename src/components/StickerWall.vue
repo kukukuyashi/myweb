@@ -5,9 +5,10 @@
         v-for="(item, index) in items"
         :key="item.path"
         class="sticker-card"
-        :class="[`sticker-card--${sizeClass(index)}`, { active: activeIndex === index }]"
+        :class="[`sticker-card--${sizeClass(index)}`, { active: activeIndex === index, 'sticker-card--tilt': canTilt }]"
         @mouseenter="activeIndex = index"
-        @mouseleave="activeIndex = -1"
+        @mouseleave="onCardLeave($event)"
+        @mousemove="onCardMove"
         @click="openLightbox(index)"
       >
         <span class="sticker-badge">{{ item.label }}</span>
@@ -49,6 +50,36 @@ const props = defineProps({
 
 const activeIndex = ref(-1)
 const lightboxIndex = ref(-1)
+const canTilt = ref(false)
+
+const TILT_MAX = 12
+
+function resetTilt(el) {
+  if (!el) return
+  el.style.setProperty('--tilt-x', '0deg')
+  el.style.setProperty('--tilt-y', '0deg')
+  el.style.setProperty('--shine-x', '50%')
+  el.style.setProperty('--shine-y', '50%')
+}
+
+function onCardMove(e) {
+  if (!canTilt.value) return
+  const el = e.currentTarget
+  const rect = el.getBoundingClientRect()
+  const px = (e.clientX - rect.left) / rect.width
+  const py = (e.clientY - rect.top) / rect.height
+  const rx = (py - 0.5) * -TILT_MAX
+  const ry = (px - 0.5) * TILT_MAX
+  el.style.setProperty('--tilt-x', `${rx.toFixed(2)}deg`)
+  el.style.setProperty('--tilt-y', `${ry.toFixed(2)}deg`)
+  el.style.setProperty('--shine-x', `${(px * 100).toFixed(1)}%`)
+  el.style.setProperty('--shine-y', `${(py * 100).toFixed(1)}%`)
+}
+
+function onCardLeave(e) {
+  activeIndex.value = -1
+  resetTilt(e.currentTarget)
+}
 
 /** 错落高度：按序号轮换 tall / mid / short */
 function sizeClass(index) {
@@ -81,7 +112,12 @@ function onKeydown(e) {
   if (e.key === 'ArrowRight') shiftLightbox(1)
 }
 
-onMounted(() => window.addEventListener('keydown', onKeydown))
+onMounted(() => {
+  canTilt.value =
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    && window.matchMedia('(hover: hover)').matches
+  window.addEventListener('keydown', onKeydown)
+})
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
   document.body.style.overflow = ''
@@ -92,9 +128,15 @@ onUnmounted(() => {
 .sticker-masonry {
   columns: 5 148px;
   column-gap: 12px;
+  perspective: 1100px;
 }
 
 .sticker-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --shine-x: 50%;
+  --shine-y: 50%;
+  --card-lift: 0px;
   position: relative;
   display: inline-block;
   width: 100%;
@@ -105,7 +147,46 @@ onUnmounted(() => {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  transform-style: preserve-3d;
+  transform:
+    translateY(calc(-1 * var(--card-lift)))
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s,
+    box-shadow 0.2s;
+  will-change: transform;
+}
+
+.sticker-card--tilt {
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.sticker-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    200px circle at var(--shine-x) var(--shine-y),
+    rgba(255, 255, 255, 0.22),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+[data-theme="dark"] .sticker-card::before {
+  background: radial-gradient(
+    200px circle at var(--shine-x) var(--shine-y),
+    rgba(255, 255, 255, 0.1),
+    transparent 62%
+  );
 }
 
 .sticker-card::after {
@@ -124,10 +205,17 @@ onUnmounted(() => {
 
 .sticker-card:hover,
 .sticker-card.active {
+  --card-lift: 6px;
   border-color: var(--orange);
-  box-shadow: 0 4px 16px rgba(232, 93, 4, 0.12);
-  transform: translateY(-2px);
-  z-index: 1;
+  box-shadow:
+    0 8px 24px rgba(232, 93, 4, 0.14),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+}
+
+.sticker-card:hover::before,
+.sticker-card.active::before {
+  opacity: 1;
 }
 
 .sticker-card:hover::after,
@@ -152,6 +240,8 @@ onUnmounted(() => {
 .sticker-img {
   overflow: hidden;
   background: var(--bg);
+  transform: translateZ(28px);
+  transform-style: preserve-3d;
 }
 
 .sticker-card--tall .sticker-img { max-height: 280px; }
@@ -165,19 +255,21 @@ onUnmounted(() => {
   object-position: top center;
   display: block;
   filter: saturate(0.88);
-  transition: filter 0.25s ease, transform 0.3s ease;
+  transform: translateZ(12px) scale(1);
+  transition: filter 0.25s ease, transform 0.25s ease;
 }
 
 .sticker-card:hover .sticker-img img,
 .sticker-card.active .sticker-img img {
   filter: saturate(1);
-  transform: scale(1.02);
+  transform: translateZ(12px) scale(1.04);
 }
 
 .sticker-foot {
   padding: 0.4rem 0.5rem;
   background: var(--bg-paper);
   border-top: 1px dashed var(--border);
+  transform: translateZ(16px);
 }
 
 .sticker-title {
@@ -272,5 +364,32 @@ onUnmounted(() => {
 
 @media (max-width: 460px) {
   .sticker-masonry { columns: 2 140px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker-masonry {
+    perspective: none;
+  }
+
+  .sticker-card {
+    transform: none;
+    will-change: auto;
+  }
+
+  .sticker-card:hover,
+  .sticker-card.active {
+    --card-lift: 0px;
+    transform: translateY(-2px);
+  }
+
+  .sticker-card::before {
+    display: none;
+  }
+
+  .sticker-img,
+  .sticker-foot,
+  .sticker-img img {
+    transform: none;
+  }
 }
 </style>

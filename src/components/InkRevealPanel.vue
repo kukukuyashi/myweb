@@ -1,6 +1,7 @@
 <template>
   <component :is="tag" :class="['ink-panel', rootClass, { 'ink-panel--bleed': bleed }]">
     <HeroInkReveal
+      :key="image"
       :image="image"
       :position="position"
       :r-end="rEnd"

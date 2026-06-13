@@ -7,8 +7,8 @@
           <InkRevealPanel
             tag="header"
             root-class="page-ink-header"
-            image="img/关于/FjtOo61UoAAWpMY.jfif"
-            position="82% center"
+            :image="MUSIC_HEADER_INK_IMAGE"
+            :position="MUSIC_HEADER_INK_POSITION"
             :r-end="125"
             fade-direction="left"
           >
@@ -22,9 +22,23 @@
           </p>
 
           <div class="player-panel">
-            <div class="player-screen">
-              <span class="screen-line">{{ playerStatus }}</span>
-              <span class="screen-line dim">{{ systemStatus }}</span>
+            <div class="player-main">
+              <div
+                class="album-cover"
+                :class="{ 'album-cover--pulse': musicStore.isPlaying && currentCoverUrl }"
+              >
+                <img
+                  v-if="currentCoverUrl && coverVisible"
+                  :src="currentCoverUrl"
+                  :alt="currentTrack?.album || '专辑封面'"
+                  @error="coverVisible = false"
+                >
+                <span v-else class="album-cover-fallback">{{ currentAlbumLabel }}</span>
+              </div>
+              <div class="player-screen">
+                <span class="screen-line">{{ playerStatus }}</span>
+                <span class="screen-line dim">{{ systemStatus }}</span>
+              </div>
             </div>
             <div class="player-btns">
               <button class="ctrl-btn" :disabled="!musicStore.hasPrev()" @click="playPrev">PREV</button>
@@ -36,35 +50,20 @@
             </div>
           </div>
 
-          <section
-            v-for="album in albumGroups"
+          <MusicAlbumSection
+            v-for="(album, i) in albumGroups"
             :key="album.source"
-            class="album-section"
-          >
-            <h2 class="album-title">
-              <span class="album-tag">{{ album.source }}</span>
-              <span class="album-count">{{ album.tracks.length }} tracks</span>
-            </h2>
-            <table class="post-table music-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Track</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="track in album.tracks"
-                  :key="track.index"
-                  :class="{ active: musicStore.currentIndex === track.index }"
-                  @click="selectTrack(track.index)"
-                >
-                  <td class="idx">{{ String(track.index + 1).padStart(2, '0') }}</td>
-                  <td>{{ track.name }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
+            :album="album"
+            :failed-covers="failedCovers"
+            :playing-index="musicStore.currentIndex"
+            :is-playing="musicStore.isPlaying"
+            :ink="i === 0"
+            :ink-image="MUSIC_FREREN_INK_IMAGE"
+            :ink-position="MUSIC_FREREN_INK_POSITION"
+            :is-last="i === albumGroups.length - 1"
+            @select="selectTrack"
+            @cover-error="markCoverFailed"
+          />
 
           <p class="now-playing">
             {{ currentTrack ? '▶ ' + currentTrack.name : 'Select a track →' }}
@@ -79,16 +78,29 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useMusicStore } from '../store'
 import { usePageMeta } from '../composables/usePageMeta'
 import { musicTracks } from '../data/musicTracks'
-import { buildTrackList, getMusicBase, groupTracksByAlbum } from '../utils/music'
+import { buildTrackList, getMusicBase, groupTracksByAlbum, getCurrentAlbumCover } from '../utils/music'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
+import MusicAlbumSection from '../components/MusicAlbumSection.vue'
+import {
+  MUSIC_HEADER_INK_IMAGE,
+  MUSIC_HEADER_INK_POSITION,
+  MUSIC_FREREN_INK_IMAGE,
+  MUSIC_FREREN_INK_POSITION,
+} from '../data/inkTheme'
 
 usePageMeta({ title: '音乐室', description: 'Cyinc 最喜欢的曲目，葬送のフリーレン OST、SANABI 等。' })
 
 const musicStore = useMusicStore()
+const coverVisible = ref(true)
+const failedCovers = ref(new Set())
+
+function markCoverFailed(source) {
+  failedCovers.value = new Set([...failedCovers.value, source])
+}
 
 const musicNoticeText = computed(() => {
   if (getMusicBase()) return ''
@@ -103,6 +115,20 @@ const currentTrack = computed(() => {
   const idx = musicStore.currentIndex
   if (idx < 0 || idx >= tracks.value.length) return null
   return tracks.value[idx]
+})
+
+const currentCoverUrl = computed(() =>
+  getCurrentAlbumCover(tracks.value, musicStore.currentIndex)
+)
+
+watch(() => musicStore.currentIndex, () => {
+  coverVisible.value = true
+})
+
+const currentAlbumLabel = computed(() => {
+  const track = currentTrack.value
+  if (!track) return '♪'
+  return (track.album || track.source || '♪').slice(0, 2)
 })
 
 const playerStatus = ref('▶ STOPPED')
@@ -196,10 +222,51 @@ onMounted(() => {
   background: #0d0d0d;
 }
 
+.player-main {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.album-cover {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-cover-fallback {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.album-cover--pulse {
+  animation: cover-pulse 2s ease-in-out infinite;
+}
+
+@keyframes cover-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 93, 4, 0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(232, 93, 4, 0); }
+}
+
 .player-screen {
+  flex: 1;
+  min-width: 0;
   font-family: var(--mono);
   font-size: 0.8rem;
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -228,34 +295,6 @@ onMounted(() => {
 
 .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.album-section {
-  margin-bottom: 2rem;
-}
-
-.album-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0 0 0.75rem;
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  font-weight: 400;
-}
-
-.album-tag {
-  color: var(--orange);
-  letter-spacing: 0.04em;
-}
-
-.album-count {
-  color: var(--text-muted);
-  font-size: 0.7rem;
-}
-
-.music-table tr { cursor: pointer; }
-.music-table tr.active td { background: var(--orange-light); }
-.music-table tr.active td:first-child { color: var(--orange); }
-
 .now-playing {
   font-family: var(--mono);
   font-size: 0.75rem;
@@ -264,6 +303,18 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+  .player-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .album-cover {
+    width: 100%;
+    max-width: 200px;
+    height: 200px;
+    align-self: center;
+  }
+
   .player-btns {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -275,12 +326,14 @@ onMounted(() => {
     min-height: 40px;
   }
 
-  .album-title {
-    flex-wrap: wrap;
-  }
-
   .player-screen {
     font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .album-cover--pulse {
+    animation: none;
   }
 }
 </style>

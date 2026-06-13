@@ -10,6 +10,7 @@
       {{ isCollapsed ? '▲' : '▼' }}
     </button>
     <div v-if="musicStore.currentSong && !isCollapsed" class="player-info">
+      <PlayerSpectrum :playing="musicStore.isPlaying" />
       <span class="song-title">{{ musicStore.currentSong.title }}</span>
       <div class="progress-wrap">
         <span class="time">{{ formatTime(sliderTime) }}</span>
@@ -64,6 +65,7 @@
     </div>
     <p v-if="loadError && musicStore.currentSong && !isCollapsed" class="load-error">{{ loadError }}</p>
     <div v-if="musicStore.currentSong && isCollapsed" class="player-mini" @click="isCollapsed = false">
+      <PlayerSpectrum :playing="musicStore.isPlaying" collapsed />
       <span class="mini-title">{{ musicStore.currentSong.title }}</span>
       <span class="mini-state">{{ musicStore.isPlaying ? '▶' : '❚❚' }}</span>
     </div>
@@ -74,6 +76,7 @@
 import { useMusicStore } from '../store'
 import { musicTracks } from '../data/musicTracks'
 import { buildTrackList } from '../utils/music'
+import PlayerSpectrum from './PlayerSpectrum.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 
 const musicStore = useMusicStore()
@@ -362,12 +365,12 @@ onMounted(() => {
 .player-mini {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
   max-width: var(--content-width);
   cursor: pointer;
   font-size: 0.75rem;
-  gap: 1rem;
+  gap: 0.65rem;
 }
 
 .mini-title {
@@ -375,11 +378,14 @@ onMounted(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 0.85;
+  flex: 1;
+  min-width: 0;
 }
 
 .mini-state {
   flex-shrink: 0;
   color: var(--orange);
+  margin-left: auto;
 }
 
 [data-theme="dark"] .music-player {

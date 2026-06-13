@@ -6,15 +6,20 @@
         <span class="rail-value">CYINC.LOG</span>
       </div>
       <div class="rail-block">
+        <span class="rail-label">NOW</span>
+        <div
+          class="rail-now-wrap"
+          :class="{ 'rail-now-wrap--scroll': scrollNowPlaying }"
+        >
+          <span class="rail-now-track">{{ nowPlayingFull }}</span>
+        </div>
+      </div>
+      <div class="rail-block">
         <span class="rail-label">REV</span>
         <span class="rail-value">{{ buildRev }}</span>
       </div>
-      <div class="rail-block">
-        <span class="rail-label">GRID</span>
-        <span class="rail-value">24×24</span>
-      </div>
       <div class="rail-ticks" />
-      <p class="rail-vertical">LEARNING · AGENT · ACG</p>
+      <p class="rail-vertical">{{ railTagline }}</p>
     </aside>
 
     <aside class="page-rail page-rail--right">
@@ -23,14 +28,30 @@
         <span class="rail-value rail-num">{{ totalPosts }}</span>
       </div>
       <div class="rail-block rail-block--right">
-        <span class="rail-label">TAGS</span>
-        <span class="rail-value rail-num">{{ totalTags }}</span>
+        <span class="rail-label">RECENT</span>
+        <nav class="rail-recent">
+          <router-link
+            v-for="post in recentPosts"
+            :key="post.id"
+            :to="post.url"
+            :title="post.title"
+          >{{ post.date.slice(5) }} · {{ truncate(post.title, 12) }}</router-link>
+        </nav>
+      </div>
+      <div class="rail-block rail-block--right">
+        <span class="rail-label">VISIT</span>
+        <div class="rail-visit">
+          <span>TODAY {{ visitorToday }}</span>
+          <span>TTL {{ visitorTotal }}</span>
+        </div>
       </div>
       <nav class="rail-nav">
         <router-link v-for="link in quickLinks" :key="link.to" :to="link.to">{{ link.label }}</router-link>
       </nav>
       <ul class="rail-tags">
-        <li v-for="t in fanTags" :key="t">{{ t }}</li>
+        <li v-for="t in fanTags" :key="t">
+          <router-link :to="{ path: '/', query: { tag: t } }">{{ t }}</router-link>
+        </li>
       </ul>
       <div class="rail-ticks rail-ticks--flip" />
     </aside>
@@ -38,12 +59,30 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { posts, getTags } from '../data/posts'
+import { computed, onMounted, ref } from 'vue'
+import { posts, getRecentPosts } from '../data/posts'
+import { useMusicStore } from '../store'
+import { getSeasonConfig } from '../data/seasonTheme'
 
+const musicStore = useMusicStore()
 const totalPosts = posts.length
-const totalTags = getTags().length
 const buildRev = '2026.06'
+const recentPosts = getRecentPosts(3)
+const railTagline = getSeasonConfig().railTagline
+
+const visitorToday = ref(0)
+const visitorTotal = ref(0)
+
+const nowPlayingFull = computed(() => {
+  if (!musicStore.currentSong) return '— idle —'
+  return musicStore.isPlaying
+    ? `▶ ${musicStore.currentSong.title}`
+    : `❚❚ ${musicStore.currentSong.title}`
+})
+
+const scrollNowPlaying = computed(() =>
+  musicStore.currentSong && nowPlayingFull.value.length > 16
+)
 
 const quickLinks = [
   { to: '/music', label: 'MUSIC' },
@@ -53,6 +92,25 @@ const quickLinks = [
 ]
 
 const fanTags = ['フリーレン', 'MyGO!!!!!', 'BA']
+
+function truncate(text, max) {
+  const s = String(text || '')
+  return s.length > max ? `${s.slice(0, max)}…` : s
+}
+
+function loadVisitorStats() {
+  try {
+    const data = JSON.parse(localStorage.getItem('cyincVisitorStats') || '{}')
+    const day = new Date().toISOString().slice(0, 10)
+    visitorToday.value = data[day] || 0
+    visitorTotal.value = data.total || 0
+  } catch {
+    visitorToday.value = 0
+    visitorTotal.value = 0
+  }
+}
+
+onMounted(loadVisitorStats)
 </script>
 
 <style scoped>
@@ -109,10 +167,62 @@ const fanTags = ['フリーレン', 'MyGO!!!!!', 'BA']
   line-height: 1.3;
 }
 
+.rail-now-wrap {
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.rail-now-track {
+  display: inline-block;
+  font-size: 0.55rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.rail-now-wrap--scroll .rail-now-track {
+  padding-left: 100%;
+  animation: rail-now-scroll 12s linear infinite;
+}
+
+@keyframes rail-now-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+.rail-visit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  color: var(--steel);
+}
+
 .rail-num {
   font-size: 1.1rem;
   color: var(--steel);
   font-weight: 500;
+}
+
+.rail-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.rail-recent a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.52rem;
+  line-height: 1.35;
+  transition: color 0.15s;
+}
+
+.rail-recent a:hover {
+  color: var(--orange);
 }
 
 .rail-ticks {
@@ -178,14 +288,30 @@ const fanTags = ['フリーレン', 'MyGO!!!!!', 'BA']
   gap: 0.25rem;
   margin-top: auto;
   width: 100%;
+  pointer-events: auto;
 }
 
 .rail-tags li {
-  padding: 0.15rem 0.35rem;
   border: 1px solid var(--border);
   background: rgba(245, 242, 238, 0.5);
   font-size: 0.52rem;
   letter-spacing: 0.04em;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.rail-tags li:hover {
+  border-color: var(--orange);
+}
+
+.rail-tags a {
+  display: block;
+  padding: 0.15rem 0.35rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rail-tags a:hover {
+  color: var(--orange);
 }
 
 [data-theme="dark"] .rail-tags li {
@@ -195,6 +321,15 @@ const fanTags = ['フリーレン', 'MyGO!!!!!', 'BA']
 @media (max-width: 1440px) {
   .page-rails {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-now-wrap--scroll .rail-now-track {
+    animation: none;
+    padding-left: 0;
+    white-space: normal;
+    word-break: break-word;
   }
 }
 </style>

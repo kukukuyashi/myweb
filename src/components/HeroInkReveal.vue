@@ -309,4 +309,34 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
     );
   }
 }
+
+[data-theme="dark"] .ink-reveal__bg {
+  opacity: 0.55;
+}
+
+[data-theme="dark"] .ink-reveal__fade--left {
+  background: linear-gradient(
+    105deg,
+    var(--bg-paper) 0%,
+    color-mix(in srgb, var(--bg-paper) 96%, transparent) 28%,
+    color-mix(in srgb, var(--bg-paper) 55%, transparent) 58%,
+    transparent 86%
+  );
+}
+
+[data-theme="dark"] .ink-reveal__fade--right {
+  background: linear-gradient(
+    255deg,
+    var(--bg-paper) 0%,
+    color-mix(in srgb, var(--bg-paper) 96%, transparent) 28%,
+    color-mix(in srgb, var(--bg-paper) 55%, transparent) 58%,
+    transparent 86%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] .ink-reveal__bg {
+    opacity: 0.48;
+  }
+}
 </style>

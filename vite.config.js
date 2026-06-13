@@ -69,6 +69,10 @@ function serveLocalMusic() {
             '.flac': 'audio/flac',
             '.ogg': 'audio/ogg',
             '.wav': 'audio/wav',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
           }
           res.setHeader('Content-Type', types[ext] || 'application/octet-stream')
           fs.createReadStream(filePath).pipe(res)

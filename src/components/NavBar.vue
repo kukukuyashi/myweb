@@ -2,12 +2,14 @@
   <header class="topbar">
     <div class="topbar-inner">
     <router-link to="/" class="topbar-logo">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <svg class="logo-mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <rect x="3" y="3" width="14" height="14" stroke="#e85d04" stroke-width="1.5" fill="none"/>
         <path d="M6 10h8M10 6v8" stroke="#e85d04" stroke-width="1.5"/>
       </svg>
       CYINC.LOG
     </router-link>
+
+    <span class="topbar-clock" aria-label="当前时间">{{ clockText }}</span>
 
     <nav class="topbar-nav" :class="{ open: menuOpen }">
       <router-link to="/" @click="menuOpen = false">首页</router-link>
@@ -42,6 +44,13 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const isDarkMode = ref(false)
 const menuOpen = ref(false)
+const clockText = ref('')
+let clockTimer = null
+
+function updateClock() {
+  const now = new Date()
+  clockText.value = now.toLocaleTimeString('zh-CN', { hour12: false })
+}
 
 watch(() => route.path, () => { menuOpen.value = false })
 
@@ -61,6 +70,8 @@ const toggleDarkMode = () => {
 }
 
 onMounted(() => {
+  updateClock()
+  clockTimer = setInterval(updateClock, 1000)
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     isDarkMode.value = true
@@ -70,6 +81,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.body.style.overflow = ''
+  if (clockTimer) clearInterval(clockTimer)
 })
 </script>
 
@@ -105,6 +117,23 @@ onUnmounted(() => {
   font-size: 0.85rem;
   color: #fff;
   text-decoration: none;
+  flex-shrink: 0;
+}
+
+.topbar-logo:hover .logo-mark {
+  transform: rotate(90deg);
+}
+
+.logo-mark {
+  transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.topbar-clock {
+  margin-left: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
   flex-shrink: 0;
 }
 
@@ -171,6 +200,7 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .topbar-inner { padding: 0 1rem; }
+  .topbar-clock { display: none; }
   .menu-btn { display: flex; }
 
   .topbar-nav {

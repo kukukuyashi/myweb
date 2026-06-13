@@ -7,6 +7,20 @@
       </div>
     </div>
 
+    <MomentPanel :total-posts="totalPosts" :site-age="siteAge" />
+
+    <div class="panel">
+      <div class="panel-header">最近更新</div>
+      <div class="panel-body">
+        <ul class="recent-list">
+          <li v-for="post in recentPosts" :key="post.id">
+            <router-link :to="post.url">{{ post.title }}</router-link>
+            <span class="recent-date">{{ post.date }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">Now Learning</div>
       <div class="panel-body">
@@ -17,6 +31,8 @@
         </ul>
       </div>
     </div>
+
+    <VisitorLcd />
 
     <div class="panel">
       <div class="panel-header">Stats</div>
@@ -44,6 +60,11 @@
 
 <script setup>
 import ProfileCard from './ProfileCard.vue'
+import MomentPanel from './MomentPanel.vue'
+import VisitorLcd from './VisitorLcd.vue'
+import { getRecentPosts } from '../data/posts'
+
+const recentPosts = getRecentPosts(3)
 
 defineProps({
   totalPosts: { type: [Number, String], default: 0 },
@@ -61,6 +82,38 @@ const learningItems = [
 </script>
 
 <style scoped>
+.recent-list {
+  list-style: none;
+}
+
+.recent-list li {
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recent-list li:last-child {
+  border-bottom: none;
+}
+
+.recent-list a {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: 0.2rem;
+}
+
+.recent-list a:hover {
+  color: var(--orange);
+}
+
+.recent-date {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
 .learning-list {
   list-style: none;
   font-family: var(--mono);
@@ -107,4 +160,5 @@ const learningItems = [
   color: var(--steel);
   font-weight: 500;
 }
+
 </style>

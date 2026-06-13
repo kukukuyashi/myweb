@@ -4,9 +4,13 @@
     <main class="page-main">
       <div class="container layout-single">
         <div class="page-content">
-          <h1 class="page-title">404</h1>
-          <p>页面不存在或已被移除。</p>
-          <router-link to="/" class="back-link">← 返回首页</router-link>
+          <SystemHaltPanel
+            code="404"
+            message="页面不存在或已被移除。"
+            status="ROUTE_FAULT"
+            :lines="diagLines"
+            home-label="← 返回首页"
+          />
         </div>
       </div>
     </main>
@@ -15,20 +19,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
+import SystemHaltPanel from '../components/SystemHaltPanel.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 
-usePageMeta({ title: '404', description: '页面不存在或已被移除。' })
-</script>
+const route = useRoute()
 
-<style scoped>
-.back-link {
-  display: inline-block;
-  margin-top: 1rem;
-  color: var(--orange);
-  font-family: var(--mono);
-  font-size: 0.85rem;
-}
-.back-link:hover { text-decoration: underline; }
-</style>
+usePageMeta({ title: '404', description: '页面不存在或已被移除。' })
+
+const diagLines = computed(() => [
+  `ERR:: ROUTE NOT FOUND`,
+  `PATH:: ${route.fullPath}`,
+  `TIME:: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`,
+  `NODE:: CYINC.LOG / HALT`,
+])
+</script>
