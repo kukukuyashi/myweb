@@ -7,59 +7,27 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
-    id: 24,
-    title: '首页墨染晕染：鼠标 hover 显现线稿',
-    date: '2026-06-16',
-    category: '前端',
-    tags: ['Vue', 'Canvas', 'CSS', '交互', '博客'],
-    excerpt: 'InkRevealPanel + Canvas destination-out 遮罩：鼠标划过纸面晕开线稿的实现与参数说明。',
-    file: '首页墨染晕染 Canvas 鼠标显现线稿.html'
-  },
-  {
-    id: 23,
-    title: '陈皮有多陈：Flask + AI 鉴陈项目笔记',
-    date: '2026-06-15',
-    category: '项目',
-    tags: ['Flask', 'Python', 'AI', 'Qwen', '比赛'],
-    excerpt: '传智杯项目复盘：Flask 单体 + 通义千问视觉鉴定陈皮，页面结构、API 流程与降级策略。',
-    file: '陈皮有多陈 Flask AI 鉴陈项目笔记.html'
-  },
-  {
-    id: 22,
-    title: '博客音乐室：GitHub Pages 上播 FLAC',
-    date: '2026-06-14',
-    category: '前端',
-    tags: ['Vue', '音乐', 'GitHub Pages', 'FLAC', '踩坑'],
-    excerpt: '音乐室架构、曲目自动生成、进度条与换页重播 bug 修复，静态站也能当播放器。',
-    file: '博客音乐室 GitHub Pages 播 FLAC.html'
-  },
-  {
-    id: 21,
-    title: 'GitHub Actions 自动部署 Vue 博客',
-    date: '2026-06-13',
-    category: '部署',
-    tags: ['GitHub Actions', 'CI/CD', 'GitHub Pages', 'Vue', '部署'],
-    excerpt: 'push 即发布：workflow 配置、build 脚本、环境变量与常见故障排查。',
-    file: 'GitHub Actions 自动部署 Vue 博客.html'
-  },
-  {
     id: 20,
-    title: '个人博客重构记：Vue3 静态站上线',
-    date: '2026-06-12',
-    category: '前端',
-    tags: ['Vue', 'Vite', 'GitHub Pages', '博客', '重构'],
-    excerpt: '从老静态页到 Vue3 + Vite 的完整重构历程：选型、目录结构、Pages 踩坑与时间线。',
-    file: '个人博客重构记 Vue3 静态站上线.html'
+    title: '帕朵root开发笔记',
+    date: '2026-06-14',
+    category: '项目',
+    tags: ['项目'],
+    excerpt: '帕朵root开发笔记 — 学习笔记。',
+    file: '帕朵root开发笔记.html',
+    cover: 'img/bkm/2.jfif',
   },
+
   {
     id: 19,
     title: '留言板 Twikoo 部署笔记',
     date: '2026-06-11',
-    category: '部署',
-    tags: ['Twikoo', 'Netlify', 'MongoDB', '部署'],
+    category: '学习',
+    tags: [],
     excerpt: 'Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。',
-    file: '留言板 Twikoo 部署笔记.html'
+    file: '留言板 Twikoo 部署笔记.html',
+    cover: 'img/bkm/1.jfif',
   },
+
   {
     id: 18,
     title: '从 LLM 到 Agent Skill 笔记',
@@ -67,7 +35,8 @@ export const posts = [
     category: 'Agent',
     tags: ['Agent', 'LLM', 'Skill', 'MCP', 'AI'],
     excerpt: 'LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。',
-    file: '从 LLM 到 Agent Skill 笔记.html'
+    file: '从 LLM 到 Agent Skill 笔记.html',
+    cover: 'img/bkm/3.jfif',
   },
   {
     id: 12,
@@ -336,6 +305,46 @@ export function getCategories() {
 /** 所有标签（去重） */
 export function getTags() {
   return [...new Set(posts.flatMap(p => p.tags || []))].sort((a, b) => a.localeCompare(b, 'zh-CN'))
+}
+
+/** 标签 + 引用次数，按热度排序 */
+export function getTagStats() {
+  const counts = new Map()
+  for (const post of posts) {
+    for (const tag of post.tags || []) {
+      counts.set(tag, (counts.get(tag) || 0) + 1)
+    }
+  }
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, 'zh-CN'))
+}
+
+/** 标签页路由 */
+export function tagUrl(tag) {
+  return `/tags/${encodeURIComponent(tag)}`
+}
+
+/** 按标签筛选（含 ACG 粉丝标签别名） */
+export function getPostsByTag(tag) {
+  const decoded = decodeURIComponent(tag)
+  return getPostsSorted()
+    .filter(p => {
+      if (FAN_TAG_FILTERS[decoded]) return postMatchesFanTag(p, decoded)
+      return (p.tags || []).includes(decoded)
+    })
+    .map(p => ({ ...p, url: postUrl(p.id) }))
+}
+
+/** 文章 OG 封面（cover 优先，兼容 thumb，否则站点默认图） */
+export function getPostCover(post) {
+  if (!post) return 'img/xiaoqing.png'
+  return post.cover || post.thumb || 'img/xiaoqing.png'
+}
+
+/** 是否在卡片/预览中展示封面（排除纯默认头像） */
+export function hasPostCover(post) {
+  return !!(post?.cover || post?.thumb)
 }
 
 /** 最近更新日期 */
