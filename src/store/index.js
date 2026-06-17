@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 
 function clampVolume(value) {
   const n = Number(value)
@@ -19,109 +20,132 @@ function readStoredVolume(fallback = 0.5) {
   return fallback
 }
 
-export const useMusicStore = defineStore('music', {
-  state: () => {
-    // 从sessionStorage加载之前的状态
-    const savedState = sessionStorage.getItem('musicState')
-    if (savedState) {
-      const parsedState = JSON.parse(savedState)
-      return {
-        currentSong: parsedState.currentSong,
-        isPlaying: parsedState.isPlaying,
-        volume: parsedState.volume != null
-          ? clampVolume(parsedState.volume)
-          : readStoredVolume(),
-        currentTime: parsedState.currentTime || 0,
-        duration: 0,
-        playlist: [],
-        currentIndex: -1,
-      }
-    }
-    return {
-      currentSong: null,
-      isPlaying: false,
-      volume: readStoredVolume(),
-      currentTime: 0,
-      duration: 0,
-      playlist: [],
-      currentIndex: -1,
-    }
-  },
-  actions: {
-    setCurrentSong(song) {
-      const changed = !this.currentSong
-        || !song
-        || this.currentSong.src !== song.src
-        || this.currentSong.title !== song.title
-      this.currentSong = song
-      if (changed) {
-        this.currentTime = 0
-        this.duration = 0
-      }
-      if (song && this.playlist.length) {
-        const idx = this.playlist.findIndex(t => t.src === song.src)
-        if (idx !== -1) this.currentIndex = idx
-      }
-      this.saveState()
-    },
-    setPlaylist(tracks) {
-      this.playlist = tracks.map(t => ({ title: t.name, src: t.url }))
-      if (this.currentSong) {
-        const idx = this.playlist.findIndex(t => t.src === this.currentSong.src)
-        this.currentIndex = idx
-      }
-    },
-    playAtIndex(index) {
-      if (index < 0 || index >= this.playlist.length) return false
-      this.currentIndex = index
-      this.setCurrentSong(this.playlist[index])
-      this.setPlaying(true)
-      return true
-    },
-    playNext() {
-      return this.playAtIndex(this.currentIndex + 1)
-    },
-    playPrev() {
-      return this.playAtIndex(this.currentIndex - 1)
-    },
-    hasNext() {
-      return this.currentIndex >= 0 && this.currentIndex < this.playlist.length - 1
-    },
-    hasPrev() {
-      return this.currentIndex > 0
-    },
-    setPlaying(playing) {
-      this.isPlaying = playing
-      // 保存状态到sessionStorage
-      this.saveState()
-    },
-    setVolume(volume) {
-      const v = clampVolume(volume)
-      this.volume = v
-      localStorage.setItem('volume', String(v))
-      this.saveState()
-    },
-    setCurrentTime(time) {
-      this.currentTime = time
-    },
-    setDuration(duration) {
-      this.duration = duration
-    },
-    resetPlayback() {
-      this.currentSong = null
-      this.isPlaying = false
-      this.currentTime = 0
-      this.duration = 0
-      this.currentIndex = -1
-      this.saveState()
-    },
-    saveState() {
+let saveTimer = null
+
+export const useMusicStore = defineStore('music', () => {
+  const savedState = sessionStorage.getItem('musicState')
+  const parsedState = savedState ? JSON.parse(savedState) : null
+
+  const currentSong = ref(parsedState?.currentSong ?? null)
+  const isPlaying = ref(parsedState?.isPlaying ?? false)
+  const volume = ref(
+    parsedState?.volume != null ? clampVolume(parsedState.volume) : readStoredVolume()
+  )
+  const currentTime = ref(parsedState?.currentTime ?? 0)
+  const duration = ref(0)
+  const playlist = ref([])
+  const currentIndex = ref(-1)
+
+  function saveState() {
+    clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
       sessionStorage.setItem('musicState', JSON.stringify({
-        currentSong: this.currentSong,
-        isPlaying: this.isPlaying,
-        volume: this.volume,
-        currentTime: this.currentTime
+        currentSong: currentSong.value,
+        isPlaying: isPlaying.value,
+        volume: volume.value,
+        currentTime: currentTime.value
       }))
+    }, 5000)
+  }
+
+  function setCurrentSong(song) {
+    const changed = !currentSong.value
+      || !song
+      || currentSong.value.src !== song.src
+      || currentSong.value.title !== song.title
+    currentSong.value = song
+    if (changed) {
+      currentTime.value = 0
+      duration.value = 0
     }
+    if (song && playlist.value.length) {
+      const idx = playlist.value.findIndex(t => t.src === song.src)
+      if (idx !== -1) currentIndex.value = idx
+    }
+    saveState()
+  }
+
+  function setPlaylist(tracks) {
+    playlist.value = tracks.map(t => ({ title: t.name, src: t.url }))
+    if (currentSong.value) {
+      const idx = playlist.value.findIndex(t => t.src === currentSong.value.src)
+      currentIndex.value = idx
+    }
+  }
+
+  function playAtIndex(index) {
+    if (index < 0 || index >= playlist.value.length) return false
+    currentIndex.value = index
+    setCurrentSong(playlist.value[index])
+    setPlaying(true)
+    return true
+  }
+
+  function playNext() {
+    return playAtIndex(currentIndex.value + 1)
+  }
+
+  function playPrev() {
+    return playAtIndex(currentIndex.value - 1)
+  }
+
+  function hasNext() {
+    return currentIndex.value >= 0 && currentIndex.value < playlist.value.length - 1
+  }
+
+  function hasPrev() {
+    return currentIndex.value > 0
+  }
+
+  function setPlaying(playing) {
+    isPlaying.value = playing
+    saveState()
+  }
+
+  function setVolume(vol) {
+    const v = clampVolume(vol)
+    volume.value = v
+    localStorage.setItem('volume', String(v))
+    saveState()
+  }
+
+  function setCurrentTime(time) {
+    currentTime.value = time
+  }
+
+  function setDuration(dur) {
+    duration.value = dur
+  }
+
+  function resetPlayback() {
+    currentSong.value = null
+    isPlaying.value = false
+    currentTime.value = 0
+    duration.value = 0
+    currentIndex.value = -1
+    saveState()
+  }
+
+  return {
+    currentSong,
+    isPlaying,
+    volume,
+    currentTime,
+    duration,
+    playlist,
+    currentIndex,
+    setCurrentSong,
+    setPlaylist,
+    playAtIndex,
+    playNext,
+    playPrev,
+    hasNext,
+    hasPrev,
+    setPlaying,
+    setVolume,
+    setCurrentTime,
+    setDuration,
+    resetPlayback,
+    saveState
   }
 })

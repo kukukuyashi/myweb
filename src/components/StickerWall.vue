@@ -29,12 +29,12 @@
     <Teleport to="body">
       <div v-if="lightboxIndex >= 0" class="sticker-lightbox" @click.self="closeLightbox">
         <button type="button" class="lb-close" aria-label="关闭" @click="closeLightbox">✕</button>
-        <button type="button" class="lb-nav lb-prev" @click.stop="shiftLightbox(-1)">‹</button>
+        <button type="button" class="lb-nav lb-prev" aria-label="上一张" @click.stop="shiftLightbox(-1)">‹</button>
         <figure class="lb-figure">
           <img :src="imgUrl(items[lightboxIndex].path)" :alt="items[lightboxIndex].label">
           <figcaption v-if="items[lightboxIndex].label">[ {{ items[lightboxIndex].label }} ]</figcaption>
         </figure>
-        <button type="button" class="lb-nav lb-next" @click.stop="shiftLightbox(1)">›</button>
+        <button type="button" class="lb-nav lb-next" aria-label="下一张" @click.stop="shiftLightbox(1)">›</button>
       </div>
     </Teleport>
   </div>

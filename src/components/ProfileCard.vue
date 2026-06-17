@@ -2,7 +2,7 @@
   <div class="profile-card">
     <router-link to="/about" class="profile-link">
       <div class="acg-frame acg-frame--avatar">
-        <img :src="avatarUrl" :alt="profile.name" width="72" height="72">
+        <img :src="avatarUrl" :alt="profile.name" width="72" height="72" loading="lazy">
       </div>
       <div class="profile-text">
         <span class="profile-name">{{ profile.name }}</span>

@@ -1,166 +1,342 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/</loc>
+    <loc>https://kukukuyashi.github.io/myweb/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/about</loc>
+    <loc>https://kukukuyashi.github.io/myweb/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/archive</loc>
+    <loc>https://kukukuyashi.github.io/myweb/archive</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/music</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/guestbook</loc>
+    <loc>https://kukukuyashi.github.io/myweb/projects</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/24</loc>
-    <lastmod>2026-06-16</lastmod>
+    <loc>https://kukukuyashi.github.io/myweb/changelog</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/23</loc>
-    <lastmod>2026-06-15</lastmod>
+    <loc>https://kukukuyashi.github.io/myweb/music</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/22</loc>
+    <loc>https://kukukuyashi.github.io/myweb/guestbook</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/20</loc>
     <lastmod>2026-06-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/21</loc>
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/20</loc>
-    <lastmod>2026-06-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/19</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/19</loc>
     <lastmod>2026-06-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/18</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/18</loc>
     <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/12</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/12</loc>
     <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/13</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/13</loc>
     <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/14</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/14</loc>
     <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/15</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/15</loc>
     <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/17</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/17</loc>
     <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/1</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/1</loc>
     <lastmod>2026-01-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/2</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/2</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/3</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/3</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/10</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/10</loc>
     <lastmod>2025-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/5</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/5</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/6</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/6</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/9</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/9</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/8</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/8</loc>
     <lastmod>2025-12-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/7</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/7</loc>
     <lastmod>2025-12-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/11</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/11</loc>
     <lastmod>2025-12-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kukukuyashi.github.io/myweb/myweb/content/4</loc>
+    <loc>https://kukukuyashi.github.io/myweb/content/4</loc>
     <lastmod>2025-02-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%97%AD%E5%8C%85</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%AD%98%E5%82%A8</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E6%96%B9%E6%B3%95</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%B7%A5%E5%85%B7</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%9F%BA%E7%A1%80</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E8%BF%9B%E9%98%B6</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%89%8D%E7%AB%AF</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%AE%9E%E6%88%98</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E4%BA%8B%E4%BB%B6</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E6%95%B0%E7%BB%84</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%80%9F%E6%9F%A5</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%A1%B9%E7%9B%AE</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%BC%82%E6%AD%A5</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E8%AF%AD%E6%B3%95</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%8E%9F%E7%90%86</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Agent</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/AI</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/BOM</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Composition%20API</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/CSS</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/DOM</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/FAQ</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/HTML</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Java</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/JavaScript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/JVM</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/LLM</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/MCP</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Node.js</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Promise</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/RhinoWeb</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Skill</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Three.js</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Vue</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Vue3</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Web%20API</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

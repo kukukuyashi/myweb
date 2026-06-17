@@ -14,7 +14,7 @@
           >
             <div class="about-hero-main">
               <div class="acg-frame acg-frame--profile">
-                <img :src="avatarUrl" :alt="profile.name" width="140" height="140">
+                <img :src="avatarUrl" :alt="profile.name" width="140" height="140" loading="lazy">
                 <span class="frame-label">ID · CYINC</span>
               </div>
               <div class="about-intro">

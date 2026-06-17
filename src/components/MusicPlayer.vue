@@ -34,19 +34,19 @@
           type="button"
           class="nav-btn"
           :disabled="!musicStore.hasPrev()"
-          title="上一首"
+          aria-label="上一首"
           @click="musicStore.playPrev()"
         >
           PREV
         </button>
-        <button type="button" @click="togglePlay" class="play-btn">
+        <button type="button" @click="togglePlay" class="play-btn" :aria-label="musicStore.isPlaying ? '暂停' : '播放'">
           {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
         </button>
         <button
           type="button"
           class="nav-btn"
           :disabled="!musicStore.hasNext()"
-          title="下一首"
+          aria-label="下一首"
           @click="musicStore.playNext()"
         >
           NEXT

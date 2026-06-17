@@ -27,7 +27,7 @@
                 </div>
                 <router-link to="/about" class="hero-avatar-link hero-avatar-float" title="关于 Cyinc">
                   <div class="acg-frame acg-frame--avatar acg-frame--hero">
-                    <img :src="avatarUrl" alt="Cyinc" width="80" height="80">
+                    <img :src="avatarUrl" alt="Cyinc" width="80" height="80" loading="lazy">
                   </div>
                 </router-link>
               </div>
@@ -51,6 +51,8 @@
               </div>
             </InkRevealPanel>
 
+            <ChangelogStrip v-if="!hasActiveFilter" :delay="85" />
+
             <div class="filter-bar reveal-item" data-reveal style="--reveal-delay: 80ms">
               <label>分类</label>
               <button
@@ -61,7 +63,7 @@
               >{{ category }}</button>
             </div>
 
-            <TagBar v-if="allTags.length" v-model="selectedTag" :tags="allTags" @update:model-value="onTagChange" />
+            <TagBar v-model="selectedTag" @update:model-value="onTagChange" />
 
             <div class="search-row">
               <input
@@ -72,6 +74,8 @@
               >
               <button v-if="searchQuery" class="search-btn" @click="searchQuery = ''">清除</button>
             </div>
+
+            <SeriesSection v-if="!hasActiveFilter" :delay="110" />
 
             <div class="section-head reveal-item" data-reveal style="--reveal-delay: 120ms"><h2>精选</h2></div>
             <div v-if="highlightPosts.length && !hasActiveFilter" class="featured-grid">
@@ -122,7 +126,7 @@
             <section class="about-strip reveal-item" data-reveal style="--reveal-delay: 200ms">
               <router-link to="/about" class="about-strip-inner">
                 <div class="acg-frame acg-frame--avatar about-strip-avatar">
-                  <img :src="avatarUrl" alt="Cyinc" width="56" height="56">
+                  <img :src="avatarUrl" alt="Cyinc" width="56" height="56" loading="lazy">
                 </div>
                 <div class="about-strip-text">
                   <h3>关于 Cyinc</h3>
@@ -157,6 +161,8 @@ import PostCard from '../components/PostCard.vue'
 import HeroTicker from '../components/HeroTicker.vue'
 import StatCounter from '../components/StatCounter.vue'
 import SystemHaltPanel from '../components/SystemHaltPanel.vue'
+import SeriesSection from '../components/SeriesSection.vue'
+import ChangelogStrip from '../components/ChangelogStrip.vue'
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -198,7 +204,6 @@ const siteStartDate = new Date('2024-01-01')
 const totalPosts = computed(() => allPosts.length)
 const totalCategories = computed(() => getCategories().length)
 const totalTags = computed(() => getTags().length)
-const allTags = computed(() => getTags())
 const categories = computed(() => ['全部', ...getCategories()])
 
 const siteAge = computed(() => {

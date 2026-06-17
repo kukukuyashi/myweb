@@ -41,12 +41,12 @@
               </div>
             </div>
             <div class="player-btns">
-              <button class="ctrl-btn" :disabled="!musicStore.hasPrev()" @click="playPrev">PREV</button>
-              <button class="ctrl-btn" @click="togglePlay" :disabled="!currentTrack">
+              <button class="ctrl-btn" :disabled="!musicStore.hasPrev()" @click="playPrev" aria-label="上一首">PREV</button>
+              <button class="ctrl-btn" @click="togglePlay" :disabled="!currentTrack" :aria-label="musicStore.isPlaying ? '暂停' : '播放'">
                 {{ musicStore.isPlaying ? 'PAUSE' : 'PLAY' }}
               </button>
-              <button class="ctrl-btn" :disabled="!musicStore.hasNext()" @click="playNext">NEXT</button>
-              <button class="ctrl-btn" @click="stopPlay" :disabled="!currentTrack">STOP</button>
+              <button class="ctrl-btn" :disabled="!musicStore.hasNext()" @click="playNext" aria-label="下一首">NEXT</button>
+              <button class="ctrl-btn" @click="stopPlay" :disabled="!currentTrack" aria-label="停止">STOP</button>
             </div>
           </div>
 
