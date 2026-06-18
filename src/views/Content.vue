@@ -58,17 +58,28 @@
               </template>
               <template v-else>
               <TypewriterTitle :text="articleTitle" :active="!loading && !error" />
-              <div class="article-meta">
-                <span>{{ currentDate }}</span>
-                <span> · {{ articleCategory }}</span>
-                <span v-if="readingMinutes"> · 约 {{ readingMinutes }} 分钟</span>
-                <span v-if="readProgress > 0" class="read-percent"> · 已读 {{ readProgress }}%</span>
+              <div class="article-meta-row">
+                <div class="article-meta">
+                  <span>{{ currentDate }}</span>
+                  <span> · {{ articleCategory }}</span>
+                  <span v-if="readingMinutes"> · 约 {{ readingMinutes }} 分钟</span>
+                  <span v-if="readProgress > 0" class="read-percent"> · 已读 {{ readProgress }}%</span>
+                </div>
+                <button
+                  v-if="!loading"
+                  type="button"
+                  class="article-copy-link"
+                  :class="{ 'article-copy-link--done': copyDone }"
+                  @click="copyArticleLink"
+                >
+                  {{ copyDone ? '已复制 ✓' : '复制链接' }}
+                </button>
               </div>
               <div v-if="articleTags.length" class="article-tags">
                 <router-link
                   v-for="tag in articleTags"
                   :key="tag"
-                  :to="{ path: '/', query: { tag } }"
+                  :to="tagUrl(tag)"
                   class="tag-link"
                 >#{{ tag }}</router-link>
               </div>
@@ -77,6 +88,27 @@
                 <div v-else v-html="articleContent"></div>
               </div>
               </template>
+
+              <section v-if="!error && articleSeries.length" class="article-series">
+                <h3 class="related-head">所属系列</h3>
+                <div
+                  v-for="series in articleSeries"
+                  :key="series.slug"
+                  class="series-inline"
+                  :style="{ '--series-accent': series.accent }"
+                >
+                  <p class="series-inline-title">{{ series.title }} · {{ series.subtitle }}</p>
+                  <ol class="series-inline-list">
+                    <li
+                      v-for="p in series.posts"
+                      :key="p.id"
+                      :class="{ 'series-inline-current': p.id === Number(postId) }"
+                    >
+                      <router-link :to="p.url">{{ p.title }}</router-link>
+                    </li>
+                  </ol>
+                </div>
+              </section>
 
               <nav v-if="!error && (adjacent.newer || adjacent.older)" class="article-nav">
                 <router-link v-if="adjacent.newer" :to="adjacent.newer.url" class="nav-prev">
@@ -99,7 +131,7 @@
                 </ul>
               </section>
 
-              <section v-if="!error" class="article-comments">
+              <section v-if="!error" ref="commentsRef" class="article-comments">
                 <div v-if="readProgress >= 95" class="read-complete">读完 · 100%</div>
                 <h3 class="comments-head">评论</h3>
                 <p v-if="commentStatus === 'loading'" class="comments-hint">评论加载中…</p>
@@ -122,12 +154,16 @@ import TypewriterTitle from '../components/TypewriterTitle.vue'
 import SystemHaltPanel from '../components/SystemHaltPanel.vue'
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import DOMPurify from 'dompurify'
 import {
   getPostById,
   getAdjacentPosts,
   getRelatedPosts,
+  getPostCover,
+  tagUrl,
 } from '../data/posts'
-import { usePageMeta, pageUrl } from '../composables/usePageMeta'
+import { getSeriesForPost } from '../data/series'
+import { usePageMeta, pageUrl, buildArticleJsonLd, absoluteAssetUrl } from '../composables/usePageMeta'
 import { useTwikoo } from '../composables/useTwikoo'
 import { highlightArticle, estimateReadingMinutes } from '../utils/highlightCode'
 
@@ -147,11 +183,16 @@ const articleBodyRef = ref(null)
 const adjacent = ref({ newer: null, older: null })
 const relatedPosts = ref([])
 const readProgress = ref(0)
+const copyDone = ref(false)
+const commentsRef = ref(null)
 let observer = null
 let scrollHandler = null
+let commentsObserver = null
+let commentsInitialized = false
 
 const postId = computed(() => route.params.id)
 const currentPost = computed(() => getPostById(postId.value))
+const articleSeries = computed(() => getSeriesForPost(postId.value))
 
 const articleErrorLines = computed(() => [
   `ERR:: ${error.value || 'DOCUMENT NOT FOUND'}`,
@@ -167,18 +208,69 @@ const haltMessage = computed(() =>
 const pageMeta = computed(() => {
   const post = currentPost.value
   if (!post) return { title: '文章未找到' }
+  const url = pageUrl(`content/${post.id}`)
+  const cover = getPostCover(post)
+  const image = absoluteAssetUrl(cover)
   return {
     title: post.title,
     description: post.excerpt,
-    url: pageUrl(`content/${post.id}`),
+    url,
     type: 'article',
+    image,
+    jsonLd: buildArticleJsonLd(post, { url, cover }),
   }
 })
 usePageMeta(pageMeta)
 
+async function copyArticleLink() {
+  const post = currentPost.value
+  if (!post) return
+  const url = pageUrl(`content/${post.id}`)
+  try {
+    await navigator.clipboard.writeText(url)
+    copyDone.value = true
+    setTimeout(() => { copyDone.value = false }, 2000)
+  } catch {
+    window.prompt('复制链接', url)
+  }
+}
+
 const { status: commentStatus, init: initComments } = useTwikoo('article-tcomment', () => ({
   path: `/content/${postId.value}`,
 }))
+
+function teardownCommentsObserver() {
+  commentsObserver?.disconnect()
+  commentsObserver = null
+}
+
+function setupLazyComments() {
+  teardownCommentsObserver()
+  if (commentsInitialized) return
+  const el = commentsRef.value
+  if (!el) return
+
+  const run = () => {
+    if (commentsInitialized) return
+    commentsInitialized = true
+    initComments()
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    run()
+    return
+  }
+
+  commentsObserver = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]?.isIntersecting) return
+      run()
+      teardownCommentsObserver()
+    },
+    { rootMargin: '200px', threshold: 0.01 },
+  )
+  commentsObserver.observe(el)
+}
 
 async function loadArticleContent() {
   loading.value = true
@@ -189,6 +281,8 @@ async function loadArticleContent() {
   relatedPosts.value = []
   adjacent.value = { newer: null, older: null }
   readProgress.value = 0
+  commentsInitialized = false
+  teardownCommentsObserver()
   teardownScrollProgress()
 
   const post = currentPost.value
@@ -216,11 +310,11 @@ async function loadArticleContent() {
     content = content.replace(/href="\.\//g, `href="${base}`)
     content = content.replace(/src="\.\.\//g, `src="${base}`)
     content = content.replace(/src="\.\//g, `src="${base}`)
-    articleContent.value = content
+    articleContent.value = DOMPurify.sanitize(content)
     readingMinutes.value = estimateReadingMinutes(content)
     loading.value = false
     await nextTick()
-    highlightArticle(articleBodyRef.value)
+    await highlightArticle(articleBodyRef.value)
     generateTOC()
     setupIntersectionObserver()
     setupScrollProgress()
@@ -228,7 +322,8 @@ async function loadArticleContent() {
       const id = decodeURIComponent(route.hash.slice(1))
       scrollToSection(id)
     }
-    await initComments()
+    await nextTick()
+    setupLazyComments()
   } catch (e) {
     console.error('加载文章失败:', e)
     loading.value = false
@@ -306,6 +401,7 @@ watch(postId, () => loadArticleContent())
 onUnmounted(() => {
   if (observer) observer.disconnect()
   teardownScrollProgress()
+  teardownCommentsObserver()
 })
 </script>
 
@@ -325,6 +421,88 @@ onUnmounted(() => {
   font-family: var(--mono);
   font-size: 0.75em;
   color: var(--steel);
+}
+
+.article-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.article-copy-link {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  color: var(--steel);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.article-copy-link:hover,
+.article-copy-link--done {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.article-series {
+  margin: 2rem 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed var(--border);
+  background: var(--bg-paper);
+}
+
+.series-inline + .series-inline {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
+.series-inline-title {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--series-accent, var(--orange));
+  margin: 0 0 0.65rem;
+  letter-spacing: 0.04em;
+}
+
+.series-inline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: series-item;
+}
+
+.series-inline-list li {
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  counter-increment: series-item;
+}
+
+.series-inline-list li::before {
+  content: counter(series-item, decimal-leading-zero) ' · ';
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+}
+
+.series-inline-list a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.series-inline-list a:hover {
+  color: var(--series-accent, var(--orange));
+}
+
+.series-inline-current a {
+  color: var(--series-accent, var(--orange));
+  font-weight: 500;
 }
 
 .read-complete {

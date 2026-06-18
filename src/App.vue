@@ -1,22 +1,28 @@
 <template>
-  <PageRails />
-  <div class="route-stage">
+  <PageRails v-if="!isAdminRoute" />
+  <div class="route-stage" :class="{ 'route-stage--admin': isAdminRoute }">
     <router-view v-slot="{ Component, route }">
       <transition :name="transitionName">
         <component :is="Component" :key="route.fullPath" />
       </transition>
     </router-view>
   </div>
-  <MusicPlayer />
+  <MusicPlayer v-if="!isAdminRoute" />
 </template>
 
 <script setup>
-import PageRails from './components/PageRails.vue'
-import MusicPlayer from './components/MusicPlayer.vue'
+import { computed, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 import router from './router'
 import { useGridSpotlight } from './composables/useRevealOnScroll'
 import { useRouteTransition } from './composables/useRouteTransition'
 import { useKonamiCheat } from './composables/useKonamiCheat'
+
+const PageRails = defineAsyncComponent(() => import('./components/PageRails.vue'))
+const MusicPlayer = defineAsyncComponent(() => import('./components/MusicPlayer.vue'))
+
+const route = useRoute()
+const isAdminRoute = computed(() => route.name === 'NotesAdmin')
 
 useGridSpotlight()
 useKonamiCheat()
@@ -27,6 +33,10 @@ const { transitionName } = useRouteTransition(router)
 .route-stage {
   position: relative;
   min-height: calc(100vh - var(--topbar-height));
+}
+
+.route-stage--admin {
+  min-height: 100vh;
 }
 
 .page-fade-enter-active,

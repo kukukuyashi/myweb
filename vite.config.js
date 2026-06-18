@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const base = '/myweb/'
+const adminPluginPath = path.join(__dirname, 'scripts/vite-notes-admin.mjs')
 
 /** 开发环境直接读取本地 img/（含子目录） */
 function serveLocalImg() {
@@ -83,7 +84,7 @@ function serveLocalMusic() {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const musicCdn = (env.VITE_MUSIC_BASE_URL || '').trim()
   const staticTargets = [
@@ -99,16 +100,39 @@ export default defineConfig(({ mode }) => {
     )
   }
 
+  const plugins = [vue(), serveLocalImg(), serveLocalMusic()]
+
+  if (command === 'serve' && fs.existsSync(adminPluginPath)) {
+    const { notesAdminApi } = await import('./scripts/vite-notes-admin.mjs')
+    plugins.push(notesAdminApi(base))
+  }
+
+  plugins.push(viteStaticCopy({ targets: staticTargets }))
+
   return {
     base,
-    plugins: [
-      vue(),
-      serveLocalImg(),
-      serveLocalMusic(),
-      viteStaticCopy({ targets: staticTargets }),
-    ],
+    plugins,
     build: {
       outDir: 'docs',
+      target: 'es2020',
+      cssCodeSplit: true,
+      modulePreload: { polyfill: true },
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (
+              id.includes('node_modules/vue/')
+              || id.includes('node_modules/@vue/')
+              || id.includes('node_modules/vue-router/')
+              || id.includes('node_modules/pinia/')
+            ) {
+              return 'vue-vendor'
+            }
+            if (id.includes('node_modules/prismjs')) return 'prism'
+            if (id.includes('node_modules/dompurify')) return 'dompurify'
+          },
+        },
+      },
     },
   }
 })

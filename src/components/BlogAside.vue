@@ -63,6 +63,7 @@ import ProfileCard from './ProfileCard.vue'
 import MomentPanel from './MomentPanel.vue'
 import VisitorLcd from './VisitorLcd.vue'
 import { getRecentPosts } from '../data/posts'
+import { profile } from '../data/profile'
 
 const recentPosts = getRecentPosts(3)
 
@@ -73,12 +74,7 @@ defineProps({
   siteAge: { type: String, default: '—' }
 })
 
-const learningItems = [
-  'AI Agent 架构',
-  'MyGO!!!!! / 碧蓝档案',
-  'Prompt / Tool Use',
-  'Cursor / SDK 实践'
-]
+const learningItems = profile.learningItems
 </script>
 
 <style scoped>

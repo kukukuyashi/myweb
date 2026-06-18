@@ -13,7 +13,7 @@
             <router-link
               v-for="tag in allTags"
               :key="tag"
-              :to="{ path: '/', query: { tag } }"
+              :to="tagUrl(tag)"
               class="archive-tag"
             >#{{ tag }}</router-link>
           </div>
@@ -118,7 +118,7 @@ import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { ref, computed } from 'vue'
-import { posts, buildArchive, getLastUpdateDate, getTags } from '../data/posts'
+import { posts, buildArchive, getLastUpdateDate, getTags, tagUrl } from '../data/posts'
 import { ARCHIVE_INK_IMAGE, ARCHIVE_INK_POSITION } from '../data/inkTheme'
 import { usePageMeta } from '../composables/usePageMeta'
 

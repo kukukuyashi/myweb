@@ -27,7 +27,7 @@
                 </div>
                 <router-link to="/about" class="hero-avatar-link hero-avatar-float" title="关于 Cyinc">
                   <div class="acg-frame acg-frame--avatar acg-frame--hero">
-                    <img :src="avatarUrl" alt="Cyinc" width="80" height="80" loading="lazy">
+                    <img :src="avatarUrl" alt="Cyinc" width="80" height="80" fetchpriority="high" decoding="async">
                   </div>
                 </router-link>
               </div>
@@ -153,7 +153,6 @@
 
 <script setup>
 import NavBar from '../components/NavBar.vue'
-import BlogAside from '../components/BlogAside.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import TagBar from '../components/TagBar.vue'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
@@ -161,9 +160,11 @@ import PostCard from '../components/PostCard.vue'
 import HeroTicker from '../components/HeroTicker.vue'
 import StatCounter from '../components/StatCounter.vue'
 import SystemHaltPanel from '../components/SystemHaltPanel.vue'
-import SeriesSection from '../components/SeriesSection.vue'
-import ChangelogStrip from '../components/ChangelogStrip.vue'
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, defineAsyncComponent } from 'vue'
+
+const SeriesSection = defineAsyncComponent(() => import('../components/SeriesSection.vue'))
+const ChangelogStrip = defineAsyncComponent(() => import('../components/ChangelogStrip.vue'))
+const BlogAside = defineAsyncComponent(() => import('../components/BlogAside.vue'))
 import { useRoute, useRouter } from 'vue-router'
 import {
   postsWithUrl,

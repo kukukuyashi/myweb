@@ -35,11 +35,65 @@ function removeCanonical() {
   document.querySelector('link[rel="canonical"]')?.remove()
 }
 
+const JSON_LD_ID = 'cyinc-json-ld'
+
+function setJsonLd(data) {
+  removeJsonLd()
+  if (!data) return
+  const script = document.createElement('script')
+  script.id = JSON_LD_ID
+  script.type = 'application/ld+json'
+  script.textContent = JSON.stringify(data)
+  document.head.appendChild(script)
+}
+
+function removeJsonLd() {
+  document.getElementById(JSON_LD_ID)?.remove()
+}
+
 export function pageUrl(path = '') {
-  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
   const clean = path.replace(/^\//, '')
-  const parts = [SITE_URL, basePath, clean].filter(Boolean)
-  return parts.join('/').replace(/([^:]\/)\/+/g, '$1')
+  const root = SITE_URL.replace(/\/$/, '')
+  if (!clean) return `${root}/`
+  return `${root}/${clean}`.replace(/([^:]\/)\/+/g, '$1')
+}
+
+export function absoluteAssetUrl(relativePath) {
+  const asset = String(relativePath || 'img/xiaoqing.png').replace(/^\//, '')
+  return pageUrl(asset)
+}
+
+/** 文章页 BlogPosting 结构化数据 */
+export function buildArticleJsonLd(post, options = {}) {
+  if (!post) return null
+  const url = options.url || pageUrl(`content/${post.id}`)
+  const image = options.image || absoluteAssetUrl(options.cover || post.cover)
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.updated || post.date,
+    author: {
+      '@type': 'Person',
+      name: 'Cyinc',
+      url: SITE_URL,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: 'Cyinc',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    url,
+    image,
+    keywords: (post.tags || []).join(', '),
+    articleSection: post.category,
+    inLanguage: 'zh-CN',
+  }
 }
 
 export function usePageMeta(getMeta) {
@@ -58,7 +112,7 @@ export function usePageMeta(getMeta) {
       : SITE_NAME
     const description = meta.description || SITE_DESCRIPTION
     const url = meta.url || defaultUrl()
-    const image = meta.image || pageUrl('img/xiaoqing.png')
+    const image = meta.image || absoluteAssetUrl('img/xiaoqing.png')
 
     document.title = title
     setMeta('name', 'description', description)
@@ -67,10 +121,12 @@ export function usePageMeta(getMeta) {
     setMeta('property', 'og:url', url)
     setMeta('property', 'og:type', meta.type || 'website')
     setMeta('property', 'og:image', image)
-    setMeta('name', 'twitter:card', 'summary')
+    setMeta('name', 'twitter:card', 'summary_large_image')
     setMeta('name', 'twitter:title', title)
     setMeta('name', 'twitter:description', description)
+    setMeta('name', 'twitter:image', image)
     setCanonical(url)
+    setJsonLd(meta.jsonLd)
   }
 
   onMounted(apply)
@@ -83,7 +139,8 @@ export function usePageMeta(getMeta) {
     document.title = restoreTitle
     removeMeta('name', 'description')
     ;['og:title', 'og:description', 'og:url', 'og:type', 'og:image'].forEach(k => removeMeta('property', k))
-    ;['twitter:card', 'twitter:title', 'twitter:description'].forEach(k => removeMeta('name', k))
+    ;['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image'].forEach(k => removeMeta('name', k))
     removeCanonical()
+    removeJsonLd()
   })
 }

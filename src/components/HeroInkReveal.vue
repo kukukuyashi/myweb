@@ -22,9 +22,10 @@ const props = defineProps({
 
 const rootRef = ref(null)
 const canvasRef = ref(null)
+const bgReady = ref(false)
 
 const bgStyle = computed(() => ({
-  backgroundImage: `url(${imgUrl(props.image)})`,
+  backgroundImage: bgReady.value ? `url(${imgUrl(props.image)})` : 'none',
   backgroundPosition: props.position,
 }))
 
@@ -34,6 +35,20 @@ onMounted(() => {
   const root = rootRef.value?.parentElement
   const canvas = canvasRef.value
   if (!root || !canvas) return
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return
+        bgReady.value = true
+        io.disconnect()
+      },
+      { rootMargin: '80px' },
+    )
+    io.observe(root)
+  } else {
+    bgReady.value = true
+  }
 
   cleanup = initInkMask(root, canvas, {
     rEnd: props.rEnd,

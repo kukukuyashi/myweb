@@ -17,6 +17,22 @@ const routes = [
     component: () => import('../views/Archive.vue')
   },
   {
+    path: '/projects',
+    name: 'Projects',
+    component: () => import('../views/Projects.vue')
+  },
+  {
+    path: '/changelog',
+    name: 'Changelog',
+    component: () => import('../views/Changelog.vue')
+  },
+  {
+    path: '/tags/:tag',
+    name: 'Tag',
+    component: () => import('../views/TagView.vue'),
+    props: true
+  },
+  {
     path: '/music',
     name: 'Music',
     component: () => import('../views/Music.vue')
@@ -32,6 +48,16 @@ const routes = [
     component: () => import('../views/Content.vue'),
     props: true
   },
+  // 须在 catch-all 之前注册；异步 addRoute 会导致首屏 /admin 被 NotFound 抢走
+  ...(import.meta.env.DEV
+    ? [
+        {
+          path: '/admin',
+          name: 'NotesAdmin',
+          component: () => import('../views/admin/NotesAdmin.vue'),
+        },
+      ]
+    : []),
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

@@ -18,6 +18,14 @@ export const profile = {
     { label: '入坑作', text: '从浏览器 F12 到 LLM — 跨度很大，但都很好玩' },
   ],
 
+  /** 侧栏 Now Learning — 改这里即可，不必动组件 */
+  learningItems: [
+    'AI Agent 架构',
+    'MyGO!!!!! / 碧蓝档案',
+    'Prompt / Tool Use',
+    'Cursor / SDK 实践',
+  ],
+
   /** @deprecated 贴纸墙改用 aboutGallery.js (img/关于/) */
   gallery: [],
 }

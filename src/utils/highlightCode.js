@@ -1,10 +1,18 @@
-import Prism from 'prismjs'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-java'
-import 'prismjs/components/prism-markup'
-import 'prismjs/components/prism-css'
-import 'prismjs/components/prism-json'
-import 'prismjs/components/prism-bash'
+let Prism = null
+let prismLoaded = false
+
+async function loadPrism() {
+  if (prismLoaded) return
+  Prism = (await import('prismjs')).default
+  await import('prismjs/components/prism-javascript')
+  await import('prismjs/components/prism-java')
+  await import('prismjs/components/prism-markup')
+  await import('prismjs/components/prism-css')
+  await import('prismjs/components/prism-json')
+  await import('prismjs/components/prism-bash')
+  await import('prismjs/themes/prism-tomorrow.css')
+  prismLoaded = true
+}
 
 const LANG_MAP = {
   js: 'javascript',
@@ -42,8 +50,9 @@ function attachCopyButton(pre) {
   pre.appendChild(btn)
 }
 
-export function highlightArticle(root) {
+export async function highlightArticle(root) {
   if (!root) return
+  await loadPrism()
   root.querySelectorAll('pre code').forEach(block => {
     const cls = Array.from(block.classList).find(c => c.startsWith('language-'))
     let lang = cls?.replace('language-', '') || ''

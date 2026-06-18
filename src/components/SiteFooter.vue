@@ -7,11 +7,17 @@
       </div>
       <div class="footer-links">
         <router-link to="/archive">归档</router-link>
+        <router-link to="/projects">项目</router-link>
+        <router-link to="/changelog">更新</router-link>
         <router-link to="/guestbook">留言板</router-link>
         <router-link to="/music">音乐室</router-link>
         <a :href="rssUrl" target="_blank" rel="noopener">RSS</a>
         <a href="https://github.com/kukukuyashi/myweb" target="_blank" rel="noopener">GitHub</a>
       </div>
+      <p class="footer-rss">
+        订阅更新：
+        <a :href="rssUrl" target="_blank" rel="noopener">{{ rssUrl }}</a>
+      </p>
       <div class="footer-meta">
         <span>© {{ year }} Cyinc</span>
         <span class="footer-dot">·</span>
@@ -87,6 +93,24 @@ const rssUrl = `${import.meta.env.BASE_URL}feed.xml`
   width: 100%;
   padding-top: 1rem;
   border-top: 1px dashed var(--border);
+}
+
+.footer-rss {
+  width: 100%;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.footer-rss a {
+  color: var(--steel);
+  text-decoration: none;
+}
+
+.footer-rss a:hover {
+  color: var(--orange);
 }
 
 .footer-dot {

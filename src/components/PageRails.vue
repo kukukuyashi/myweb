@@ -50,7 +50,7 @@
       </nav>
       <ul class="rail-tags">
         <li v-for="t in fanTags" :key="t">
-          <router-link :to="{ path: '/', query: { tag: t } }">{{ t }}</router-link>
+          <router-link :to="tagRoute(t)">{{ t }}</router-link>
         </li>
       </ul>
       <div class="rail-ticks rail-ticks--flip" />
@@ -60,13 +60,14 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { posts, getRecentPosts } from '../data/posts'
+import { posts, getRecentPosts, tagUrl } from '../data/posts'
 import { useMusicStore } from '../store'
 import { getSeasonConfig } from '../data/seasonTheme'
+import { getLatestChangelogEntry } from '../data/changelog'
 
 const musicStore = useMusicStore()
 const totalPosts = posts.length
-const buildRev = '2026.06'
+const buildRev = getLatestChangelogEntry()?.version ?? '2026.06'
 const recentPosts = getRecentPosts(3)
 const railTagline = getSeasonConfig().railTagline
 
@@ -85,6 +86,8 @@ const scrollNowPlaying = computed(() =>
 )
 
 const quickLinks = [
+  { to: '/projects', label: 'PROJ' },
+  { to: '/changelog', label: 'LOG' },
   { to: '/music', label: 'MUSIC' },
   { to: '/archive', label: 'ARCH' },
   { to: '/guestbook', label: 'GUEST' },
@@ -96,6 +99,10 @@ const fanTags = ['フリーレン', 'MyGO!!!!!', 'BA']
 function truncate(text, max) {
   const s = String(text || '')
   return s.length > max ? `${s.slice(0, max)}…` : s
+}
+
+function tagRoute(tag) {
+  return tagUrl(tag)
 }
 
 function loadVisitorStats() {

@@ -88,14 +88,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import StickerWall from '../components/StickerWall.vue'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 import { profile, imgUrl } from '../data/profile'
 import { aboutGallery } from '../data/aboutGallery'
+
+const StickerWall = defineAsyncComponent(() => import('../components/StickerWall.vue'))
 
 usePageMeta({
   title: '关于我',
