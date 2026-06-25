@@ -17,6 +17,7 @@ import router from './router'
 import { useGridSpotlight } from './composables/useRevealOnScroll'
 import { useRouteTransition } from './composables/useRouteTransition'
 import { useKonamiCheat } from './composables/useKonamiCheat'
+import { useClickRipple } from './composables/useClickRipple'
 
 const PageRails = defineAsyncComponent(() => import('./components/PageRails.vue'))
 const MusicPlayer = defineAsyncComponent(() => import('./components/MusicPlayer.vue'))
@@ -26,6 +27,7 @@ const isAdminRoute = computed(() => route.name === 'NotesAdmin')
 
 useGridSpotlight()
 useKonamiCheat()
+useClickRipple()
 const { transitionName } = useRouteTransition(router)
 </script>
 

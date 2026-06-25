@@ -19,10 +19,9 @@
         <p class="series-card-sub">{{ item.subtitle }}</p>
         <p class="series-card-desc">{{ item.description }}</p>
         <ol class="series-card-posts">
-          <li v-for="post in item.posts.slice(0, 4)" :key="post.id">
+          <li v-for="post in item.posts" :key="post.id">
             <router-link :to="post.url">{{ post.title }}</router-link>
           </li>
-          <li v-if="item.count > 4" class="series-card-more">+{{ item.count - 4 }} 篇…</li>
         </ol>
       </article>
     </div>

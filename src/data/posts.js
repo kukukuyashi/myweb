@@ -7,6 +7,16 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 26,
+    title: '自定义鼠标样式与点击涟漪效果',
+    date: '2026-06-26',
+    category: '前端',
+    tags: ['CSS', 'Vue', '前端', '鼠标', '动画'],
+    excerpt: '用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。',
+    file: '自定义鼠标样式与点击涟漪效果.html',
+    cover: 'img/bkm/5.jfif',
+  },
+  {
     id: 20,
     title: '帕朵root开发笔记',
     date: '2026-06-14',
@@ -15,6 +25,59 @@ export const posts = [
     excerpt: '帕朵root开发笔记 — 学习笔记。',
     file: '帕朵root开发笔记.html',
     cover: 'img/bkm/2.jfif',
+  },
+
+  {
+    id: 24,
+    title: '首页墨染晕染：鼠标 hover 显现线稿',
+    date: '2026-06-16',
+    category: '前端',
+    tags: ['Canvas', 'Vue', '前端'],
+    excerpt: '首页 Hero、音乐室、关于页顶栏都有「鼠标划过去，线稿从纸面晕开」的效果。这篇拆开 DOM 结构、Canvas 遮罩原理和 Vue 组件怎么接，方便以后换图或复用到别的面板。',
+    file: '首页墨染晕染 Canvas 鼠标显现线稿.html',
+    cover: 'img/bkm/3.jfif',
+  },
+
+  {
+    id: 25,
+    title: '陈皮有多陈：Flask + AI 鉴陈项目笔记',
+    date: '2026-06-15',
+    category: '项目',
+    tags: ['Flask', 'Python', 'AI', '项目', 'Qwen'],
+    excerpt: '第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。',
+    file: '陈皮有多陈 Flask AI 鉴陈项目笔记.html',
+  },
+
+  {
+    id: 22,
+    title: '博客音乐室：GitHub Pages 上播 FLAC',
+    date: '2026-06-14',
+    category: '部署',
+    tags: ['Vue', 'FLAC', 'GitHub Pages', '部署', '音乐'],
+    excerpt: '静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。',
+    file: '博客音乐室 GitHub Pages 播 FLAC.html',
+    cover: 'img/bkm/5.jfif',
+  },
+
+  {
+    id: 23,
+    title: 'GitHub Actions 自动部署 Vue 博客',
+    date: '2026-06-13',
+    category: '部署',
+    tags: ['GitHub Actions', 'CI/CD', 'Vue', '部署'],
+    excerpt: 'push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。',
+    file: 'GitHub Actions 自动部署 Vue 博客.html',
+  },
+
+  {
+    id: 21,
+    title: '个人博客重构记：Vue3 静态站上线',
+    date: '2026-06-12',
+    category: '部署',
+    tags: ['Vue3', 'Vue', 'GitHub Pages', '重构', '部署'],
+    excerpt: '记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。',
+    file: '个人博客重构记 Vue3 静态站上线.html',
+    cover: 'img/bkm/4.jfif',
   },
 
   {

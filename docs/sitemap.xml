@@ -36,8 +36,44 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/26</loc>
+    <lastmod>2026-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/24</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/25</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/content/20</loc>
     <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/22</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/23</loc>
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/21</loc>
+    <lastmod>2026-06-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -155,7 +191,17 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%83%A8%E7%BD%B2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/%E5%AD%98%E5%82%A8</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%8A%A8%E7%94%BB</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -200,6 +246,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%BC%A0%E6%A0%87</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/%E6%95%B0%E7%BB%84</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -220,6 +271,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%9F%B3%E4%B9%90</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/%E8%AF%AD%E6%B3%95</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -235,6 +291,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E9%87%8D%E6%9E%84</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/Agent</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -246,6 +307,16 @@
   </url>
   <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/BOM</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Canvas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/CI%2FCD</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -266,6 +337,26 @@
   </url>
   <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/FAQ</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/FLAC</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Flask</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/GitHub%20Actions</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/GitHub%20Pages</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -306,6 +397,16 @@
   </url>
   <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/Promise</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Python</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/Qwen</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

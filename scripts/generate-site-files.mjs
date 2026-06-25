@@ -9,6 +9,14 @@ const outDir = process.argv[2] || path.join(root, 'docs')
 const { posts, SITE_URL, SITE_NAME, SITE_DESCRIPTION } = await import('../src/data/posts.js')
 
 const base = '/myweb/'
+
+function siteUrl(routePath = '') {
+  const clean = String(routePath).replace(/^\//, '')
+  const root = SITE_URL.replace(/\/$/, '')
+  if (!clean) return `${root}/`
+  return `${root}/${clean}`.replace(/([^:]\/)\/+/g, '$1')
+}
+
 const sorted = [...posts].sort((a, b) => b.date.localeCompare(a.date))
 
 function escXml(s) {
@@ -18,8 +26,8 @@ function escXml(s) {
 const feedItems = sorted.map(p => `
   <item>
     <title>${escXml(p.title)}</title>
-    <link>${SITE_URL}${base}content/${p.id}</link>
-    <guid isPermaLink="true">${SITE_URL}${base}content/${p.id}</guid>
+    <link>${siteUrl(`content/${p.id}`)}</link>
+    <guid isPermaLink="true">${siteUrl(`content/${p.id}`)}</guid>
     <pubDate>${new Date(p.date).toUTCString()}</pubDate>
     <description>${escXml(p.excerpt)}</description>
     <category>${escXml(p.category)}</category>
@@ -29,7 +37,7 @@ const feed = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${escXml(SITE_NAME)}</title>
-    <link>${SITE_URL}${base}</link>
+    <link>${siteUrl('')}</link>
     <description>${escXml(SITE_DESCRIPTION)}</description>
     <language>zh-CN</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${feedItems}
@@ -37,21 +45,29 @@ const feed = `<?xml version="1.0" encoding="UTF-8"?>
 </rss>`
 
 const urls = [
-  { loc: `${SITE_URL}${base}`, priority: '1.0' },
-  { loc: `${SITE_URL}${base}about`, priority: '0.6' },
-  { loc: `${SITE_URL}${base}archive`, priority: '0.7' },
-  { loc: `${SITE_URL}${base}music`, priority: '0.5' },
-  { loc: `${SITE_URL}${base}guestbook`, priority: '0.6' },
+  { loc: siteUrl(''), priority: '1.0' },
+  { loc: siteUrl('about'), priority: '0.6' },
+  { loc: siteUrl('archive'), priority: '0.7' },
+  { loc: siteUrl('projects'), priority: '0.6' },
+  { loc: siteUrl('changelog'), priority: '0.5' },
+  { loc: siteUrl('music'), priority: '0.5' },
+  { loc: siteUrl('guestbook'), priority: '0.6' },
   ...sorted.map(p => ({
-    loc: `${SITE_URL}${base}content/${p.id}`,
+    loc: siteUrl(`content/${p.id}`),
     priority: '0.8',
     lastmod: p.date,
   })),
 ]
 
+const { getTags } = await import('../src/data/posts.js')
+const tagUrls = getTags().map(tag => ({
+  loc: siteUrl(`tags/${encodeURIComponent(tag)}`),
+  priority: '0.5',
+}))
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(u => `  <url>
+${[...urls, ...tagUrls].map(u => `  <url>
     <loc>${escXml(u.loc)}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ''}
     <changefreq>monthly</changefreq>
     <priority>${u.priority}</priority>
@@ -61,7 +77,7 @@ ${urls.map(u => `  <url>
 const robots = `User-agent: *
 Allow: /
 
-Sitemap: ${SITE_URL}${base}sitemap.xml
+Sitemap: ${siteUrl('sitemap.xml')}
 `
 
 fs.mkdirSync(outDir, { recursive: true })

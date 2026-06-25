@@ -5,7 +5,31 @@
     <link>https://kukukuyashi.github.io/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 17 Jun 2026 05:24:47 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 25 Jun 2026 16:16:50 GMT</lastBuildDate>
+  <item>
+    <title>自定义鼠标样式与点击涟漪效果</title>
+    <link>https://kukukuyashi.github.io/myweb/content/26</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/26</guid>
+    <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
+    <description>用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>首页墨染晕染：鼠标 hover 显现线稿</title>
+    <link>https://kukukuyashi.github.io/myweb/content/24</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/24</guid>
+    <pubDate>Tue, 16 Jun 2026 00:00:00 GMT</pubDate>
+    <description>首页 Hero、音乐室、关于页顶栏都有「鼠标划过去，线稿从纸面晕开」的效果。这篇拆开 DOM 结构、Canvas 遮罩原理和 Vue 组件怎么接，方便以后换图或复用到别的面板。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>陈皮有多陈：Flask + AI 鉴陈项目笔记</title>
+    <link>https://kukukuyashi.github.io/myweb/content/25</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/25</guid>
+    <pubDate>Mon, 15 Jun 2026 00:00:00 GMT</pubDate>
+    <description>第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。</description>
+    <category>项目</category>
+  </item>
   <item>
     <title>帕朵root开发笔记</title>
     <link>https://kukukuyashi.github.io/myweb/content/20</link>
@@ -13,6 +37,30 @@
     <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
     <description>帕朵root开发笔记 — 学习笔记。</description>
     <category>项目</category>
+  </item>
+  <item>
+    <title>博客音乐室：GitHub Pages 上播 FLAC</title>
+    <link>https://kukukuyashi.github.io/myweb/content/22</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/22</guid>
+    <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
+    <description>静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>GitHub Actions 自动部署 Vue 博客</title>
+    <link>https://kukukuyashi.github.io/myweb/content/23</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/23</guid>
+    <pubDate>Sat, 13 Jun 2026 00:00:00 GMT</pubDate>
+    <description>push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>个人博客重构记：Vue3 静态站上线</title>
+    <link>https://kukukuyashi.github.io/myweb/content/21</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/21</guid>
+    <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+    <description>记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。</description>
+    <category>部署</category>
   </item>
   <item>
     <title>留言板 Twikoo 部署笔记</title>

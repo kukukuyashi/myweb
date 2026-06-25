@@ -7,13 +7,135 @@
     <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
     <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
     <title>Cyinc 的学习日志</title>
+    <!-- 字体异步加载，避免阻塞首屏；系统字体已在 CSS 中作为 fallback -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/myweb/assets/index-COtWrGE6.js"></script>
-  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B99shNwW.css">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      media="print"
+      onload="this.media='all'"
+    >
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+    <style>
+      /* 加载屏幕样式 */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #f5f2ee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+      
+      .loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-content {
+        text-align: center;
+        font-family: ui-monospace, 'Cascadia Code', 'IBM Plex Mono', monospace;
+      }
+      
+      .loading-logo {
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 2rem;
+        letter-spacing: 0.1em;
+      }
+      
+      .loading-bar {
+        width: 200px;
+        height: 2px;
+        background: #c8c2ba;
+        margin: 0 auto 1rem;
+        overflow: hidden;
+      }
+      
+      .loading-progress {
+        width: 0%;
+        height: 100%;
+        background: #e85d04;
+        animation: loading-progress 1.5s ease-in-out infinite;
+      }
+      
+      .loading-text {
+        font-size: 0.75rem;
+        color: #5c5c5c;
+        letter-spacing: 0.05em;
+      }
+      
+      @keyframes loading-progress {
+        0% { width: 0%; transform: translateX(0%); }
+        50% { width: 100%; transform: translateX(0%); }
+        100% { width: 100%; transform: translateX(100%); }
+      }
+      
+      /* 深色模式支持 */
+      [data-theme="dark"] .loading-screen {
+        background: #242220;
+      }
+      
+      [data-theme="dark"] .loading-logo {
+        color: #eae6e1;
+      }
+      
+      [data-theme="dark"] .loading-bar {
+        background: #3a3835;
+      }
+      
+      [data-theme="dark"] .loading-text {
+        color: #9a9590;
+      }
+    </style>
+  <script type="module" crossorigin src="/myweb/assets/index-B6i5hLqN.js"></script>
+  <link rel="modulepreload" crossorigin href="/myweb/assets/vue-vendor-Dw3_6RyQ.js">
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-Df1pDvP1.css">
 </head>
 <body>
+    <!-- 加载屏幕 -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-content">
+        <div class="loading-logo">CYINC.LOG</div>
+        <div class="loading-bar">
+          <div class="loading-progress"></div>
+        </div>
+        <div class="loading-text">加载中...</div>
+      </div>
+    </div>
+    
     <div id="app"></div>
+    
+    <script>
+      // Vue 挂载后隐藏加载屏幕
+      function hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('fade-out');
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+          }, 500);
+        }
+      }
+      
+      // 页面加载完成后隐藏
+      window.addEventListener('load', function() {
+        // 最少显示 800ms，让用户能看到加载效果
+        setTimeout(hideLoadingScreen, 800);
+      });
+      
+      // 如果页面加载时间超过 3 秒，也强制隐藏（防止卡住）
+      setTimeout(hideLoadingScreen, 3000);
+    </script>
 </body>
 </html>

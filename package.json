@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs",
+    "build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",
     "preview": "vite preview --base /myweb/",
-    "music:upload": "node scripts/upload-music-cdn.mjs"
+    "music:upload": "node scripts/upload-music-cdn.mjs",
+    "new:post": "node scripts/new-post.mjs",
+    "publish:post": "node scripts/publish-post.mjs",
+    "admin": "npm run dev"
   },
   "dependencies": {
+    "dompurify": "^3.4.10",
     "pinia": "^3.0.4",
     "prismjs": "^1.30.0",
     "vue": "^3.5.25",

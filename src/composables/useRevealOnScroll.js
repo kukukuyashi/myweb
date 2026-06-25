@@ -44,9 +44,24 @@ export function observeReveal(root, selector = '[data-reveal]') {
 
 /** 进入视口时给元素加 .is-revealed，配合 main.css 的 .reveal-item */
 export function useRevealOnScroll(rootRef, selector = '[data-reveal]') {
-  onMounted(() => observeReveal(rootRef?.value, selector))
+  let mutationObserver = null
+
+  onMounted(() => {
+    const root = rootRef?.value
+    if (!root) return
+
+    observeReveal(root, selector)
+
+    if (prefersReducedMotion()) return
+
+    mutationObserver = new MutationObserver(() => {
+      observeReveal(root, selector)
+    })
+    mutationObserver.observe(root, { childList: true, subtree: true })
+  })
+
   onUnmounted(() => {
-    /* observer 全局复用，页面切换时元素已 DOM 移除 */
+    mutationObserver?.disconnect()
   })
 }
 
