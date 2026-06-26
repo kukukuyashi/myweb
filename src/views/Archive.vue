@@ -2,110 +2,130 @@
   <div class="archive">
     <NavBar />
     <main class="page-main">
-      <div class="container layout-single">
-        <div class="page-content">
+      <div class="container archive-wrap">
+        <header class="archive-header">
           <h1 class="page-title">文章归档</h1>
           <div class="archive-meta">
             TOTAL {{ totalPosts }} POSTS · {{ totalTags }} TAGS · LAST UPDATE {{ lastUpdate }}
           </div>
+        </header>
 
-          <div v-if="allTags.length" class="archive-tags">
-            <router-link
-              v-for="tag in allTags"
-              :key="tag"
-              :to="tagUrl(tag)"
-              class="archive-tag"
-            >#{{ tag }}</router-link>
-          </div>
-
-          <InkRevealPanel
-            v-if="timelineYears.length"
-            tag="section"
-            root-class="archive-timeline archive-timeline--ink"
-            :image="ARCHIVE_INK_IMAGE"
-            :position="ARCHIVE_INK_POSITION"
-            :r-end="108"
-            :max-stamps="110"
-            fade-direction="left"
-            aria-label="归档时间轴"
-            @mouseleave="clearHoverMonth"
-          >
-            <div class="timeline-head">
-              <span class="timeline-head-label">
-                TIMELINE · <span class="ink-hint">hover 晕染</span>
-              </span>
-              <button v-if="monthFilter" type="button" class="timeline-clear" @click="monthFilter = ''">
-                清除筛选
-              </button>
+        <div class="archive-columns">
+          <section ref="streamRef" class="archive-main" aria-label="文章时间轴">
+            <div v-if="activeCategory" class="archive-filter-hint">
+              正在查看「{{ activeCategory }}」·
+              <button type="button" class="archive-filter-clear" @click="activeCategory = ''">显示全部</button>
             </div>
 
-            <div class="timeline-preview-area">
-              <Transition name="timeline-preview-fade" mode="out-in">
-                <div
-                  v-if="hoverPreviewPosts.length"
-                  key="preview"
-                  class="timeline-preview"
-                >
-                  <div class="timeline-preview-head">
-                    {{ hoverPreviewLabel }} · {{ hoverPreviewPosts.length }} 篇
-                  </div>
-                  <ul class="timeline-preview-list">
-                    <li v-for="post in hoverPreviewPosts.slice(0, 6)" :key="post.id">
-                      <span class="timeline-preview-date">{{ post.date }}</span>
-                      <router-link :to="post.url">{{ post.title }}</router-link>
-                    </li>
-                  </ul>
-                  <p v-if="hoverPreviewPosts.length > 6" class="timeline-preview-more">
-                    +{{ hoverPreviewPosts.length - 6 }} more…
-                  </p>
-                </div>
-                <p v-else key="placeholder" class="timeline-preview-placeholder">
-                  悬停月份预览文章 · 面板内 hover 可晕染
-                </p>
-              </Transition>
-            </div>
-
-            <div class="timeline-years">
-              <div v-for="year in timelineYears" :key="year.year" class="timeline-year">
-                <span class="timeline-year-label">{{ year.year }}</span>
-                <div class="timeline-months">
-                  <button
-                    v-for="m in year.months"
-                    :key="m.key"
-                    type="button"
-                    class="timeline-month"
-                    :class="{ active: monthFilter === m.key, empty: !m.count, hovered: hoverMonth === m.key }"
-                    :style="{ '--heat': heatRatio(m.count) }"
-                    :disabled="!m.count"
-                    @mouseenter="setHoverMonth(m.key, m.count)"
-                    @focus="setHoverMonth(m.key, m.count)"
-                    @click="toggleMonth(m.key)"
-                  >
-                    <span class="timeline-bar" aria-hidden="true" />
-                    <span class="timeline-label">{{ m.month }}</span>
-                  </button>
-                </div>
+            <template v-for="(entry, index) in timelineEntries" :key="entry.key">
+              <div v-if="entry.kind === 'year'" class="archive-stream-year">
+                <span class="archive-stream-year-dot" aria-hidden="true" />
+                <span class="archive-stream-year-label">{{ entry.year }}</span>
               </div>
-            </div>
-          </InkRevealPanel>
 
-          <template v-for="group in visibleGroups" :key="group.year">
-            <h2 class="archive-year">{{ group.year }}</h2>
-            <template v-for="month in group.months" :key="`${group.year}-${month.month}`">
-              <h3 class="archive-month">{{ month.label }}</h3>
-              <ul class="archive-items">
-                <li v-for="post in month.posts" :key="post.id">
-                  <span class="date">{{ post.date }}</span>
-                  <router-link :to="post.url">{{ post.title }}</router-link>
-                  <span v-if="post.tags?.length" class="post-tags">
-                    <span v-for="t in post.tags.slice(0, 2)" :key="t" class="mini-tag">{{ t }}</span>
-                  </span>
+              <article
+                v-else
+                class="archive-stream-item reveal-item"
+                data-reveal
+                :style="{ '--reveal-delay': `${Math.min(index, 8) * 40}ms` }"
+              >
+                <span class="archive-stream-dot" aria-hidden="true" />
+                <div class="archive-stream-card">
+                  <time class="archive-stream-date" :datetime="entry.post.date">
+                    {{ formatTimelineDate(entry.post.date) }}
+                  </time>
+                  <h2 class="archive-stream-title">
+                    <router-link :to="entry.post.url">{{ entry.post.title }}</router-link>
+                  </h2>
+                  <p v-if="entry.post.excerpt" class="archive-stream-excerpt">
+                    {{ entry.post.excerpt }}
+                  </p>
+                  <div class="archive-stream-foot">
+                    <button
+                      type="button"
+                      class="archive-stream-cat"
+                      :style="{ '--cat-color': getCategoryColor(entry.post.category) }"
+                      @click="activeCategory = entry.post.category"
+                    >
+                      {{ entry.post.category }}
+                    </button>
+                    <span v-if="entry.post.tags?.length" class="archive-stream-tags">
+                      <router-link
+                        v-for="t in entry.post.tags.slice(0, 3)"
+                        :key="t"
+                        :to="tagUrl(t)"
+                        class="archive-stream-tag"
+                      >#{{ t }}</router-link>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </template>
+
+            <p v-if="!timelineEntries.some((e) => e.kind === 'post')" class="archive-empty">
+              该分类暂无文章
+            </p>
+          </section>
+
+          <aside class="archive-aside" aria-label="笔记分类">
+            <div class="archive-panel archive-type-panel">
+              <div class="archive-panel-head">
+                <span class="archive-panel-label">笔记类型</span>
+                <span class="archive-panel-count">{{ categoryStats.length }}</span>
+              </div>
+              <ul class="archive-type-list">
+                <li>
+                  <button
+                    type="button"
+                    class="archive-type-item"
+                    :class="{ active: !activeCategory }"
+                    @click="activeCategory = ''"
+                  >
+                    <span class="archive-type-icon archive-type-icon--all">ALL</span>
+                    <span class="archive-type-body">
+                      <span class="archive-type-name">全部笔记</span>
+                      <span class="archive-type-desc">按时间浏览</span>
+                    </span>
+                    <span class="archive-type-badge">{{ totalPosts }}</span>
+                  </button>
+                </li>
+                <li v-for="cat in categoryStats" :key="cat.name">
+                  <button
+                    type="button"
+                    class="archive-type-item"
+                    :class="{ active: activeCategory === cat.name }"
+                    :style="{ '--cat-color': cat.color }"
+                    @click="toggleCategory(cat.name)"
+                  >
+                    <span class="archive-type-icon">{{ cat.icon }}</span>
+                    <span class="archive-type-body">
+                      <span class="archive-type-name">{{ cat.name }}</span>
+                      <span class="archive-type-desc">{{ categoryDesc(cat.name) }}</span>
+                    </span>
+                    <span class="archive-type-badge">{{ cat.count }}</span>
+                  </button>
                 </li>
               </ul>
-            </template>
-          </template>
+            </div>
 
-          <p v-if="monthFilter && !visibleGroups.length" class="timeline-empty">该月份暂无文章</p>
+            <div class="archive-panel archive-tag-panel">
+              <div class="archive-panel-head">
+                <span class="archive-panel-label">热门标签</span>
+                <span class="archive-panel-count">{{ allTags.length }}</span>
+              </div>
+              <div class="archive-tag-cloud">
+                <router-link
+                  v-for="item in topTags"
+                  :key="item.tag"
+                  :to="tagUrl(item.tag)"
+                  class="archive-tag-chip"
+                >
+                  #{{ item.tag }}
+                  <span class="archive-tag-chip-count">{{ item.count }}</span>
+                </router-link>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </main>
@@ -116,364 +136,573 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { ref, computed } from 'vue'
-import { posts, buildArchive, getLastUpdateDate, getTags, tagUrl } from '../data/posts'
-import { ARCHIVE_INK_IMAGE, ARCHIVE_INK_POSITION } from '../data/inkTheme'
+import {
+  getPostsSorted,
+  getLastUpdateDate,
+  getTags,
+  getTagStats,
+  getCategories,
+  getCategoryColor,
+  getCategoryIcon,
+  tagUrl,
+  postUrl,
+} from '../data/posts'
 import { usePageMeta } from '../composables/usePageMeta'
+import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 
-usePageMeta({ title: '归档', description: '按年月浏览全部技术学习笔记。' })
+usePageMeta({ title: '归档', description: '按时间轴浏览全部技术学习笔记。' })
 
-const totalPosts = computed(() => posts.length)
+const streamRef = ref(null)
+const activeCategory = ref('')
+useRevealOnScroll(streamRef, '[data-reveal]')
+
+const totalPosts = computed(() => getPostsSorted().length)
 const totalTags = computed(() => getTags().length)
 const allTags = computed(() => getTags())
 const lastUpdate = computed(() => getLastUpdateDate())
-const archiveGroups = computed(() => buildArchive())
-const monthFilter = ref('')
-const hoverMonth = ref('')
+const topTags = computed(() => getTagStats().slice(0, 18))
 
-const monthPostsMap = computed(() => {
-  const map = new Map()
-  for (const group of archiveGroups.value) {
-    for (const month of group.months) {
-      const key = `${group.year}-${String(month.month).padStart(2, '0')}`
-      map.set(key, month.posts)
-    }
+const categoryStats = computed(() => {
+  const counts = new Map()
+  for (const post of getPostsSorted()) {
+    counts.set(post.category, (counts.get(post.category) || 0) + 1)
   }
-  return map
-})
 
-const hoverPreviewPosts = computed(() => {
-  if (!hoverMonth.value) return []
-  return monthPostsMap.value.get(hoverMonth.value) || []
-})
-
-const hoverPreviewLabel = computed(() => {
-  if (!hoverMonth.value) return ''
-  const [year, monthStr] = hoverMonth.value.split('-')
-  return `${year}年${parseInt(monthStr, 10)}月`
-})
-
-const maxMonthCount = computed(() => {
-  let max = 1
-  for (const group of archiveGroups.value) {
-    for (const month of group.months) {
-      max = Math.max(max, month.posts.length)
-    }
-  }
-  return max
-})
-
-const timelineYears = computed(() =>
-  archiveGroups.value.map(group => ({
-    year: group.year,
-    months: group.months.map(m => ({
-      key: `${group.year}-${String(m.month).padStart(2, '0')}`,
-      month: m.month,
-      count: m.posts.length,
-    })),
-  }))
-)
-
-const visibleGroups = computed(() => {
-  if (!monthFilter.value) return archiveGroups.value
-  const [year, monthStr] = monthFilter.value.split('-')
-  const monthNum = parseInt(monthStr, 10)
-  return archiveGroups.value
-    .filter(g => g.year === year)
-    .map(g => ({
-      ...g,
-      months: g.months.filter(m => m.month === monthNum),
+  return getCategories()
+    .map((name) => ({
+      name,
+      count: counts.get(name) || 0,
+      color: getCategoryColor(name),
+      icon: getCategoryIcon(name),
     }))
-    .filter(g => g.months.length)
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh-CN'))
 })
 
-function heatRatio(count) {
-  if (!count) return 0
-  return Math.max(0.15, count / maxMonthCount.value)
+const filteredPosts = computed(() => {
+  const sorted = getPostsSorted().map((post) => ({
+    ...post,
+    url: postUrl(post.id),
+  }))
+  if (!activeCategory.value) return sorted
+  return sorted.filter((post) => post.category === activeCategory.value)
+})
+
+const timelineEntries = computed(() => {
+  const entries = []
+  let lastYear = ''
+
+  for (const post of filteredPosts.value) {
+    const year = post.date.slice(0, 4)
+    if (year !== lastYear) {
+      entries.push({ kind: 'year', year, key: `year-${year}` })
+      lastYear = year
+    }
+    entries.push({ kind: 'post', post, key: `post-${post.id}` })
+  }
+
+  return entries
+})
+
+const CATEGORY_DESC = {
+  前端: 'Vue / CSS / 交互',
+  Java: '语法与 JVM 笔记',
+  Agent: 'LLM / MCP / Skill',
+  部署: 'CI/CD / 静态站',
+  项目: '实战与复盘',
+  学习: '踩坑与记录',
+  技术: '通用技术笔记',
+  小知识: '零碎知识点',
 }
 
-function toggleMonth(key) {
-  monthFilter.value = monthFilter.value === key ? '' : key
+function categoryDesc(name) {
+  return CATEGORY_DESC[name] || '技术笔记'
 }
 
-function setHoverMonth(key, count) {
-  if (!count) return
-  hoverMonth.value = key
+function toggleCategory(name) {
+  activeCategory.value = activeCategory.value === name ? '' : name
 }
 
-function clearHoverMonth() {
-  hoverMonth.value = ''
+function formatTimelineDate(date) {
+  const [y, m, d] = date.split('-')
+  return `${y}.${m}.${d}`
 }
 </script>
 
 <style scoped>
-.archive-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 2rem;
-}
-
-.archive-tag {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--steel);
-  text-decoration: none;
-  padding: 0.2rem 0.5rem;
-  border: 1px solid var(--border);
-}
-
-.archive-tag:hover {
-  color: var(--orange);
-  border-color: var(--orange);
-}
-
-.archive-timeline--ink {
-  margin-bottom: 2.5rem;
-}
-
-:deep(.archive-timeline--ink .ink-panel__content) {
-  padding: 1.15rem 1.25rem 1.25rem;
-}
-
-.timeline-head-label {
-  letter-spacing: 0.1em;
-}
-
-.timeline-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  color: var(--orange);
-}
-
-.timeline-preview-area {
+.archive-wrap {
   position: relative;
-  min-height: 10.5rem;
-  margin-bottom: 1rem;
+  z-index: 1;
 }
 
-.timeline-preview-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 1rem;
-  border: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
-  background: color-mix(in srgb, var(--bg-paper) 52%, transparent);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-  text-align: center;
-  line-height: 1.6;
+.archive-header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--border);
 }
 
-.timeline-preview {
-  position: absolute;
-  inset: 0;
-  padding: 1rem 1.1rem;
-  border: 1px dashed var(--orange);
-  background: color-mix(in srgb, var(--bg-paper) 82%, transparent);
-  overflow: auto;
-}
-
-.timeline-years {
-  position: relative;
-  padding-top: 0.15rem;
-}
-
-.timeline-clear {
-  font-family: inherit;
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  background: none;
-  border: 1px solid var(--border);
-  padding: 0.15rem 0.45rem;
-  cursor: pointer;
-}
-
-.timeline-clear:hover {
-  color: var(--orange);
-  border-color: var(--orange);
-}
-
-.timeline-preview-fade-enter-active,
-.timeline-preview-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.timeline-preview-fade-enter-from,
-.timeline-preview-fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-.timeline-preview-head {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--orange);
-  letter-spacing: 0.06em;
+.archive-header .page-title {
   margin-bottom: 0.65rem;
-}
-
-.timeline-preview-list {
-  list-style: none;
-  display: grid;
-  gap: 0.15rem;
-}
-
-.timeline-preview-list li {
-  display: grid;
-  grid-template-columns: 4.5rem 1fr;
-  align-items: baseline;
-  gap: 0.65rem;
-  padding: 0.35rem 0;
-  font-size: 0.875rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--orange) 12%, var(--border));
-}
-
-.timeline-preview-date {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
-}
-
-.timeline-preview-list li:last-child {
+  padding-bottom: 0;
   border-bottom: none;
 }
 
-.timeline-preview a {
-  color: var(--text);
-  text-decoration: none;
-}
-
-.timeline-preview a:hover {
-  color: var(--orange);
-  text-decoration: underline;
-}
-
-.timeline-preview-more {
-  margin: 0.35rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text-muted);
-}
-
-.timeline-year {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  padding-top: 0.15rem;
-}
-
-.timeline-year:last-child {
-  margin-bottom: 0;
-}
-
-.timeline-year-label {
-  flex-shrink: 0;
-  width: 2.5rem;
+.archive-meta {
   font-family: var(--mono);
   font-size: 0.72rem;
-  color: var(--steel);
-  padding-bottom: 0.15rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
 }
 
-.timeline-months {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  flex: 1;
+.archive-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  align-items: start;
 }
 
-.timeline-month {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.25rem 0.35rem;
-  border: 1px solid transparent;
-  background: none;
-  cursor: pointer;
-  min-width: 1.75rem;
+.archive-main {
+  min-width: 0;
 }
 
-.timeline-month.empty {
-  opacity: 0.25;
-  cursor: default;
-}
-
-.timeline-month:not(.empty):hover,
-.timeline-month.hovered,
-.timeline-month.active {
-  border-color: var(--orange);
-  background: color-mix(in srgb, var(--bg-paper) 75%, var(--orange-light));
-}
-
-.timeline-bar {
-  display: block;
-  width: 100%;
-  min-width: 1.25rem;
-  height: calc(4px + var(--heat, 0.15) * 28px);
-  background: color-mix(in srgb, var(--orange) calc(var(--heat, 0.15) * 100%), var(--border));
-  transition: height 0.15s;
-}
-
-.timeline-month.active .timeline-bar {
-  background: var(--orange);
-}
-
-.timeline-label {
+.archive-filter-hint {
+  margin-bottom: 1rem;
   font-family: var(--mono);
-  font-size: 0.55rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
-.timeline-empty {
+.archive-filter-clear {
+  font: inherit;
+  color: var(--orange);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.archive-empty {
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   padding: 2rem 0;
 }
 
-.post-tags {
-  margin-left: auto;
-  display: flex;
-  gap: 0.25rem;
+/* 右侧分类栏 */
+.archive-aside {
+  position: sticky;
+  top: calc(var(--topbar-height) + 1.25rem);
+  display: grid;
+  gap: 1rem;
 }
 
-.mini-tag {
+.archive-panel {
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+
+.archive-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--topbar-bg);
+  color: #fff;
+}
+
+[data-theme="dark"] .archive-panel-head {
+  background: #0d0d0d;
+}
+
+.archive-panel-label {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.archive-panel-count {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.archive-type-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.45rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.archive-type-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid transparent;
+  border-left: 3px solid var(--cat-color, var(--border));
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.archive-type-item:hover,
+.archive-type-item.active {
+  border-color: color-mix(in srgb, var(--cat-color, var(--orange)) 35%, var(--border));
+  background: color-mix(in srgb, var(--cat-color, var(--orange)) 6%, var(--bg-paper));
+}
+
+.archive-type-item.active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cat-color, var(--orange)) 18%, transparent);
+}
+
+.archive-type-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cat-color, var(--steel));
+  border: 1px solid color-mix(in srgb, var(--cat-color, var(--border)) 40%, var(--border));
+  background: var(--bg-paper);
+}
+
+.archive-type-icon--all {
+  color: var(--orange);
+  border-color: color-mix(in srgb, var(--orange) 35%, var(--border));
+}
+
+.archive-type-body {
+  min-width: 0;
+}
+
+.archive-type-name {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.archive-type-desc {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.archive-type-badge {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+}
+
+.archive-type-item.active .archive-type-badge {
+  color: var(--cat-color, var(--orange));
+  border-color: color-mix(in srgb, var(--cat-color, var(--orange)) 35%, var(--border));
+}
+
+.archive-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.archive-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--steel);
+  text-decoration: none;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.archive-tag-chip:hover {
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+.archive-tag-chip-count {
+  color: var(--text-muted);
+  font-size: 0.52rem;
+}
+
+/* 时间轴 */
+.archive-stream {
+  position: relative;
+  margin-top: 0.15rem;
+  padding-left: 2.35rem;
+}
+
+.archive-stream-year {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0.25rem 0 1rem;
+  padding-left: 0.15rem;
+}
+
+.archive-stream-year:first-child {
+  margin-top: 0;
+}
+
+.archive-stream-year-dot {
+  position: absolute;
+  left: -2.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  margin-left: 0.48rem;
+  border-radius: 50%;
+  border: 2px solid var(--orange);
+  background: var(--bg-paper);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--orange) 12%, transparent);
+}
+
+.archive-stream-year-label {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--orange);
+}
+
+.archive-main {
+  position: relative;
+  padding-left: 2.35rem;
+}
+
+.archive-main::before {
+  content: '';
+  position: absolute;
+  left: 0.55rem;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--steel) 18%, transparent),
+    color-mix(in srgb, var(--steel) 42%, var(--border)),
+    color-mix(in srgb, var(--steel) 18%, transparent)
+  );
+  border-radius: 999px;
+}
+
+.archive-stream-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-bottom: 1.25rem;
+}
+
+.archive-stream-item:last-child {
+  margin-bottom: 0;
+}
+
+.archive-stream-dot {
+  position: absolute;
+  left: -2.35rem;
+  top: 1.35rem;
+  width: 12px;
+  height: 12px;
+  margin-left: 0.52rem;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--steel) 70%, var(--border));
+  background: var(--bg-paper);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.archive-stream-item:hover .archive-stream-dot,
+.archive-stream-item:focus-within .archive-stream-dot {
+  border-color: var(--orange);
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--orange) 10%, transparent);
+}
+
+.archive-stream-card {
+  padding: 0.95rem 1.05rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--bg-paper) 92%, #fff) 0%,
+    color-mix(in srgb, var(--steel) 8%, var(--bg-paper)) 52%,
+    color-mix(in srgb, var(--steel) 14%, var(--bg-paper)) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--steel) 16%, var(--border));
+  box-shadow:
+    0 10px 24px rgba(26, 26, 26, 0.05),
+    0 1px 0 rgba(255, 255, 255, 0.45) inset;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+[data-theme="dark"] .archive-stream-card {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--bg-paper) 88%, #fff) 0%,
+    color-mix(in srgb, var(--steel) 12%, var(--bg-paper)) 100%
+  );
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.archive-stream-item:hover .archive-stream-card,
+.archive-stream-item:focus-within .archive-stream-card {
+  transform: translateX(4px);
+  border-color: color-mix(in srgb, var(--orange) 28%, var(--border));
+}
+
+.archive-stream-date {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--steel) 82%, var(--text));
+  margin-bottom: 0.4rem;
+}
+
+.archive-stream-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.archive-stream-title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.archive-stream-title a:hover {
+  color: var(--orange);
+}
+
+.archive-stream-excerpt {
+  margin: 0 0 0.65rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
   color: var(--text-muted);
 }
 
-.archive-items li {
+.archive-stream-foot {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.archive-stream-cat {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cat-color, var(--steel));
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.archive-stream-cat:hover {
+  text-decoration: underline;
+}
+
+.archive-stream-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.archive-stream-tag {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.archive-stream-tag:hover {
+  color: var(--orange);
+}
+
+@media (max-width: 960px) {
+  .archive-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-aside {
+    position: static;
+    order: -1;
+  }
+
+  .archive-type-list {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .archive-main {
+    padding-left: 1.85rem;
+  }
+
+  .archive-main::before {
+    left: 0.35rem;
+  }
+
+  .archive-stream-dot,
+  .archive-stream-year-dot {
+    margin-left: 0.28rem;
+  }
+
+  .archive-stream-dot {
+    left: -1.85rem;
+    top: 1.2rem;
+  }
+
+  .archive-stream-year-dot {
+    left: -1.85rem;
+  }
+
+  .archive-type-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .timeline-bar {
+  .archive-stream-card,
+  .archive-stream-dot,
+  .archive-type-item {
     transition: none;
   }
 
-  .timeline-preview-fade-enter-active,
-  .timeline-preview-fade-leave-active {
-    transition: none;
+  .archive-stream-item:hover .archive-stream-card,
+  .archive-stream-item:focus-within .archive-stream-card {
+    transform: none;
   }
 }
 </style>
