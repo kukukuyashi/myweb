@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
+    "cursors:generate": "python scripts/generate-cursors.py",
+    "build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && python scripts/generate-cursors.py && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",
     "preview": "vite preview --base /myweb/",
     "music:upload": "node scripts/upload-music-cdn.mjs",

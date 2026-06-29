@@ -90,6 +90,30 @@ select,
   cursor: not-allowed;
 }
 
+/* JS 叠加层播放 GIF 动画（Chrome 不支持 CSS cursor 里的 GIF 动画） */
+html.has-animated-cursor,
+html.has-animated-cursor * {
+  cursor: none !important;
+}
+
+html.has-animated-cursor [disabled],
+html.has-animated-cursor .not-allowed {
+  cursor: not-allowed !important;
+}
+
+.animated-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  z-index: 99999;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
+}
+
 body {
   font-family: var(--sans);
   background: var(--bg);
