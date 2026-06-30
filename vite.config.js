@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const base = '/myweb/'
@@ -103,7 +103,9 @@ export default defineConfig(async ({ mode, command }) => {
   const plugins = [vue(), serveLocalImg(), serveLocalMusic()]
 
   if (command === 'serve' && fs.existsSync(adminPluginPath)) {
-    const { notesAdminApi } = await import('./scripts/vite-notes-admin.mjs')
+    const { notesAdminApi } = await import(
+      /* @vite-ignore */ pathToFileURL(adminPluginPath).href
+    )
     plugins.push(notesAdminApi(base))
   }
 
