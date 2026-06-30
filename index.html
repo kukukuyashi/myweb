@@ -36,7 +36,8 @@
         transition: opacity 0.5s ease;
       }
       
-      .loading-screen.fade-out {
+      .loading-screen.fade-out,
+      .loading-screen.is-hidden {
         opacity: 0;
         pointer-events: none;
       }
@@ -118,12 +119,13 @@
       // Vue 挂载后隐藏加载屏幕
       function hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          loadingScreen.classList.add('fade-out');
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-          }, 500);
-        }
+        if (!loadingScreen || loadingScreen.dataset.hidden === '1') return;
+        loadingScreen.dataset.hidden = '1';
+        loadingScreen.classList.add('fade-out', 'is-hidden');
+        loadingScreen.style.pointerEvents = 'none';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
       }
       
       // 页面加载完成后隐藏

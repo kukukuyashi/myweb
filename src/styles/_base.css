@@ -107,8 +107,8 @@ html.has-animated-cursor .not-allowed {
   left: 0;
   width: 96px;
   height: 96px;
-  pointer-events: none;
-  z-index: 99999;
+  pointer-events: none !important;
+  z-index: 2147483646;
   user-select: none;
   -webkit-user-drag: none;
   background: transparent;

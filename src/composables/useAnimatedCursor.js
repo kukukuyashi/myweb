@@ -198,6 +198,8 @@ export function useAnimatedCursor() {
     canvas.style.width = `${size}px`
     canvas.style.height = `${size}px`
     canvas.setAttribute('aria-hidden', 'true')
+    canvas.style.pointerEvents = 'none'
+    canvas.style.setProperty('pointer-events', 'none', 'important')
     ctx = canvas.getContext('2d', { alpha: true })
     document.body.appendChild(canvas)
 

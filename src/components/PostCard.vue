@@ -4,6 +4,7 @@
     :class="{ 'post-card--featured': featured }"
     data-reveal
     :style="{ '--cat-color': categoryColor, '--reveal-delay': `${revealDelay}ms` }"
+    @click="onCardClick"
   >
     <div class="post-card-accent" aria-hidden="true" />
     <div class="post-card-body">
@@ -39,6 +40,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { getCategoryColor, getCategoryIcon, estimateReadingMinutesFromText, imgUrl, tagUrl, getPostCover, hasPostCover } from '../data/posts'
 import { onArticleHover } from '../composables/useLinkPrefetch'
 
@@ -47,6 +49,13 @@ const props = defineProps({
   featured: { type: Boolean, default: false },
   revealDelay: { type: Number, default: 0 },
 })
+
+const router = useRouter()
+
+function onCardClick(e) {
+  if (e.target.closest('a')) return
+  router.push(props.post.url)
+}
 
 const categoryColor = computed(() => getCategoryColor(props.post.category))
 const categoryIcon = computed(() => getCategoryIcon(props.post.category))

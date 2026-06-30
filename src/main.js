@@ -8,6 +8,17 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
+function hideLoadingScreen() {
+  const loadingScreen = document.getElementById('loading-screen')
+  if (!loadingScreen || loadingScreen.dataset.hidden === '1') return
+  loadingScreen.dataset.hidden = '1'
+  loadingScreen.classList.add('fade-out')
+  loadingScreen.style.pointerEvents = 'none'
+  setTimeout(() => {
+    loadingScreen.style.display = 'none'
+  }, 500)
+}
+
 // GitHub Pages SPA fallback: 404.html 会把原始路径存到 ?p= 参数
 const params = new URLSearchParams(window.location.search)
 const redirectPath = params.get('p')
@@ -21,3 +32,4 @@ if (redirectPath) {
 }
 
 app.mount('#app')
+hideLoadingScreen()
