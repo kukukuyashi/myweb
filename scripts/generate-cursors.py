@@ -18,8 +18,8 @@ SRC_DIR = ROOT / 'img' / 'Mouse animation'
 OUT_DIR = ROOT / 'public' / 'cursors'
 SIZE = 64
 FRAME_MS = 33  # ~30fps
+TRANSPARENT_INDEX = 255
 
-# 优先使用 PNG 序列（帧数更多、画质更高）
 MAPPING = {
     '普通（第二版）': 'normal.gif',
     '交互（第二版）': 'pointer.gif',
@@ -33,13 +33,41 @@ def sort_key(path: Path) -> int:
     return int(match.group(1)) if match else 0
 
 
+def clean_alpha(frame: Image.Image) -> Image.Image:
+    """去掉半透明脏边，避免 GIF 量化后在移动时留下黑边拖影。"""
+    rgba = frame.convert('RGBA')
+    px = rgba.load()
+    w, h = rgba.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 48:
+                px[x, y] = (0, 0, 0, 0)
+            elif a < 220 and r < 64 and g < 64 and b < 64:
+                # 半透明黑边 → 全透明
+                px[x, y] = (0, 0, 0, 0)
+    return rgba
+
+
+def rgba_to_palette(frame: Image.Image) -> Image.Image:
+    rgba = clean_alpha(frame)
+    alpha = rgba.getchannel('A')
+    rgb = rgba.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=254)
+    mask = alpha.point(lambda a: 255 if a <= 128 else 0)
+    rgb.paste(TRANSPARENT_INDEX, mask)
+    rgb.info['transparency'] = TRANSPARENT_INDEX
+    return rgb
+
+
 def resize_png_sequence(src_dir: Path, dest: Path) -> None:
     pngs = sorted(src_dir.glob('*.png'), key=sort_key)
     if not pngs:
         raise RuntimeError(f'目录内无 PNG: {src_dir}')
 
     frames = [
-        Image.open(p).convert('RGBA').resize((SIZE, SIZE), Image.Resampling.LANCZOS)
+        rgba_to_palette(
+            Image.open(p).convert('RGBA').resize((SIZE, SIZE), Image.Resampling.LANCZOS)
+        )
         for p in pngs
     ]
 
@@ -50,7 +78,9 @@ def resize_png_sequence(src_dir: Path, dest: Path) -> None:
         append_images=frames[1:],
         duration=FRAME_MS,
         loop=0,
+        disposal=2,
         optimize=False,
+        transparency=TRANSPARENT_INDEX,
     )
     print(f'{src_dir.name}/ → {dest.name}  ({len(frames)} 帧, {SIZE}×{SIZE})')
 

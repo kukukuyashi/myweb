@@ -1,78 +1,97 @@
-<p class="article-intro">用 img/Mouse animation 的 PNG 序列生成 64×64 GIF 光标，再用 JS 叠加层解决 Chrome 只显示第一帧的问题。</p>
+<p class="article-intro">PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。</p>
 <h1>鼠标动画光标：从 PNG 序列到 Chrome 兼容</h1>
 <blockquote>日期：2026-06-29</blockquote>
 <hr>
-<h2>一、问题从哪来</h2>
-<p>上一篇《自定义鼠标样式与点击涟漪效果》里，光标是用 CSS <code>cursor: url(...gif)</code> 挂上去的。素材放在 <code>public/cursors/</code>，构建后路径是 <code>/myweb/cursors/normal.gif</code> 这类。</p>
-<p>Firefox 里 GIF 光标能正常动；<strong>Chrome / Edge 往往只显示 GIF 第一帧</strong>，看起来就像鼠标「冻住了」。这不是素材坏了，是浏览器对 CSS 自定义光标的实现限制。</p>
+<h2>一、要解决的两个问题</h2>
+<ol>
+<li><strong>Chrome 里 CSS 光标不动</strong> — <code>cursor: url(...gif)</code> 往往只显示 GIF 第一帧。</li>
+<li><strong>移动时有黑色拖影</strong> — 用 <code>&lt;img&gt;</code> + <code>transform: translate()</code> 跟随时，GIF 半透明黑边会在路径上残留像素。</li>
+</ol>
+<p>Firefox 对 CSS GIF 光标支持较好；Chrome / Edge 需要 JS 叠加层。拖影则要用 Canvas 每帧 <code>clearRect</code> 再 <code>drawImage</code>，并用 <code>left/top</code> 定位（不用 <code>transform</code>）。</p>
 <h2>二、素材：<code>img/Mouse animation/</code></h2>
-<p>项目里有一套「鼠标计划」动画资源，目录结构大致如下：</p>
 <table><thead><tr>
 <th>子目录</th>
-<th>用途</th>
-<th>帧数（PNG）</th>
+<th>输出文件</th>
+<th>帧数</th>
 </tr></thead><tbody>
 <tr>
 <td><code>普通（第二版）/</code></td>
-<td>默认指针</td>
+<td><code>normal.gif</code></td>
 <td>130</td>
 </tr>
 <tr>
 <td><code>交互（第二版）/</code></td>
-<td>链接、按钮</td>
+<td><code>pointer.gif</code></td>
 <td>94</td>
 </tr>
 <tr>
 <td><code>文本/</code></td>
-<td>输入框</td>
+<td><code>text.gif</code></td>
 <td>140</td>
 </tr>
 <tr>
 <td><code>加载/</code></td>
-<td>路由切换等待</td>
+<td><code>busy.gif</code></td>
 <td>45</td>
 </tr>
 </tbody></table>
-<p>根目录还有合成好的 <code>普通.gif</code>、<code>交互.gif</code> 等，但 <strong>PNG 序列帧数更多、画质更高</strong>，生成脚本优先读子目录里的 PNG。</p>
-<p>浏览器光标尺寸建议 <strong>64×64</strong>，再大容易被忽略。脚本会把 240×240 的 PNG 用 LANCZOS 缩到 64×64，再合成 GIF。</p>
+<p>PNG 为 240×240，脚本缩到 <strong>64×64</strong>（浏览器 cursor 尺寸上限附近）。</p>
 <h2>三、生成脚本 <code>scripts/generate-cursors.py</code></h2>
-<p>核心逻辑：按文件名里的序号排序 PNG → 逐帧缩放 → 写出 GIF。</p>
+<p>流程：排序 PNG → 缩放 → <strong>清理半透明黑边</strong> → 量化带透明索引的 GIF。</p>
+<p>半透明黑边是拖影根源之一。脚本会把 <code>alpha &lt; 48</code> 以及「半透明且 RGB 很暗」的像素改为全透明，再写入 GIF：</p>
 <pre><code class="language-python">
-MAPPING = {
-    '普通（第二版）': 'normal.gif',
-    '交互（第二版）': 'pointer.gif',
-    '文本': 'text.gif',
-    '加载': 'busy.gif',
-}
+def clean_alpha(frame):
+    # alpha 过低 → 透明
+    # 半透明黑边 (r,g,b &lt; 64 且 alpha &lt; 220) → 透明
 </code></pre>
-<p>输出到 <code>public/cursors/</code>，Vite 构建时会复制到 <code>docs/cursors/</code>。</p>
-<p>本地单独生成：</p>
+<p>写出时设 <code>disposal=2</code>，避免帧叠加脏背景。</p>
 <pre><code class="language-bash">
-npm run cursors:generate
+npm run cursors:generate   # 单独生成
+npm run build              # 构建时自动跑
 </code></pre>
-<p><code>npm run build</code> 也会自动跑这一步，避免忘了更新光标。</p>
-<p><strong>依赖</strong>：Python 3 + Pillow（<code>pip install Pillow</code>）。</p>
-<h2>四、Chrome 兼容：<code>useAnimatedCursor.js</code></h2>
-<p>思路：<strong>隐藏系统光标，用 fixed 定位的 <code>&lt;img&gt;</code> 跟着鼠标走</strong>。<code>&lt;img&gt;</code> 里的 GIF 在各浏览器都能播动画。</p>
-<ol>
-<li><code>mousemove</code> 里用 <code>requestAnimationFrame</code> 更新位置（热点偏移 8, 8）。</li>
-<li><code>elementFromPoint</code> 判断当前元素，切换四种 GIF：</li>
-</ol>
-<p>   - <code>normal</code> — 默认</p>
-<p>   - <code>pointer</code> — 链接、按钮等</p>
-<p>   - <code>text</code> — input / textarea</p>
-<p>   - <code>busy</code> — <code>html</code> 带 <code>cursor-busy</code> 时（路由切换）</p>
-<ol>
-<li>禁用元素上隐藏自定义层，保留系统 <code>not-allowed</code>。</li>
-<li><code>prefers-reduced-motion: reduce</code> 或 <code>(pointer: coarse)</code> 时不启用，回退 CSS 静态光标。</li>
-</ol>
-<p>在 <code>App.vue</code> 里一行挂载：</p>
+<p>依赖：Python 3 + Pillow。</p>
+<h2>四、运行时：<code>useAnimatedCursor.js</code></h2>
+<p>核心思路：<strong>隐藏系统光标 + Canvas 跟随鼠标</strong>。</p>
+<pre><code class="language-javascript">
+mousemove → rAF 更新 left/top
+         → elementFromPoint 判断 normal / pointer / text / busy
+paintLoop → 每帧 clearRect → drawImage(当前 GIF 的隐藏 Image)
+</code></pre>
+<p>四种 GIF 预加载到 <code>HTMLImageElement</code>，Canvas 只负责显示当前帧，不在 DOM 里移动 <code>&lt;img&gt;</code>，避免 compositor 拖影。</p>
+<p><code>App.vue</code> 挂载：</p>
 <pre><code class="language-js">
 useAnimatedCursor()
 </code></pre>
-<p>CSS 侧给 <code>html.has-animated-cursor</code> 加 <code>cursor: none</code>，避免双光标。</p>
-<h2>五、和路由过渡的配合</h2>
-<p><code>useRouteTransition.js</code> 在路由 <code>beforeEach</code> 时给 <code>document.documentElement</code> 加 <code>cursor-busy</code>，<code>afterEach</code> 延迟 300ms 去掉。叠加层通过 <code>MutationObserver</code> 监听 class 变化，自动切到 <code>busy.gif</code>。</p>
+<p>CSS：<code>html.has-animated-cursor</code> 下全局 <code>cursor: none</code>；<code>.animated-cursor</code> 为 <code>position: fixed</code> 的 canvas，<strong>不设 <code>will-change: transform</code></strong>。</p>
+<h3>状态切换</h3>
+<table><thead><tr>
+<th>场景</th>
+<th>光标</th>
+</tr></thead><tbody>
+<tr>
+<td>默认</td>
+<td><code>normal.gif</code></td>
+</tr>
+<tr>
+<td>链接、按钮</td>
+<td><code>pointer.gif</code></td>
+</tr>
+<tr>
+<td>输入框</td>
+<td><code>text.gif</code></td>
+</tr>
+<tr>
+<td>路由切换（<code>cursor-busy</code>）</td>
+<td><code>busy.gif</code></td>
+</tr>
+<tr>
+<td><code>[disabled]</code></td>
+<td>隐藏自定义层，用系统 <code>not-allowed</code></td>
+</tr>
+</tbody></table>
+<p><code>prefers-reduced-motion</code> 或 <code>(pointer: coarse)</code> 时不启用，回退 CSS 静态光标。</p>
+<h2>五、和上一篇的关系</h2>
+<p>《自定义鼠标样式与点击涟漪效果》讲的是 CSS <code>cursor: url()</code> 基础写法。本篇是在同一套 GIF 素材上，补齐 <strong>Chrome 动画</strong> 与 <strong>无拖影</strong> 的完整方案。</p>
 <h2>六、文件一览</h2>
 <table><thead><tr>
 <th>路径</th>
@@ -80,33 +99,33 @@ useAnimatedCursor()
 </tr></thead><tbody>
 <tr>
 <td><code>img/Mouse animation/</code></td>
-<td>原始 PNG / GIF 素材</td>
+<td>PNG 源序列</td>
 </tr>
 <tr>
 <td><code>scripts/generate-cursors.py</code></td>
-<td>PNG → 64×64 GIF</td>
-</tr>
-<tr>
-<td><code>public/cursors/*.gif</code></td>
-<td>站点使用的光标</td>
+<td>生成 <code>public/cursors/*.gif</code></td>
 </tr>
 <tr>
 <td><code>src/composables/useAnimatedCursor.js</code></td>
-<td>跟随鼠标的 GIF 层</td>
+<td>Canvas 光标层</td>
 </tr>
 <tr>
 <td><code>src/styles/_base.css</code></td>
-<td><code>has-animated-cursor</code>、涟漪等样式</td>
+<td><code>has-animated-cursor</code> 样式</td>
+</tr>
+<tr>
+<td><code>src/composables/useRouteTransition.js</code></td>
+<td>路由切换时 <code>cursor-busy</code></td>
 </tr>
 </tbody></table>
-<h2>七、踩坑小结</h2>
+<h2>七、踩坑</h2>
 <ol>
-<li><strong>CSS GIF 光标在 Chrome 不动</strong> → 用 JS 叠加层，不要只靠 <code>cursor: url()</code>。</li>
-<li><strong>路径要带 base</strong> → 项目 <code>base: '/myweb/'</code>，JS 里用 <code>import.meta.env.BASE_URL + 'cursors/...'</code>。</li>
-<li><strong>PNG 比根目录 GIF 更适合做源</strong> → 帧数多；Pillow 写 GIF 时会合并完全相同的相邻帧，属正常现象。</li>
-<li><strong>触控设备别强上</strong> → <code>(pointer: fine)</code> 检测后再启用，避免平板上一根看不见的光标。</li>
+<li><strong><code>&lt;img&gt;</code> + transform 移动 animated GIF</strong> → 容易黑边拖影，改 Canvas + left/top。</li>
+<li><strong>GIF 半透明量化</strong> → 必须清 alpha 脏边，并设 <code>disposal=2</code>。</li>
+<li><strong>路径要带 base</strong> → <code>import.meta.env.BASE_URL + 'cursors/...'</code>。</li>
+<li><strong>不要用 <code>will-change: transform</code></strong> 跟鼠标 — 会加剧合成层残留。</li>
 </ol>
-<h2>八、相关文章</h2>
+<h2>八、相关</h2>
 <ul>
-<li><a href="/myweb/Content/26/" target="_blank" rel="noopener">自定义鼠标样式与点击涟漪效果</a> — CSS cursor 基础与点击涟漪</li>
+<li><a href="/myweb/Content/26/" target="_blank" rel="noopener">自定义鼠标样式与点击涟漪效果</a></li>
 </ul>

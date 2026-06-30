@@ -111,7 +111,7 @@ html.has-animated-cursor .not-allowed {
   z-index: 99999;
   user-select: none;
   -webkit-user-drag: none;
-  will-change: transform;
+  background: transparent;
 }
 
 body {

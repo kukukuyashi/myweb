@@ -38,12 +38,7 @@ function cursorSrc(name) {
   return `${base}cursors/${name}.gif`
 }
 
-const CURSORS = {
-  normal: cursorSrc('normal'),
-  pointer: cursorSrc('pointer'),
-  text: cursorSrc('text'),
-  busy: cursorSrc('busy'),
-}
+const CURSOR_NAMES = ['normal', 'pointer', 'text', 'busy']
 
 function resolveCursorType(target) {
   if (document.documentElement.classList.contains('cursor-busy')) {
@@ -65,39 +60,60 @@ function resolveCursorType(target) {
 }
 
 /**
- * 用跟随鼠标的 GIF 图层实现动态光标。
- * Chrome 对 CSS cursor:url() 的 GIF 只显示第一帧，img 叠加层可正常播放动画。
+ * Canvas 叠加层播放 GIF 光标：每帧 clearRect 再 drawImage，避免 img+transform 拖影；
+ * Chrome 对 CSS cursor:url() 的 GIF 只显示第一帧。
  */
 export function useAnimatedCursor() {
-  let el = null
+  let canvas = null
+  let ctx = null
+  /** @type {Record<string, HTMLImageElement>} */
+  const sources = {}
   let visible = true
-  let currentType = ''
-  let rafId = 0
+  let currentType = 'normal'
+  let paintRaf = 0
+  let moveRaf = 0
   let pendingX = 0
   let pendingY = 0
   let observer = null
 
+  function activeSource() {
+    return sources[currentType] || sources.normal
+  }
+
   function setPosition(x, y) {
-    if (!el) return
-    el.style.transform = `translate(${x - HOTSPOT_X}px, ${y - HOTSPOT_Y}px)`
+    if (!canvas) return
+    canvas.style.left = `${x - HOTSPOT_X}px`
+    canvas.style.top = `${y - HOTSPOT_Y}px`
+  }
+
+  function paintLoop() {
+    paintRaf = requestAnimationFrame(paintLoop)
+    if (!ctx || !visible || currentType === 'disabled') return
+
+    const img = activeSource()
+    ctx.clearRect(0, 0, CURSOR_SIZE, CURSOR_SIZE)
+    if (img?.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, 0, 0, CURSOR_SIZE, CURSOR_SIZE)
+    }
   }
 
   function applyType(type) {
-    if (!el || type === currentType) return
-
+    if (type === currentType) return
     currentType = type
 
+    if (!canvas) return
+
     if (type === 'disabled') {
-      el.style.visibility = 'hidden'
+      canvas.style.visibility = 'hidden'
+      ctx?.clearRect(0, 0, CURSOR_SIZE, CURSOR_SIZE)
       return
     }
 
-    el.style.visibility = visible ? 'visible' : 'hidden'
-    el.src = CURSORS[type] || CURSORS.normal
+    canvas.style.visibility = visible ? 'visible' : 'hidden'
   }
 
   function flushMove() {
-    rafId = 0
+    moveRaf = 0
     const target = document.elementFromPoint(pendingX, pendingY)
     const type = resolveCursorType(target)
     applyType(type)
@@ -109,48 +125,56 @@ export function useAnimatedCursor() {
   function onMove(e) {
     pendingX = e.clientX
     pendingY = e.clientY
-    if (!rafId) {
-      rafId = requestAnimationFrame(flushMove)
+    if (!moveRaf) {
+      moveRaf = requestAnimationFrame(flushMove)
     }
   }
 
   function onMouseOut(e) {
     if (e.relatedTarget == null) {
       visible = false
-      if (el) el.style.visibility = 'hidden'
+      if (canvas) {
+        canvas.style.visibility = 'hidden'
+        ctx?.clearRect(0, 0, CURSOR_SIZE, CURSOR_SIZE)
+      }
     }
   }
 
   function onMouseOver() {
     visible = true
-    if (el && currentType !== 'disabled') {
-      el.style.visibility = 'visible'
+    if (canvas && currentType !== 'disabled') {
+      canvas.style.visibility = 'visible'
     }
   }
 
   onMounted(() => {
     if (prefersReducedMotion() || !hasFinePointer()) return
 
-    el = document.createElement('img')
-    el.className = 'animated-cursor'
-    el.src = CURSORS.normal
-    el.width = CURSOR_SIZE
-    el.height = CURSOR_SIZE
-    el.alt = ''
-    el.draggable = false
-    el.setAttribute('aria-hidden', 'true')
-    document.body.appendChild(el)
+    canvas = document.createElement('canvas')
+    canvas.className = 'animated-cursor'
+    canvas.width = CURSOR_SIZE
+    canvas.height = CURSOR_SIZE
+    canvas.setAttribute('aria-hidden', 'true')
+    ctx = canvas.getContext('2d', { alpha: true })
+    document.body.appendChild(canvas)
+
+    for (const name of CURSOR_NAMES) {
+      const img = new Image()
+      img.src = cursorSrc(name)
+      img.decoding = 'async'
+      sources[name] = img
+    }
 
     document.documentElement.classList.add('has-animated-cursor')
-    currentType = 'normal'
+    paintRaf = requestAnimationFrame(paintLoop)
 
     document.addEventListener('mousemove', onMove, { passive: true })
     document.addEventListener('mouseout', onMouseOut)
     document.addEventListener('mouseover', onMouseOver)
 
     observer = new MutationObserver(() => {
-      if (rafId) cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(flushMove)
+      if (moveRaf) cancelAnimationFrame(moveRaf)
+      moveRaf = requestAnimationFrame(flushMove)
     })
     observer.observe(document.documentElement, {
       attributes: true,
@@ -159,15 +183,17 @@ export function useAnimatedCursor() {
   })
 
   onUnmounted(() => {
-    if (!el) return
+    if (!canvas) return
 
     document.documentElement.classList.remove('has-animated-cursor')
     document.removeEventListener('mousemove', onMove)
     document.removeEventListener('mouseout', onMouseOut)
     document.removeEventListener('mouseover', onMouseOver)
     observer?.disconnect()
-    if (rafId) cancelAnimationFrame(rafId)
-    el.remove()
-    el = null
+    if (paintRaf) cancelAnimationFrame(paintRaf)
+    if (moveRaf) cancelAnimationFrame(moveRaf)
+    canvas.remove()
+    canvas = null
+    ctx = null
   })
 }
