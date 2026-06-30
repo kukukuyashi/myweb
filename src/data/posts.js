@@ -7,6 +7,16 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 27,
+    title: '鼠标动画光标：从 PNG 序列到 Chrome 兼容',
+    date: '2026-06-29',
+    category: '前端',
+    tags: ['CSS', 'Vue', '前端', '鼠标', '动画', 'Python'],
+    excerpt: '用 img/Mouse animation 的 PNG 序列生成 64×64 GIF 光标，再用 JS 叠加层解决 Chrome 只显示第一帧的问题。',
+    file: '鼠标动画光标从素材到上线.html',
+    cover: 'img/bkm/5.jfif',
+  },
+  {
     id: 26,
     title: '自定义鼠标样式与点击涟漪效果',
     date: '2026-06-26',

@@ -5,7 +5,15 @@
     <link>https://kukukuyashi.github.io/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 29 Jun 2026 16:40:40 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 30 Jun 2026 00:17:37 GMT</lastBuildDate>
+  <item>
+    <title>鼠标动画光标：从 PNG 序列到 Chrome 兼容</title>
+    <link>https://kukukuyashi.github.io/myweb/content/27</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/27</guid>
+    <pubDate>Mon, 29 Jun 2026 00:00:00 GMT</pubDate>
+    <description>用 img/Mouse animation 的 PNG 序列生成 64×64 GIF 光标，再用 JS 叠加层解决 Chrome 只显示第一帧的问题。</description>
+    <category>前端</category>
+  </item>
   <item>
     <title>自定义鼠标样式与点击涟漪效果</title>
     <link>https://kukukuyashi.github.io/myweb/content/26</link>
