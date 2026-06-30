@@ -18,8 +18,8 @@
   <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
   <title>鼠标动画光标：从 PNG 序列到 Chrome 兼容 · Cyinc 的学习日志</title>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"鼠标动画光标：从 PNG 序列到 Chrome 兼容","description":"PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。","datePublished":"2026-06-29","dateModified":"2026-06-29","author":{"@type":"Person","name":"Cyinc","url":"https://kukukuyashi.github.io/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kukukuyashi.github.io/myweb/content/27"},"url":"https://kukukuyashi.github.io/myweb/content/27","image":"https://kukukuyashi.github.io/myweb/img/bkm/5.jfif","keywords":"CSS, Vue, 前端, 鼠标, 动画, Python, Canvas","articleSection":"前端","inLanguage":"zh-CN"}</script>
-  <link rel="stylesheet" crossorigin href="/myweb/assets/index-BLgEp5Ni.css">
-  <script type="module" crossorigin src="/myweb/assets/index-DLuiZHAM.js"></script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-brj0HBAa.css">
+  <script type="module" crossorigin src="/myweb/assets/index-vRITcksK.js"></script>
   <style>
     .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
     .prerender-fallback a{color:#e85d04}
@@ -87,19 +87,17 @@ npm run cursors:generate   # 单独生成
 npm run build              # 构建时自动跑
 </code></pre>
 <p>依赖：Python 3 + Pillow。</p>
-<h2>四、运行时：<code>useAnimatedCursor.js</code></h2>
-<p>核心思路：<strong>隐藏系统光标 + Canvas 跟随鼠标</strong>。</p>
+<h2>四、运行时：Canvas + PNG 精灵图</h2>
+<p><strong>为什么不用 GIF 直接画到 Canvas？</strong>  </p>
+<p><code>drawImage(gifImage, …)</code> 在浏览器里<strong>只会取 GIF 第一帧</strong>，动画会消失。  </p>
+<p><strong>为什么不用 <code>&lt;img&gt;</code> 跟着鼠标？</strong>  </p>
+<p><code>transform</code> 移动 animated GIF 容易留下黑色拖影。</p>
+<p>最终方案：构建时把 PNG 序列横向拼成 <strong>精灵图</strong>（<code>normal-sheet.png</code> 等），运行时读 <code>manifest.json</code>，Canvas 按帧索引切图：</p>
 <pre><code class="language-javascript">
-mousemove → rAF 更新 left/top
-         → elementFromPoint 判断 normal / pointer / text / busy
-paintLoop → 每帧 clearRect → drawImage(当前 GIF 的隐藏 Image)
+paintLoop → frameIndex++ → drawImage(sheet, index×64, 0, 64, 64, …)
+mousemove → left/top 定位（不用 transform）
 </code></pre>
-<p>四种 GIF 预加载到 <code>HTMLImageElement</code>，Canvas 只负责显示当前帧，不在 DOM 里移动 <code>&lt;img&gt;</code>，避免 compositor 拖影。</p>
-<p><code>App.vue</code> 挂载：</p>
-<pre><code class="language-js">
-useAnimatedCursor()
-</code></pre>
-<p>CSS：<code>html.has-animated-cursor</code> 下全局 <code>cursor: none</code>；<code>.animated-cursor</code> 为 <code>position: fixed</code> 的 canvas，<strong>不设 <code>will-change: transform</code></strong>。</p>
+<p><code>App.vue</code> 挂载 <code>useAnimatedCursor()</code>；CSS 里 <code>html.has-animated-cursor { cursor: none }</code>。</p>
 <h3>状态切换</h3>
 <table><thead><tr>
 <th>场景</th>
@@ -140,11 +138,19 @@ useAnimatedCursor()
 </tr>
 <tr>
 <td><code>scripts/generate-cursors.py</code></td>
-<td>生成 <code>public/cursors/*.gif</code></td>
+<td>GIF + 精灵图 + <code>manifest.json</code></td>
+</tr>
+<tr>
+<td><code>public/cursors/*-sheet.png</code></td>
+<td>Canvas 逐帧动画源</td>
+</tr>
+<tr>
+<td><code>public/cursors/manifest.json</code></td>
+<td>帧数、尺寸配置</td>
 </tr>
 <tr>
 <td><code>src/composables/useAnimatedCursor.js</code></td>
-<td>Canvas 光标层</td>
+<td>Canvas 逐帧播放精灵图</td>
 </tr>
 <tr>
 <td><code>src/styles/_base.css</code></td>
@@ -157,7 +163,8 @@ useAnimatedCursor()
 </tbody></table>
 <h2>七、踩坑</h2>
 <ol>
-<li><strong><code>&lt;img&gt;</code> + transform 移动 animated GIF</strong> → 容易黑边拖影，改 Canvas + left/top。</li>
+<li><strong>Canvas + GIF</strong> → 只有第一帧，无动画。</li>
+<li><strong><code>&lt;img&gt;</code> + transform 移动</strong> → 容易黑边拖影，改 left/top 或精灵图。</li>
 <li><strong>GIF 半透明量化</strong> → 必须清 alpha 脏边，并设 <code>disposal=2</code>。</li>
 <li><strong>路径要带 base</strong> → <code>import.meta.env.BASE_URL + 'cursors/...'</code>。</li>
 <li><strong>不要用 <code>will-change: transform</code></strong> 跟鼠标 — 会加剧合成层残留。</li>

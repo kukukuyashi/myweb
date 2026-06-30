@@ -1,0 +1,28 @@
+{
+  "size": 96,
+  "hotspotX": 12,
+  "hotspotY": 12,
+  "frameMs": 33,
+  "cursors": {
+    "normal": {
+      "frames": 130,
+      "sheet": "normal-sheet.png",
+      "anchor": "tip"
+    },
+    "pointer": {
+      "frames": 94,
+      "sheet": "pointer-sheet.png",
+      "anchor": "tip"
+    },
+    "text": {
+      "frames": 140,
+      "sheet": "text-sheet.png",
+      "anchor": "center-top"
+    },
+    "busy": {
+      "frames": 45,
+      "sheet": "busy-sheet.png",
+      "anchor": "center"
+    }
+  }
+}

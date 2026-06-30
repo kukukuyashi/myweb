@@ -52,12 +52,12 @@ html.cheat-mode body::before {
 
 /* 自定义鼠标样式 - 普通的鼠标指针V1.2 */
 html {
-  cursor: url('/myweb/cursors/normal.gif') 8 8, auto;
+  cursor: url('/myweb/cursors/normal.gif') 12 12, auto;
 }
 
 /* 页面加载/等待时的动态光标 */
 html.cursor-busy {
-  cursor: url('/myweb/cursors/busy.gif') 8 8, wait;
+  cursor: url('/myweb/cursors/busy.gif') 12 12, wait;
 }
 
 a,
@@ -75,14 +75,14 @@ button,
 .archive-title,
 .nav-prev,
 .nav-next {
-  cursor: url('/myweb/cursors/pointer.gif') 8 8, pointer;
+  cursor: url('/myweb/cursors/pointer.gif') 12 12, pointer;
 }
 
 input,
 textarea,
 select,
 [contenteditable="true"] {
-  cursor: url('/myweb/cursors/text.gif') 8 8, text;
+  cursor: url('/myweb/cursors/text.gif') 12 12, text;
 }
 
 .not-allowed,
@@ -105,8 +105,8 @@ html.has-animated-cursor .not-allowed {
   position: fixed;
   top: 0;
   left: 0;
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   pointer-events: none;
   z-index: 99999;
   user-select: none;
