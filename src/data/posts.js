@@ -7,6 +7,15 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 28,
+    title: 'Agent Harness 体系',
+    date: '2026-07-01',
+    category: '学习',
+    tags: ['学习'],
+    excerpt: '学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。',
+    file: 'Agent Harness 体系.html'
+  },
+  {
     id: 27,
     title: '鼠标动画光标：从 PNG 序列到 Chrome 兼容',
     date: '2026-06-29',

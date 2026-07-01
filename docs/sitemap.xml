@@ -36,6 +36,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://kukukuyashi.github.io/myweb/content/28</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://kukukuyashi.github.io/myweb/content/27</loc>
     <lastmod>2026-06-29</lastmod>
     <changefreq>monthly</changefreq>
@@ -268,6 +274,11 @@
   </url>
   <url>
     <loc>https://kukukuyashi.github.io/myweb/tags/%E9%A1%B9%E7%9B%AE</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://kukukuyashi.github.io/myweb/tags/%E5%AD%A6%E4%B9%A0</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

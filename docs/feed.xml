@@ -5,7 +5,15 @@
     <link>https://kukukuyashi.github.io/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 30 Jun 2026 06:29:10 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jul 2026 10:56:26 GMT</lastBuildDate>
+  <item>
+    <title>Agent Harness 体系</title>
+    <link>https://kukukuyashi.github.io/myweb/content/28</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/28</guid>
+    <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+    <description>学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。</description>
+    <category>学习</category>
+  </item>
   <item>
     <title>鼠标动画光标：从 PNG 序列到 Chrome 兼容</title>
     <link>https://kukukuyashi.github.io/myweb/content/27</link>
