@@ -5,7 +5,15 @@
     <link>https://kukukuyashi.github.io/myweb/</link>
     <description>前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 01 Jul 2026 10:56:26 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jul 2026 13:30:27 GMT</lastBuildDate>
+  <item>
+    <title>Git 与 GitHub入门笔记</title>
+    <link>https://kukukuyashi.github.io/myweb/content/29</link>
+    <guid isPermaLink="true">https://kukukuyashi.github.io/myweb/content/29</guid>
+    <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+    <description>Git 与 GitHub入门笔记 — 学习笔记。</description>
+    <category>部署</category>
+  </item>
   <item>
     <title>Agent Harness 体系</title>
     <link>https://kukukuyashi.github.io/myweb/content/28</link>

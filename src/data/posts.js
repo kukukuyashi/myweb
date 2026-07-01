@@ -7,6 +7,16 @@ export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑�
 
 export const posts = [
   {
+    id: 29,
+    title: 'Git 与 GitHub入门笔记',
+    date: '2026-07-01',
+    category: '部署',
+    tags: ['学习', 'git', 'github', '多人项目协助', '项目版本处理'],
+    excerpt: 'Git 与 GitHub入门笔记 — 学习笔记。',
+    file: 'Git 与 GitHub入门笔记.html',
+    cover: 'img/关于/F0xVRaEakAAKgCw.jfif',
+  },
+  {
     id: 28,
     title: 'Agent Harness 体系',
     date: '2026-07-01',
