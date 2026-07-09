@@ -69,6 +69,15 @@ scripts/         构建辅助脚本
 
 Vue 3 · Vite · Vue Router · Pinia · Prism.js · Twikoo
 
+## 平台 v2（M1–M5.5 已完成 · M6 整站 ECS）
+
+**方案 A 开发** + **M6 整站阿里云同域部署**（前端 + API 均在 ECS）。
+
+- **后端 API**：[backend/README.md](backend/README.md)
+- **M6 上线指南**：[deploy/README-m6-ecs.md](deploy/README-m6-ecs.md)
+- **方案 A 本地开发**：[deploy/README-cloud-dev.md](deploy/README-cloud-dev.md)
+- 工作流：[笔记/项目/CYINC动态主站工作流.md](笔记/项目/CYINC动态主站工作流.md)
+
 ## License
 
 MIT（站点内容与图片除外，版权归作者所有）

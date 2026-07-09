@@ -1,0 +1,59 @@
+name: Deploy full site to ECS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ secrets.ECS_HOST != '' && secrets.ECS_USER != '' && secrets.ECS_SSH_KEY != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Python deps (cursor sprite generator)
+        run: pip install Pillow
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: /api/v1
+          VITE_TWIKOO_ENV_ID: ${{ vars.VITE_TWIKOO_ENV_ID || 'https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo' }}
+          VITE_MUSIC_BASE_URL: ${{ vars.VITE_MUSIC_BASE_URL }}
+
+      - name: Rsync frontend to ECS
+        env:
+          ECS_HOST: ${{ secrets.ECS_HOST }}
+          ECS_USER: ${{ secrets.ECS_USER }}
+          ECS_SSH_KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s\n' "$ECS_SSH_KEY" > ~/.ssh/id_ecs
+          chmod 600 ~/.ssh/id_ecs
+          ssh-keyscan -H "$ECS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          rsync -avz --delete -e "ssh -i ~/.ssh/id_ecs -o StrictHostKeyChecking=accept-new" \
+            docs/ "${ECS_USER}@${ECS_HOST}:/var/www/cyinc/myweb/"
+
+      - name: Deploy API via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            APP_ROOT="${APP_ROOT:-/var/www/cyinc}"
+            cd "$APP_ROOT"
+            bash deploy/scripts/deploy.sh

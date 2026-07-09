@@ -1,5 +1,6 @@
 <template>
-  <PageRails v-if="!isAdminRoute" />
+  <PageRails v-if="!isAdminRoute && !isPlatformRoute" />
+  <PlatformRails v-if="!isAdminRoute && isPlatformRoute" />
   <div class="route-stage" :class="{ 'route-stage--admin': isAdminRoute }">
     <router-view v-slot="{ Component, route }">
       <transition :name="transitionName">
@@ -21,10 +22,12 @@ import { useClickRipple } from './composables/useClickRipple'
 import { useAnimatedCursor } from './composables/useAnimatedCursor'
 
 const PageRails = defineAsyncComponent(() => import('./components/PageRails.vue'))
+const PlatformRails = defineAsyncComponent(() => import('./components/PlatformRails.vue'))
 const MusicPlayer = defineAsyncComponent(() => import('./components/MusicPlayer.vue'))
 
 const route = useRoute()
 const isAdminRoute = computed(() => route.name === 'NotesAdmin')
+const isPlatformRoute = computed(() => route.path.startsWith('/app'))
 
 useGridSpotlight()
 useKonamiCheat()

@@ -80,6 +80,26 @@
             <p>💻 GitHub：<a :href="profile.github" target="_blank" rel="noopener">{{ profile.github }}</a></p>
             <p>🎵 音乐室：<router-link to="/music">/music</router-link></p>
           </section>
+
+          <section class="about-block">
+            <h2>友链</h2>
+            <div class="friend-grid">
+              <a
+                v-for="link in friendLinks"
+                :key="link.url"
+                :href="link.url"
+                target="_blank"
+                rel="noopener"
+                class="friend-card"
+              >
+                <span class="friend-name">{{ link.name }}</span>
+                <span class="friend-desc">{{ link.desc }}</span>
+              </a>
+            </div>
+            <button type="button" class="about-friend-teleport" @click="teleportRandom">
+              随机传送 →
+            </button>
+          </section>
         </div>
       </div>
     </main>
@@ -95,8 +115,14 @@ import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 import { profile, imgUrl } from '../data/profile'
 import { aboutGallery } from '../data/aboutGallery'
+import { friendLinks, randomFriendLink } from '../data/social'
 
 const StickerWall = defineAsyncComponent(() => import('../components/StickerWall.vue'))
+
+function teleportRandom() {
+  const link = randomFriendLink()
+  if (link) window.open(link.url, '_blank', 'noopener')
+}
 
 usePageMeta({
   title: '关于我',
@@ -151,6 +177,54 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
 
 .about-block {
   margin-bottom: 2.25rem;
+}
+
+.friend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.friend-card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.friend-card:hover {
+  border-color: var(--orange);
+  box-shadow: 0 3px 0 var(--orange);
+}
+
+.friend-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.friend-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.about-friend-teleport {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  color: inherit;
+  cursor: pointer;
+}
+
+.about-friend-teleport:hover {
+  border-color: var(--orange);
+  color: var(--orange);
 }
 
 .about-block h2 {

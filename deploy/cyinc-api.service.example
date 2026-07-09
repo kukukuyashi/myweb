@@ -1,0 +1,15 @@
+# 不用 Docker 时用 systemd 直跑 uvicorn（见 deploy/README-m6-ecs.md §六）
+[Unit]
+Description=CYINC FastAPI
+After=network.target
+
+[Service]
+User=deploy
+WorkingDirectory=/var/www/cyinc/backend
+EnvironmentFile=/var/www/cyinc/backend/.env
+ExecStart=/var/www/cyinc/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

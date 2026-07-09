@@ -1,0 +1,14 @@
+# 可选：本地 Redis（需 Docker）。方案 A 无需运行本文件。
+# 开发指南：deploy/README-cloud-dev.md
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  redis_data:

@@ -17,6 +17,9 @@
       <router-link to="/archive" @mouseenter="onNavHover('Archive')" @click="menuOpen = false">归档</router-link>
       <router-link to="/projects" @mouseenter="onNavHover('Projects')" @click="menuOpen = false">项目</router-link>
       <router-link to="/music" @mouseenter="onNavHover('Music')" @click="menuOpen = false">音乐室</router-link>
+      <router-link to="/app" @mouseenter="onNavHover('PlatformHome')" @click="menuOpen = false">主站</router-link>
+      <router-link to="/ai" @mouseenter="onNavHover('AiChat')" @click="menuOpen = false">AI助手</router-link>
+      <router-link v-if="hasToken" to="/app/me" @click="menuOpen = false">我的</router-link>
       <router-link to="/guestbook" @mouseenter="onNavHover('Guestbook')" @click="menuOpen = false">留言板</router-link>
     </nav>
 
@@ -42,11 +45,13 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { onNavHover } from '../composables/useLinkPrefetch'
+import { getPlatformToken } from '../api/platform.js'
 
 const route = useRoute()
 const isDarkMode = ref(false)
 const menuOpen = ref(false)
 const clockText = ref('')
+const hasToken = ref(!!getPlatformToken())
 let clockTimer = null
 
 function updateClock() {
@@ -54,7 +59,10 @@ function updateClock() {
   clockText.value = now.toLocaleTimeString('zh-CN', { hour12: false })
 }
 
-watch(() => route.path, () => { menuOpen.value = false })
+watch(() => route.path, () => {
+  menuOpen.value = false
+  hasToken.value = !!getPlatformToken()
+})
 
 watch(menuOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''

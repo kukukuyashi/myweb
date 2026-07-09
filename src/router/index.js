@@ -43,12 +43,86 @@ const routes = [
     component: () => import('../views/Guestbook.vue')
   },
   {
+    path: '/ai',
+    name: 'AiChat',
+    component: () => import('../views/AiChat.vue')
+  },
+  {
+    path: '/app',
+    component: () => import('../layouts/PlatformLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'PlatformHome',
+        component: () => import('../views/platform/PlatformHome.vue'),
+      },
+      {
+        path: 'forum',
+        name: 'ForumCategories',
+        component: () => import('../views/platform/ForumCategories.vue'),
+      },
+      {
+        path: 'forum/c/:slug',
+        name: 'ForumCategory',
+        component: () => import('../views/platform/ForumCategory.vue'),
+        props: true,
+      },
+      {
+        path: 'forum/t/:id',
+        name: 'ForumThread',
+        component: () => import('../views/platform/ForumThread.vue'),
+        props: true,
+      },
+      {
+        path: 'forum/new',
+        name: 'ForumNewThread',
+        component: () => import('../views/platform/ForumNewThread.vue'),
+      },
+      {
+        path: 'forum/t/:id/edit',
+        name: 'ForumEditThread',
+        component: () => import('../views/platform/ForumEditThread.vue'),
+        props: true,
+      },
+      {
+        path: 'posts/new',
+        name: 'PostNew',
+        component: () => import('../views/platform/PostEditor.vue'),
+      },
+      {
+        path: 'posts/:id/edit',
+        name: 'PostEdit',
+        component: () => import('../views/platform/PostEditor.vue'),
+        props: true,
+      },
+      {
+        path: 'posts/:id',
+        name: 'PostDetail',
+        component: () => import('../views/platform/PostDetail.vue'),
+        props: true,
+      },
+      {
+        path: 'me',
+        name: 'Me',
+        component: () => import('../views/Me.vue'),
+      },
+      {
+        path: 'pomo',
+        name: 'Pomo',
+        component: () => import('../views/Pomo.vue'),
+      },
+    ],
+  },
+  { path: '/hub', redirect: '/app' },
+  { path: '/me', redirect: '/app/me' },
+  { path: '/pomo', redirect: '/app/pomo' },
+  { path: '/forum', redirect: '/app/forum' },
+  {
     path: '/content/:id',
     name: 'Content',
     component: () => import('../views/Content.vue'),
     props: true
   },
-  // 须在 catch-all 之前注册；异步 addRoute 会导致首屏 /admin 被 NotFound 抢走
   ...(import.meta.env.DEV
     ? [
         {
