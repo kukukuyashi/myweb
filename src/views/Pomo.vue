@@ -3,7 +3,7 @@
     <PlatformPageShell
       :coord="minimalMode ? 'POMODORO · FOCUS' : 'POMODORO · 勉強部 · ACG'"
       title="番茄钟"
-      :lead="minimalMode ? '沙漏计时 · 全屏专注 · 反思写入时间线。' : '和碧蓝档案的伙伴们一起专注 — 沙漏计时、沉浸自习室、反思写入时间线。'"
+      :lead="minimalMode ? '能量格计时 · 全屏专注 · 反思写入时间线。' : '和碧蓝档案的伙伴们一起专注 — 弹匣计时、沉浸自习室、反思写入时间线。'"
       :ink-image="minimalMode ? '' : PLATFORM_POMO_INK_IMAGE"
       :ink-position="PLATFORM_POMO_INK_POSITION"
       :ink-r-end="120"
@@ -97,12 +97,27 @@
           />
         </div>
 
-        <PomoHourglass
+        <PomoEnergyGrid
+          v-if="minimalMode"
           :display-time="displayTime"
           :remaining-ratio="remainingRatio"
+          :total-minutes="currentTotalMinutes"
+          :elapsed-seconds="elapsedSeconds"
           :running="running"
+          :mode="mode"
           :accent="timerAccent"
-          :sub-text="mode === 'focus' ? (minimalMode ? '保持专注' : '邪魔禁止 · STAY ON TASK') : (minimalMode ? '放松一下' : 'お疲れ · BREATHE')"
+          :sub-text="mode === 'focus' ? '保持专注' : '放松一下'"
+        />
+        <PomoMagazine
+          v-else
+          :display-time="displayTime"
+          :remaining-ratio="remainingRatio"
+          :total-minutes="currentTotalMinutes"
+          :elapsed-seconds="elapsedSeconds"
+          :running="running"
+          :mode="mode"
+          :accent="timerAccent"
+          :sub-text="mode === 'focus' ? '邪魔禁止 · STAY ON TASK' : 'お疲れ · BREATHE'"
         />
 
         <label v-if="mode === 'focus'" class="task-label">
@@ -251,7 +266,8 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
-import PomoHourglass from '../components/platform/PomoHourglass.vue'
+import PomoEnergyGrid from '../components/platform/PomoEnergyGrid.vue'
+import PomoMagazine from '../components/platform/PomoMagazine.vue'
 import PomoStudyRoom from '../components/platform/PomoStudyRoom.vue'
 import { usePageMeta } from '../composables/usePageMeta'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
@@ -385,6 +401,10 @@ const remainingRatio = computed(() => {
   if (!totalSeconds.value) return 1
   return secondsLeft.value / totalSeconds.value
 })
+
+const currentTotalMinutes = computed(() => Math.max(1, Math.round(totalSeconds.value / 60)))
+
+const elapsedSeconds = computed(() => Math.max(0, totalSeconds.value - secondsLeft.value))
 
 const timerAccent = computed(() => {
   if (minimalMode.value) return mode.value === 'break' ? '#5a8fd4' : '#e85d04'
@@ -806,8 +826,8 @@ onUnmounted(() => {
   max-width: 360px;
 }
 
-.pomo-main--centered :deep(.pomo-hourglass) {
-  width: min(260px, 78vw);
+.pomo-main--centered :deep(.pomo-energy) {
+  width: min(320px, 88vw);
 }
 
 .pomo-reflect-modal--minimal {
@@ -1136,7 +1156,7 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 25%, transparent);
 }
 
-.pomo-main :deep(.pomo-hourglass) {
+.pomo-main :deep(.pomo-mag) {
   margin-bottom: 0.5rem;
 }
 
