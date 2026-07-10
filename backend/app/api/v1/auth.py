@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,21 +6,72 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.response import ok
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
-from app.schemas.user import TokenData, UserLogin, UserPublic, UserRegister
+from app.schemas.user import EmailCodeRequest, TokenData, UserLogin, UserPublic, UserRegister
+from app.services.email_service import send_verification_email
+from app.services.email_verify import can_send_code, generate_code, mark_send_rate, store_code, verify_code
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+_DEV_SECRET_KEYS = {"dev-secret-change-in-production", "dev-cyinclog-local"}
 
-@router.post("/register", summary="用户注册")
+
+def _is_dev_mode() -> bool:
+    return get_settings().secret_key in _DEV_SECRET_KEYS
+
+
+@router.post("/email/code", summary="发送注册邮箱验证码")
+def send_email_code(payload: EmailCodeRequest, db: Annotated[Session, Depends(get_db)]):
+    settings = get_settings()
+    email = str(payload.email).strip().lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="该邮箱已注册")
+
+    if not can_send_code(email):
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="发送过于频繁，请 60 秒后再试")
+
+    code = generate_code()
+    if not store_code(email, code):
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="验证码暂无法保存，请稍后重试")
+    mark_send_rate(email)
+
+    smtp_ready = bool(settings.smtp_user and settings.smtp_password)
+    if smtp_ready:
+        try:
+            send_verification_email(email, code)
+        except Exception as exc:
+            logger.exception("SMTP send failed for %s: %s", email, exc)
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="邮件发送失败，请稍后重试") from exc
+        return ok({"expires_in": 600}, message="验证码已发送，请查收邮箱（含垃圾箱）")
+
+    if _is_dev_mode():
+        logger.warning("DEV email code for %s: %s", email, code)
+        return ok(
+            {"expires_in": 600, "dev_code": code},
+            message="开发模式：未配置 SMTP，验证码见下方或后端终端日志",
+        )
+
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="邮件服务未配置，请在 backend/.env 设置 SMTP_USER / SMTP_PASSWORD",
+    )
+
+
+@router.post("/register", summary="用户注册（需邮箱验证码）")
 def register(payload: UserRegister, db: Annotated[Session, Depends(get_db)]):
+    email = str(payload.email).strip().lower()
+    if not verify_code(email, payload.code):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="验证码错误或已过期")
+
     nickname = payload.nickname or payload.username
     user = User(
         username=payload.username,
-        email=payload.email,
+        email=email,
         password_hash=get_password_hash(payload.password),
         nickname=nickname,
     )

@@ -44,8 +44,7 @@ const routes = [
   },
   {
     path: '/ai',
-    name: 'AiChat',
-    component: () => import('../views/AiChat.vue')
+    redirect: '/app/forum',
   },
   {
     path: '/app',
@@ -68,12 +67,6 @@ const routes = [
         props: true,
       },
       {
-        path: 'forum/t/:id',
-        name: 'ForumThread',
-        component: () => import('../views/platform/ForumThread.vue'),
-        props: true,
-      },
-      {
         path: 'forum/new',
         name: 'ForumNewThread',
         component: () => import('../views/platform/ForumNewThread.vue'),
@@ -82,6 +75,12 @@ const routes = [
         path: 'forum/t/:id/edit',
         name: 'ForumEditThread',
         component: () => import('../views/platform/ForumEditThread.vue'),
+        props: true,
+      },
+      {
+        path: 'forum/t/:id',
+        name: 'ForumThread',
+        component: () => import('../views/platform/ForumThread.vue'),
         props: true,
       },
       {
@@ -107,9 +106,26 @@ const routes = [
         component: () => import('../views/Me.vue'),
       },
       {
+        path: 'login',
+        name: 'Login',
+        component: () => import('../views/auth/Login.vue'),
+        meta: { guestOnly: true },
+      },
+      {
+        path: 'register',
+        name: 'Register',
+        component: () => import('../views/auth/Register.vue'),
+        meta: { guestOnly: true },
+      },
+      {
         path: 'pomo',
         name: 'Pomo',
         component: () => import('../views/Pomo.vue'),
+      },
+      {
+        path: 'music',
+        name: 'PlatformMusic',
+        component: () => import('../views/platform/PlatformMusic.vue'),
       },
     ],
   },

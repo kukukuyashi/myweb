@@ -1,18 +1,18 @@
 <template>
   <div class="container layout-single">
-    <header class="page-header">
+    <PlatformSubPageHeader coord="FORUM · EDIT">
       <router-link :to="`/app/forum/t/${id}`" class="back">← 返回帖子</router-link>
       <h1 class="page-title">编辑帖子</h1>
-    </header>
+    </PlatformSubPageHeader>
 
-    <section v-if="!token" class="card">
+    <section v-if="!token" class="platform-panel ink-panel">
       <p>请先 <router-link to="/app/me">登录</router-link>。</p>
     </section>
 
     <p v-else-if="loading" class="muted">加载中…</p>
     <p v-else-if="error && !form.title" class="error">{{ error }}</p>
 
-    <form v-else class="card" @submit.prevent="submit">
+    <form v-else class="platform-panel ink-panel" @submit.prevent="submit">
       <label>
         板块
         <select v-model="form.category_id" required>
@@ -40,6 +40,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
 import {
@@ -141,7 +142,7 @@ async function remove() {
 .card {
   margin-top: 1rem;
   border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
+  background: var(--bg-paper);
   padding: 1.25rem;
 }
 

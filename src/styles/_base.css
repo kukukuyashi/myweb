@@ -57,7 +57,7 @@ html {
 
 /* 页面加载/等待时的动态光标 */
 html.cursor-busy {
-  cursor: url('/myweb/cursors/busy.gif') 12 12, wait;
+  cursor: url('/myweb/cursors/busy.gif') 48 48, wait;
 }
 
 a,
@@ -82,7 +82,7 @@ input,
 textarea,
 select,
 [contenteditable="true"] {
-  cursor: url('/myweb/cursors/text.gif') 12 12, text;
+  cursor: url('/myweb/cursors/text.gif') 12 54, text;
 }
 
 .not-allowed,

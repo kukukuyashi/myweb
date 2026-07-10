@@ -1,40 +1,67 @@
 <template>
-  <div class="platform-layout">
-    <PlatformNav />
-    <main class="platform-main">
-      <router-view />
-    </main>
-    <footer class="platform-footer">
-      <div class="platform-footer-inner">
-        <span class="footer-coord">CYINC · PLATFORM · {{ footerYear }}</span>
-        <p class="footer-line">
-          与 <router-link to="/">个人博客</router-link> 账号通用 · FastAPI + Vue 3
-        </p>
-      </div>
-    </footer>
+  <div
+    class="platform-layout"
+    :class="{
+      'platform-layout--auth': isAuthRoute,
+      'platform-layout--sidebar-collapsed': sidebarCollapsed && !isAuthRoute,
+    }"
+  >
+    <PlatformNav v-if="!isAuthRoute" />
+    <div class="platform-body">
+      <main class="platform-main">
+        <router-view />
+      </main>
+      <footer v-if="!isAuthRoute" class="platform-footer">
+        <div class="platform-footer-inner">
+          <span class="footer-coord">CYINC · PLATFORM · {{ footerYear }}</span>
+          <p class="footer-line">
+            与 <router-link to="/">个人博客</router-link> 账号通用 · FastAPI + Vue 3
+          </p>
+        </div>
+      </footer>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import PlatformNav from '../components/PlatformNav.vue'
+import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 
+const route = useRoute()
+const { collapsed: sidebarCollapsed } = usePlatformSidebar()
 const footerYear = computed(() => new Date().getFullYear())
+const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
 </script>
 
 <style scoped>
 .platform-layout {
+  --platform-sidebar-width: 240px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.platform-layout:not(.platform-layout--auth) .platform-body {
+  margin-left: var(--platform-sidebar-width);
+  transition: margin-left 0.22s ease;
+}
+
+.platform-layout--sidebar-collapsed:not(.platform-layout--auth) .platform-body {
+  margin-left: 0;
+}
+
+.platform-body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
 }
 
 .platform-main {
   position: relative;
   isolation: isolate;
   flex: 1;
-  padding: 2rem 0 3rem;
+  padding: clamp(1.25rem, 3vw, 2rem) 0 2.5rem;
 }
 
 .platform-main::before {
@@ -44,7 +71,7 @@ const footerYear = computed(() => new Date().getFullYear())
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: var(--content-width);
+  width: min(var(--content-width), calc(100% - 2rem));
   background: var(--bg-paper);
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
@@ -61,22 +88,12 @@ const footerYear = computed(() => new Date().getFullYear())
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-.platform-main::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--content-width);
-  pointer-events: none;
-  z-index: 0;
-  background:
-    linear-gradient(var(--orange) 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(var(--orange) 0 0) 100% 0 / 12px 2px no-repeat,
-    linear-gradient(var(--orange) 0 0) 0 100% / 12px 2px no-repeat,
-    linear-gradient(var(--orange) 0 0) 100% 100% / 12px 2px no-repeat;
-  opacity: 0.45;
+.platform-layout--auth .platform-main::before {
+  display: none;
+}
+
+.platform-layout--auth .platform-main {
+  padding: 0;
 }
 
 .platform-footer {
@@ -88,7 +105,7 @@ const footerYear = computed(() => new Date().getFullYear())
   font-size: 0.68rem;
   color: var(--text-muted);
   border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-paper) 80%, var(--bg));
+  background: color-mix(in srgb, var(--bg-paper) 85%, var(--bg));
 }
 
 .platform-footer-inner {
@@ -109,5 +126,15 @@ const footerYear = computed(() => new Date().getFullYear())
 
 .platform-footer a {
   color: var(--orange);
+}
+
+@media (max-width: 960px) {
+  .platform-layout:not(.platform-layout--auth) .platform-body {
+    margin-left: 0;
+  }
+
+  .platform-layout:not(.platform-layout--auth) .platform-main {
+    padding-top: 3.5rem;
+  }
 }
 </style>

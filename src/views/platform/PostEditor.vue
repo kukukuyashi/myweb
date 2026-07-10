@@ -1,17 +1,21 @@
 <template>
   <div class="container layout-single">
-    <header class="page-header">
+    <PlatformSubPageHeader
+      coord="POST · EDITOR"
+      :image="PLATFORM_POST_INK_IMAGE"
+      :position="PLATFORM_POST_INK_POSITION"
+    >
       <router-link to="/app/me" class="back">← 个人中心</router-link>
       <h1 class="page-title">{{ isEdit ? '编辑文章' : '写文章' }}</h1>
-    </header>
+    </PlatformSubPageHeader>
 
-    <section v-if="!token" class="card">
+    <section v-if="!token" class="platform-panel ink-panel">
       <p>请先 <router-link to="/app/me">登录</router-link> 后再写文章。</p>
     </section>
 
     <p v-else-if="loadingPost" class="muted">加载中…</p>
 
-    <form v-else class="card" @submit.prevent="submit">
+    <form v-else class="platform-panel ink-panel" @submit.prevent="submit">
       <label>
         标题
         <input v-model="form.title" required maxlength="200" placeholder="文章标题" />
@@ -65,6 +69,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
+import { PLATFORM_POST_INK_IMAGE, PLATFORM_POST_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
 import {

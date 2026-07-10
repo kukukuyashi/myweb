@@ -1,35 +1,37 @@
 <template>
   <div class="container layout-single">
-    <header class="page-header">
+    <PlatformSubPageHeader coord="FORUM · CATEGORY">
       <router-link to="/app/forum" class="back">← 全部板块</router-link>
-      <p class="coord">{{ slug?.toUpperCase() }}</p>
       <h1 class="page-title">{{ categoryName || '板块' }}</h1>
-    </header>
+    </PlatformSubPageHeader>
 
-    <p v-if="loading" class="muted">加载中…</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
-    <template v-else>
-      <p v-if="!threads.length" class="muted">暂无帖子。</p>
-      <ul v-else class="thread-list">
-        <li v-for="t in threads" :key="t.id">
-          <router-link :to="`/app/forum/t/${t.id}`" class="thread-title">
-            <span v-if="t.is_pinned" class="pin">置顶</span>
-            {{ t.title }}
-          </router-link>
-          <div class="thread-meta">
-            <span>{{ t.author?.nickname || t.author?.username || '匿名' }}</span>
-            <span>{{ t.reply_count }} 回复</span>
-            <span>{{ t.view_count }} 浏览</span>
-            <span>{{ formatDate(t.created_at) }}</span>
-          </div>
-        </li>
-      </ul>
-    </template>
+    <section class="platform-panel ink-panel">
+      <p v-if="loading" class="muted">加载中…</p>
+      <p v-else-if="error" class="error">{{ error }}</p>
+      <template v-else>
+        <p v-if="!threads.length" class="muted">暂无帖子。</p>
+        <ul v-else class="thread-list">
+          <li v-for="t in threads" :key="t.id">
+            <router-link :to="`/app/forum/t/${t.id}`" class="thread-title">
+              <span v-if="t.is_pinned" class="pin">置顶</span>
+              {{ t.title }}
+            </router-link>
+            <div class="thread-meta">
+              <span>{{ t.author?.nickname || t.author?.username || '匿名' }}</span>
+              <span>{{ t.reply_count }} 回复</span>
+              <span>{{ t.view_count }} 浏览</span>
+              <span>{{ formatDate(t.created_at) }}</span>
+            </div>
+          </li>
+        </ul>
+      </template>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { fetchForumCategories, fetchForumCategoryThreads } from '../../api/platform.js'
 
@@ -78,31 +80,32 @@ onMounted(load)
 
 <style scoped>
 .back {
+  display: inline-block;
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--orange);
   text-decoration: none;
+  margin-bottom: 0.35rem;
 }
 
-.coord {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--orange);
-  letter-spacing: 0.12em;
-  margin-top: 0.5rem;
+.page-title {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
 }
 
 .thread-list {
   list-style: none;
   padding: 0;
-  margin: 1rem 0 0;
-  border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
+  margin: 0;
 }
 
 .thread-list li {
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.thread-list li:last-child {
+  border-bottom: none;
 }
 
 .thread-title {

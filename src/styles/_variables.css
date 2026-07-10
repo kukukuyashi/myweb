@@ -10,6 +10,8 @@
   --border: #c8c2ba;
   --topbar-height: 52px;
   --topbar-bg: #1a1a1a;
+  --platform-topbar-bg: #1a1a2e;
+  --platform-topbar-text: #ffffff;
   --content-width: min(1680px, calc(100vw - clamp(3rem, 10vw, 12rem)));
   --mono: ui-monospace, 'Cascadia Code', 'IBM Plex Mono', monospace;
   --sans: system-ui, -apple-system, 'Segoe UI', 'IBM Plex Sans', sans-serif;
@@ -37,6 +39,9 @@
   --orange-light: rgba(232, 93, 4, 0.15);
   --border: #3a3835;
   --steel: #6aabc8;
+  --topbar-bg: #121110;
+  --platform-topbar-bg: #16141a;
+  --platform-topbar-text: #eae6e1;
 }
 
 [data-season="spring"] {

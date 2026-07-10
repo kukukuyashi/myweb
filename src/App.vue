@@ -8,11 +8,19 @@
       </transition>
     </router-view>
   </div>
-  <MusicPlayer v-if="!isAdminRoute" />
+  <audio
+    ref="globalAudioRef"
+    id="cyinc-global-audio"
+    preload="auto"
+    tabindex="-1"
+    aria-hidden="true"
+    style="position:fixed;width:0;height:0;opacity:0;pointer-events:none"
+  />
+  <MusicPlayer v-if="showMusicPlayer" />
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import router from './router'
 import { useGridSpotlight } from './composables/useRevealOnScroll'
@@ -20,6 +28,8 @@ import { useRouteTransition } from './composables/useRouteTransition'
 import { useKonamiCheat } from './composables/useKonamiCheat'
 import { useClickRipple } from './composables/useClickRipple'
 import { useAnimatedCursor } from './composables/useAnimatedCursor'
+import { initMusicEngine, useMusicPlayback } from './composables/useMusicPlayback'
+import { bindGlobalAudio } from './utils/musicAudio.js'
 
 const PageRails = defineAsyncComponent(() => import('./components/PageRails.vue'))
 const PlatformRails = defineAsyncComponent(() => import('./components/PlatformRails.vue'))
@@ -28,11 +38,27 @@ const MusicPlayer = defineAsyncComponent(() => import('./components/MusicPlayer.
 const route = useRoute()
 const isAdminRoute = computed(() => route.name === 'NotesAdmin')
 const isPlatformRoute = computed(() => route.path.startsWith('/app'))
+const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
+
+/** 主站除音乐室外不挂底栏播放器，避免挡住侧边栏主题切换 */
+const showMusicPlayer = computed(() => {
+  if (isAdminRoute.value || isAuthRoute.value) return false
+  if (isPlatformRoute.value && route.name !== 'PlatformMusic') return false
+  return true
+})
 
 useGridSpotlight()
 useKonamiCheat()
 useClickRipple()
 useAnimatedCursor()
+useMusicPlayback()
+
+const globalAudioRef = ref(null)
+onMounted(() => {
+  bindGlobalAudio(globalAudioRef.value)
+  initMusicEngine()
+})
+
 const { transitionName } = useRouteTransition(router)
 </script>
 

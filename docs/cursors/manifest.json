@@ -7,22 +7,34 @@
     "normal": {
       "frames": 130,
       "sheet": "normal-sheet.png",
-      "anchor": "tip"
+      "anchor": "tip",
+      "hotspotX": 12,
+      "hotspotY": 12,
+      "contentHeight": 74
     },
     "pointer": {
       "frames": 94,
       "sheet": "pointer-sheet.png",
-      "anchor": "tip"
+      "anchor": "tip",
+      "hotspotX": 12,
+      "hotspotY": 12,
+      "contentHeight": 84
     },
     "text": {
       "frames": 140,
       "sheet": "text-sheet.png",
-      "anchor": "center-top"
+      "anchor": "center-top",
+      "hotspotX": 12,
+      "hotspotY": 54,
+      "contentHeight": 84
     },
     "busy": {
       "frames": 45,
       "sheet": "busy-sheet.png",
-      "anchor": "center"
+      "anchor": "center",
+      "hotspotX": 48,
+      "hotspotY": 48,
+      "contentHeight": 84
     }
   }
 }

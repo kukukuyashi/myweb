@@ -1,13 +1,43 @@
 from datetime import datetime
+import re
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _validate_email(v: str) -> str:
+    email = v.strip().lower()
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise ValueError("邮箱格式不正确，须为有效邮箱地址（含 @ 符号）")
+    return email
+
+
+class EmailCodeRequest(BaseModel):
+    email: str = Field(max_length=255)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str) -> str:
+        return _validate_email(v)
 
 
 class UserRegister(BaseModel):
     username: str = Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")
-    email: EmailStr
-    password: str = Field(min_length=6, max_length=128)
+    email: str = Field(max_length=255)
+    password: str = Field(min_length=9, max_length=128)
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
     nickname: str | None = Field(default=None, max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str) -> str:
+        return _validate_email(v)
+
+    @field_validator("password")
+    @classmethod
+    def password_strong(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", v):
+            raise ValueError("密码须同时包含大写字母、小写字母和数字")
+        return v
 
 
 class UserLogin(BaseModel):
@@ -25,12 +55,24 @@ class UserUpdate(BaseModel):
     avatar: str | None = Field(default=None, max_length=512)
 
 
+class PasswordChange(BaseModel):
+    current_password: str = Field(min_length=6, max_length=128)
+    new_password: str = Field(min_length=9, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strong(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", v):
+            raise ValueError("密码须同时包含大写字母、小写字母和数字")
+        return v
+
+
 class UserPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     username: str
-    email: EmailStr
+    email: str
     nickname: str
     avatar: str | None
     created_at: datetime

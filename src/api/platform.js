@@ -1,3 +1,5 @@
+import { formatApiError } from '../utils/apiError.js'
+
 const BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '')
 
 /** API 服务根 URL（静态文件 /uploads 用） */
@@ -18,16 +20,28 @@ export function getPlatformToken() {
 }
 
 export function setPlatformToken(token) {
-  if (token) localStorage.setItem('cyinc_platform_token', token)
-  else localStorage.removeItem('cyinc_platform_token')
+  if (token && typeof token === 'string') {
+    localStorage.setItem('cyinc_platform_token', token)
+  } else {
+    localStorage.removeItem('cyinc_platform_token')
+  }
+  window.dispatchEvent(new CustomEvent('platform-auth-changed'))
+}
+
+export function requirePlatformToken() {
+  const token = getPlatformToken()
+  if (!token) {
+    const err = new Error('登录已过期，请重新登录')
+    err.code = 'AUTH_REQUIRED'
+    throw err
+  }
+  return token
 }
 
 export async function platformFetch(path, { method = 'GET', body, auth = false } = {}) {
   const headers = { 'Content-Type': 'application/json; charset=utf-8' }
   if (auth) {
-    const token = getPlatformToken()
-    if (!token) throw new Error('请先登录')
-    headers.Authorization = `Bearer ${token}`
+    headers.Authorization = `Bearer ${requirePlatformToken()}`
   }
   const res = await fetch(`${BASE}${path}`, {
     method,
@@ -41,11 +55,10 @@ export async function platformFetch(path, { method = 'GET', body, auth = false }
     throw new Error(res.statusText || '请求失败')
   }
   if (!res.ok) {
-    const msg = json.detail || json.message || res.statusText
-    throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg))
+    throw new Error(formatApiError(json.detail ?? json.message ?? res.statusText))
   }
   if (json.code != null && json.code !== 0) {
-    throw new Error(json.message || '业务错误')
+    throw new Error(formatApiError(json.message) || '业务错误')
   }
   return json
 }
@@ -55,14 +68,24 @@ export async function platformLogin(username, password) {
     method: 'POST',
     body: { username, password },
   })
-  setPlatformToken(json.data.access_token)
+  const accessToken = json?.data?.access_token
+  if (!accessToken) throw new Error('登录失败：未收到有效令牌')
+  setPlatformToken(accessToken)
   return json.data
 }
 
-export async function platformRegister(username, email, password) {
+export async function sendEmailVerificationCode(email) {
+  const json = await platformFetch('/auth/email/code', {
+    method: 'POST',
+    body: { email: String(email).trim() },
+  })
+  return { ...(json.data || {}), message: json.message }
+}
+
+export async function platformRegister({ username, email, password, code, nickname }) {
   await platformFetch('/auth/register', {
     method: 'POST',
-    body: { username, email, password },
+    body: { username, email, password, code, nickname },
   })
   return platformLogin(username, password)
 }
@@ -91,9 +114,19 @@ export async function updateProfile(payload) {
   })
 }
 
+export async function changePassword({ currentPassword, newPassword }) {
+  return platformFetch('/users/me/password', {
+    method: 'POST',
+    auth: true,
+    body: {
+      current_password: currentPassword,
+      new_password: newPassword,
+    },
+  })
+}
+
 export async function uploadAvatar(file) {
-  const token = getPlatformToken()
-  if (!token) throw new Error('请先登录')
+  const token = requirePlatformToken()
   const form = new FormData()
   form.append('file', file)
   const res = await fetch(`${BASE}/users/me/avatar`, {

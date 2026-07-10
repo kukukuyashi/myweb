@@ -20,6 +20,30 @@ const POINTER_SELECTOR = [
 
 const TEXT_SELECTOR = 'input, textarea, select, [contenteditable="true"]'
 const DISABLED_SELECTOR = '[disabled], .not-allowed'
+const CONTENT_FILL = 0.88
+
+/** 与 scripts/generate-cursors.py 中 CURSOR_ANCHORS 对齐 */
+function hotspotForAnchor(anchor, size, hx, hy, contentHeight) {
+  switch (anchor) {
+    case 'center-top':
+      return { x: hx, y: hy + Math.round(contentHeight / 2) }
+    case 'center':
+      return { x: Math.round(size / 2), y: Math.round(size / 2) }
+    default:
+      return { x: hx, y: hy }
+  }
+}
+
+function resolveAssetHotspot(info, manifest) {
+  if (info.hotspotX != null && info.hotspotY != null) {
+    return { x: info.hotspotX, y: info.hotspotY }
+  }
+  const size = manifest.size || 96
+  const hx = manifest.hotspotX ?? 12
+  const hy = manifest.hotspotY ?? 12
+  const contentHeight = info.contentHeight ?? Math.round(size * CONTENT_FILL)
+  return hotspotForAnchor(info.anchor, size, hx, hy, contentHeight)
+}
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -108,6 +132,13 @@ export function useAnimatedCursor() {
     drawFrame()
   }
 
+  function applyHotspot(type) {
+    const asset = assets[type] || assets.normal
+    if (!asset) return
+    hotspotX = asset.hotspotX
+    hotspotY = asset.hotspotY
+  }
+
   function applyType(type) {
     if (type === currentType) return
     currentType = type
@@ -122,7 +153,9 @@ export function useAnimatedCursor() {
       return
     }
 
+    applyHotspot(type)
     canvas.style.visibility = visible ? 'visible' : 'hidden'
+    setPosition(pendingX, pendingY)
     drawFrame()
   }
 
@@ -175,18 +208,21 @@ export function useAnimatedCursor() {
       if (!res.ok) throw new Error('manifest missing')
       const manifest = await res.json()
       size = manifest.size || 96
-      hotspotX = manifest.hotspotX ?? 12
-      hotspotY = manifest.hotspotY ?? 12
       frameMs = manifest.frameMs || 33
 
       await Promise.all(
         Object.entries(manifest.cursors).map(async ([id, info]) => {
+          const hs = resolveAssetHotspot(info, manifest)
           assets[id] = {
             sheet: await loadImage(`${base}${info.sheet}`),
             frames: info.frames,
+            hotspotX: hs.x,
+            hotspotY: hs.y,
           }
         }),
       )
+
+      applyHotspot('normal')
     } catch {
       return
     }

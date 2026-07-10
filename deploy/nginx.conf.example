@@ -47,8 +47,36 @@ server {
         proxy_set_header Connection "";
     }
 
-    # Vue 静态站（Vite base=/myweb/）
-    # 构建：npm run build → 将 docs/ 同步到 /var/www/cyinc/myweb/
+    # 博客文章正文（必须存在，勿 fallback 到 index.html）
+    location ^~ /myweb/Content/ {
+        root /var/www/cyinc;
+        try_files $uri =404;
+    }
+
+    # 大图 / 音乐 — 与前端包分离，Nginx 直出（部署快、可长期缓存）
+    location ^~ /myweb/img/ {
+        alias /var/www/cyinc/img/;
+        add_header Cache-Control "public, max-age=604800";
+        access_log off;
+    }
+
+    location ^~ /myweb/Music/ {
+        alias /var/www/cyinc/Music/;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Accept-Ranges bytes;
+        types {
+            audio/flac flac;
+            audio/mpeg mp3;
+            audio/ogg ogg;
+            image/jpeg jpg jpeg;
+            image/png png;
+        }
+        access_log off;
+    }
+
+    # Vue 静态站（Vite base=/myweb/）— 仅含 index.html + assets + Content
+    # 构建：npm run build → deploy/scripts/pack-frontend.ps1 → 上传 frontend.zip 到 myweb/ 解压
+    # 必须包含 Content/（文章正文）与 assets/
     location /myweb/ {
         root /var/www/cyinc;
         try_files $uri $uri/ /myweb/index.html;

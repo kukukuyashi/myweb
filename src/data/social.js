@@ -8,11 +8,6 @@ export const friendLinks = [
     desc: '本站技术博客',
   },
   {
-    name: '雨雪冰屋',
-    url: 'https://iamyukino.cn/',
-    desc: '一隅雨雪一炉窝 · ACG 自留地',
-  },
-  {
     name: 'GitHub',
     url: 'https://github.com/kukukuyashi/myweb',
     desc: '项目源码',

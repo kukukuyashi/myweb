@@ -1,40 +1,36 @@
 <template>
-  <div class="container layout-single me-layout">
-    <header class="me-header">
-      <p class="coord">ACCOUNT · ME</p>
-      <h1 class="page-title">个人中心</h1>
-    </header>
-
-    <section v-if="!token" class="card me-login">
-      <h2>登录主站账号</h2>
-      <form @submit.prevent="handleLogin">
-        <label>
-          用户名
-          <input v-model="loginForm.username" required autocomplete="username" />
-        </label>
-        <label>
-          密码
-          <input v-model="loginForm.password" type="password" required autocomplete="current-password" />
-        </label>
-        <p v-if="error" class="error">{{ error }}</p>
-        <button type="submit" class="btn-primary" :disabled="loading">登录</button>
-      </form>
+  <PlatformPageShell
+    coord="ACCOUNT · ME"
+    title="个人中心"
+    :lead="token ? '资料、文章、论坛帖与专注时间线 — 你的主站控制台。' : '登录后管理头像、Markdown 文章、论坛帖与番茄钟记录。'"
+    :ink-image="PLATFORM_ME_INK_IMAGE"
+    :ink-position="PLATFORM_ME_INK_POSITION"
+    :ink-r-end="114"
+  >
+    <section v-if="!token" class="platform-panel ink-panel me-guest">
+      <p class="platform-coord">GUEST · READ ONLY</p>
+      <h2 class="me-guest-title">尚未登录</h2>
+      <p class="muted">登录后可编辑资料、发布文章、管理论坛帖，并查看专注时间线。</p>
+      <div class="me-auth-actions">
+        <router-link to="/app/login?redirect=/app/me" class="platform-btn-primary">登录</router-link>
+        <router-link to="/app/register" class="platform-btn-ghost">注册新账号</router-link>
+      </div>
     </section>
 
     <div v-else class="me-grid">
-      <aside class="user-card card">
+      <aside class="user-card platform-panel ink-panel">
         <div class="avatar-wrap">
           <img v-if="avatarDisplayUrl" :src="avatarDisplayUrl" alt="" class="avatar" />
           <span v-else class="avatar placeholder">{{ avatarInitial }}</span>
         </div>
         <h2>{{ profile?.nickname || profile?.username }}</h2>
         <p class="username">@{{ profile?.username }}</p>
-        <p class="email">{{ profile?.email }}</p>
-        <button type="button" class="btn-ghost" @click="logout">退出登录</button>
+        <p class="email">{{ maskedEmail }}</p>
+        <button type="button" class="platform-btn-ghost me-logout" @click="logout">退出登录</button>
       </aside>
 
       <section class="me-main">
-        <nav class="tabs">
+        <nav class="platform-tabs">
           <button
             v-for="tab in tabs"
             :key="tab.id"
@@ -46,7 +42,7 @@
           </button>
         </nav>
 
-        <div v-show="activeTab === 'profile'" class="card tab-panel">
+        <div v-show="activeTab === 'profile'" class="platform-panel ink-panel tab-panel">
           <form @submit.prevent="saveProfile">
             <div class="avatar-field">
               <div class="avatar-preview">
@@ -79,11 +75,51 @@
             <p v-if="error" class="error">{{ error }}</p>
             <button type="submit" class="btn-primary" :disabled="loading">保存资料</button>
           </form>
+
+          <div class="security-divider" />
+
+          <form class="security-form" @submit.prevent="savePassword">
+            <h3 class="security-title">修改密码</h3>
+            <p class="security-hint">密码仅用于登录验证，不会在页面上展示或回显。</p>
+            <label>
+              当前密码
+              <input
+                v-model="passwordForm.current"
+                type="password"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+            <label>
+              新密码
+              <input
+                v-model="passwordForm.next"
+                type="password"
+                autocomplete="new-password"
+                minlength="9"
+                required
+              />
+            </label>
+            <label>
+              确认新密码
+              <input
+                v-model="passwordForm.confirm"
+                type="password"
+                autocomplete="new-password"
+                minlength="9"
+                required
+              />
+            </label>
+            <p class="security-rule">至少 9 位，须含大写字母、小写字母和数字。</p>
+            <p v-if="passwordMsg" class="success">{{ passwordMsg }}</p>
+            <p v-if="passwordError" class="error">{{ passwordError }}</p>
+            <button type="submit" class="btn-primary" :disabled="passwordLoading">更新密码</button>
+          </form>
         </div>
 
-        <div v-show="activeTab === 'posts'" class="card tab-panel">
+        <div v-show="activeTab === 'posts'" class="platform-panel ink-panel tab-panel">
           <div class="panel-head">
-            <router-link to="/app/posts/new" class="btn-primary">写文章</router-link>
+            <router-link to="/app/posts/new" class="platform-btn-primary">写文章</router-link>
           </div>
           <p v-if="postsLoading" class="muted">加载中…</p>
           <p v-else-if="!posts.length" class="muted">暂无文章，点上方写第一篇吧。</p>
@@ -102,9 +138,9 @@
           </ul>
         </div>
 
-        <div v-show="activeTab === 'threads'" class="card tab-panel">
+        <div v-show="activeTab === 'threads'" class="platform-panel ink-panel tab-panel">
           <div class="panel-head">
-            <router-link to="/app/forum/new" class="btn-primary">发帖</router-link>
+            <router-link to="/app/forum/new" class="platform-btn-primary">发帖</router-link>
           </div>
           <p v-if="threadsLoading" class="muted">加载中…</p>
           <p v-else-if="!forumThreads.length" class="muted">暂无帖子，去论坛发一条吧。</p>
@@ -127,7 +163,7 @@
           <p v-if="timelineLoading" class="muted">加载中…</p>
           <p v-else-if="!timelineDays.length" class="muted">暂无专注记录，去番茄钟开始第一段吧。</p>
           <div v-else class="timeline">
-            <section v-for="day in timelineDays" :key="day.date" class="card day-block">
+            <section v-for="day in timelineDays" :key="day.date" class="platform-panel day-block">
               <h3>{{ day.date }} · {{ day.total_minutes }} 分钟</h3>
               <ul>
                 <li v-for="s in day.sessions" :key="s.id">
@@ -142,12 +178,14 @@
         </div>
       </section>
     </div>
-  </div>
+  </PlatformPageShell>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
+import { PLATFORM_ME_INK_IMAGE, PLATFORM_ME_INK_POSITION } from '../data/inkTheme.js'
 import { usePageMeta } from '../composables/usePageMeta'
 import {
   deleteForumThread,
@@ -157,11 +195,11 @@ import {
   fetchPomodoroTimeline,
   fetchProfile,
   getPlatformToken,
-  platformLogin,
   resolveMediaUrl,
   setPlatformToken,
   updateProfile,
   uploadAvatar,
+  changePassword,
 } from '../api/platform.js'
 
 usePageMeta({
@@ -179,7 +217,6 @@ const tabs = [
 const route = useRoute()
 const token = ref(getPlatformToken())
 const activeTab = ref(route.query.tab === 'threads' ? 'threads' : route.query.tab === 'posts' ? 'posts' : 'profile')
-const loginForm = ref({ username: '', password: '' })
 const profile = ref(null)
 const editForm = ref({ nickname: '', avatar: '' })
 const posts = ref([])
@@ -191,6 +228,10 @@ const threadsLoading = ref(false)
 const timelineLoading = ref(false)
 const error = ref('')
 const profileMsg = ref('')
+const passwordForm = ref({ current: '', next: '', confirm: '' })
+const passwordMsg = ref('')
+const passwordError = ref('')
+const passwordLoading = ref(false)
 const avatarInputRef = ref(null)
 const avatarUploading = ref(false)
 const avatarPreviewOverride = ref('')
@@ -210,6 +251,30 @@ const avatarInitial = computed(() => {
   const n = profile.value?.nickname || profile.value?.username || '?'
   return n.charAt(0).toUpperCase()
 })
+
+const maskedEmail = computed(() => {
+  const email = profile.value?.email || ''
+  const at = email.indexOf('@')
+  if (at <= 1) return email
+  const name = email.slice(0, at)
+  const domain = email.slice(at)
+  const visible = name.slice(0, 2)
+  return `${visible}${'*'.repeat(Math.min(4, Math.max(1, name.length - 2)))}${domain}`
+})
+
+function authSessionExpired(message) {
+  return /401|凭证|未登录|请先登录|登录已过期|token/i.test(message || '')
+}
+
+function syncToken() {
+  const next = getPlatformToken()
+  if (!next && token.value) logout()
+  else token.value = next
+}
+
+function onStorageAuth(e) {
+  if (e.key === 'cyinc_platform_token' || e.key === null) syncToken()
+}
 
 function formatDate(iso) {
   if (!iso) return ''
@@ -259,7 +324,7 @@ async function loadProfile() {
     }
   } catch (e) {
     error.value = e.message
-    if (e.message.includes('401') || e.message.includes('凭证')) logout()
+    if (authSessionExpired(e.message)) logout()
   }
 }
 
@@ -302,17 +367,31 @@ async function loadTimeline() {
   }
 }
 
-async function handleLogin() {
-  error.value = ''
-  loading.value = true
+async function savePassword() {
+  syncToken()
+  passwordError.value = ''
+  passwordMsg.value = ''
+  if (!token.value) {
+    passwordError.value = '登录已过期，请重新登录后再修改密码'
+    return
+  }
+  if (passwordForm.value.next !== passwordForm.value.confirm) {
+    passwordError.value = '两次输入的新密码不一致'
+    return
+  }
+  passwordLoading.value = true
   try {
-    await platformLogin(loginForm.value.username, loginForm.value.password)
-    token.value = getPlatformToken()
-    await loadAll()
+    const json = await changePassword({
+      currentPassword: passwordForm.value.current,
+      newPassword: passwordForm.value.next,
+    })
+    passwordForm.value = { current: '', next: '', confirm: '' }
+    passwordMsg.value = json.message || '密码已更新'
   } catch (e) {
-    error.value = e.message
+    passwordError.value = e.message
+    if (authSessionExpired(e.message)) logout()
   } finally {
-    loading.value = false
+    passwordLoading.value = false
   }
 }
 
@@ -394,28 +473,36 @@ watch(activeTab, (tab) => {
 
 watch(token, (t) => { if (t) loadAll() })
 
-onMounted(() => { if (token.value) loadAll() })
+onMounted(() => {
+  syncToken()
+  window.addEventListener('platform-auth-changed', syncToken)
+  window.addEventListener('storage', onStorageAuth)
+  if (token.value) loadAll()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('platform-auth-changed', syncToken)
+  window.removeEventListener('storage', onStorageAuth)
+})
 </script>
 
 <style scoped>
-.coord {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--orange);
-  letter-spacing: 0.12em;
-}
-
-.card {
-  border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
-  padding: 1.25rem;
+.me-guest-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
 }
 
 .me-grid {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: minmax(200px, 240px) 1fr;
   gap: 1.25rem;
-  margin-top: 1.25rem;
+}
+
+.me-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
 }
 
 .user-card {
@@ -451,26 +538,9 @@ onMounted(() => { if (token.value) loadAll() })
   margin: 0.25rem 0;
 }
 
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-bottom: 0.75rem;
-}
-
-.tabs button {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid var(--border);
-  background: transparent;
-  cursor: pointer;
-}
-
-.tabs button.active {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
+.me-logout {
+  margin-top: 0.85rem;
+  width: 100%;
 }
 
 form { display: grid; gap: 0.75rem; }
@@ -538,15 +608,8 @@ input {
   margin-bottom: 0.85rem;
 }
 
-.panel-head .btn-primary {
-  display: inline-block;
+.panel-head .platform-btn-primary {
   text-decoration: none;
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  padding: 0.45rem 0.9rem;
-  background: var(--orange);
-  border: 1px solid var(--orange);
-  color: #fff;
 }
 
 .item-list a {
@@ -605,23 +668,27 @@ input {
 .mins { font-family: var(--mono); color: var(--orange); }
 .task { font-weight: 500; }
 
-.btn-primary, .btn-ghost {
+.btn-primary {
   font-family: var(--mono);
   font-size: 0.78rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
   width: fit-content;
 }
 
-.btn-primary {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-}
-
 .btn-primary:disabled { opacity: 0.55; }
-.btn-ghost { background: transparent; margin-top: 0.75rem; }
+
+.btn-ghost {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+}
 
 .error { color: #c0392b; font-size: 0.82rem; }
 .success { color: #2d6a4f; font-size: 0.82rem; }
@@ -672,6 +739,30 @@ input {
   font-family: var(--mono);
   font-size: 0.65rem;
   color: var(--text-muted);
+}
+
+.security-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1.25rem 0;
+}
+
+.security-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.security-hint,
+.security-rule {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.security-form {
+  display: grid;
+  gap: 0.75rem;
 }
 
 @media (max-width: 720px) {

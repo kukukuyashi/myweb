@@ -88,7 +88,7 @@ function formatDate(iso) {
 <style scoped>
 .platform-home-aside {
   position: sticky;
-  top: calc(var(--topbar-height) + 1rem);
+  top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0;

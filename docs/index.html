@@ -99,9 +99,9 @@
         color: #9a9590;
       }
     </style>
-  <script type="module" crossorigin src="/myweb/assets/index-D8DyEwCa.js"></script>
-  <link rel="modulepreload" crossorigin href="/myweb/assets/vue-vendor-Dfgvpueu.js">
-  <link rel="stylesheet" crossorigin href="/myweb/assets/index-BjKt1hGt.css">
+  <script type="module" crossorigin src="/myweb/assets/index-B1GSdoeH.js"></script>
+  <link rel="modulepreload" crossorigin href="/myweb/assets/vue-vendor-CzSemRAn.js">
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-CLHQzojC.css">
 </head>
 <body>
     <!-- 加载屏幕 -->
@@ -118,6 +118,14 @@
     <div id="app"></div>
     
     <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      })();
       // Vue 挂载后隐藏加载屏幕
       function hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');

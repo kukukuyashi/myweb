@@ -32,23 +32,46 @@ def _get_client() -> redis.Redis | None:
     return _client
 
 
+def cache_available() -> bool:
+    return _get_client() is not None
+
+
 def cache_get(key: str) -> Any | None:
     client = _get_client()
     if not client:
         return None
     try:
         raw = client.get(key)
-        return json.loads(raw) if raw else None
+        if raw is None:
+            return None
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return raw
     except Exception:
         return None
 
 
-def cache_set(key: str, value: Any, ttl: int = POST_LIST_TTL) -> None:
+def cache_set(key: str, value: Any, ttl: int = POST_LIST_TTL) -> bool:
+    client = _get_client()
+    if not client:
+        return False
+    try:
+        if isinstance(value, str):
+            client.setex(key, ttl, value)
+        else:
+            client.setex(key, ttl, json.dumps(value, default=str))
+        return True
+    except Exception:
+        return False
+
+
+def cache_delete(key: str) -> None:
     client = _get_client()
     if not client:
         return
     try:
-        client.setex(key, ttl, json.dumps(value, default=str))
+        client.delete(key)
     except Exception:
         pass
 

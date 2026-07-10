@@ -171,7 +171,7 @@
         <h2 class="section-title">工作台</h2>
         <p class="section-sub">NAV · QUICK ACCESS</p>
       </header>
-      <p class="section-lead">专注、AI、个人资料 — 从这里进。</p>
+      <p class="section-lead">专注、论坛、个人资料 — 从这里进。</p>
 
       <div class="work-grid">
         <router-link
@@ -182,7 +182,7 @@
           :class="{ accent: item.accent }"
         >
           <div class="work-thumb">
-            <img :src="imgUrl(platformPortrait)" alt="" loading="lazy">
+            <img :src="imgUrl(item.thumb)" alt="" loading="lazy">
           </div>
           <div class="work-body">
             <span class="work-tag">{{ item.tag }}</span>
@@ -193,7 +193,7 @@
         </router-link>
       </div>
 
-      <div v-if="stats" class="focus-strip ink-panel">
+      <div v-if="stats" class="focus-strip ink-panel platform-stat-strip">
         <span>今日专注 <strong>{{ stats.today_minutes }}</strong> 分</span>
         <span>本周 <strong>{{ stats.week_minutes }}</strong> 分</span>
         <span>今日 <strong>{{ stats.today_sessions }}</strong> 次</span>
@@ -226,31 +226,6 @@
       </p>
     </section>
 
-    <!-- 友链 -->
-    <section id="friends" class="section-block ink-panel reveal-item" data-reveal>
-      <header class="section-header">
-        <h2 class="section-title">友链</h2>
-        <p class="section-sub">FRIENDS · LINK</p>
-      </header>
-      <div class="friend-grid">
-        <a
-          v-for="link in friendLinks"
-          :key="link.url"
-          :href="link.url"
-          target="_blank"
-          rel="noopener"
-          class="friend-card"
-        >
-          <span class="friend-name">{{ link.name }}</span>
-          <span class="friend-desc">{{ link.desc }}</span>
-          <span class="friend-url">{{ link.url }}</span>
-        </a>
-      </div>
-      <button type="button" class="btn-ghost random-teleport" @click="teleportRandom">
-        随机传送 →
-      </button>
-    </section>
-
     <!-- 链接 / 关于 -->
     <section id="links" class="section-block footer-block reveal-item section-block--alt" data-reveal>
       <header class="section-header">
@@ -264,14 +239,13 @@
             <li><router-link to="/app/forum">论坛</router-link></li>
             <li><router-link to="/app/me">个人中心</router-link></li>
             <li><router-link to="/app/pomo">番茄钟</router-link></li>
-            <li><router-link to="/ai">AI 助手</router-link></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>博客区</h4>
           <ul>
             <li><router-link to="/">技术博客</router-link></li>
-            <li><router-link to="/music">音乐室</router-link></li>
+            <li><router-link to="/app/music">音乐室</router-link></li>
             <li><router-link to="/about">关于 & 贴纸墙</router-link></li>
             <li><router-link to="/guestbook">留言板</router-link></li>
           </ul>
@@ -328,7 +302,7 @@ import {
   platformSiteAttrs,
   platformTimeline,
 } from '../../data/platformBaGallery.js'
-import { friendLinks, randomFriendLink, guestboardExamples } from '../../data/social.js'
+import { guestboardExamples } from '../../data/social.js'
 import { imgUrl, profile as siteProfile } from '../../data/profile.js'
 import {
   createQaMessage,
@@ -398,11 +372,6 @@ function closeLightbox() {
 function shiftLightbox(delta) {
   const n = platformBaStrip.length
   lightboxIndex.value = (lightboxIndex.value + delta + n) % n
-}
-
-function teleportRandom() {
-  const link = randomFriendLink()
-  if (link) window.open(link.url, '_blank', 'noopener')
 }
 
 async function loadQa() {
@@ -513,6 +482,10 @@ onUnmounted(() => {
 
 .section-nav--mobile {
   display: none;
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  z-index: auto;
 }
 
 .section-nav {
@@ -520,11 +493,6 @@ onUnmounted(() => {
   flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.5rem 0;
-  position: sticky;
-  top: calc(var(--topbar-height) + var(--safe-top, 0px));
-  z-index: 50;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(6px);
   border-bottom: 1px dashed var(--border);
 }
 
@@ -1159,62 +1127,6 @@ onUnmounted(() => {
   color: #c0392b;
   font-size: 0.8rem;
   margin: 0;
-}
-
-/* 友链 */
-.friend-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.friend-card {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--border);
-  background: var(--bg-paper);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.friend-card:hover {
-  border-color: var(--orange);
-  box-shadow: 0 3px 0 var(--orange);
-}
-
-.friend-name {
-  font-weight: 600;
-  font-size: 0.92rem;
-}
-
-.friend-desc {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.friend-url {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--orange);
-  word-break: break-all;
-}
-
-.random-teleport {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  background: var(--bg-paper);
-  color: inherit;
-  cursor: pointer;
-}
-
-.random-teleport:hover {
-  border-color: var(--orange);
-  color: var(--orange);
 }
 
 /* Lightbox */

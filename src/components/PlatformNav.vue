@@ -1,179 +1,388 @@
 <template>
-  <header class="platform-topbar">
-    <div class="platform-inner">
-      <router-link to="/app" class="platform-logo">
-        <span class="logo-dot" aria-hidden="true" />
-        CYINC 主站
-      </router-link>
-
-      <nav class="platform-nav" :class="{ open: menuOpen }">
-        <router-link to="/app" @click="menuOpen = false">首页</router-link>
-        <router-link to="/app/forum" @click="menuOpen = false">论坛</router-link>
-        <router-link to="/app/pomo" @click="menuOpen = false">番茄钟</router-link>
-        <router-link to="/app/me" @click="menuOpen = false">个人中心</router-link>
-        <router-link to="/ai" @click="menuOpen = false">AI 助手</router-link>
-        <router-link to="/" class="back-blog" @click="menuOpen = false">返回博客</router-link>
-      </nav>
-
-      <div class="platform-actions">
-        <span v-if="hasToken" class="user-hint">已登录</span>
-        <button class="menu-btn" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
-          {{ menuOpen ? '✕' : '☰' }}
+  <aside class="platform-sidebar" :class="{ open: menuOpen, 'is-collapsed': collapsed }">
+    <div class="sidebar-inner">
+      <div class="sidebar-top">
+        <router-link to="/app" class="sidebar-logo" @click="menuOpen = false">
+          <svg class="logo-mark" width="22" height="22" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3" y="3" width="14" height="14" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M6 10h8M10 6v8" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <div class="logo-text">
+            <strong>CYINC</strong>
+            <span>主站</span>
+          </div>
+        </router-link>
+        <button
+          type="button"
+          class="sidebar-collapse"
+          aria-label="收起侧栏"
+          title="收起侧栏"
+          @click="togglePlatformSidebar"
+        >
+          ◀
         </button>
       </div>
+
+      <nav class="sidebar-nav">
+        <router-link to="/app" @click="menuOpen = false">
+          <span class="nav-icon">⌂</span> 首页
+        </router-link>
+        <router-link to="/app/forum" @click="menuOpen = false">
+          <span class="nav-icon">☷</span> 论坛
+        </router-link>
+        <router-link to="/app/music" @click="menuOpen = false">
+          <span class="nav-icon">♫</span> 音乐室
+        </router-link>
+        <router-link to="/app/pomo" @click="menuOpen = false">
+          <span class="nav-icon">◷</span> 番茄钟
+        </router-link>
+        <router-link v-if="hasToken" to="/app/me" @click="menuOpen = false">
+          <span class="nav-icon">◉</span> 个人中心
+        </router-link>
+        <router-link v-else to="/app/login" @click="menuOpen = false">
+          <span class="nav-icon">→</span> 登录
+        </router-link>
+        <router-link v-if="!hasToken" to="/app/register" @click="menuOpen = false">
+          <span class="nav-icon">+</span> 注册
+        </router-link>
+      </nav>
+
+      <div class="sidebar-divider" />
+
+      <nav class="sidebar-nav sidebar-nav--sub">
+        <router-link to="/" @click="menuOpen = false">
+          <span class="nav-icon">↩</span> 返回博客
+        </router-link>
+      </nav>
+
+      <div class="sidebar-spacer" />
+
+      <SidebarMusicPanel variant="sidebar" @navigate="menuOpen = false" />
+
+      <div class="sidebar-footer">
+        <button type="button" class="sidebar-theme" @click="toggleDarkMode">
+          {{ isDarkMode ? '☀ 浅色模式' : '☾ 深色模式' }}
+        </button>
+        <p v-if="hasToken" class="sidebar-user">● 已登录</p>
+      </div>
     </div>
-    <div v-if="menuOpen" class="nav-overlay" @click="menuOpen = false" />
-  </header>
+  </aside>
+  <div v-if="menuOpen" class="sidebar-overlay" @click="menuOpen = false" />
+  <button
+    v-if="collapsed"
+    type="button"
+    class="sidebar-reopen"
+    aria-label="展开侧栏"
+    title="展开侧栏"
+    @click="togglePlatformSidebar"
+  >
+    ☰
+  </button>
+  <button
+    type="button"
+    class="sidebar-toggle"
+    :aria-expanded="menuOpen"
+    @click="menuOpen = !menuOpen"
+  >
+    {{ menuOpen ? '✕' : '☰' }}
+  </button>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPlatformToken } from '../api/platform.js'
+import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
+import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
+import SidebarMusicPanel from './SidebarMusicPanel.vue'
 
 const route = useRoute()
 const menuOpen = ref(false)
+const { collapsed, togglePlatformSidebar } = usePlatformSidebar()
 const hasToken = ref(!!getPlatformToken())
+const isDarkMode = ref(getInitialDarkState())
+
+function syncToken() {
+  hasToken.value = !!getPlatformToken()
+}
+
+function toggleDarkMode() {
+  isDarkMode.value = toggleTheme()
+}
+
+applyTheme(isDarkMode.value)
+
+onMounted(() => {
+  window.addEventListener('platform-auth-changed', syncToken)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('platform-auth-changed', syncToken)
+})
 
 watch(() => route.path, () => {
   menuOpen.value = false
-  hasToken.value = !!getPlatformToken()
+  syncToken()
+})
+
+watch(menuOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
 })
 </script>
 
 <style scoped>
-.platform-topbar {
-  position: sticky;
+.platform-sidebar {
+  position: fixed;
   top: 0;
-  z-index: 1001;
-  background: #1a1a2e;
-  color: #fff;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  border-bottom: 2px solid var(--orange);
+  left: 0;
+  z-index: 1005;
+  width: var(--platform-sidebar-width, 240px);
+  height: 100vh;
+  height: 100dvh;
+  border-right: 1px solid var(--border);
+  background: var(--bg-paper);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s ease;
 }
 
-.platform-inner {
+.sidebar-top {
   display: flex;
-  align-items: center;
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 2.5vw, 2.5rem);
-  height: calc(var(--topbar-height) + var(--safe-top, 0px));
-  padding-top: var(--safe-top, 0);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-bottom: 1.35rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.platform-logo {
+.sidebar-collapse {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sidebar-collapse:hover {
+  color: var(--orange);
+  border-color: color-mix(in srgb, var(--orange) 35%, var(--border));
+}
+
+.sidebar-reopen {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1004;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem 1rem 1rem;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #fff;
+  gap: 0.65rem;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
+  color: var(--text);
+  min-width: 0;
+  flex: 1;
+}
+
+.logo-mark {
+  color: var(--orange);
   flex-shrink: 0;
 }
 
-.logo-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--orange);
-  border-radius: 50%;
-}
-
-.platform-nav {
+.logo-text {
   display: flex;
-  margin-left: auto;
-  align-items: center;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-.platform-nav a {
-  color: rgba(255, 255, 255, 0.7);
+.logo-text strong {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+}
+
+.logo-text span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid transparent;
   text-decoration: none;
-  padding: 0 0.85rem;
-  height: var(--topbar-height);
-  display: flex;
-  align-items: center;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  transition: color 0.15s, background 0.15s;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.platform-nav a:hover,
-.platform-nav a.router-link-active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
+.sidebar-nav a:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--orange) 6%, var(--bg-paper));
+  border-color: var(--border);
 }
 
-.platform-nav a.router-link-active {
-  box-shadow: inset 0 -2px 0 var(--orange);
+.sidebar-nav a.router-link-active {
+  color: var(--orange);
+  background: var(--orange-light);
+  border-color: color-mix(in srgb, var(--orange) 35%, var(--border));
+  box-shadow: inset 3px 0 0 var(--orange);
 }
 
-.back-blog {
-  color: var(--orange) !important;
+.nav-icon {
+  width: 1.1rem;
+  text-align: center;
+  opacity: 0.85;
 }
 
-.platform-actions {
-  display: flex;
-  align-items: center;
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.85rem 0;
+}
+
+.sidebar-nav--sub a {
+  font-size: 0.72rem;
+}
+
+.sidebar-spacer {
+  flex: 1;
+  min-height: 1rem;
+}
+
+.sidebar-footer {
+  display: grid;
   gap: 0.5rem;
-  margin-left: 0.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--border);
+  margin-top: 0.75rem;
 }
 
-.user-hint {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.menu-btn {
-  display: none;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  width: 36px;
-  height: 36px;
+.sidebar-theme {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
   cursor: pointer;
+  text-align: left;
 }
 
-.nav-overlay { display: none; }
+.sidebar-theme:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
 
-@media (max-width: 768px) {
-  .menu-btn { display: flex; align-items: center; justify-content: center; }
-  .user-hint { display: none; }
+.sidebar-user {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
 
-  .platform-nav {
-    position: fixed;
-    top: calc(var(--topbar-height) + var(--safe-top, 0px));
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    background: #1a1a2e;
-    transform: translateY(-110%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.2s, opacity 0.2s;
-    margin-left: 0;
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1003;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (min-width: 961px) {
+  .platform-sidebar.is-collapsed {
+    transform: translateX(-105%);
   }
 
-  .platform-nav.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
+  .sidebar-reopen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .platform-nav a {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    height: auto;
-    padding: 0.9rem 1.25rem;
+  .sidebar-collapse {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 960px) {
+  .sidebar-collapse {
+    display: none;
   }
 
-  .nav-overlay {
+  .platform-sidebar.is-collapsed {
+    transform: translateX(-105%);
+  }
+
+  .platform-sidebar {
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .platform-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-reopen {
+    display: none !important;
+  }
+
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-overlay {
     display: block;
     position: fixed;
-    inset: calc(var(--topbar-height) + var(--safe-top, 0px)) 0 0 0;
+    inset: 0;
+    z-index: 1001;
     background: rgba(0, 0, 0, 0.35);
-    z-index: 999;
   }
 }
 </style>

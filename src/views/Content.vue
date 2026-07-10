@@ -303,9 +303,20 @@ async function loadArticleContent() {
 
   try {
     const base = import.meta.env.BASE_URL || '/'
-    const response = await fetch(`${base}Content/${encodeURIComponent(post.file)}`)
+    const url = `${base}Content/${encodeURIComponent(post.file)}`
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 15000)
+    const response = await fetch(url, { signal: controller.signal })
+    clearTimeout(timer)
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     let content = await response.text()
+    if (
+      content.includes('id="loading-screen"')
+      && content.includes('id="app"')
+      && content.includes('/assets/index-')
+    ) {
+      throw new Error('HTTP 404')
+    }
     content = content.replace(/href="\.\.\//g, `href="${base}`)
     content = content.replace(/href="\.\//g, `href="${base}`)
     content = content.replace(/src="\.\.\//g, `src="${base}`)
@@ -327,7 +338,12 @@ async function loadArticleContent() {
   } catch (e) {
     console.error('加载文章失败:', e)
     loading.value = false
-    error.value = `加载失败：${e.message}`
+    const msg = String(e.message || '')
+    if (msg.includes('404') || msg.includes('abort')) {
+      error.value = '文章正文未找到：请重新上传 docs/Content/ 到 ECS 的 /var/www/cyinc/myweb/Content/'
+    } else {
+      error.value = `加载失败：${msg || '网络错误'}`
+    }
   }
 }
 

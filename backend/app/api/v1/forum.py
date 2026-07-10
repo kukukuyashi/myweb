@@ -93,7 +93,7 @@ def list_category_threads(
 @router.get("/threads/recent", summary="最新帖子")
 def recent_threads(
     db: Annotated[Session, Depends(get_db)],
-    limit: int = Query(5, ge=1, le=20),
+    limit: int = Query(5, ge=1, le=50),
 ):
     rows = (
         db.query(ForumThread)

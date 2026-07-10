@@ -1,32 +1,51 @@
 <template>
   <div class="sticker-wall">
     <div class="sticker-masonry">
-      <article
+      <component
+        :is="cardTag(item)"
         v-for="(item, index) in items"
-        :key="item.path"
+        :key="itemKey(item, index)"
+        :to="item.to || undefined"
         class="sticker-card"
-        :class="[`sticker-card--${sizeClass(index)}`, { active: activeIndex === index, 'sticker-card--tilt': canTilt }]"
+        :class="[
+          `sticker-card--${sizeClass(index)}`,
+          {
+            active: activeIndex === index,
+            'sticker-card--tilt': canTilt && !item.to,
+            'sticker-card--link': !!item.to,
+          },
+        ]"
         @mouseenter="activeIndex = index"
         @mouseleave="onCardLeave($event)"
         @mousemove="onCardMove"
-        @click="openLightbox(index)"
+        @click="onCardClick(item, index)"
       >
         <span class="sticker-badge">{{ item.label }}</span>
-        <div class="sticker-img">
+        <div v-if="item.path" class="sticker-img">
           <img
             :src="imgUrl(item.path)"
-            :alt="item.label"
+            :alt="item.title || item.label"
             loading="lazy"
             decoding="async"
           >
         </div>
-        <footer v-if="item.label" class="sticker-foot">
-          <div class="sticker-title">[ {{ item.label }} ]</div>
+        <div v-else class="sticker-img sticker-img--empty" aria-hidden="true" />
+        <footer class="sticker-foot">
+          <div
+            v-if="mode === 'gallery'"
+            class="sticker-title"
+          >
+            [ {{ item.label }} ]
+          </div>
+          <template v-else>
+            <div class="sticker-title sticker-title--forum">{{ item.title || item.label }}</div>
+            <p v-if="item.subtitle" class="sticker-sub">{{ item.subtitle }}</p>
+          </template>
         </footer>
-      </article>
+      </component>
     </div>
 
-    <Teleport to="body">
+    <Teleport v-if="mode === 'gallery'" to="body">
       <div v-if="lightboxIndex >= 0" class="sticker-lightbox" @click.self="closeLightbox">
         <button type="button" class="lb-close" aria-label="关闭" @click="closeLightbox">✕</button>
         <button type="button" class="lb-nav lb-prev" aria-label="上一张" @click.stop="shiftLightbox(-1)">‹</button>
@@ -42,10 +61,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { imgUrl } from '../data/profile'
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
+  /** gallery：关于页灯箱；forum：帖子链接 + 标题在底部 */
+  mode: { type: String, default: 'gallery' },
 })
 
 const activeIndex = ref(-1)
@@ -53,6 +75,15 @@ const lightboxIndex = ref(-1)
 const canTilt = ref(false)
 
 const TILT_MAX = 12
+
+function cardTag(item) {
+  if (item.to) return RouterLink
+  return 'article'
+}
+
+function itemKey(item, index) {
+  return item.to || item.path || item.label || index
+}
 
 function resetTilt(el) {
   if (!el) return
@@ -81,12 +112,16 @@ function onCardLeave(e) {
   resetTilt(e.currentTarget)
 }
 
-/** 错落高度：按序号轮换 tall / mid / short */
 function sizeClass(index) {
   const m = index % 5
   if (m === 0 || m === 3) return 'tall'
   if (m === 2) return 'short'
   return 'mid'
+}
+
+function onCardClick(item, index) {
+  if (item.to || props.mode !== 'gallery') return
+  openLightbox(index)
 }
 
 function openLightbox(i) {
@@ -125,6 +160,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+a.sticker-card {
+  text-decoration: none;
+  color: inherit;
+}
+
 .sticker-masonry {
   columns: 5 148px;
   column-gap: 12px;
@@ -157,6 +197,10 @@ onUnmounted(() => {
     border-color 0.2s,
     box-shadow 0.2s;
   will-change: transform;
+}
+
+.sticker-card--link {
+  cursor: pointer;
 }
 
 .sticker-card--tilt {
@@ -244,6 +288,11 @@ onUnmounted(() => {
   transform-style: preserve-3d;
 }
 
+.sticker-img--empty {
+  min-height: 88px;
+  background: color-mix(in srgb, var(--orange) 8%, var(--bg));
+}
+
 .sticker-card--tall .sticker-img { max-height: 280px; }
 .sticker-card--mid .sticker-img { max-height: 220px; }
 .sticker-card--short .sticker-img { max-height: 165px; }
@@ -266,7 +315,9 @@ onUnmounted(() => {
 }
 
 .sticker-foot {
-  padding: 0.4rem 0.5rem;
+  position: relative;
+  z-index: 4;
+  padding: 0.45rem 0.55rem 0.5rem;
   background: var(--bg-paper);
   border-top: 1px dashed var(--border);
   transform: translateZ(16px);
@@ -279,6 +330,32 @@ onUnmounted(() => {
   color: var(--text);
   letter-spacing: 0.04em;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sticker-title--forum {
+  white-space: normal;
+  text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sticker-card--link:hover .sticker-title--forum,
+.sticker-card--link.active .sticker-title--forum {
+  color: var(--orange);
+}
+
+.sticker-sub {
+  margin: 0.25rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--orange);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -87,17 +87,28 @@ function serveLocalMusic() {
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const musicCdn = (env.VITE_MUSIC_BASE_URL || '').trim()
+  const bundleMedia = env.VITE_BUNDLE_STATIC_MEDIA === '1'
   const staticTargets = [
     { src: 'Content', dest: '' },
-    { src: 'img', dest: '' },
   ]
   const musicDir = path.join(__dirname, 'Music')
-  if (!musicCdn && fs.existsSync(musicDir)) {
-    staticTargets.push({ src: 'Music', dest: '' })
-  } else if (!musicCdn) {
-    console.warn(
-      '[vite] Music/ 不存在且未设置 VITE_MUSIC_BASE_URL，构建产物不含音频（线上需配置 CDN）'
+  const imgDir = path.join(__dirname, 'img')
+
+  if (bundleMedia || command === 'serve') {
+    if (fs.existsSync(imgDir)) {
+      staticTargets.push({ src: 'img', dest: '' })
+    }
+    if (!musicCdn && fs.existsSync(musicDir)) {
+      staticTargets.push({ src: 'Music', dest: '' })
+    }
+  } else if (command === 'build') {
+    console.log(
+      '[vite] 生产构建不打包 img/Music（由 Nginx 同域提供）。GitHub Pages 请设 VITE_BUNDLE_STATIC_MEDIA=1'
     )
+  }
+
+  if (command === 'build' && !musicCdn && !bundleMedia && !fs.existsSync(musicDir)) {
+    console.warn('[vite] Music/ 不在构建包内；线上需在 ECS 配置 /myweb/Music/ → /var/www/cyinc/Music/')
   }
 
   const plugins = [vue(), serveLocalImg(), serveLocalMusic()]

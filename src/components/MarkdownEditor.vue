@@ -259,8 +259,9 @@ watch(
 
 <style scoped>
 .md-editor {
-  border: 1px solid var(--border, #ddd);
-  background: var(--bg, #fff);
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  color: var(--text);
 }
 
 .md-toolbar {
@@ -270,8 +271,8 @@ watch(
   align-items: center;
   justify-content: space-between;
   padding: 0.45rem 0.55rem;
-  border-bottom: 1px solid var(--border, #ddd);
-  background: var(--card-bg, #fafafa);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 72%, var(--bg-paper));
 }
 
 .mode-tabs {
@@ -281,18 +282,26 @@ watch(
 
 .mode-tabs button,
 .fmt-btns button {
-  font-family: var(--mono, monospace);
+  font-family: var(--mono);
   font-size: 0.72rem;
   padding: 0.3rem 0.55rem;
-  border: 1px solid var(--border, #ddd);
-  background: transparent;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-paper) 55%, var(--bg));
+  color: var(--text);
   cursor: pointer;
   line-height: 1.2;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.mode-tabs button:hover:not(.active),
+.fmt-btns button:hover {
+  border-color: color-mix(in srgb, var(--orange) 55%, var(--border));
+  color: var(--orange);
 }
 
 .mode-tabs button.active {
-  background: var(--orange, #e85d04);
-  border-color: var(--orange, #e85d04);
+  background: var(--orange);
+  border-color: var(--orange);
   color: #fff;
 }
 
@@ -306,7 +315,7 @@ watch(
 .fmt-btns .sep {
   width: 1px;
   height: 1rem;
-  background: var(--border, #ddd);
+  background: var(--border);
   margin: 0 0.15rem;
 }
 
@@ -328,6 +337,7 @@ watch(
 .pane {
   min-height: 280px;
   overflow: auto;
+  background: var(--bg-paper);
 }
 
 .md-pane textarea,
@@ -341,6 +351,8 @@ watch(
   line-height: 1.65;
   resize: vertical;
   background: transparent;
+  color: var(--text);
+  caret-color: var(--orange);
   box-sizing: border-box;
 }
 
@@ -348,18 +360,29 @@ watch(
   outline: none;
 }
 
-.rich-area :deep(h2) { font-size: 1.1rem; margin: 0.75em 0 0.35em; }
+.rich-area :deep(h2) {
+  font-size: 1.1rem;
+  margin: 0.75em 0 0.35em;
+  color: var(--text);
+}
+
+.rich-area :deep(p),
+.rich-area :deep(li) {
+  color: var(--text);
+}
+
 .rich-area :deep(blockquote) {
   margin: 0.5em 0;
   padding-left: 0.75em;
-  border-left: 3px solid var(--orange, #e85d04);
-  color: var(--text-muted, #666);
+  border-left: 3px solid var(--orange);
+  color: var(--text-muted);
 }
 
 .preview-pane {
   padding: 0.75rem 1rem;
-  border-left: 1px solid var(--border, #ddd);
-  background: var(--card-bg, #fff);
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
 }
 
 .mode-md .preview-pane,
@@ -369,7 +392,7 @@ watch(
 }
 
 .preview-empty {
-  color: var(--text-muted, #999);
+  color: var(--text-muted);
   font-size: 0.88rem;
 }
 
@@ -379,7 +402,7 @@ watch(
   }
   .preview-pane {
     border-left: none;
-    border-top: 1px solid var(--border, #ddd);
+    border-top: 1px solid var(--border);
   }
 }
 </style>

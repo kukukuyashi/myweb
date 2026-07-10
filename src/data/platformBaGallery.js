@@ -30,7 +30,7 @@ export const platformBaStrip = [
 export const platformSiteAttrs = [
   { key: '坐标', value: 'CYINC · /app' },
   { key: '栈', value: 'Vue 3 · FastAPI · MySQL' },
-  { key: 'AI', value: 'Dify · n8n Cloud' },
+  { key: '论坛', value: '板块 · 贴纸墙 · Markdown' },
   { key: 'ACG', value: '碧蓝档案 · 葬送のフリーレン' },
   { key: '主色', value: '#e85d04 工业橙' },
   { key: '字体', value: 'IBM Plex Mono' },
@@ -50,7 +50,6 @@ export const platformSectionNav = [
   { id: 'guestboard', label: '留言板' },
   { id: 'workbench', label: '工作台' },
   { id: 'posts', label: '博客' },
-  { id: 'friends', label: '友链' },
   { id: 'links', label: '链接' },
 ]
 
@@ -60,6 +59,7 @@ export const platformQuickEntries = [
     tag: 'ME',
     title: '个人中心',
     desc: '资料、文章与专注时间线。',
+    thumb: 'img/BA/X/星野/d6db50f9097db958e26f0fc42c67eb16.jpeg',
     accent: true,
   },
   {
@@ -67,18 +67,21 @@ export const platformQuickEntries = [
     tag: 'POMO',
     title: '番茄钟',
     desc: '圆环计时、反思总结与本周统计。',
+    thumb: 'img/BA/R/日奈/5d0a8942b8224ab477751bdcffa8abc3.jpeg',
   },
   {
-    to: '/ai',
-    tag: 'AI · DIFY',
-    title: 'AI 助手',
-    desc: '基于 Dify Chatflow，可问博客与技术栈。',
+    to: '/app/forum',
+    tag: 'FORUM',
+    title: 'ACG 社区',
+    desc: '论坛讨论、贴纸墙精选与板块。',
+    thumb: 'img/BA/mika/acdcfb54cb622b0e8bdf29af195398f6_720.jpg',
   },
   {
-    to: '/',
-    tag: 'BLOG',
-    title: '技术博客',
-    desc: '文章、归档与音乐室。',
+    to: '/app/music',
+    tag: 'MUSIC',
+    title: '音乐室',
+    desc: 'FLAC 歌单、专辑列表与换页续播。',
+    thumb: 'img/BA/魔法伊蕾娜/c9d5e22d00c44a9139f12f3139620173_720.jpg',
   },
 ]
 

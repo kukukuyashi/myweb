@@ -1,5 +1,13 @@
 from sqladmin import ModelView
 
+from app.admin.labels import (
+    FORUM_CATEGORY_LABELS,
+    FORUM_REPLY_LABELS,
+    FORUM_THREAD_LABELS,
+    POST_LABELS,
+    QA_LABELS,
+    USER_LABELS,
+)
 from app.models.forum import ForumCategory, ForumReply, ForumThread
 from app.models.post import Post
 from app.models.qa import QaMessage
@@ -10,6 +18,7 @@ class UserAdmin(ModelView, model=User):
     name = "用户"
     name_plural = "用户"
     icon = "fa-solid fa-user"
+    column_labels = USER_LABELS
 
     column_list = [User.id, User.username, User.email, User.nickname, User.created_at]
     column_searchable_list = [User.username, User.email, User.nickname]
@@ -28,6 +37,7 @@ class PostAdmin(ModelView, model=Post):
     name = "文章"
     name_plural = "文章"
     icon = "fa-solid fa-file-lines"
+    column_labels = POST_LABELS
 
     column_list = [
         Post.id,
@@ -62,6 +72,7 @@ class ForumCategoryAdmin(ModelView, model=ForumCategory):
     name = "论坛板块"
     name_plural = "论坛板块"
     icon = "fa-solid fa-folder"
+    column_labels = FORUM_CATEGORY_LABELS
 
     column_list = [ForumCategory.id, ForumCategory.name, ForumCategory.slug, ForumCategory.sort_order]
     column_searchable_list = [ForumCategory.name, ForumCategory.slug]
@@ -78,6 +89,7 @@ class ForumThreadAdmin(ModelView, model=ForumThread):
     name = "论坛帖子"
     name_plural = "论坛帖子"
     icon = "fa-solid fa-comments"
+    column_labels = FORUM_THREAD_LABELS
 
     column_list = [
         ForumThread.id,
@@ -114,6 +126,7 @@ class ForumReplyAdmin(ModelView, model=ForumReply):
     name = "论坛回复"
     name_plural = "论坛回复"
     icon = "fa-solid fa-reply"
+    column_labels = FORUM_REPLY_LABELS
 
     column_list = [
         ForumReply.id,
@@ -137,6 +150,7 @@ class QaMessageAdmin(ModelView, model=QaMessage):
     name = "留言板"
     name_plural = "留言板"
     icon = "fa-solid fa-message"
+    column_labels = QA_LABELS
 
     column_list = [QaMessage.id, QaMessage.name, QaMessage.content, QaMessage.created_at]
     column_searchable_list = [QaMessage.name, QaMessage.content]

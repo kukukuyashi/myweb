@@ -27,29 +27,6 @@ const heights = ref(Array.from({ length: barCount }, () => 0.12))
 let raf = 0
 let phase = 0
 
-function ensureAnalyser() {
-  if (window.__musicSpectrum) return window.__musicSpectrum
-  const audio = window.globalAudio
-  if (!audio) return null
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
-    const analyser = ctx.createAnalyser()
-    analyser.fftSize = 64
-    analyser.smoothingTimeConstant = 0.72
-    const source = ctx.createMediaElementSource(audio)
-    source.connect(analyser)
-    analyser.connect(ctx.destination)
-    window.__musicSpectrum = {
-      ctx,
-      analyser,
-      data: new Uint8Array(analyser.frequencyBinCount),
-    }
-    return window.__musicSpectrum
-  } catch {
-    return null
-  }
-}
-
 function fakeBars() {
   phase += 0.14
   heights.value = heights.value.map((_, i) => {
@@ -62,7 +39,7 @@ function fakeBars() {
 function tick() {
   if (!props.playing) return
 
-  const spec = ensureAnalyser()
+  const spec = window.__musicSpectrum
   if (spec) {
     if (spec.ctx.state === 'suspended') spec.ctx.resume()
     spec.analyser.getByteFrequencyData(spec.data)

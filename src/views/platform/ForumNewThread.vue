@@ -1,15 +1,15 @@
 <template>
   <div class="container layout-single">
-    <header class="page-header">
+    <PlatformSubPageHeader coord="FORUM · NEW">
       <router-link to="/app/forum" class="back">← 论坛</router-link>
       <h1 class="page-title">发帖</h1>
-    </header>
+    </PlatformSubPageHeader>
 
-    <section v-if="!token" class="card">
-      <p>请先 <router-link to="/app/me">登录</router-link> 后再发帖。</p>
+    <section v-if="!token" class="platform-panel ink-panel">
+      <p>请先 <router-link to="/app/login?redirect=/app/forum/new">登录</router-link> 后再发帖。</p>
     </section>
 
-    <form v-else class="card" @submit.prevent="submit">
+    <form v-else class="platform-panel ink-panel" @submit.prevent="submit">
       <label>
         板块
         <select v-model="form.category_id" required>
@@ -34,6 +34,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
 import { createForumThread, fetchForumCategories, getPlatformToken } from '../../api/platform.js'
@@ -96,7 +97,7 @@ async function submit() {
 .card {
   margin-top: 1rem;
   border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
+  background: var(--bg-paper);
   padding: 1.25rem;
 }
 

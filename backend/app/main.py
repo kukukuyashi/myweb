@@ -2,17 +2,20 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect, text
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.responses import RedirectResponse
+from starlette.requests import Request
+from starlette.responses import JSONResponse, RedirectResponse
 
 from app.admin import setup_admin
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.db import Base, engine
 from app.core.response import ok
+from app.core.validation_zh import format_validation_errors
 from app.models import ForumCategory, ForumReply, ForumThread, PomodoroSession, Post, QaMessage, User  # noqa: F401
 from app.services.forum_seed import seed_forum_categories
 
@@ -60,6 +63,13 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix=settings.api_prefix)
     setup_admin(app)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(_request: Request, exc: RequestValidationError) -> JSONResponse:
+        return JSONResponse(
+            status_code=422,
+            content={"detail": format_validation_errors(exc)},
+        )
 
     upload_root = Path(settings.upload_dir).resolve()
     upload_root.mkdir(parents=True, exist_ok=True)

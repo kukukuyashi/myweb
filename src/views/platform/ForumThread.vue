@@ -3,7 +3,7 @@
     <p v-if="loading" class="muted">加载中…</p>
     <p v-else-if="error" class="error">{{ error }}</p>
     <template v-else-if="thread">
-      <header class="thread-header">
+      <PlatformSubPageHeader coord="FORUM · THREAD">
         <router-link :to="`/app/forum/c/${thread.category_slug}`" class="back">
           ← {{ thread.category_name }}
         </router-link>
@@ -19,15 +19,15 @@
         >
           编辑帖子
         </router-link>
-      </header>
+      </PlatformSubPageHeader>
 
-      <article class="card post-body">
+      <article class="platform-panel ink-panel post-body">
         <MarkdownBody :content="thread.content" />
       </article>
 
       <section class="replies">
         <h2>{{ thread.replies.length }} 条回复</h2>
-        <div v-for="r in thread.replies" :key="r.id" class="card reply">
+        <div v-for="r in thread.replies" :key="r.id" class="platform-panel ink-panel reply">
           <p class="reply-meta">
             {{ r.author?.nickname || r.author?.username }} · {{ formatDate(r.created_at) }}
           </p>
@@ -37,7 +37,7 @@
         </div>
       </section>
 
-      <section v-if="!thread.is_locked" class="card reply-form">
+      <section v-if="!thread.is_locked" class="platform-panel ink-panel reply-form">
         <h2>回复</h2>
         <p v-if="!token" class="warn">
           请先 <router-link to="/app/me">登录</router-link> 后回复。
@@ -55,6 +55,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownBody from '../../components/MarkdownBody.vue'
 import {
@@ -155,7 +156,7 @@ onMounted(load)
 
 .card {
   border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
+  background: var(--bg-paper);
   padding: 1rem 1.25rem;
   margin-top: 1rem;
 }

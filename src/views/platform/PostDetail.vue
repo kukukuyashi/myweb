@@ -3,7 +3,11 @@
     <p v-if="loading" class="muted">加载中…</p>
     <p v-else-if="error" class="error">{{ error }}</p>
     <template v-else-if="post">
-      <header class="post-header">
+      <PlatformSubPageHeader
+        coord="POST · READ"
+        :image="PLATFORM_POST_INK_IMAGE"
+        :position="PLATFORM_POST_INK_POSITION"
+      >
         <router-link to="/app/me" class="back">← 个人中心</router-link>
         <h1 class="page-title">{{ post.title }}</h1>
         <p class="meta">
@@ -13,11 +17,11 @@
         <div v-if="canEdit" class="toolbar">
           <router-link :to="`/app/posts/${post.id}/edit`" class="btn-ghost">编辑</router-link>
         </div>
-      </header>
-      <article class="card body">
+      </PlatformSubPageHeader>
+      <article class="platform-panel ink-panel body">
         <MarkdownBody :content="post.content" />
       </article>
-      <p v-if="post.ai_summary" class="card summary">
+      <p v-if="post.ai_summary" class="platform-panel ink-panel summary">
         <strong>AI 摘要</strong> · {{ post.ai_summary }}
       </p>
     </template>
@@ -26,6 +30,8 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
+import { PLATFORM_POST_INK_IMAGE, PLATFORM_POST_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownBody from '../../components/MarkdownBody.vue'
 import { fetchPost, fetchProfile, getPlatformToken } from '../../api/platform.js'
@@ -80,10 +86,17 @@ onMounted(load)
 
 <style scoped>
 .back {
+  display: inline-block;
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--orange);
   text-decoration: none;
+  margin-bottom: 0.35rem;
+}
+
+.page-title {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 .meta {
@@ -104,20 +117,15 @@ onMounted(load)
   color: inherit;
 }
 
-.card {
-  border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
-  padding: 1.25rem;
-  margin-top: 1rem;
-}
-
 .body {
   font-size: 0.95rem;
+  margin-top: 1rem;
 }
 
 .summary {
   font-size: 0.88rem;
   color: var(--text-muted);
+  margin-top: 1rem;
 }
 
 .muted { color: var(--text-muted); }

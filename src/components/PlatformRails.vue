@@ -13,6 +13,13 @@
         <span class="rail-label">UP</span>
         <span class="rail-value rail-num">{{ siteDays }}D</span>
       </div>
+      <div class="rail-block rail-block--interactive">
+        <SidebarMusicPanel
+          variant="rail"
+          :show-progress="false"
+          :show-volume="false"
+        />
+      </div>
       <div class="rail-ticks" />
       <p class="rail-vertical">FORUM · POMO · GUEST</p>
     </aside>
@@ -46,6 +53,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { profile } from '../data/profile'
 import { platformLaunchDate } from '../data/platformBaGallery.js'
+import SidebarMusicPanel from './SidebarMusicPanel.vue'
 
 const clockText = ref('')
 const visitorToday = ref(0)
@@ -58,6 +66,7 @@ const acgTags = profile.acgTags.slice(0, 4)
 const quickLinks = [
   { to: '/app', label: 'HOME' },
   { to: '/app/pomo', label: 'POMO' },
+  { to: '/app/music', label: 'MUSIC' },
   { to: '/app/forum', label: 'FORUM' },
   { to: '/app/me', label: 'ME' },
   { to: '/', label: 'BLOG' },
@@ -138,6 +147,10 @@ onUnmounted(() => {
 
 .rail-block--right {
   align-items: flex-end;
+}
+
+.rail-block--interactive {
+  pointer-events: auto;
 }
 
 .rail-label {

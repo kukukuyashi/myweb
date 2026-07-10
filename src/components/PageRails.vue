@@ -5,14 +5,12 @@
         <span class="rail-label">DOC</span>
         <span class="rail-value">CYINC.LOG</span>
       </div>
-      <div class="rail-block">
-        <span class="rail-label">NOW</span>
-        <div
-          class="rail-now-wrap"
-          :class="{ 'rail-now-wrap--scroll': scrollNowPlaying }"
-        >
-          <span class="rail-now-track">{{ nowPlayingFull }}</span>
-        </div>
+      <div class="rail-block rail-block--interactive">
+        <SidebarMusicPanel
+          variant="rail"
+          :show-progress="false"
+          :show-volume="false"
+        />
       </div>
       <div class="rail-block">
         <span class="rail-label">REV</span>
@@ -59,13 +57,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { posts, getRecentPosts, tagUrl } from '../data/posts'
-import { useMusicStore } from '../store'
+import SidebarMusicPanel from './SidebarMusicPanel.vue'
 import { getSeasonConfig } from '../data/seasonTheme'
 import { getLatestChangelogEntry } from '../data/changelog'
 
-const musicStore = useMusicStore()
 const totalPosts = posts.length
 const buildRev = getLatestChangelogEntry()?.version ?? '2026.06'
 const recentPosts = getRecentPosts(3)
@@ -73,17 +70,6 @@ const railTagline = getSeasonConfig().railTagline
 
 const visitorToday = ref(0)
 const visitorTotal = ref(0)
-
-const nowPlayingFull = computed(() => {
-  if (!musicStore.currentSong) return '— idle —'
-  return musicStore.isPlaying
-    ? `▶ ${musicStore.currentSong.title}`
-    : `❚❚ ${musicStore.currentSong.title}`
-})
-
-const scrollNowPlaying = computed(() =>
-  musicStore.currentSong && nowPlayingFull.value.length > 16
-)
 
 const quickLinks = [
   { to: '/projects', label: 'PROJ' },
@@ -163,6 +149,10 @@ onMounted(loadVisitorStats)
   align-items: flex-end;
 }
 
+.rail-block--interactive {
+  pointer-events: auto;
+}
+
 .rail-label {
   letter-spacing: 0.14em;
   color: var(--orange);
@@ -172,29 +162,6 @@ onMounted(loadVisitorStats)
 .rail-value {
   letter-spacing: 0.06em;
   line-height: 1.3;
-}
-
-.rail-now-wrap {
-  overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-}
-
-.rail-now-track {
-  display: inline-block;
-  font-size: 0.55rem;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-
-.rail-now-wrap--scroll .rail-now-track {
-  padding-left: 100%;
-  animation: rail-now-scroll 12s linear infinite;
-}
-
-@keyframes rail-now-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
 }
 
 .rail-visit {
@@ -328,15 +295,6 @@ onMounted(loadVisitorStats)
 @media (max-width: 1440px) {
   .page-rails {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rail-now-wrap--scroll .rail-now-track {
-    animation: none;
-    padding-left: 0;
-    white-space: normal;
-    word-break: break-word;
   }
 }
 </style>

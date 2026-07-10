@@ -9,8 +9,9 @@ from app.api.deps import get_current_user
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.response import ok
+from app.core.security import get_password_hash, verify_password
 from app.models.user import User
-from app.schemas.user import UserPublic, UserUpdate
+from app.schemas.user import PasswordChange, UserPublic, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -75,6 +76,22 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
     return ok(UserPublic.model_validate(current_user).model_dump(), message="更新成功")
+
+
+@router.post("/me/password", summary="修改密码")
+def change_password(
+    payload: PasswordChange,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="当前密码不正确")
+    if verify_password(payload.new_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="新密码不能与当前密码相同")
+    current_user.password_hash = get_password_hash(payload.new_password)
+    db.add(current_user)
+    db.commit()
+    return ok(message="密码已更新，请使用新密码登录")
 
 
 @router.post("/me/avatar", summary="上传头像")

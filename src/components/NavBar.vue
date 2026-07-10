@@ -18,8 +18,6 @@
       <router-link to="/projects" @mouseenter="onNavHover('Projects')" @click="menuOpen = false">项目</router-link>
       <router-link to="/music" @mouseenter="onNavHover('Music')" @click="menuOpen = false">音乐室</router-link>
       <router-link to="/app" @mouseenter="onNavHover('PlatformHome')" @click="menuOpen = false">主站</router-link>
-      <router-link to="/ai" @mouseenter="onNavHover('AiChat')" @click="menuOpen = false">AI助手</router-link>
-      <router-link v-if="hasToken" to="/app/me" @click="menuOpen = false">我的</router-link>
       <router-link to="/guestbook" @mouseenter="onNavHover('Guestbook')" @click="menuOpen = false">留言板</router-link>
     </nav>
 
@@ -45,13 +43,12 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { onNavHover } from '../composables/useLinkPrefetch'
-import { getPlatformToken } from '../api/platform.js'
+import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 
 const route = useRoute()
-const isDarkMode = ref(false)
+const isDarkMode = ref(getInitialDarkState())
 const menuOpen = ref(false)
 const clockText = ref('')
-const hasToken = ref(!!getPlatformToken())
 let clockTimer = null
 
 function updateClock() {
@@ -61,7 +58,6 @@ function updateClock() {
 
 watch(() => route.path, () => {
   menuOpen.value = false
-  hasToken.value = !!getPlatformToken()
 })
 
 watch(menuOpen, (open) => {
@@ -69,24 +65,14 @@ watch(menuOpen, (open) => {
 })
 
 const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  if (isDarkMode.value) {
-    document.documentElement.setAttribute('data-theme', 'dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.removeAttribute('data-theme')
-    localStorage.setItem('theme', 'light')
-  }
+  isDarkMode.value = toggleTheme()
 }
 
 onMounted(() => {
   updateClock()
   clockTimer = setInterval(updateClock, 1000)
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDarkMode.value = true
-    document.documentElement.setAttribute('data-theme', 'dark')
-  }
+  isDarkMode.value = getInitialDarkState()
+  applyTheme(isDarkMode.value)
 })
 
 onUnmounted(() => {
