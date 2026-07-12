@@ -1,0 +1,350 @@
+{
+  "season_code": "202607",
+  "season_label": "2026年7月新番",
+  "items": [
+    {
+      "id": 920101,
+      "name": "アズールレーン びそくぜんしんっ！にっ！！",
+      "name_cn": "碧蓝航线 微速前行 第二季",
+      "air_weekday": 1,
+      "air_date": "2026-07-06"
+    },
+    {
+      "id": 920102,
+      "name": "骸骨騎士大人異世界冒険中II",
+      "name_cn": "骸骨骑士大人异世界冒险中 第二季",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "mgnacg_vod_id": 212
+    },
+    {
+      "id": 920103,
+      "name": "お前はまだグンマを弾いていない",
+      "name_cn": "斗球儿弹子",
+      "air_weekday": 1,
+      "air_date": "2026-07-06"
+    },
+    {
+      "id": 920104,
+      "name": "捨てられ聖女の異世界ごはん旅",
+      "name_cn": "被遗弃的圣女的异世界饭旅",
+      "air_weekday": 1,
+      "air_date": "2026-07-06"
+    },
+    {
+      "id": 920105,
+      "name": "転校先の清楚可憐な美少女は、昔男子と思って一緒に遊んだ幼馴染だった",
+      "name_cn": "转学后班上的清纯可爱美少女，竟是小时候玩在一起的哥们儿",
+      "air_weekday": 1,
+      "air_date": "2026-07-06"
+    },
+    {
+      "id": 920201,
+      "name": "攻殻機動隊 THE GHOST IN THE SHELL",
+      "name_cn": "攻壳机动队 THE GHOST IN THE SHELL",
+      "air_weekday": 2,
+      "air_date": "2026-07-07"
+    },
+    {
+      "id": 920202,
+      "name": "鎧真伝サムライトルーパー",
+      "name_cn": "铠真传 武士军团 第二季",
+      "air_weekday": 2,
+      "air_date": "2026-07-07"
+    },
+    {
+      "id": 920203,
+      "name": "対ありでした。",
+      "name_cn": "感谢对战。～大小姐才不玩格斗游戏～",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "mgnacg_vod_id": 1622
+    },
+    {
+      "id": 920204,
+      "name": "天は赤い河のほとり",
+      "name_cn": "天是红河岸",
+      "air_weekday": 2,
+      "air_date": "2026-07-07"
+    },
+    {
+      "id": 920205,
+      "name": "無自覚聖女は今日も無意識に力を垂れ流す",
+      "name_cn": "无自觉圣女今天也无意识地释放力量",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "mgnacg_vod_id": 1591
+    },
+    {
+      "id": 920206,
+      "name": "身代わり令嬢を救ったのは冷酷無慈悲な氷の王子の愛でした",
+      "name_cn": "拯救替身千金的是冷酷无情冰之王子的爱",
+      "air_weekday": 2,
+      "air_date": "2026-07-07"
+    },
+    {
+      "id": 920207,
+      "name": "手札が多めのビクトリア",
+      "name_cn": "奇招百出的维多利亚",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "mgnacg_vod_id": 1624
+    },
+    {
+      "id": 920208,
+      "name": "きみが死ぬまで恋をしたい",
+      "name_cn": "与你相恋到生命尽头",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "mgnacg_vod_id": 1623
+    },
+    {
+      "id": 920301,
+      "name": "Re:ゼロから始める異世界生活 4th season",
+      "name_cn": "Re：从零开始的异世界生活 第四季",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "mgnacg_vod_id": 1572
+    },
+    {
+      "id": 920302,
+      "name": "片田舎のおっさん、剣聖になる",
+      "name_cn": "乡下大叔成为剑圣 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-08"
+    },
+    {
+      "id": 920303,
+      "name": "幼女戦記 II",
+      "name_cn": "幼女战记 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "mgnacg_vod_id": 730
+    },
+    {
+      "id": 920304,
+      "name": "クレバテス II",
+      "name_cn": "克雷瓦提斯 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "mgnacg_vod_id": 1449
+    },
+    {
+      "id": 920305,
+      "name": "LV999の村人",
+      "name_cn": "LV999的村民",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "mgnacg_vod_id": 1590
+    },
+    {
+      "id": 920306,
+      "name": "メイドインアビス 烈日の黄金郷",
+      "name_cn": "来自深渊 烈日的黄金乡",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "mgnacg_vod_id": 1482
+    },
+    {
+      "id": 920401,
+      "name": "BanG Dream! YUME∞MITA",
+      "name_cn": "BanG Dream! YUME∞MITA",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "mgnacg_vod_id": 1595
+    },
+    {
+      "id": 920402,
+      "name": "花ざかりの君たちへ",
+      "name_cn": "花样少年少女 第二季",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "mgnacg_vod_id": 1520
+    },
+    {
+      "id": 920403,
+      "name": "文豪ストレイドッグス わん！",
+      "name_cn": "文豪野犬 汪！第二季",
+      "air_weekday": 4,
+      "air_date": "2026-07-09"
+    },
+    {
+      "id": 920404,
+      "name": "ニコニコニチアニメ",
+      "name_cn": "尼古喵喵",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "mgnacg_vod_id": 1628
+    },
+    {
+      "id": 920405,
+      "name": "世界は踊る",
+      "name_cn": "世界在起舞",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "mgnacg_vod_id": 1596
+    },
+    {
+      "id": 920406,
+      "name": "スーパーの裏でヤニ吸うふたり",
+      "name_cn": "躲在超市后门抽烟的两人",
+      "air_weekday": 4,
+      "air_date": "2026-07-09"
+    },
+    {
+      "id": 920407,
+      "name": "落第賢者の学院無双",
+      "name_cn": "落第贤者的学院无双",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "mgnacg_vod_id": 1594
+    },
+    {
+      "id": 920501,
+      "name": "逃げ上手の若君",
+      "name_cn": "擅长逃跑的殿下 第二季",
+      "air_weekday": 5,
+      "air_date": "2026-07-10"
+    },
+    {
+      "id": 920502,
+      "name": "命短し恋せよ乙女",
+      "name_cn": "描绘直至生命尽头",
+      "air_weekday": 5,
+      "air_date": "2026-07-10",
+      "mgnacg_vod_id": 1601
+    },
+    {
+      "id": 920503,
+      "name": "鉄鍋のジャン！",
+      "name_cn": "铁锅的ジャン！",
+      "air_weekday": 5,
+      "air_date": "2026-07-10"
+    },
+    {
+      "id": 920504,
+      "name": "正反対な君と僕",
+      "name_cn": "相反的你和我 第二季",
+      "air_weekday": 5,
+      "air_date": "2026-07-10",
+      "mgnacg_vod_id": 1538
+    },
+    {
+      "id": 920601,
+      "name": "無職転生 ～異世界行ったら本気だす～ 第3期",
+      "name_cn": "无职转生 第三季",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "mgnacg_vod_id": 1604
+    },
+    {
+      "id": 920602,
+      "name": "BLEACH 千年血戦篇-禍進譚-",
+      "name_cn": "死神 千年血战篇-祸进谭-",
+      "air_weekday": 6,
+      "air_date": "2026-07-11"
+    },
+    {
+      "id": 920603,
+      "name": "猫と竜",
+      "name_cn": "猫与龙",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "mgnacg_vod_id": 1589
+    },
+    {
+      "id": 920604,
+      "name": "BLACK TORCH",
+      "name_cn": "BLACK TORCH 暗黑灯火",
+      "air_weekday": 6,
+      "air_date": "2026-07-11"
+    },
+    {
+      "id": 920605,
+      "name": "魔法少女リリカルなのは EXCEEDS",
+      "name_cn": "魔法少女奈叶 EXCEEDS",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "mgnacg_vod_id": 1610
+    },
+    {
+      "id": 920606,
+      "name": "岩元先輩ノ推薦",
+      "name_cn": "岩元前辈的推荐",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "mgnacg_vod_id": 1607
+    },
+    {
+      "id": 920607,
+      "name": "天幕のジャードゥーガル",
+      "name_cn": "穹庐下的魔女",
+      "air_weekday": 6,
+      "air_date": "2026-07-11"
+    },
+    {
+      "id": 920608,
+      "name": "株式会社マジルミエ",
+      "name_cn": "魔法光源股份有限公司 第二季",
+      "air_weekday": 6,
+      "air_date": "2026-07-11"
+    },
+    {
+      "id": 920609,
+      "name": "ふつつかな悪女ではございますが",
+      "name_cn": "我是不才恶女",
+      "air_weekday": 6,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920701,
+      "name": "ONE PIECE HEROINES",
+      "name_cn": "航海王 女英雄们的故事",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920702,
+      "name": "刃牙道",
+      "name_cn": "刃牙道",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920703,
+      "name": "君のことが大大大大大好きな100人の彼女",
+      "name_cn": "超超超超超喜欢你的100个女朋友 第三季",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920704,
+      "name": "二十世紀電氣目録",
+      "name_cn": "二十世纪电气目录",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920705,
+      "name": "さよならララ",
+      "name_cn": "再见菈菈",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    },
+    {
+      "id": 920706,
+      "name": "GRAND BLUE 第3期",
+      "name_cn": "碧蓝之海 第三季",
+      "air_weekday": 7,
+      "air_date": "2026-07-12",
+      "mgnacg_vod_id": 301
+    },
+    {
+      "id": 920707,
+      "name": "女性向けゲーム世界は市民にとって厳しい世界です",
+      "name_cn": "女性向游戏世界对路人角色很不友好 第二季",
+      "air_weekday": 7,
+      "air_date": "2026-07-12"
+    }
+  ]
+}

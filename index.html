@@ -116,6 +116,14 @@
     <script type="module" src="/src/main.js"></script>
     
     <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      })();
       // Vue 挂载后隐藏加载屏幕
       function hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');

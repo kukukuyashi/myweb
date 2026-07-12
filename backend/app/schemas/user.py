@@ -75,4 +75,7 @@ class UserPublic(BaseModel):
     email: str
     nickname: str
     avatar: str | None
+    xp: int = 0
+    level: int = 1
+    checkin_streak: int = 0
     created_at: datetime

@@ -30,6 +30,9 @@
         <router-link to="/app/forum" @click="menuOpen = false">
           <span class="nav-icon">☷</span> 论坛
         </router-link>
+        <router-link to="/app/anime" @click="menuOpen = false">
+          <span class="nav-icon">▣</span> 追番表
+        </router-link>
         <router-link to="/app/music" @click="menuOpen = false">
           <span class="nav-icon">♫</span> 音乐室
         </router-link>

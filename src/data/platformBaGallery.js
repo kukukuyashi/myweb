@@ -77,6 +77,13 @@ export const platformQuickEntries = [
     thumb: 'img/BA/mika/acdcfb54cb622b0e8bdf29af195398f6_720.jpg',
   },
   {
+    to: '/app/anime',
+    tag: 'ANIME',
+    title: '追番表',
+    desc: '本季番剧、今日更新与周放送表。',
+    thumb: 'img/BA/A/爱莉/2fd0a12728327701054df80f0686eb0f.jpeg',
+  },
+  {
     to: '/app/music',
     tag: 'MUSIC',
     title: '音乐室',

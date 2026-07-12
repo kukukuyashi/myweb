@@ -23,9 +23,15 @@
         标题
         <input v-model="form.title" required maxlength="200" />
       </label>
+      <CoverImageField v-model="form.cover_url" scope="forum" />
       <label>
         内容
-        <MarkdownEditor v-model="form.content" :rows="12" />
+        <MarkdownEditor
+          v-model="form.content"
+          :rows="12"
+          placeholder="正文内容 · 可点击「上传图片」，或直接拖拽 / 粘贴图片"
+          enable-image-upload
+        />
       </label>
       <div class="actions">
         <button type="submit" class="btn-primary" :disabled="saving">保存</button>
@@ -43,6 +49,7 @@ import { useRouter } from 'vue-router'
 import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
+import CoverImageField from '../../components/CoverImageField.vue'
 import {
   deleteForumThread,
   fetchForumCategories,
@@ -61,7 +68,7 @@ const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 const msg = ref('')
-const form = ref({ category_id: '', title: '', content: '' })
+const form = ref({ category_id: '', title: '', content: '', cover_url: '' })
 
 usePageMeta({ title: '编辑帖子', description: '编辑论坛帖子。' })
 
@@ -86,6 +93,7 @@ onMounted(async () => {
       category_id: t.category_id,
       title: t.title,
       content: t.content,
+      cover_url: t.cover_url || '',
     }
   } catch (e) {
     error.value = e.message
@@ -107,6 +115,7 @@ async function submit() {
       category_id: Number(form.value.category_id),
       title: form.value.title.trim(),
       content: form.value.content.trim(),
+      cover_url: form.value.cover_url?.trim() || null,
     })
     msg.value = '帖子已更新'
     setTimeout(() => router.push(`/app/forum/t/${props.id}`), 400)

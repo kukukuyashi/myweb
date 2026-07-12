@@ -20,6 +20,7 @@ class Post(Base):
     status: Mapped[str] = mapped_column(String(20), default="draft", index=True)
     ai_summary: Mapped[str | None] = mapped_column(String(500), nullable=True)
     ai_summary_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cover_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

@@ -23,11 +23,39 @@
         <button type="button" title="有序列表" @click="applyFormat('ol')">1.</button>
         <button type="button" title="代码" @click="applyFormat('code')">&lt;/&gt;</button>
         <button type="button" title="链接" @click="applyFormat('link')">🔗</button>
-        <button type="button" title="图片" @click="applyFormat('image')">🖼</button>
+        <button
+          type="button"
+          :title="enableImageUpload ? '上传图片' : '图片'"
+          :disabled="imageUploading"
+          @click="onImageClick"
+        >
+          {{ imageUploading ? '上传中…' : (enableImageUpload ? '上传图片' : '🖼') }}
+        </button>
       </div>
     </div>
+    <input
+      ref="imageInputRef"
+      type="file"
+      accept="image/jpeg,image/png,image/webp,image/gif"
+      class="hidden-file"
+      multiple
+      @change="onImagePick"
+    />
 
-    <div class="md-panes" :class="`mode-${viewMode}`">
+    <div
+      class="md-panes"
+      :class="[
+        `mode-${viewMode}`,
+        {
+          'is-uploading': imageUploading,
+          'can-upload': enableImageUpload,
+          'drag-over': dragOver,
+        },
+      ]"
+      @dragover.prevent="onDragOver"
+      @dragleave="onDragLeave"
+      @drop.prevent="onDrop"
+    >
       <div v-show="viewMode === 'rich'" class="pane rich-pane">
         <div
           ref="richRef"
@@ -36,6 +64,7 @@
           spellcheck="false"
           @input="onRichInput"
           @blur="syncRichToModel"
+          @paste="onPaste"
         />
       </div>
 
@@ -46,6 +75,7 @@
           :rows="rows"
           :placeholder="placeholder"
           @input="onTextareaInput"
+          @paste="onPaste"
         />
       </div>
 
@@ -61,11 +91,15 @@
 import { nextTick, ref, watch } from 'vue'
 import MarkdownBody from './MarkdownBody.vue'
 import { htmlToMarkdown, markdownToHtml } from '../utils/markdown.js'
+import { resolveMediaUrl, uploadForumImage, uploadPostImage } from '../api/platform.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
   rows: { type: Number, default: 16 },
   placeholder: { type: String, default: '支持 Markdown · 可切换富文本模式' },
+  enableImageUpload: { type: Boolean, default: false },
+  /** forum | post — 决定图片上传到哪个目录 */
+  imageUploadScope: { type: String, default: 'forum' },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -81,6 +115,107 @@ const viewMode = ref('split')
 const textareaRef = ref(null)
 const richRef = ref(null)
 const richDirty = ref(false)
+const imageInputRef = ref(null)
+const imageUploading = ref(false)
+const dragOver = ref(false)
+
+function triggerImageUpload() {
+  imageInputRef.value?.click()
+}
+
+function insertMarkdownImage(url, alt = 'image') {
+  const insert = `![${alt}](${url})`
+  const richActive = viewMode.value === 'rich'
+    || (viewMode.value === 'split' && document.activeElement === richRef.value)
+
+  if (richActive && richRef.value) {
+    richRef.value.focus()
+    document.execCommand('insertImage', false, resolveMediaUrl(url))
+    richDirty.value = true
+    syncRichToModel()
+    return
+  }
+
+  if (viewMode.value === 'preview') {
+    viewMode.value = 'md'
+  }
+  const ta = textareaRef.value
+  const start = ta?.selectionStart ?? props.modelValue.length
+  const text = props.modelValue
+  emitValue(text.slice(0, start) + insert + text.slice(start))
+  nextTick(() => {
+    ta?.focus()
+    if (viewMode.value === 'rich' || viewMode.value === 'split') {
+      fillRichFromModel()
+    }
+  })
+}
+
+function onImageClick() {
+  if (props.enableImageUpload) {
+    triggerImageUpload()
+    return
+  }
+  applyFormat('image')
+}
+
+async function uploadImageFile(file) {
+  if (!file || !file.type?.startsWith('image/')) return
+  if (file.size > 5 * 1024 * 1024) {
+    window.alert('图片不能超过 5MB')
+    return
+  }
+  imageUploading.value = true
+  try {
+    const uploader = props.imageUploadScope === 'post' ? uploadPostImage : uploadForumImage
+    const json = await uploader(file)
+    const url = json.data?.url
+    if (!url) throw new Error('上传失败')
+    const alt = file.name.replace(/\.[^.]+$/, '') || 'image'
+    insertMarkdownImage(url, alt)
+  } catch (err) {
+    window.alert(err.message || '图片上传失败')
+  } finally {
+    imageUploading.value = false
+  }
+}
+
+async function onImagePick(e) {
+  const files = Array.from(e.target.files || [])
+  e.target.value = ''
+  for (const file of files) {
+    await uploadImageFile(file)
+  }
+}
+
+function onDragOver() {
+  if (!props.enableImageUpload) return
+  dragOver.value = true
+}
+
+function onDragLeave() {
+  dragOver.value = false
+}
+
+async function onDrop(e) {
+  dragOver.value = false
+  if (!props.enableImageUpload) return
+  const files = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/'))
+  for (const file of files) {
+    await uploadImageFile(file)
+  }
+}
+
+async function onPaste(e) {
+  if (!props.enableImageUpload) return
+  const items = Array.from(e.clipboardData?.items || [])
+  const imageItem = items.find((item) => item.type.startsWith('image/'))
+  if (!imageItem) return
+  const file = imageItem.getAsFile()
+  if (!file) return
+  e.preventDefault()
+  await uploadImageFile(file)
+}
 
 function emitValue(val) {
   emit('update:modelValue', val)
@@ -186,18 +321,23 @@ function applyFormat(type) {
       if (url) wrapTextarea('[', `](${url})`, '链接文字')
       break
     }
-    case 'image': {
-      const url = window.prompt('图片 URL', 'https://')
-      if (url) {
-        const alt = window.prompt('图片描述', 'image') || 'image'
-        const ta = textareaRef.value
-        const start = ta?.selectionStart ?? props.modelValue.length
-        const text = props.modelValue
-        const insert = `![${alt}](${url})`
-        emitValue(text.slice(0, start) + insert + text.slice(start))
+    case 'image':
+      if (props.enableImageUpload) {
+        triggerImageUpload()
+        break
+      }
+      {
+        const url = window.prompt('图片 URL', 'https://')
+        if (url) {
+          const alt = window.prompt('图片描述', 'image') || 'image'
+          const ta = textareaRef.value
+          const start = ta?.selectionStart ?? props.modelValue.length
+          const text = props.modelValue
+          const insert = `![${alt}](${url})`
+          emitValue(text.slice(0, start) + insert + text.slice(start))
+        }
       }
       break
-    }
     default:
       break
   }
@@ -237,11 +377,16 @@ function applyRichFormat(type) {
       if (url) document.execCommand('createLink', false, url)
       break
     }
-    case 'image': {
-      const url = window.prompt('图片 URL', 'https://')
-      if (url) document.execCommand('insertImage', false, url)
+    case 'image':
+      if (props.enableImageUpload) {
+        triggerImageUpload()
+        break
+      }
+      {
+        const url = window.prompt('图片 URL', 'https://')
+        if (url) document.execCommand('insertImage', false, url)
+      }
       break
-    }
     default:
       break
   }
@@ -324,6 +469,12 @@ watch(
   min-height: 280px;
 }
 
+.md-panes.can-upload.drag-over,
+.md-panes.can-upload.is-uploading {
+  outline: 2px dashed color-mix(in srgb, var(--orange) 55%, var(--border));
+  outline-offset: -2px;
+}
+
 .mode-split {
   grid-template-columns: 1fr 1fr;
 }
@@ -404,5 +555,9 @@ watch(
     border-left: none;
     border-top: 1px solid var(--border);
   }
+}
+
+.hidden-file {
+  display: none;
 }
 </style>

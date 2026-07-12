@@ -11,6 +11,7 @@
 <script setup>
 import { computed } from 'vue'
 import StickerWall from '../StickerWall.vue'
+import { imgUrl } from '../../data/profile.js'
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
@@ -18,7 +19,7 @@ const props = defineProps({
 
 const wallItems = computed(() =>
   props.items.map((item, index) => ({
-    path: item.cover || '',
+    path: item.cover ? imgUrl(item.cover) : '',
     label: String(index + 1).padStart(2, '0'),
     title: item.title,
     subtitle: item.category_name || '',

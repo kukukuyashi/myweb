@@ -223,6 +223,10 @@ export async function fetchForumRecentThreads(limit = 5) {
   return platformFetch(`/forum/threads/recent?limit=${limit}`)
 }
 
+export async function fetchForumFeaturedThreads() {
+  return platformFetch('/forum/threads/featured')
+}
+
 export async function fetchForumCategoryThreads(slug, page = 1, pageSize = 20) {
   return platformFetch(`/forum/categories/${slug}/threads?page=${page}&page_size=${pageSize}`)
 }
@@ -233,6 +237,33 @@ export async function fetchForumThread(id) {
 
 export async function fetchMyForumThreads(page = 1, pageSize = 20) {
   return platformFetch(`/forum/threads/mine?page=${page}&page_size=${pageSize}`, { auth: true })
+}
+
+export async function uploadForumImage(file) {
+  return uploadEditorImage(file, '/forum/uploads/image')
+}
+
+export async function uploadPostImage(file) {
+  return uploadEditorImage(file, '/posts/uploads/image')
+}
+
+async function uploadEditorImage(file, path) {
+  const token = requirePlatformToken()
+  const form = new FormData()
+  form.append('file', file)
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(formatApiError(json, res.status))
+  }
+  if (json.code != null && json.code !== 0) {
+    throw new Error(formatApiError(json.message) || '上传失败')
+  }
+  return json
 }
 
 export async function createForumThread(payload) {
@@ -264,6 +295,81 @@ export async function createForumReply(threadId, content) {
     auth: true,
     body: { content },
   })
+}
+
+export async function likeForumThread(threadId) {
+  return platformFetch(`/forum/threads/${threadId}/like`, { method: 'POST', auth: true })
+}
+
+export async function likeForumReply(replyId) {
+  return platformFetch(`/forum/replies/${replyId}/like`, { method: 'POST', auth: true })
+}
+
+export async function shareForumThread(threadId) {
+  return platformFetch(`/forum/threads/${threadId}/share`, { method: 'POST', auth: true })
+}
+
+export async function fetchCheckinStatus() {
+  return platformFetch('/users/me/checkin/status', { auth: true })
+}
+
+export async function doCheckin() {
+  return platformFetch('/users/me/checkin', { method: 'POST', auth: true })
+}
+
+export async function fetchCheckinCalendar(months = 3) {
+  return platformFetch(`/users/me/checkin/calendar?months=${months}`, { auth: true })
+}
+
+export async function fetchAnimeSchedule() {
+  const token = getPlatformToken()
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 12000)
+  try {
+    const headers = { 'Content-Type': 'application/json; charset=utf-8' }
+    if (token) headers.Authorization = `Bearer ${token}`
+    const res = await fetch(`${BASE}/anime/schedule`, { headers, signal: controller.signal })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(formatApiError(json.detail ?? json.message ?? res.statusText))
+    if (json.code != null && json.code !== 0) throw new Error(formatApiError(json.message) || '业务错误')
+    return json
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('请求超时，请稍后重试')
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+export async function fetchAnimeCalendar() {
+  return platformFetch('/anime/calendar')
+}
+
+export async function fetchAnimeToday() {
+  const token = getPlatformToken()
+  if (!token) return platformFetch('/anime/today')
+  const res = await fetch(`${BASE}/anime/today`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(formatApiError(json.detail ?? json.message ?? res.statusText))
+  if (json.code != null && json.code !== 0) throw new Error(formatApiError(json.message) || '业务错误')
+  return json
+}
+
+export async function fetchAnimeWatchlist() {
+  return platformFetch('/anime/watchlist', { auth: true })
+}
+
+export async function addAnimeWatchlist(payload) {
+  return platformFetch('/anime/watchlist', { method: 'POST', auth: true, body: payload })
+}
+
+export async function removeAnimeWatchlist(bangumiId) {
+  return platformFetch(`/anime/watchlist/${bangumiId}`, { method: 'DELETE', auth: true })
 }
 
 export async function fetchQaMessages(limit = 20) {

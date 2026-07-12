@@ -21,6 +21,10 @@ USER_LABELS = {
     User.password_hash: "密码哈希",
     User.nickname: "昵称",
     User.avatar: "头像",
+    User.xp: "经验值",
+    User.level: "等级",
+    User.checkin_streak: "连续签到",
+    User.last_checkin_date: "上次签到",
     User.created_at: "注册时间",
     User.updated_at: "更新时间",
 }
@@ -62,6 +66,9 @@ FORUM_THREAD_LABELS = {
     ForumThread.view_count: "浏览数",
     ForumThread.is_pinned: "置顶",
     ForumThread.is_locked: "锁定",
+    ForumThread.is_featured: "精选",
+    ForumThread.cover_url: "封面图 URL",
+    ForumThread.featured_order: "精选排序(1-7)",
     ForumThread.created_at: "发帖时间",
     ForumThread.updated_at: "更新时间",
 }

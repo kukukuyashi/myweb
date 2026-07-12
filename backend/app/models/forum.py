@@ -28,8 +28,13 @@ class ForumThread(Base):
     content: Mapped[str] = mapped_column(Text)
     reply_count: Mapped[int] = mapped_column(Integer, default=0)
     view_count: Mapped[int] = mapped_column(Integer, default=0)
+    like_count: Mapped[int] = mapped_column(Integer, default=0)
+    share_count: Mapped[int] = mapped_column(Integer, default=0)
     is_pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     is_locked: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    cover_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    featured_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), index=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
@@ -47,6 +52,7 @@ class ForumReply(Base):
     thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     content: Mapped[str] = mapped_column(Text)
+    like_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), index=True)
 
     thread = relationship("ForumThread", back_populates="replies")

@@ -21,9 +21,15 @@
         标题
         <input v-model="form.title" required maxlength="200" placeholder="帖子标题" />
       </label>
+      <CoverImageField v-model="form.cover_url" scope="forum" />
       <label>
         内容
-        <MarkdownEditor v-model="form.content" :rows="12" placeholder="正文内容" />
+        <MarkdownEditor
+          v-model="form.content"
+          :rows="12"
+          placeholder="正文内容 · 可点击「上传图片」，或直接拖拽 / 粘贴图片"
+          enable-image-upload
+        />
       </label>
       <p v-if="error" class="error">{{ error }}</p>
       <button type="submit" class="btn-primary" :disabled="loading">发布</button>
@@ -37,6 +43,7 @@ import { useRouter, useRoute } from 'vue-router'
 import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHeader.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
+import CoverImageField from '../../components/CoverImageField.vue'
 import { createForumThread, fetchForumCategories, getPlatformToken } from '../../api/platform.js'
 
 usePageMeta({ title: '发帖', description: '在论坛发布新帖。' })
@@ -47,7 +54,7 @@ const token = ref(getPlatformToken())
 const categories = ref([])
 const loading = ref(false)
 const error = ref('')
-const form = ref({ category_id: '', title: '', content: '' })
+const form = ref({ category_id: '', title: '', content: '', cover_url: '' })
 
 onMounted(async () => {
   if (!token.value) return
@@ -76,6 +83,7 @@ async function submit() {
       category_id: Number(form.value.category_id),
       title: form.value.title.trim(),
       content: form.value.content.trim(),
+      cover_url: form.value.cover_url?.trim() || null,
     })
     router.push(`/app/forum/t/${json.data.id}`)
   } catch (e) {

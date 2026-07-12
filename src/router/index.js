@@ -127,6 +127,11 @@ const routes = [
         name: 'PlatformMusic',
         component: () => import('../views/platform/PlatformMusic.vue'),
       },
+      {
+        path: 'anime',
+        name: 'AnimeSchedule',
+        component: () => import('../views/platform/AnimeSchedule.vue'),
+      },
     ],
   },
   { path: '/hub', redirect: '/app' },

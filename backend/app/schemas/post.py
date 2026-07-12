@@ -14,6 +14,7 @@ class PostCreate(BaseModel):
     category: str = Field(default="未分类", max_length=50)
     tags: list[str] = Field(default_factory=list)
     status: PostStatus = "draft"
+    cover_url: str | None = Field(default=None, max_length=512)
 
 
 class PostUpdate(BaseModel):
@@ -23,6 +24,7 @@ class PostUpdate(BaseModel):
     category: str | None = Field(default=None, max_length=50)
     tags: list[str] | None = None
     status: PostStatus | None = None
+    cover_url: str | None = Field(default=None, max_length=512)
 
 
 class PostAuthor(BaseModel):
@@ -44,6 +46,7 @@ class PostPublic(BaseModel):
     category: str
     tags: list[str]
     status: str
+    cover_url: str | None = None
     ai_summary: str | None
     ai_summary_at: datetime | None
     published_at: datetime | None
@@ -61,6 +64,7 @@ class PostListItem(BaseModel):
     category: str
     tags: list[str]
     status: str
+    cover_url: str | None = None
     ai_summary: str | None
     published_at: datetime | None
     created_at: datetime

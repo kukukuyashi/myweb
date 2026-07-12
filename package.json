@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "powershell -NoProfile -ExecutionPolicy Bypass -File backend/scripts/dev.ps1",
     "cursors:generate": "python scripts/generate-cursors.py",
     "build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && python scripts/generate-cursors.py && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",

@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user, get_optional_user
+from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.response import ok
 from app.models.post import Post
@@ -13,10 +14,26 @@ from app.models.user import User
 from app.schemas.post import PostCreate, PostListItem, PostPublic, PostUpdate
 from app.services.cache import cache_get, cache_set, invalidate_post_lists, post_list_cache_key
 from app.services.dify_client import DifyError, run_summary_workflow
+from app.services.image_upload import save_uploaded_image
 from app.services.n8n_client import build_post_published_payload, notify_post_published
 from app.utils.slug import slugify
 
 router = APIRouter(prefix="/posts", tags=["posts"])
+
+
+@router.post("/uploads/image", summary="上传文章图片")
+async def upload_post_image(
+    current_user: Annotated[User, Depends(get_current_user)],
+    file: UploadFile = File(...),
+):
+    settings = get_settings()
+    url = await save_uploaded_image(
+        file,
+        subdir="posts",
+        user_id=current_user.id,
+        max_bytes=settings.max_forum_image_bytes,
+    )
+    return ok({"url": url}, message="上传成功")
 
 
 def _author_dict(user: User | None) -> dict | None:
@@ -149,6 +166,7 @@ def create_post(
         category=payload.category,
         tags=payload.tags,
         status=payload.status,
+        cover_url=payload.cover_url,
     )
     _apply_publish_time(post, payload.status)
     db.add(post)
@@ -230,6 +248,8 @@ def update_post(
 
     new_status = data.get("status")
     for key, value in data.items():
+        if key == "cover_url" and value == "":
+            value = None
         setattr(post, key, value)
     _apply_publish_time(post, new_status)
 

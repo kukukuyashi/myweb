@@ -70,6 +70,11 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
+
+# 任选一种启动（推荐前两种，带 --reload 改代码自动重启）
+npm run dev:api                              # 项目根目录
+.\scripts\dev.ps1                            # backend 目录
+.\dev.bat                                    # 双击或 cmd
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 

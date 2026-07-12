@@ -58,6 +58,17 @@ def clean_alpha(frame: Image.Image) -> Image.Image:
     return rgba
 
 
+def anchor_hotspot(anchor: str, nw: int, nh: int) -> tuple[int, int]:
+    hx, hy = HOTSPOT
+    if anchor == 'tip':
+        return hx, hy
+    if anchor == 'center-top':
+        return hx, hy + nh // 2
+    if anchor == 'center':
+        return OUT_SIZE // 2, OUT_SIZE // 2
+    return hx, hy
+
+
 def normalize_frame(img: Image.Image, anchor: str) -> Image.Image:
     """按内容 bbox 等比放大到统一占比，消除各状态画布尺寸差异。"""
     img = clean_alpha(img)
@@ -155,10 +166,26 @@ def main() -> None:
         save_gif(frames, OUT_DIR / f'{cursor_id}.gif')
         sheet_name = f'{cursor_id}-sheet.png'
         save_sprite_sheet(frames, OUT_DIR / sheet_name)
+
+        first_png = sorted(src.glob('*.png'), key=sort_key)[0]
+        first_bbox = clean_alpha(Image.open(first_png)).getbbox()
+        nh = round(OUT_SIZE * CONTENT_FILL)
+        if first_bbox:
+            cw, ch = first_bbox[2] - first_bbox[0], first_bbox[3] - first_bbox[1]
+            target = OUT_SIZE * CONTENT_FILL
+            scale = target / max(cw, ch)
+            nw, nh = max(1, round(cw * scale)), max(1, round(ch * scale))
+            hs_x, hs_y = anchor_hotspot(anchor, nw, nh)
+        else:
+            hs_x, hs_y = anchor_hotspot(anchor, 0, nh)
+
         manifest['cursors'][cursor_id] = {
             'frames': len(frames),
             'sheet': sheet_name,
             'anchor': anchor,
+            'hotspotX': hs_x,
+            'hotspotY': hs_y,
+            'contentHeight': nh,
         }
         print(f'{folder_name}/ → {cursor_id} ({anchor})  {len(frames)} 帧 @ {OUT_SIZE}px')
 

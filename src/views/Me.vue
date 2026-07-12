@@ -19,12 +19,15 @@
 
     <div v-else class="me-grid">
       <aside class="user-card platform-panel ink-panel">
-        <div class="avatar-wrap">
-          <img v-if="avatarDisplayUrl" :src="avatarDisplayUrl" alt="" class="avatar" />
-          <span v-else class="avatar placeholder">{{ avatarInitial }}</span>
-        </div>
+        <AvatarFrame :level="profile?.level || 1">
+          <div class="avatar-wrap">
+            <img v-if="avatarDisplayUrl" :src="avatarDisplayUrl" alt="" class="avatar" />
+            <span v-else class="avatar placeholder">{{ avatarInitial }}</span>
+          </div>
+        </AvatarFrame>
         <h2>{{ profile?.nickname || profile?.username }}</h2>
         <p class="username">@{{ profile?.username }}</p>
+        <LevelBadge v-if="(profile?.level || 1) >= 2" :level="profile?.level || 1" />
         <p class="email">{{ maskedEmail }}</p>
         <button type="button" class="platform-btn-ghost me-logout" @click="logout">退出登录</button>
       </aside>
@@ -57,7 +60,7 @@
                   class="hidden-file"
                   @change="onAvatarPick"
                 />
-                <button type="button" class="btn-ghost sm" :disabled="avatarUploading" @click="pickAvatar">
+                <button type="button" class="platform-btn-ghost sm" :disabled="avatarUploading" @click="pickAvatar">
                   {{ avatarUploading ? '上传中…' : '上传头像' }}
                 </button>
                 <p class="hint">JPG / PNG / WebP / GIF，最大 2MB</p>
@@ -115,6 +118,87 @@
             <p v-if="passwordError" class="error">{{ passwordError }}</p>
             <button type="submit" class="btn-primary" :disabled="passwordLoading">更新密码</button>
           </form>
+        </div>
+
+        <div v-show="activeTab === 'checkin'" class="platform-panel ink-panel tab-panel checkin-tab">
+          <div v-if="checkinLoading" class="muted">加载签到数据…</div>
+          <template v-else-if="checkinStatus">
+            <div class="checkin-summary">
+              <div>
+                <p class="checkin-level-label">当前等级</p>
+                <p class="checkin-level-value">Lv.{{ checkinStatus.level }} {{ checkinStatus.title }}</p>
+                <p class="checkin-xp">{{ checkinStatus.xp }} XP · 连续 {{ checkinStatus.streak }} 天</p>
+              </div>
+              <button
+                v-if="!checkinStatus.checked_today"
+                type="button"
+                class="platform-btn-primary"
+                :disabled="checkinBusy"
+                @click="handleCheckin"
+              >
+                {{ checkinBusy ? '签到中…' : '立即签到' }}
+              </button>
+              <span v-else class="checkin-stamp-inline">今日已签</span>
+            </div>
+
+            <div class="checkin-progress-block">
+              <div class="checkin-progress-bar">
+                <span :style="{ width: `${checkinStatus.progress?.progress_pct || 0}%` }" />
+              </div>
+              <p class="checkin-progress-hint">
+                <template v-if="checkinStatus.progress?.next_level">
+                  距 Lv.{{ checkinStatus.progress.next_level }} {{ checkinStatus.progress.next_title }}
+                  还需 {{ checkinStatus.progress.xp_to_next }} XP
+                </template>
+                <template v-else>已满级</template>
+              </p>
+            </div>
+
+            <h3 class="checkin-section-title">近 3 月签到</h3>
+            <div class="checkin-heatmap">
+              <span
+                v-for="cell in heatmapCells"
+                :key="cell.date"
+                class="heatmap-cell"
+                :class="{ checked: cell.checked, today: cell.isToday }"
+                :title="cell.date"
+              />
+            </div>
+
+            <h3 class="checkin-section-title">等级权益</h3>
+            <ul class="perk-list">
+              <li
+                v-for="tier in checkinStatus.tiers || []"
+                :key="tier.level"
+                :class="{ unlocked: (checkinStatus.level || 1) >= tier.level }"
+              >
+                <strong>Lv.{{ tier.level }} {{ tier.title }}</strong>
+                <span>{{ tier.xp_required }} XP</span>
+                <p v-if="tier.perks?.length">{{ tier.perks.join(' · ') }}</p>
+                <p v-else class="muted">基础身份</p>
+              </li>
+            </ul>
+
+            <h3 v-if="checkinStatus.xp_actions?.length" class="checkin-section-title">经验获取（每日上限）</h3>
+            <ul v-if="checkinStatus.xp_actions?.length" class="xp-action-list">
+              <li v-for="row in checkinStatus.xp_actions" :key="row.action">
+                <span>{{ row.label }}</span>
+                <span>+{{ row.xp }} XP</span>
+                <span>{{ row.daily_max }} 次/日 · 上限 {{ row.daily_cap_xp }} XP</span>
+              </li>
+            </ul>
+
+            <h3 class="checkin-section-title">签到记录</h3>
+            <ul v-if="checkinHistory.length" class="checkin-history">
+              <li v-for="row in checkinHistory" :key="row.date">
+                <span>{{ row.date }}</span>
+                <span>+{{ row.xp_gained }} XP</span>
+                <span>连续 {{ row.streak_day }} 天</span>
+              </li>
+            </ul>
+            <p v-else class="muted">暂无签到记录</p>
+            <p v-if="checkinMsg" class="success">{{ checkinMsg }}</p>
+          </template>
         </div>
 
         <div v-show="activeTab === 'posts'" class="platform-panel ink-panel tab-panel">
@@ -185,6 +269,8 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
+import AvatarFrame from '../components/AvatarFrame.vue'
+import LevelBadge from '../components/LevelBadge.vue'
 import { PLATFORM_ME_INK_IMAGE, PLATFORM_ME_INK_POSITION } from '../data/inkTheme.js'
 import { usePageMeta } from '../composables/usePageMeta'
 import {
@@ -200,6 +286,9 @@ import {
   updateProfile,
   uploadAvatar,
   changePassword,
+  doCheckin,
+  fetchCheckinCalendar,
+  fetchCheckinStatus,
 } from '../api/platform.js'
 
 usePageMeta({
@@ -209,6 +298,7 @@ usePageMeta({
 
 const tabs = [
   { id: 'profile', label: '资料' },
+  { id: 'checkin', label: '签到' },
   { id: 'posts', label: '我的文章' },
   { id: 'threads', label: '我的帖子' },
   { id: 'timeline', label: '专注时间线' },
@@ -216,7 +306,12 @@ const tabs = [
 
 const route = useRoute()
 const token = ref(getPlatformToken())
-const activeTab = ref(route.query.tab === 'threads' ? 'threads' : route.query.tab === 'posts' ? 'posts' : 'profile')
+const activeTab = ref(
+  route.query.tab === 'threads' ? 'threads'
+    : route.query.tab === 'posts' ? 'posts'
+      : route.query.tab === 'checkin' ? 'checkin'
+        : 'profile',
+)
 const profile = ref(null)
 const editForm = ref({ nickname: '', avatar: '' })
 const posts = ref([])
@@ -235,6 +330,25 @@ const passwordLoading = ref(false)
 const avatarInputRef = ref(null)
 const avatarUploading = ref(false)
 const avatarPreviewOverride = ref('')
+const checkinStatus = ref(null)
+const checkinHistory = ref([])
+const checkinLoading = ref(false)
+const checkinBusy = ref(false)
+const checkinMsg = ref('')
+
+const heatmapCells = computed(() => {
+  const checked = new Set(checkinHistory.value.map((r) => r.date))
+  const today = new Date()
+  const cells = []
+  for (let i = 89; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    const iso = d.toISOString().slice(0, 10)
+    const isToday = i === 0
+    cells.push({ date: iso, checked: checked.has(iso), isToday })
+  }
+  return cells
+})
 
 const avatarDisplayUrl = computed(() => {
   if (avatarPreviewOverride.value) return avatarPreviewOverride.value
@@ -354,6 +468,38 @@ async function loadThreads() {
   }
 }
 
+async function loadCheckin() {
+  if (!token.value) return
+  checkinLoading.value = true
+  try {
+    const [statusJson, calJson] = await Promise.all([
+      fetchCheckinStatus(),
+      fetchCheckinCalendar(3),
+    ])
+    checkinStatus.value = statusJson.data
+    checkinHistory.value = calJson.data?.history || []
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    checkinLoading.value = false
+  }
+}
+
+async function handleCheckin() {
+  checkinBusy.value = true
+  checkinMsg.value = ''
+  try {
+    const json = await doCheckin()
+    checkinMsg.value = json.message || '签到成功'
+    await Promise.all([loadCheckin(), loadProfile()])
+    window.dispatchEvent(new CustomEvent('platform-checkin-done'))
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    checkinBusy.value = false
+  }
+}
+
 async function loadTimeline() {
   if (!token.value) return
   timelineLoading.value = true
@@ -455,11 +601,11 @@ function logout() {
 
 async function loadAll() {
   await loadProfile()
-  await Promise.all([loadPosts(), loadThreads(), loadTimeline()])
+  await Promise.all([loadPosts(), loadThreads(), loadTimeline(), loadCheckin()])
 }
 
 watch(() => route.query.tab, (tab) => {
-  if (tab === 'posts' || tab === 'threads' || tab === 'timeline' || tab === 'profile') {
+  if (tab === 'posts' || tab === 'threads' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
     activeTab.value = tab
   }
 })
@@ -469,6 +615,7 @@ watch(activeTab, (tab) => {
   if (tab === 'posts') loadPosts()
   if (tab === 'threads') loadThreads()
   if (tab === 'timeline') loadTimeline()
+  if (tab === 'checkin') loadCheckin()
 })
 
 watch(token, (t) => { if (t) loadAll() })
@@ -477,12 +624,14 @@ onMounted(() => {
   syncToken()
   window.addEventListener('platform-auth-changed', syncToken)
   window.addEventListener('storage', onStorageAuth)
+  window.addEventListener('platform-checkin-done', loadCheckin)
   if (token.value) loadAll()
 })
 
 onUnmounted(() => {
   window.removeEventListener('platform-auth-changed', syncToken)
   window.removeEventListener('storage', onStorageAuth)
+  window.removeEventListener('platform-checkin-done', loadCheckin)
 })
 </script>
 
@@ -550,6 +699,7 @@ label {
   gap: 0.35rem;
   font-family: var(--mono);
   font-size: 0.78rem;
+  color: var(--text);
 }
 
 input {
@@ -557,6 +707,12 @@ input {
   padding: 0.55rem 0.65rem;
   font: inherit;
   background: var(--bg);
+  color: var(--text);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 .item-list {
@@ -681,17 +837,11 @@ input {
 
 .btn-primary:disabled { opacity: 0.55; }
 
-.btn-ghost {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  padding: 0.4rem 0.75rem;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-}
+.error { color: var(--error, #c0392b); font-size: 0.82rem; }
+.success { color: var(--success, #2d6a4f); font-size: 0.82rem; }
 
-.error { color: #c0392b; font-size: 0.82rem; }
-.success { color: #2d6a4f; font-size: 0.82rem; }
+[data-theme="dark"] .error { color: #ff8a80; }
+[data-theme="dark"] .success { color: #95d5b2; }
 .muted { color: var(--text-muted); font-size: 0.88rem; }
 
 .avatar-field {
@@ -728,17 +878,11 @@ input {
   display: none;
 }
 
-.btn-ghost.sm {
-  margin-top: 0;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.72rem;
-}
-
 .hint {
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  color: var(--steel, var(--text-muted));
 }
 
 .security-divider {
@@ -763,6 +907,177 @@ input {
 .security-form {
   display: grid;
   gap: 0.75rem;
+}
+
+.checkin-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.checkin-level-label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.checkin-level-value {
+  margin: 0.2rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.checkin-xp {
+  margin: 0.25rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.checkin-stamp-inline {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--orange);
+  border: 2px solid var(--orange);
+  padding: 0.25rem 0.55rem;
+  transform: rotate(-6deg);
+}
+
+.checkin-progress-block {
+  margin-bottom: 1.25rem;
+}
+
+.checkin-progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.checkin-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--orange);
+}
+
+.checkin-progress-hint {
+  margin: 0.4rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.checkin-section-title {
+  margin: 1rem 0 0.65rem;
+  font-size: 0.92rem;
+}
+
+.checkin-heatmap {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.heatmap-cell.checked {
+  background: rgba(232, 93, 4, 0.55);
+}
+
+.heatmap-cell.checked.today {
+  background: var(--orange);
+  box-shadow: 0 0 0 2px rgba(232, 93, 4, 0.35);
+}
+
+.perk-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.perk-list li {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  opacity: 0.55;
+}
+
+.perk-list li.unlocked {
+  opacity: 1;
+  border-color: rgba(232, 93, 4, 0.35);
+}
+
+.perk-list li strong {
+  margin-right: 0.5rem;
+}
+
+.perk-list li span {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.perk-list li p {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+}
+
+.xp-action-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.xp-action-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.65rem;
+  border: 1px dashed var(--border);
+  font-size: 0.78rem;
+}
+
+.xp-action-list li span:nth-child(2) {
+  font-family: var(--mono);
+  color: var(--orange);
+  font-size: 0.72rem;
+}
+
+.xp-action-list li span:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+
+.checkin-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.checkin-history li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 0.35rem;
 }
 
 @media (max-width: 720px) {

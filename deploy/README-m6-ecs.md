@@ -251,4 +251,4 @@ cd backend
 
 ---
 
-相关：[backend/README.md](../backend/README.md) · [README-cloud-dev.md](./README-cloud-dev.md) · [nginx.conf.example](./nginx.conf.example)
+相关：[backend/README.md](../backend/README.md) · [README-cloud-dev.md](./README-cloud-dev.md) · [DEPLOY-PLAN.md](./DEPLOY-PLAN.md) · [nginx.conf.example](./nginx.conf.example)

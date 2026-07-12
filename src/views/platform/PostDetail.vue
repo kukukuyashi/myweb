@@ -18,6 +18,11 @@
           <router-link :to="`/app/posts/${post.id}/edit`" class="btn-ghost">编辑</router-link>
         </div>
       </PlatformSubPageHeader>
+
+      <figure v-if="post.cover_url" class="platform-panel ink-panel post-cover">
+        <img :src="coverUrl" :alt="post.title">
+      </figure>
+
       <article class="platform-panel ink-panel body">
         <MarkdownBody :content="post.content" />
       </article>
@@ -34,7 +39,7 @@ import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHead
 import { PLATFORM_POST_INK_IMAGE, PLATFORM_POST_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownBody from '../../components/MarkdownBody.vue'
-import { fetchPost, fetchProfile, getPlatformToken } from '../../api/platform.js'
+import { fetchPost, fetchProfile, getPlatformToken, resolveMediaUrl } from '../../api/platform.js'
 
 const props = defineProps({ id: { type: [String, Number], required: true } })
 
@@ -49,9 +54,12 @@ const canEdit = computed(() => {
   return post.value.user_id === profile.value.id
 })
 
+const coverUrl = computed(() => resolveMediaUrl(post.value?.cover_url))
+
 usePageMeta(() => ({
   title: post.value?.title || '文章',
   description: post.value?.ai_summary || '主站文章阅读。',
+  image: coverUrl.value || undefined,
 }))
 
 function formatDate(iso) {
@@ -120,6 +128,20 @@ onMounted(load)
 .body {
   font-size: 0.95rem;
   margin-top: 1rem;
+}
+
+.post-cover {
+  margin-top: 0.75rem;
+  padding: 0;
+  overflow: hidden;
+}
+
+.post-cover img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
 }
 
 .summary {

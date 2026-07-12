@@ -8,6 +8,9 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend/.env
+    extra_hosts:
+      # Linux ECS 无 Docker Desktop，需 host-gateway 才能解析 host.docker.internal
+      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:8000:8000"
     restart: unless-stopped

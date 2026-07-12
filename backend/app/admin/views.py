@@ -20,7 +20,7 @@ class UserAdmin(ModelView, model=User):
     icon = "fa-solid fa-user"
     column_labels = USER_LABELS
 
-    column_list = [User.id, User.username, User.email, User.nickname, User.created_at]
+    column_list = [User.id, User.username, User.email, User.nickname, User.level, User.xp, User.checkin_streak, User.created_at]
     column_searchable_list = [User.username, User.email, User.nickname]
     column_sortable_list = [User.id, User.username, User.created_at]
     column_details_exclude_list = [User.password_hash]
@@ -96,6 +96,8 @@ class ForumThreadAdmin(ModelView, model=ForumThread):
         ForumThread.title,
         ForumThread.category_id,
         ForumThread.user_id,
+        ForumThread.is_featured,
+        ForumThread.featured_order,
         ForumThread.reply_count,
         ForumThread.view_count,
         ForumThread.is_pinned,
@@ -103,13 +105,16 @@ class ForumThreadAdmin(ModelView, model=ForumThread):
         ForumThread.created_at,
     ]
     column_searchable_list = [ForumThread.title, ForumThread.content]
-    column_sortable_list = [ForumThread.id, ForumThread.created_at, ForumThread.reply_count]
+    column_sortable_list = [ForumThread.id, ForumThread.created_at, ForumThread.reply_count, ForumThread.featured_order]
     column_default_sort = [(ForumThread.created_at, True)]
     form_columns = [
         ForumThread.category_id,
         ForumThread.user_id,
         ForumThread.title,
         ForumThread.content,
+        ForumThread.is_featured,
+        ForumThread.cover_url,
+        ForumThread.featured_order,
         ForumThread.is_pinned,
         ForumThread.is_locked,
         ForumThread.reply_count,

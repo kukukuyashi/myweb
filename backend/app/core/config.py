@@ -25,12 +25,15 @@ class Settings(BaseSettings):
     public_site_url: str = "http://127.0.0.1:5173/myweb"
     upload_dir: str = "uploads"
     max_avatar_bytes: int = 2 * 1024 * 1024
+    max_forum_image_bytes: int = 5 * 1024 * 1024
     smtp_host: str = "smtp.qq.com"
     smtp_port: int = 465
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from: str = ""
     smtp_use_ssl: bool = True
+    mgnacg_base_url: str = "https://www.mgnacg.com"
+    mgnacg_enabled: bool = True
 
     @field_validator("secret_key")
     @classmethod

@@ -14,29 +14,7 @@
         <h1 class="forum-hero-title">CYINC 社区</h1>
         <p class="forum-hero-sub">分享你的 ACG 生活与技术笔记，结识同好</p>
       </div>
-      <div class="forum-stat-grid">
-        <div class="forum-stat">
-          <span class="forum-stat-icon">👥</span>
-          <div>
-            <strong>{{ memberCount }}</strong>
-            <span>社区成员</span>
-          </div>
-        </div>
-        <div class="forum-stat">
-          <span class="forum-stat-icon">💬</span>
-          <div>
-            <strong>{{ totalThreads }}</strong>
-            <span>讨论话题</span>
-          </div>
-        </div>
-        <div class="forum-stat">
-          <span class="forum-stat-icon">❤</span>
-          <div>
-            <strong>{{ totalReplies }}</strong>
-            <span>互动回复</span>
-          </div>
-        </div>
-      </div>
+      <ForumCheckinCard :token="token" />
     </InkRevealPanel>
 
     <div class="forum-layout">
@@ -173,12 +151,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import InkRevealPanel from '../../components/InkRevealPanel.vue'
 import ForumFeaturedWall from '../../components/forum/ForumFeaturedWall.vue'
+import ForumCheckinCard from '../../components/forum/ForumCheckinCard.vue'
 import { PLATFORM_FORUM_INK_IMAGE, PLATFORM_FORUM_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
-import { forumAnnouncements, mergeFeaturedThreads, pickCover } from '../../data/forumDemo.js'
+import { forumAnnouncements, pickCover } from '../../data/forumDemo.js'
 import { imgUrl } from '../../data/profile.js'
 import {
   fetchForumCategories,
+  fetchForumFeaturedThreads,
   fetchForumRecentThreads,
   fetchMyForumThreads,
   getPlatformToken,
@@ -189,6 +169,7 @@ usePageMeta({ title: '论坛', description: 'CYINC ACG 社区论坛。' })
 const token = ref(getPlatformToken())
 const categories = ref([])
 const allThreads = ref([])
+const featuredThreads = ref([])
 const myThreads = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -204,18 +185,6 @@ const tabs = [
   { id: 'latest', label: '最新话题' },
   { id: 'mine', label: '我的话题' },
 ]
-
-const totalThreads = computed(() =>
-  categories.value.reduce((s, c) => s + (c.thread_count || 0), 0) || allThreads.value.filter((t) => t.id).length,
-)
-
-const totalReplies = computed(() =>
-  allThreads.value.reduce((s, t) => s + (t.reply_count || 0), 0),
-)
-
-const memberCount = computed(() => Math.max(totalThreads.value * 3 + 12, 48))
-
-const featuredThreads = computed(() => mergeFeaturedThreads(sortedThreads.value.filter((t) => t.id).slice(0, 7)))
 
 const sortedThreads = computed(() => {
   let list = activeTab.value === 'mine' && token.value
@@ -237,7 +206,11 @@ const sortedThreads = computed(() => {
     list = list.filter((t) => t.title?.toLowerCase().includes(q))
   }
 
-  return list.map((t, i) => ({ ...t, cover: t.cover || pickCover(i), excerpt: t.excerpt || t.title }))
+  return list.map((t, i) => ({
+    ...t,
+    cover: t.cover_url || t.cover || pickCover(i),
+    excerpt: t.excerpt || t.title,
+  }))
 })
 
 const displayThreads = computed(() => sortedThreads.value)
@@ -264,12 +237,19 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const [catJson, threadJson] = await Promise.all([
+    const [catJson, threadJson, featuredJson] = await Promise.all([
       fetchForumCategories(),
       fetchForumRecentThreads(20),
+      fetchForumFeaturedThreads(),
     ])
     categories.value = catJson.data || []
     allThreads.value = threadJson.data?.items || threadJson.data || []
+    const rawFeatured = featuredJson.data?.items || []
+    featuredThreads.value = rawFeatured.map((t, i) => ({
+      ...t,
+      cover: t.cover_url || pickCover(i),
+      excerpt: t.excerpt || t.title,
+    }))
     if (token.value) {
       const mineJson = await fetchMyForumThreads()
       myThreads.value = mineJson.data?.items || []

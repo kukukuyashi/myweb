@@ -20,6 +20,7 @@
         标题
         <input v-model="form.title" required maxlength="200" placeholder="文章标题" />
       </label>
+      <CoverImageField v-model="form.cover_url" scope="post" />
       <label>
         URL 别名（slug，可选）
         <input v-model="form.slug" maxlength="200" placeholder="留空则根据标题自动生成" />
@@ -41,7 +42,13 @@
       </label>
       <label>
         正文
-        <MarkdownEditor v-model="form.content" :rows="18" />
+        <MarkdownEditor
+          v-model="form.content"
+          :rows="18"
+          placeholder="正文内容 · 可点击「上传图片」，或直接拖拽 / 粘贴图片"
+          enable-image-upload
+          image-upload-scope="post"
+        />
       </label>
       <div class="actions">
         <button type="submit" class="btn-primary" :disabled="loading">
@@ -73,6 +80,7 @@ import PlatformSubPageHeader from '../../components/platform/PlatformSubPageHead
 import { PLATFORM_POST_INK_IMAGE, PLATFORM_POST_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import MarkdownEditor from '../../components/MarkdownEditor.vue'
+import CoverImageField from '../../components/CoverImageField.vue'
 import {
   createPost,
   fetchPost,
@@ -100,6 +108,7 @@ const form = ref({
   content: '',
   category: '未分类',
   status: 'draft',
+  cover_url: '',
 })
 
 const isEdit = computed(() => props.id != null && props.id !== '')
@@ -124,6 +133,7 @@ function buildPayload() {
     category: form.value.category.trim() || '未分类',
     tags: parseTags(tagsText.value),
     status: form.value.status,
+    cover_url: form.value.cover_url?.trim() || null,
   }
   const slug = form.value.slug.trim()
   if (slug) payload.slug = slug
@@ -143,6 +153,7 @@ async function loadPost() {
       content: p.content,
       category: p.category,
       status: p.status,
+      cover_url: p.cover_url || '',
     }
     tagsText.value = (p.tags || []).join(', ')
   } catch (e) {
