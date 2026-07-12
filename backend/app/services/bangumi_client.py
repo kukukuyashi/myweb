@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 BANGUMI_BASE = "https://api.bgm.tv"
 CACHE_KEY_CALENDAR = "bangumi:calendar"
+CACHE_KEY_SCHEDULE = "anime:schedule"
 CACHE_TTL = 6 * 3600
+CACHE_TTL_SCHEDULE = 6 * 3600
 REQUEST_TIMEOUT = 8.0
 USER_AGENT = "CYINC-Platform/1.0 (https://cyinc.ink)"
 WEEKDAY_CN = {1: "星期一", 2: "星期二", 3: "星期三", 4: "星期四", 5: "星期五", 6: "星期六", 7: "星期日"}
@@ -273,6 +275,10 @@ async def fetch_season_subjects(year: int, month: int) -> tuple[list[dict], dict
 
 async def build_schedule() -> dict:
     """组装追番表：本季新番 + 周放送表 + 今日更新。"""
+    cached = _cached_get(CACHE_KEY_SCHEDULE)
+    if cached is not None:
+        return cached
+
     season_info = current_season_info()
     cal_meta: dict = {}
     season_meta: dict = {}
@@ -348,11 +354,15 @@ async def build_schedule() -> dict:
             f"{meta['season_label']} 离线数据（本地网络可能需代理；服务器环境通常可直连）"
         )
 
-    season, today_items, weekdays = await enrich_schedule_watch_urls(season, today_items, weekdays)
+    season, today_items, weekdays = await enrich_schedule_watch_urls(
+        season, today_items, weekdays, live_suggest=False,
+    )
 
-    return {
+    result = {
         "meta": meta,
         "weekdays": weekdays,
         "season": season,
         "today_items": today_items,
     }
+    _cached_set(CACHE_KEY_SCHEDULE, result, CACHE_TTL_SCHEDULE)
+    return result
