@@ -8,14 +8,17 @@ set -euo pipefail
 APP_ROOT="${APP_ROOT:-/var/www/cyinc}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 
-if docker compose version >/dev/null 2>&1; then
-  COMPOSE=(docker compose)
-elif command -v docker-compose >/dev/null 2>&1; then
+if command -v docker-compose >/dev/null 2>&1; then
   COMPOSE=(docker-compose)
+elif docker compose version >/dev/null 2>&1; then
+  COMPOSE=(docker compose)
 else
-  echo "ERROR: 未找到 docker compose / docker-compose，请先安装 Docker Compose 插件" >&2
+  echo "ERROR: 未找到 docker-compose 或 docker compose 插件" >&2
+  echo "请在 ECS 执行: sudo apt-get install -y docker-compose-plugin" >&2
   exit 1
 fi
+
+echo "==> 使用 ${COMPOSE[*]}"
 
 cd "$APP_ROOT"
 
