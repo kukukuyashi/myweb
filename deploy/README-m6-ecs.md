@@ -201,16 +201,43 @@ bash deploy/scripts/sync-frontend.sh deploy@你的ECS_IP
 ## 六、运维命令
 
 ```bash
+# ECS 无 docker compose 插件时用 docker-compose（带连字符）
+COMPOSE="docker-compose -f docker-compose.prod.yml"
+# 或：COMPOSE="docker compose -f docker-compose.prod.yml"
+
 # API 日志
-docker compose -f docker-compose.prod.yml logs -f api
+$COMPOSE logs -f api
 
 # 重启 API
-docker compose -f docker-compose.prod.yml restart api
+$COMPOSE restart api
+
+# 健康检查
+curl -s http://127.0.0.1:8000/api/health
 
 # 磁盘：头像在 Docker volume uploads_data
 docker volume inspect cyinc_uploads_data
 
 # RDS 备份：阿里云控制台自动备份
+```
+
+### 6.1 常见故障
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 全站 `/api/*` 502 | API 容器未运行或启动失败 | `docker-compose -f docker-compose.prod.yml ps` + `logs api` |
+| `Can't connect to MySQL ... rm-xxxxx` | `backend/.env` 仍为示例占位符 | 改为 RDS 控制台**内网地址** |
+| `UnicodeEncodeError: latin-1` | `DATABASE_URL` 密码含中文 | 密码改为纯 ASCII |
+| Actions 健康检查失败 | 同上或部署先 down 后 API 起不来 | ECS 手动修 `.env` 后 `up -d --build`；见 [ECS-STATUS.md](./ECS-STATUS.md) |
+| `$'\r': command not found` | shell 脚本 CRLF | 仓库已加 `.gitattributes`；ECS 上 `sed -i 's/\r$//' deploy/scripts/deploy.sh` |
+| 追番页请求超时 | 旧版实时 mgnacg 搜索 ~40s | 拉最新 `main`（已关 live_suggest + 6h 缓存） |
+
+**恢复最小步骤**（API 502 时）：
+
+```bash
+cd /var/www/cyinc
+grep DATABASE_URL backend/.env   # 确认非 rm-xxxxx
+docker-compose -f docker-compose.prod.yml up -d --build
+curl -s http://127.0.0.1:8000/api/health
 ```
 
 ---
