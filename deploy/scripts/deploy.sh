@@ -27,6 +27,7 @@ git fetch origin
 git reset --hard origin/main
 
 echo "==> docker compose build & up"
+"${COMPOSE[@]}" -f "$COMPOSE_FILE" down --remove-orphans 2>/dev/null || true
 "${COMPOSE[@]}" -f "$COMPOSE_FILE" up -d --build --remove-orphans
 
 echo "==> 等待健康检查"
