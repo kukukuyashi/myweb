@@ -14,7 +14,7 @@ jobs:
           missing=0
           [ -z "${{ secrets.ECS_HOST }}" ] && echo "::error::Missing secret ECS_HOST" && missing=1
           [ -z "${{ secrets.ECS_USER }}" ] && echo "::error::Missing secret ECS_USER" && missing=1
-          [ -z "${{ secrets.ECS_SSH_KEY }}" ] && echo "::error::Missing secret ECS_SSH_KEY" && missing=1
+          # ECS_SSH_KEY 为多行私钥，不在 shell 中内联校验，由后续 SSH/rsync 步骤验证
           [ "$missing" -eq 1 ] && exit 1
 
       - uses: actions/checkout@v4
