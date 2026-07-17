@@ -17,6 +17,9 @@ class ForumCategory(Base):
 
     threads = relationship("ForumThread", back_populates="category")
 
+    def __str__(self) -> str:
+        return f"{self.name} ({self.slug})"
+
 
 class ForumThread(Base):
     __tablename__ = "forum_threads"
@@ -43,6 +46,10 @@ class ForumThread(Base):
     category = relationship("ForumCategory", back_populates="threads")
     user = relationship("User", backref="forum_threads")
     replies = relationship("ForumReply", back_populates="thread", cascade="all, delete-orphan")
+
+    def __str__(self) -> str:
+        title = (self.title or "")[:40]
+        return f"#{self.id} {title}"
 
 
 class ForumReply(Base):

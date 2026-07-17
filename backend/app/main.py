@@ -19,8 +19,10 @@ from app.core.validation_zh import format_validation_errors
 from app.models import ForumCategory, ForumReply, ForumThread, PomodoroSession, Post, QaMessage, User  # noqa: F401
 from app.models.checkin import UserCheckin  # noqa: F401
 from app.models.anime_watchlist import AnimeWatchlist  # noqa: F401
+from app.models.acg import AcgSubmission  # noqa: F401
 from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare, UserXpLog  # noqa: F401
 from app.services.forum_seed import seed_forum_categories
+from app.services.acg_scheduler import shutdown_scheduler, start_scheduler
 
 
 def _ensure_schema_patches() -> None:
@@ -76,7 +78,11 @@ async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
     _ensure_schema_patches()
     seed_forum_categories()
-    yield
+    start_scheduler()
+    try:
+        yield
+    finally:
+        shutdown_scheduler()
 
 
 def create_app() -> FastAPI:

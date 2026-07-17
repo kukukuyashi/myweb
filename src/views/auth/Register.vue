@@ -4,8 +4,8 @@
     subtitle="填写以下信息完成注册，验证码将发送到邮箱"
     brand-title="加入 CYINC 社区"
     brand-copy="注册后可逛论坛、收藏歌单、记录专注 — 与同好一起分享 ACG 与技术日常。"
-    :panel-image="authRegisterPanel"
-    :backdrop-image="authPageBackdrop"
+    :panel-image="authVisual.panel"
+    :backdrop-image="authVisual.backdrop"
     :stats="[
       { value: '邮箱', label: '验证码注册' },
       { value: '9+', label: '位安全密码' },
@@ -123,8 +123,9 @@ import { computed, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthShell from './AuthShell.vue'
 import { platformRegister, sendEmailVerificationCode } from '../../api/platform.js'
-import { authPageBackdrop, authRegisterPanel } from '../../data/authGallery.js'
+import { getAuthVisuals } from '../../data/authGallery.js'
 
+const authVisual = getAuthVisuals()
 const router = useRouter()
 const loading = ref(false)
 const codeSending = ref(false)

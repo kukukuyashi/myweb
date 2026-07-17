@@ -18,6 +18,13 @@ const props = defineProps({
   maxStamps: { type: Number, default: 130 },
   /** left | right — 文字保护渐变方向 */
   fadeDirection: { type: String, default: 'left' },
+  /**
+   * 遮罩不透明度：1 = 未扫过完全盖住；0.5 = 未扫过半透明看得见图案
+   * 鼠标墨染镂空后仍显示底层原图
+   */
+  maskOpacity: { type: Number, default: 1 },
+  /** 墨迹是否保留（登录/注册：扫过即为原图） */
+  persistReveal: { type: Boolean, default: false },
 })
 
 const rootRef = ref(null)
@@ -53,6 +60,8 @@ onMounted(() => {
   cleanup = initInkMask(root, canvas, {
     rEnd: props.rEnd,
     maxStamps: props.maxStamps,
+    maskOpacity: props.maskOpacity,
+    persistReveal: props.persistReveal,
   })
 })
 
@@ -60,7 +69,30 @@ onUnmounted(() => {
   cleanup?.()
 })
 
-function initInkMask(hero, canvas, { rEnd, maxStamps }) {
+function parseCssColor(input) {
+  const raw = (input || '').trim()
+  if (!raw) return { r: 245, g: 242, b: 238 }
+  if (raw.startsWith('#')) {
+    const hex = raw.slice(1)
+    const full =
+      hex.length === 3
+        ? hex
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        : hex
+    const n = Number.parseInt(full.slice(0, 6), 16)
+    if (Number.isNaN(n)) return { r: 245, g: 242, b: 238 }
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+  }
+  const m = raw.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i)
+  if (m) {
+    return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]) }
+  }
+  return { r: 245, g: 242, b: 238 }
+}
+
+function initInkMask(hero, canvas, { rEnd, maxStamps, maskOpacity = 1, persistReveal = false }) {
   const canHover = window.matchMedia('(hover: hover)').matches
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (!canHover || reduceMotion) return () => {}
@@ -71,10 +103,11 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
   const R_START = 6
   const R_END = rEnd
   const R_VARY = 0.48
-  const LIFETIME = 560
+  const LIFETIME = persistReveal ? 420 : 560
   const STAMP_STEP = 8
   const MAX_STAMPS = maxStamps
   const DPR = Math.min(window.devicePixelRatio || 1, 2)
+  const coverAlpha = Math.min(1, Math.max(0, maskOpacity))
 
   let w = 0
   let h = 0
@@ -88,6 +121,19 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
     return getComputedStyle(document.documentElement).getPropertyValue('--bg-paper').trim() || '#f5f2ee'
   }
 
+  function maskFillStyle() {
+    if (coverAlpha >= 0.999) return maskColor()
+    const { r, g, b } = parseCssColor(maskColor())
+    return `rgba(${r}, ${g}, ${b}, ${coverAlpha})`
+  }
+
+  function paintBaseMask() {
+    ctx.globalCompositeOperation = 'source-over'
+    if (coverAlpha < 0.999) ctx.clearRect(0, 0, w, h)
+    ctx.fillStyle = maskFillStyle()
+    ctx.fillRect(0, 0, w, h)
+  }
+
   function resize() {
     const rect = hero.getBoundingClientRect()
     w = rect.width
@@ -97,9 +143,8 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
     canvas.style.width = w + 'px'
     canvas.style.height = h + 'px'
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.fillStyle = maskColor()
-    ctx.fillRect(0, 0, w, h)
+    paintBaseMask()
+    if (stamps.length) start()
   }
 
   function addStamp(x, y) {
@@ -155,27 +200,37 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
 
   function loop() {
     const now = performance.now()
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.fillStyle = maskColor()
-    ctx.fillRect(0, 0, w, h)
+    paintBaseMask()
 
     ctx.globalCompositeOperation = 'destination-out'
+    let animating = false
     for (let i = stamps.length - 1; i >= 0; i--) {
       const t = (now - stamps[i].born) / LIFETIME
-      if (t >= 1) {
+      if (!persistReveal && t >= 1) {
         stamps.splice(i, 1)
         continue
       }
-      const ease = 1 - Math.pow(1 - t, 3)
+      const tt = Math.min(1, Math.max(0, t))
+      if (persistReveal && tt < 1) animating = true
+      if (!persistReveal) animating = true
+      const ease = 1 - Math.pow(1 - tt, 3)
       const r = R_START + (stamps[i].rmax - R_START) * ease
-      const alpha = 1 - t * t
+      const alpha = persistReveal ? 1 : 1 - tt * tt
       carveInk(stamps[i].x, stamps[i].y, r, alpha, stamps[i].seed)
     }
 
-    if (stamps.length) {
+    if (stamps.length && (!persistReveal || animating)) {
       rafId = requestAnimationFrame(loop)
     } else {
       running = false
+      // 持久墨迹：停帧前再画一次定格
+      if (persistReveal && stamps.length) {
+        paintBaseMask()
+        ctx.globalCompositeOperation = 'destination-out'
+        for (const s of stamps) {
+          carveInk(s.x, s.y, s.rmax, 1, s.seed)
+        }
+      }
     }
   }
 
@@ -215,7 +270,7 @@ function initInkMask(hero, canvas, { rEnd, maxStamps }) {
   resize()
 
   const themeObs = new MutationObserver(() => {
-    if (!stamps.length) resize()
+    resize()
   })
   themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 

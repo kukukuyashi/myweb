@@ -5,7 +5,8 @@
         :image="backdropImage || panelImage"
         position="center"
         :r-end="132"
-        :max-stamps="150"
+        :max-stamps="180"
+        :mask-opacity="0.55"
         fade-direction="left"
       />
       <div class="auth-page__ink-veil" />

@@ -23,3 +23,6 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
+
+    def __str__(self) -> str:
+        return f"{self.nickname or self.username} (#{self.id})"

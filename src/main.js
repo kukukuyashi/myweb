@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { initTheme } from './utils/theme.js'
+import { ensurePostsCatalogLoaded } from './data/posts.js'
 import './styles/main.css'
 
 initTheme()
@@ -34,5 +35,7 @@ if (redirectPath) {
   router.replace(redirectPath)
 }
 
-app.mount('#app')
-hideLoadingScreen()
+ensurePostsCatalogLoaded().finally(() => {
+  app.mount('#app')
+  hideLoadingScreen()
+})

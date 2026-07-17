@@ -276,6 +276,44 @@ export const posts = [
   }
 ]
 
+let _postsCatalogLoaded = false
+let _postsCatalogPromise = null
+
+/**
+ * 优先拉取 /myweb/data/posts.json（线上发布热更新），失败则保留打包进包的目录。
+ * 用 splice 原地更新，已 import posts 的模块会看到新数据。
+ */
+export async function reloadPostsCatalog() {
+  _postsCatalogLoaded = false
+  _postsCatalogPromise = null
+  return ensurePostsCatalogLoaded()
+}
+
+export function ensurePostsCatalogLoaded() {
+  if (_postsCatalogLoaded) return Promise.resolve(posts)
+  if (_postsCatalogPromise) return _postsCatalogPromise
+
+  _postsCatalogPromise = (async () => {
+    try {
+      const base = import.meta.env.BASE_URL || '/myweb/'
+      const res = await fetch(`${base}data/posts.json`, { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        const list = Array.isArray(data?.posts) ? data.posts : Array.isArray(data) ? data : null
+        if (list?.length) {
+          posts.splice(0, posts.length, ...list)
+        }
+      }
+    } catch {
+      /* keep bundled posts */
+    }
+    _postsCatalogLoaded = true
+    return posts
+  })()
+
+  return _postsCatalogPromise
+}
+
 /** 文章详情页路由 */
 export function postUrl(id) {
   return `/content/${id}`

@@ -28,3 +28,6 @@ class Post(Base):
     )
 
     author = relationship("User", backref="posts")
+
+    def __str__(self) -> str:
+        return f"#{self.id} {(self.title or '')[:40]}"

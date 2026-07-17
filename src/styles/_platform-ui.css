@@ -249,7 +249,7 @@
 [data-theme="dark"] .platform-layout .error { color: #ff8a80; }
 [data-theme="dark"] .platform-layout .success { color: #95d5b2; }
 
-/* ── 登录 / 注册（CyC 居中卡片 + CYINC 工业橙） ── */
+/* ── 登录 / 注册（卡片原样；半透明只在背后墨染层） ── */
 .auth-page {
   --auth-accent: var(--orange, #e85d04);
   --auth-ink-base: #f2ede6;
@@ -285,26 +285,20 @@
   pointer-events: none;
 }
 
+/* 后面墨染：底图保持原色；半透明由 canvas 遮罩完成（未扫过淡显，扫过见原图） */
 .auth-page__ink :deep(.ink-reveal__bg) {
-  filter: saturate(1.08) contrast(1.02) brightness(1.08);
+  filter: saturate(1.04) contrast(1.02) brightness(1.03);
   opacity: 1;
 }
 
-.auth-page__ink :deep(.ink-reveal__fade--left) {
-  background: radial-gradient(
-    ellipse 130% 110% at 50% 45%,
-    color-mix(in srgb, var(--auth-ink-base) 25%, transparent) 0%,
-    color-mix(in srgb, var(--auth-ink-base) 72%, transparent) 42%,
-    var(--auth-ink-base) 88%
-  );
-}
-
+.auth-page__ink :deep(.ink-reveal__fade--left),
 .auth-page__ink :deep(.ink-reveal__fade--right) {
+  /* 登录页不要大块纸色盖住图案，只留极轻晕染 */
   background: radial-gradient(
-    ellipse 130% 110% at 50% 45%,
-    color-mix(in srgb, var(--auth-ink-base) 25%, transparent) 0%,
-    color-mix(in srgb, var(--auth-ink-base) 72%, transparent) 42%,
-    var(--auth-ink-base) 88%
+    ellipse 140% 120% at 50% 48%,
+    transparent 0%,
+    color-mix(in srgb, var(--auth-ink-base) 12%, transparent) 70%,
+    color-mix(in srgb, var(--auth-ink-base) 28%, transparent) 100%
   );
 }
 
@@ -314,8 +308,8 @@
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 35%, rgba(242, 237, 230, 0.2) 100%),
-    linear-gradient(135deg, color-mix(in srgb, var(--auth-accent) 6%, transparent), transparent 55%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 30%, rgba(242, 237, 230, 0.08) 100%),
+    linear-gradient(135deg, color-mix(in srgb, var(--auth-accent) 4%, transparent), transparent 55%);
 }
 
 .auth-page__ink-hint {
@@ -337,16 +331,17 @@
     display: none;
   }
 
+  /* 触屏无墨染：整底半透明看得见图案 */
   .auth-page__ink :deep(.ink-reveal__bg) {
-    opacity: 0.55;
+    opacity: 0.5;
   }
 
   .auth-page__ink :deep(.ink-reveal__fade--left),
   .auth-page__ink :deep(.ink-reveal__fade--right) {
     background: radial-gradient(
       ellipse 120% 100% at 50% 50%,
-      color-mix(in srgb, var(--auth-ink-base) 40%, transparent) 0%,
-      var(--auth-ink-base) 85%
+      transparent 0%,
+      color-mix(in srgb, var(--auth-ink-base) 25%, transparent) 85%
     );
   }
 }

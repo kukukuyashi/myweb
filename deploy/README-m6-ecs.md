@@ -146,7 +146,39 @@ sudo certbot --nginx -d 你的域名.com -d www.你的域名.com
 - `https://你的域名.com/myweb/` — 首页
 - `https://你的域名.com/myweb/app` — 主站 Hub
 - `https://你的域名.com/api/health`
-- `https://你的域名.com/admin` — SQLAdmin
+- `https://你的域名.com/admin` — SQLAdmin（用户 / 论坛 / API 文章）
+- `https://你的域名.com/myweb/admin` — **笔记管理台**（Markdown → Content + posts.json）
+
+---
+
+## 3.8 线上笔记管理台
+
+与 SQLAdmin（`/admin`）不同：笔记管理台入口是 **`/myweb/admin`**，登录用同一套 `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH`。
+
+发布后写入：
+
+| 路径 | 用途 |
+|------|------|
+| `笔记/`（容器内 `/data/notes`） | Markdown 源 |
+| `myweb/Content/*.html` | 正文 |
+| `myweb/data/posts.json` | 文章目录（前端运行时拉取，无需立刻 rebuild） |
+
+首次上线请确保：
+
+```bash
+sudo mkdir -p /var/www/cyinc/笔记 /var/www/cyinc/myweb/Content /var/www/cyinc/myweb/data
+# 若前端包已含 data/posts.json，rsync 后会有；否则从本机构建产物拷贝
+# 建议把本地 笔记/ 同步一份到服务器作为初始稿库
+```
+
+`.env` 生产配置（与 `docker-compose.prod.yml` 挂载一致）：
+
+```env
+NOTES_ROOT=/data/notes
+SITE_WEB_ROOT=/data/web
+```
+
+验收：未登录不能读写；登录后新建 → 保存 →「发布到博客」→ 打开 `/myweb/` 可见新文。
 
 ---
 
@@ -201,16 +233,43 @@ bash deploy/scripts/sync-frontend.sh deploy@你的ECS_IP
 ## 六、运维命令
 
 ```bash
+# ECS 无 docker compose 插件时用 docker-compose（带连字符）
+COMPOSE="docker-compose -f docker-compose.prod.yml"
+# 或：COMPOSE="docker compose -f docker-compose.prod.yml"
+
 # API 日志
-docker compose -f docker-compose.prod.yml logs -f api
+$COMPOSE logs -f api
 
 # 重启 API
-docker compose -f docker-compose.prod.yml restart api
+$COMPOSE restart api
+
+# 健康检查
+curl -s http://127.0.0.1:8000/api/health
 
 # 磁盘：头像在 Docker volume uploads_data
 docker volume inspect cyinc_uploads_data
 
 # RDS 备份：阿里云控制台自动备份
+```
+
+### 6.1 常见故障
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 全站 `/api/*` 502 | API 容器未运行或启动失败 | `docker-compose -f docker-compose.prod.yml ps` + `logs api` |
+| `Can't connect to MySQL ... rm-xxxxx` | `backend/.env` 仍为示例占位符 | 改为 RDS 控制台**内网地址** |
+| `UnicodeEncodeError: latin-1` | `DATABASE_URL` 密码含中文 | 密码改为纯 ASCII |
+| Actions 健康检查失败 | 同上或部署先 down 后 API 起不来 | ECS 手动修 `.env` 后 `up -d --build`；见 [ECS-STATUS.md](./ECS-STATUS.md) |
+| `$'\r': command not found` | shell 脚本 CRLF | 仓库已加 `.gitattributes`；ECS 上 `sed -i 's/\r$//' deploy/scripts/deploy.sh` |
+| 追番页请求超时 | 旧版实时 mgnacg 搜索 ~40s | 拉最新 `main`（已关 live_suggest + 6h 缓存） |
+
+**恢复最小步骤**（API 502 时）：
+
+```bash
+cd /var/www/cyinc
+grep DATABASE_URL backend/.env   # 确认非 rm-xxxxx
+docker-compose -f docker-compose.prod.yml up -d --build
+curl -s http://127.0.0.1:8000/api/health
 ```
 
 ---

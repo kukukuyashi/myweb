@@ -262,8 +262,11 @@ bash deploy/scripts/sync-frontend.sh deploy@ECS_IP
 ### 改 `backend/.env` 后
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build api
+# ECS 常用 docker-compose（无 compose 插件时）
+docker-compose -f docker-compose.prod.yml up -d --build api
 ```
+
+线上排障快照见 [ECS-STATUS.md](./ECS-STATUS.md)。
 
 ---
 

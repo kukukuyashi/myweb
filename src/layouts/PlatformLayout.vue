@@ -17,6 +17,13 @@
           <p class="footer-line">
             与 <router-link to="/">个人博客</router-link> 账号通用 · FastAPI + Vue 3
           </p>
+          <p class="footer-beian">
+            <a
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >桂ICP备2026014828号-1</a>
+          </p>
         </div>
       </footer>
     </div>
@@ -124,7 +131,30 @@ const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Reg
   margin: 0;
 }
 
+.footer-beian {
+  margin: 0.65rem 0 0;
+}
+
+.footer-beian a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.footer-beian a:hover {
+  color: var(--orange);
+  border-bottom-color: color-mix(in srgb, var(--orange) 45%, transparent);
+}
+
 .platform-footer a {
+  color: var(--orange);
+}
+
+.platform-footer .footer-beian a {
+  color: var(--text-muted);
+}
+
+.platform-footer .footer-beian a:hover {
   color: var(--orange);
 }
 

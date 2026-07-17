@@ -16,6 +16,9 @@ services:
     restart: unless-stopped
     volumes:
       - uploads_data:/app/uploads
+      # 笔记管理台：读写 Markdown 与静态站 Content / posts.json
+      - ./笔记:/data/notes
+      - ./myweb:/data/web
     depends_on:
       redis:
         condition: service_started

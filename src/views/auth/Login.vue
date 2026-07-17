@@ -4,8 +4,8 @@
     subtitle="登录您的账号，探索主站功能"
     brand-title="欢迎回来"
     brand-copy="登录后可管理资料、发布 Markdown 文章、参与论坛讨论，并同步番茄钟专注记录。"
-    :panel-image="authLoginPanel"
-    :backdrop-image="authPageBackdrop"
+    :panel-image="authVisual.panel"
+    :backdrop-image="authVisual.backdrop"
     :stats="authDefaultStats"
     footer-note="© CYINC · 用爱发电，与博客账号通用"
   >
@@ -70,13 +70,10 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AuthShell from './AuthShell.vue'
 import { platformLogin } from '../../api/platform.js'
-import {
-  authPageBackdrop,
-  authLoginPanel,
-  authDefaultStats,
-} from '../../data/authGallery.js'
+import { authDefaultStats, getAuthVisuals } from '../../data/authGallery.js'
 
 const REMEMBER_KEY = 'cyinc_remember_username'
+const authVisual = getAuthVisuals()
 
 const route = useRoute()
 const router = useRouter()

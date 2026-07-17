@@ -9,14 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Require ECS deploy secrets
-        run: |
-          missing=0
-          [ -z "${{ secrets.ECS_HOST }}" ] && echo "::error::Missing secret ECS_HOST" && missing=1
-          [ -z "${{ secrets.ECS_USER }}" ] && echo "::error::Missing secret ECS_USER" && missing=1
-          [ -z "${{ secrets.ECS_SSH_KEY }}" ] && echo "::error::Missing secret ECS_SSH_KEY" && missing=1
-          [ "$missing" -eq 1 ] && exit 1
-
       - uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -58,9 +50,12 @@ jobs:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USER }}
           key: ${{ secrets.ECS_SSH_KEY }}
+          command_timeout: 30m
           script_stop: true
           script: |
             set -e
             APP_ROOT="${APP_ROOT:-/var/www/cyinc}"
             cd "$APP_ROOT"
+            git fetch origin
+            git reset --hard origin/main
             bash deploy/scripts/deploy.sh

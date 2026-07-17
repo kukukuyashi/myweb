@@ -144,15 +144,18 @@ const routes = [
     component: () => import('../views/Content.vue'),
     props: true
   },
-  ...(import.meta.env.DEV
-    ? [
-        {
-          path: '/admin',
-          name: 'NotesAdmin',
-          component: () => import('../views/admin/NotesAdmin.vue'),
-        },
-      ]
-    : []),
+  {
+    path: '/admin',
+    name: 'NotesAdmin',
+    component: () => import('../views/admin/NotesAdmin.vue'),
+    meta: { title: '笔记管理台' },
+  },
+  {
+    path: '/admin/acg-bot',
+    name: 'AcgBotAdmin',
+    component: () => import('../views/admin/AcgBotAdmin.vue'),
+    meta: { title: 'ACG 资讯机器人' },
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

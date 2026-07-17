@@ -1,0 +1,49 @@
+﻿python : Traceback (most recent call last):
+所在位置 C:\Users\GuloguloYH\AppData\Local\Temp\ps-script-3f6f5093-fd9b-4926-a33d-3f52b6f2558a.ps1:95 字符: 85
++ ... -8'; cd "D:\phpstudy\phpstudy_pro\WWW\gerenboke\backend"; python -c "
++                                                               ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\zoneinfo\_common.py", line 12, in load_tzdata
+    return importlib.resources.open_binary(package_name, resource_name)
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\importlib\resources.py", line 43, in open_binar
+y
+    package = _common.get_package(package)
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\importlib\_common.py", line 66, in get_package
+    resolved = resolve(package)
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\importlib\_common.py", line 57, in resolve
+    return cand if isinstance(cand, types.ModuleType) else importlib.import_module(cand)
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py", line 126, in import_mod
+ule
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1004, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'tzdata'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 16, in <module>
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\asyncio\runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\asyncio\base_events.py", line 646, in run_until
+_complete
+    return future.result()
+  File "<string>", line 6, in main
+  File "D:\phpstudy\phpstudy_pro\WWW\gerenboke\backend\app\services\bangumi_client.py", line 276, in build_schedule
+    season_info = current_season_info()
+  File "D:\phpstudy\phpstudy_pro\WWW\gerenboke\backend\app\services\bangumi_client.py", line 61, in current_season_info
+    now = now or datetime.now(ZoneInfo("Asia/Shanghai"))
+  File "C:\Users\GuloguloYH\AppData\Local\Programs\Python\Python310\lib\zoneinfo\_common.py", line 24, in load_tzdata
+    raise ZoneInfoNotFoundError(f"No time zone found with key {key}")
+zoneinfo._common.ZoneInfoNotFoundError: 'No time zone found with key Asia/Shanghai'

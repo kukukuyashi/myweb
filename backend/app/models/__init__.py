@@ -2,6 +2,7 @@ from app.models.anime_watchlist import AnimeWatchlist
 from app.models.checkin import UserCheckin
 from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare, UserXpLog
 from app.models.forum import ForumCategory, ForumReply, ForumThread
+from app.models.acg import AcgSubmission
 from app.models.pomodoro import PomodoroSession
 from app.models.post import Post
 from app.models.qa import QaMessage
@@ -14,6 +15,7 @@ __all__ = [
     "ForumCategory",
     "ForumThread",
     "ForumReply",
+    "AcgSubmission",
     "QaMessage",
     "UserCheckin",
     "AnimeWatchlist",

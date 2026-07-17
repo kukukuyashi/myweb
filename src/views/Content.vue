@@ -131,13 +131,7 @@
                 </ul>
               </section>
 
-              <section v-if="!error" ref="commentsRef" class="article-comments">
-                <div v-if="readProgress >= 95" class="read-complete">读完 · 100%</div>
-                <h3 class="comments-head">评论</h3>
-                <p v-if="commentStatus === 'loading'" class="comments-hint">评论加载中…</p>
-                <p v-if="commentStatus === 'error'" class="comments-hint error">评论暂不可用</p>
-                <div id="article-tcomment"></div>
-              </section>
+              <p v-if="!error && readProgress >= 95" class="read-complete">读完 · 100%</p>
             </div>
           </div>
         </div>
@@ -164,7 +158,6 @@ import {
 } from '../data/posts'
 import { getSeriesForPost } from '../data/series'
 import { usePageMeta, pageUrl, buildArticleJsonLd, absoluteAssetUrl } from '../composables/usePageMeta'
-import { useTwikoo } from '../composables/useTwikoo'
 import { highlightArticle, estimateReadingMinutes } from '../utils/highlightCode'
 
 const route = useRoute()
@@ -184,11 +177,8 @@ const adjacent = ref({ newer: null, older: null })
 const relatedPosts = ref([])
 const readProgress = ref(0)
 const copyDone = ref(false)
-const commentsRef = ref(null)
 let observer = null
 let scrollHandler = null
-let commentsObserver = null
-let commentsInitialized = false
 
 const postId = computed(() => route.params.id)
 const currentPost = computed(() => getPostById(postId.value))
@@ -235,43 +225,6 @@ async function copyArticleLink() {
   }
 }
 
-const { status: commentStatus, init: initComments } = useTwikoo('article-tcomment', () => ({
-  path: `/content/${postId.value}`,
-}))
-
-function teardownCommentsObserver() {
-  commentsObserver?.disconnect()
-  commentsObserver = null
-}
-
-function setupLazyComments() {
-  teardownCommentsObserver()
-  if (commentsInitialized) return
-  const el = commentsRef.value
-  if (!el) return
-
-  const run = () => {
-    if (commentsInitialized) return
-    commentsInitialized = true
-    initComments()
-  }
-
-  if (!('IntersectionObserver' in window)) {
-    run()
-    return
-  }
-
-  commentsObserver = new IntersectionObserver(
-    (entries) => {
-      if (!entries[0]?.isIntersecting) return
-      run()
-      teardownCommentsObserver()
-    },
-    { rootMargin: '200px', threshold: 0.01 },
-  )
-  commentsObserver.observe(el)
-}
-
 async function loadArticleContent() {
   loading.value = true
   error.value = ''
@@ -281,8 +234,6 @@ async function loadArticleContent() {
   relatedPosts.value = []
   adjacent.value = { newer: null, older: null }
   readProgress.value = 0
-  commentsInitialized = false
-  teardownCommentsObserver()
   teardownScrollProgress()
 
   const post = currentPost.value
@@ -306,7 +257,7 @@ async function loadArticleContent() {
     const url = `${base}Content/${encodeURIComponent(post.file)}`
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 15000)
-    const response = await fetch(url, { signal: controller.signal })
+    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' })
     clearTimeout(timer)
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     let content = await response.text()
@@ -334,7 +285,6 @@ async function loadArticleContent() {
       scrollToSection(id)
     }
     await nextTick()
-    setupLazyComments()
   } catch (e) {
     console.error('加载文章失败:', e)
     loading.value = false
@@ -417,7 +367,6 @@ watch(postId, () => loadArticleContent())
 onUnmounted(() => {
   if (observer) observer.disconnect()
   teardownScrollProgress()
-  teardownCommentsObserver()
 })
 </script>
 
@@ -526,7 +475,7 @@ onUnmounted(() => {
   font-size: 0.7rem;
   color: var(--orange);
   letter-spacing: 0.08em;
-  margin-bottom: 0.75rem;
+  margin: 1.5rem 0 0;
   padding: 0.35rem 0.65rem;
   border: 1px dashed var(--orange);
   display: inline-block;
@@ -597,7 +546,7 @@ onUnmounted(() => {
   margin-bottom: 2rem;
 }
 
-.related-head, .comments-head {
+.related-head {
   font-family: var(--mono);
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -632,23 +581,6 @@ onUnmounted(() => {
   color: var(--text-muted);
   flex-shrink: 0;
 }
-
-.article-comments {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed var(--border);
-}
-
-.comments-hint {
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
-}
-
-.comments-hint.error { color: #c0392b; }
-
-.content-page :deep(.tk-extras) { display: none; }
 
 .article-body :deep(table) {
   width: 100%;

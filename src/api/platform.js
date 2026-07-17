@@ -324,7 +324,7 @@ export async function fetchCheckinCalendar(months = 3) {
 export async function fetchAnimeSchedule() {
   const token = getPlatformToken()
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 12000)
+  const timer = setTimeout(() => controller.abort(), 30000)
   try {
     const headers = { 'Content-Type': 'application/json; charset=utf-8' }
     if (token) headers.Authorization = `Bearer ${token}`

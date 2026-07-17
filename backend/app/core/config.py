@@ -34,6 +34,18 @@ class Settings(BaseSettings):
     smtp_use_ssl: bool = True
     mgnacg_base_url: str = "https://www.mgnacg.com"
     mgnacg_enabled: bool = True
+    # 笔记管理台：空则自动推断仓库布局 / ECS /var/www/cyinc
+    notes_root: str = ""
+    site_web_root: str = ""
+    notes_admin_token_expire_minutes: int = 60 * 8
+    # ACG 资讯机器人
+    acg_bot_username: str = "acg-bot"
+    acg_bot_category_slug: str = ""
+    acg_rss_feeds: str = ""
+    # 定时任务：每日几点自动生成草稿（本地时区 Asia/Shanghai），设为空字符串禁用
+    acg_bot_schedule_cron: str = "0 8 * * *"
+    # 定时任务是否自动发布"每日速报"（深度文章始终仅入草稿等审核）
+    acg_bot_auto_publish_daily: bool = True
 
     @field_validator("secret_key")
     @classmethod

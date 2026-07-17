@@ -151,17 +151,23 @@ async def resolve_watch_url(
     return url
 
 
-async def attach_watch_urls(items: list[dict]) -> list[dict]:
+async def attach_watch_urls(items: list[dict], *, live_suggest: bool = True) -> list[dict]:
     """为番剧列表批量附加 watch_url。"""
 
     async def _one(item: dict) -> dict:
         out = dict(item)
         if out.get("watch_url"):
             return out
+        vod_id = out.get("mgnacg_vod_id")
+        if vod_id and get_settings().mgnacg_enabled:
+            out["watch_url"] = play_url(vod_id)
+            return out
+        if not live_suggest:
+            return out
         url = await resolve_watch_url(
             out.get("name_cn"),
             out.get("name"),
-            vod_id=out.get("mgnacg_vod_id"),
+            vod_id=vod_id,
         )
         if url:
             out["watch_url"] = url
@@ -176,6 +182,8 @@ async def enrich_schedule_watch_urls(
     season: list[dict],
     today_items: list[dict],
     weekdays: list[dict],
+    *,
+    live_suggest: bool = False,
 ) -> tuple[list[dict], list[dict], list[dict]]:
     """按 bangumi_id 去重后解析一次 watch_url，再写回各列表。"""
     by_id: dict[int, dict] = {}
@@ -184,7 +192,7 @@ async def enrich_schedule_watch_urls(
         if bid:
             by_id[bid] = item
 
-    resolved = await attach_watch_urls(list(by_id.values()))
+    resolved = await attach_watch_urls(list(by_id.values()), live_suggest=live_suggest)
     url_by_id = {
         row["bangumi_id"]: row["watch_url"]
         for row in resolved
