@@ -3,7 +3,8 @@
  *
  * - 原图（`img/关于/xx.jpg`）继续可用于灯箱/大图；
  * - 列表/贴纸墙/轮播用 `thumbUrl(...)` 拿到 ~720px 的 webp；
- * - 删除任何 .thumb.webp 或 manifest 后自动降级为原图。
+ * - 删除任何 .thumb.webp 或 manifest 后自动降级为原图；
+ * - 缩略图 404 时用 `onThumbError` 切回原图，防止部署漂移破图。
  */
 import { imgUrl } from '../data/profile.js'
 import manifest from '../data/thumbManifest.json'
@@ -31,4 +32,16 @@ export function thumbUrl(relativePath) {
   if (!relativePath) return ''
   if (hasThumb(relativePath)) return imgUrl(toThumbRel(relativePath))
   return imgUrl(relativePath)
+}
+
+/**
+ * `<img @error="onThumbError($event, originalRel)">`
+ * 缩略图加载失败时切回原图；用 dataset 防止死循环。
+ */
+export function onThumbError(event, originalRel) {
+  const el = event?.target
+  if (!el || !originalRel) return
+  if (el.dataset.thumbFallback === '1') return
+  el.dataset.thumbFallback = '1'
+  el.src = imgUrl(originalRel)
 }

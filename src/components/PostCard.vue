@@ -15,7 +15,12 @@
       </div>
       <div class="post-card-main">
         <div v-if="thumbUrl" class="post-card-thumb">
-          <img :src="thumbUrl" :alt="post.title" loading="lazy">
+          <img
+            :src="thumbUrl"
+            :alt="post.title"
+            loading="lazy"
+            @error="onThumbError($event, getPostCover(post))"
+          >
         </div>
         <div v-else class="post-card-icon" aria-hidden="true">{{ categoryIcon }}</div>
         <div class="post-card-text">
@@ -42,7 +47,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategoryColor, getCategoryIcon, estimateReadingMinutesFromText, tagUrl, getPostCover, hasPostCover } from '../data/posts'
-import { thumbUrl as makeThumbUrl } from '../utils/thumbs.js'
+import { thumbUrl as makeThumbUrl, onThumbError } from '../utils/thumbs.js'
 import { onArticleHover } from '../composables/useLinkPrefetch'
 
 const props = defineProps({

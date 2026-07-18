@@ -27,6 +27,7 @@
             :alt="item.title || item.label"
             loading="lazy"
             decoding="async"
+            @error="onThumbError($event, item.path)"
           >
         </div>
         <div v-else class="sticker-img sticker-img--empty" aria-hidden="true" />
@@ -73,7 +74,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { imgUrl } from '../data/profile'
-import { thumbUrl } from '../utils/thumbs.js'
+import { thumbUrl, onThumbError } from '../utils/thumbs.js'
 
 const BATCH = 24
 

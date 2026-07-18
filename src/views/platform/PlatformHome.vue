@@ -50,7 +50,13 @@
 
         <figure class="hero-portrait">
           <div class="acg-frame acg-frame--portrait">
-            <img :src="thumbUrl(platformPortrait)" alt="立绘" loading="lazy" decoding="async">
+            <img
+              :src="thumbUrl(platformPortrait)"
+              alt="立绘"
+              loading="lazy"
+              decoding="async"
+              @error="onThumbError($event, platformPortrait)"
+            >
           </div>
           <figcaption>ARCHIVE · img/BA</figcaption>
         </figure>
@@ -182,7 +188,12 @@
           :class="{ accent: item.accent }"
         >
           <div class="work-thumb">
-            <img :src="thumbUrl(item.thumb)" alt="" loading="lazy">
+            <img
+              :src="thumbUrl(item.thumb)"
+              alt=""
+              loading="lazy"
+              @error="onThumbError($event, item.thumb)"
+            >
           </div>
           <div class="work-body">
             <span class="work-tag">{{ item.tag }}</span>
@@ -304,7 +315,7 @@ import {
 } from '../../data/platformBaGallery.js'
 import { guestboardExamples } from '../../data/social.js'
 import { imgUrl, profile as siteProfile } from '../../data/profile.js'
-import { thumbUrl } from '../../utils/thumbs.js'
+import { thumbUrl, onThumbError } from '../../utils/thumbs.js'
 import {
   createQaMessage,
   fetchPomodoroStats,

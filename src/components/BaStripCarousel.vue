@@ -16,7 +16,13 @@
           @click="emit('select', item.index)"
         >
           <div class="acg-frame acg-frame--gallery">
-            <img :src="thumbUrl(item.path)" :alt="item.label" loading="lazy" decoding="async">
+            <img
+              :src="thumbUrl(item.path)"
+              :alt="item.label"
+              loading="lazy"
+              decoding="async"
+              @error="onThumbError($event, item.path)"
+            >
           </div>
           <span class="ba-carousel-label">{{ item.label }}</span>
         </button>
@@ -27,8 +33,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { imgUrl } from '../data/profile.js'
-import { thumbUrl } from '../utils/thumbs.js'
+import { thumbUrl, onThumbError } from '../utils/thumbs.js'
 
 const props = defineProps({
   items: { type: Array, required: true },
