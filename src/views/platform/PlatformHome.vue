@@ -32,12 +32,12 @@
             <div class="acg-frame acg-frame--profile">
               <img
                 :src="heroAvatarSrc"
-                :alt="profile?.nickname || 'Cyinc'"
+                :alt="siteProfile.name"
                 width="100"
                 height="100"
                 loading="eager"
               >
-              <span class="frame-label">{{ profile ? 'ID · CYINC' : 'GUEST' }}</span>
+              <span class="frame-label">CYINC</span>
             </div>
             <div class="hero-intro">
               <p class="hero-tagline">{{ welcomeSubtitle }}</p>
@@ -212,18 +212,18 @@
       </div>
     </section>
 
-    <!-- 最新博客 -->
+    <!-- 最新文章 -->
     <section id="posts" class="section-block ink-panel reveal-item" data-reveal>
       <header class="section-header">
-        <h2 class="section-title">最新博客</h2>
-        <router-link to="/" class="section-more">全部文章 →</router-link>
+        <h2 class="section-title">最新文章</h2>
+        <router-link to="/app/me" class="section-more">全部文章 →</router-link>
       </header>
       <p v-if="postsLoading" class="muted">加载中…</p>
       <div v-else-if="recentPosts.length" class="post-card-grid">
         <router-link
           v-for="p in recentPosts"
           :key="p.id"
-          :to="`/post/${p.slug}`"
+          :to="`/app/posts/${p.id}`"
           class="post-card"
         >
           <span class="post-card-cat">{{ p.category || '日志' }}</span>
@@ -233,7 +233,7 @@
         </router-link>
       </div>
       <p v-else class="muted">
-        暂无文章 — <router-link to="/">去博客看看</router-link>
+        暂无文章 — <router-link to="/app/me">去个人中心写一篇</router-link>
       </p>
     </section>
 
@@ -323,7 +323,6 @@ import {
   fetchProfile,
   fetchQaMessages,
   getPlatformToken,
-  resolveMediaUrl,
 } from '../../api/platform.js'
 
 usePageMeta({
@@ -352,17 +351,12 @@ const postsLoading = ref(true)
 const heroTags = siteProfile.acgTags.slice(0, 5)
 
 const welcomeSubtitle = computed(() => {
-  if (profile.value?.nickname) return `欢迎回来，${profile.value.nickname}。`
+  if (profile.value?.nickname) return '欢迎回到 CYINC 主站。'
   return '随便逛逛，有事去留言板说～'
 })
 
-/** 上传头像走 /uploads（API 同源），本地图走 /myweb/img；禁止对 /uploads 用 imgUrl */
-const heroAvatarSrc = computed(() => {
-  const avatar = profile.value?.avatar
-  if (!avatar) return imgUrl('img/xiaoqing.png')
-  if (avatar.startsWith('/uploads/') || avatar.startsWith('http')) return resolveMediaUrl(avatar)
-  return imgUrl(avatar)
-})
+/** 站点形象头像（与下方兴趣标签同属品牌区，不用登录用户上传头像） */
+const heroAvatarSrc = computed(() => imgUrl(siteProfile.avatar || 'img/xiaoqing.png'))
 
 const siteDays = computed(() => {
   const start = new Date(platformLaunchDate)

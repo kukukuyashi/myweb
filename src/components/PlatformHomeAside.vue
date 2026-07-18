@@ -38,17 +38,17 @@
     </div>
 
     <div class="panel">
-      <div class="panel-header">最新博客</div>
+      <div class="panel-header">最新文章</div>
       <div class="panel-body">
         <p v-if="postsLoading" class="aside-muted">加载中…</p>
         <ul v-else-if="recentPosts.length" class="aside-posts">
           <li v-for="p in recentPosts" :key="p.id">
-            <router-link :to="`/post/${p.slug}`">{{ p.title }}</router-link>
+            <router-link :to="`/app/posts/${p.id}`">{{ p.title }}</router-link>
             <time>{{ formatDate(p.published_at || p.created_at) }}</time>
           </li>
         </ul>
         <p v-else class="aside-muted">
-          <router-link to="/">去博客</router-link>
+          <router-link to="/app/me">去个人中心</router-link>
         </p>
       </div>
     </div>

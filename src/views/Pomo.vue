@@ -38,7 +38,7 @@
         :style="minimalMode ? undefined : coreAccentStyle"
       >
         <template v-if="!minimalMode">
-          <div class="pomo-deco-bg" :style="{ backgroundImage: `url(${imgUrl(activeCompanion.img)})` }" aria-hidden="true" />
+          <div class="pomo-deco-bg" :style="{ backgroundImage: `url('${thumbUrl(activeCompanion.img)}')` }" aria-hidden="true" />
           <div class="pomo-petals" aria-hidden="true" />
         </template>
         <div class="cockpit-grid" aria-hidden="true" />
@@ -46,7 +46,12 @@
         <div class="pomo-stage" :class="{ 'pomo-stage--solo': minimalMode }">
           <aside v-if="!minimalMode && !isFullscreen" class="pomo-companion">
             <div class="acg-frame acg-frame--profile pomo-portrait">
-              <img :src="imgUrl(activeCompanion.img)" :alt="activeCompanion.name" loading="lazy" />
+              <img
+                :src="thumbUrl(activeCompanion.img)"
+                :alt="activeCompanion.name"
+                loading="lazy"
+                @error="onThumbError($event, activeCompanion.img)"
+              />
               <span class="frame-label">{{ activeCompanion.series }}</span>
             </div>
             <div class="pomo-bubble">
@@ -68,7 +73,11 @@
                   :title="c.name"
                   @click="selectCompanion(c.id)"
                 >
-                  <img :src="imgUrl(c.img)" :alt="c.name" />
+                  <img
+                    :src="thumbUrl(c.img)"
+                    :alt="c.name"
+                    @error="onThumbError($event, c.img)"
+                  />
                 </button>
               </div>
             </div>
@@ -145,7 +154,11 @@
         </div>
 
         <figure v-if="!minimalMode && isFullscreen" class="pomo-fs-companion">
-          <img :src="imgUrl(activeCompanion.img)" :alt="activeCompanion.name" />
+          <img
+            :src="thumbUrl(activeCompanion.img)"
+            :alt="activeCompanion.name"
+            @error="onThumbError($event, activeCompanion.img)"
+          />
           <figcaption>{{ companionLine }}</figcaption>
         </figure>
       </section>
@@ -207,7 +220,11 @@
         <div class="modal platform-panel ink-panel pomo-reflect-modal" :class="{ 'pomo-reflect-modal--minimal': minimalMode }">
           <div v-if="!minimalMode" class="reflect-hero">
             <div class="acg-frame acg-frame--profile reflect-portrait">
-              <img :src="imgUrl(activeCompanion.img)" :alt="activeCompanion.name" />
+              <img
+                :src="thumbUrl(activeCompanion.img)"
+                :alt="activeCompanion.name"
+                @error="onThumbError($event, activeCompanion.img)"
+              />
               <span class="frame-label">MISSION CLEAR</span>
             </div>
             <div>
@@ -238,7 +255,7 @@
         v-if="studyRoomOpen && !minimalMode"
         ref="studyRoomRef"
         :companion="activeCompanion"
-        :companion-img="imgUrl(activeCompanion.img)"
+        :companion-img="thumbUrl(activeCompanion.img)"
         :companion-line="companionLine"
         :display-time="displayTime"
         :mode="mode"
@@ -276,7 +293,7 @@ import { musicTracks } from '../data/musicTracks.js'
 import { buildTrackList } from '../utils/music.js'
 import { useMusicStore } from '../store'
 import { PLATFORM_POMO_INK_IMAGE, PLATFORM_POMO_INK_POSITION } from '../data/inkTheme.js'
-import { imgUrl } from '../data/profile.js'
+import { thumbUrl, onThumbError } from '../utils/thumbs.js'
 import {
   getDefaultCompanionId,
   normalizeCompanionId,

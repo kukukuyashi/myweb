@@ -40,8 +40,7 @@
 
         <!-- 搜索 -->
         <div class="forum-search">
-          <input v-model="searchQuery" type="search" placeholder="搜索话题…" class="forum-search-input">
-          <button type="button" class="platform-btn-primary forum-search-btn">搜索</button>
+          <input v-model="searchQuery" type="search" placeholder="搜索话题…" class="forum-search-input" aria-label="搜索话题">
         </div>
 
         <!-- 分类标签 -->
@@ -385,11 +384,6 @@ onMounted(load)
   border-radius: 999px;
   background: var(--bg);
   font: inherit;
-}
-
-.forum-search-btn {
-  border-radius: 999px;
-  flex-shrink: 0;
 }
 
 .forum-tags {

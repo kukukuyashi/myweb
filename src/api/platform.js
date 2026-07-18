@@ -55,6 +55,12 @@ export async function platformFetch(path, { method = 'GET', body, auth = false }
     throw new Error(res.statusText || '请求失败')
   }
   if (!res.ok) {
+    if (res.status === 401) {
+      setPlatformToken(null)
+      const err = new Error(formatApiError(json.detail ?? json.message ?? '登录已过期，请重新登录'))
+      err.code = 'AUTH_REQUIRED'
+      throw err
+    }
     throw new Error(formatApiError(json.detail ?? json.message ?? res.statusText))
   }
   if (json.code != null && json.code !== 0) {

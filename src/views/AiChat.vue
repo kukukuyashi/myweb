@@ -12,7 +12,7 @@
       <h2>登录后使用 AI 助手</h2>
       <p class="ai-guest-hint">请先登录或注册主站账号，会话将绑定你的 CYINC 身份。</p>
       <div class="ai-guest-actions">
-        <router-link to="/app/login?redirect=/app/ai" class="platform-btn-primary">登录</router-link>
+        <router-link to="/app/login?redirect=/app/forum" class="platform-btn-primary">登录</router-link>
         <router-link to="/app/register" class="platform-btn-ghost">注册</router-link>
       </div>
     </section>

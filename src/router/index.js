@@ -56,6 +56,10 @@ const routes = [
         component: () => import('../views/platform/PlatformHome.vue'),
       },
       {
+        path: 'ai',
+        redirect: '/app/forum',
+      },
+      {
         path: 'forum',
         name: 'ForumCategories',
         component: () => import('../views/platform/ForumCategories.vue'),
