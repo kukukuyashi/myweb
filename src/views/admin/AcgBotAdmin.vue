@@ -18,6 +18,9 @@
         <button v-if="authed" type="button" class="btn btn-primary" :disabled="generating" @click="handleGenerate">
           {{ generating ? '采集中…' : '一键生成今日汇总' }}
         </button>
+        <button v-if="authed" type="button" class="btn btn-ghost" :disabled="repairing" @click="handleRepairMedia">
+          {{ repairing ? '补图中…' : '修复已发帖配图' }}
+        </button>
         <button v-if="authed" type="button" class="btn btn-ghost" @click="reloadList">刷新</button>
         <button v-if="authed" type="button" class="btn btn-ghost" @click="logout">退出</button>
       </div>
@@ -199,6 +202,7 @@ import {
   generateDigest,
   previewSubmission,
   publishSubmission,
+  repairPublishedMedia,
   updateSubmission,
 } from '../../api/acgBot'
 
@@ -210,6 +214,7 @@ const loginForm = reactive({ username: 'Cyinc', password: '' })
 const baseUrl = import.meta.env.BASE_URL || '/'
 const useAi = ref(false)
 const generating = ref(false)
+const repairing = ref(false)
 const loadingList = ref(false)
 const saving = ref(false)
 const publishing = ref(false)
@@ -370,6 +375,19 @@ async function handleGenerate() {
     flash(err.message, 'error')
   } finally {
     generating.value = false
+  }
+}
+
+async function handleRepairMedia() {
+  repairing.value = true
+  try {
+    const res = await repairPublishedMedia(30)
+    const n = res?.fixed?.length || 0
+    flash(n ? `已为 ${n} 篇已发帖补上配图` : '没有需要补图的帖子（或抓取失败）', n ? 'success' : 'info')
+  } catch (err) {
+    flash(err.message, 'error')
+  } finally {
+    repairing.value = false
   }
 }
 

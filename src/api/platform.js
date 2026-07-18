@@ -1,4 +1,5 @@
 import { formatApiError } from '../utils/apiError.js'
+import { imgUrl } from '../data/profile.js'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '')
 
@@ -13,6 +14,23 @@ export function resolveMediaUrl(url) {
   if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url
   const origin = apiOrigin()
   return `${origin}${url.startsWith('/') ? url : `/${url}`}`
+}
+
+/**
+ * 站点静态资源（img/…）+ API 上传（/uploads/…）+ 外链统一解析。
+ * 论坛头像、封面等混用路径时用这个，不要用 imgUrl 硬拼外链。
+ */
+export function resolvePublicUrl(url) {
+  if (!url) return ''
+  const s = String(url).trim()
+  if (!s) return ''
+  if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('data:') || s.startsWith('blob:')) {
+    return s
+  }
+  if (s.startsWith('img/') || s.startsWith('/img/')) {
+    return imgUrl(s.replace(/^\//, ''))
+  }
+  return resolveMediaUrl(s)
 }
 
 export function getPlatformToken() {

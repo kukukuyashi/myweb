@@ -240,3 +240,56 @@ def categories(
             ]
         }
     )
+
+
+@router.post("/repair-published-media", summary="给资讯姬已发帖补配图")
+async def repair_published_media(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+):
+    """扫描机器人已发帖：正文缺 Markdown 图时，按原文链接抓 og:image 并插入。"""
+    import re
+
+    from app.models.forum import ForumThread
+    from app.services.acg_articles import _fetch_page_images
+    from app.services.acg_publish import get_or_create_bot_user
+
+    bot = get_or_create_bot_user(db)
+    threads = (
+        db.query(ForumThread)
+        .filter(ForumThread.user_id == bot.id)
+        .order_by(ForumThread.id.desc())
+        .limit(limit)
+        .all()
+    )
+    link_re = re.compile(r"<(https?://[^>\s]+)>")
+    fixed: list[dict[str, Any]] = []
+    for thread in threads:
+        content = thread.content or ""
+        if "![" in content:
+            continue
+        m = link_re.search(content)
+        if not m:
+            continue
+        images = await _fetch_page_images(m.group(1), limit=4)
+        if not images:
+            continue
+        img_block = "\n\n".join(f"![配图]({u})" for u in images)
+        # 插在第一段引用之后
+        if content.startswith(">"):
+            parts = content.split("\n\n", 1)
+            if len(parts) == 2:
+                content = f"{parts[0]}\n\n{img_block}\n\n{parts[1]}"
+            else:
+                content = f"{content}\n\n{img_block}"
+        else:
+            content = f"{img_block}\n\n{content}"
+        thread.content = content
+        if not thread.cover_url:
+            thread.cover_url = images[0]
+        fixed.append({"thread_id": thread.id, "images": len(images)})
+
+    db.commit()
+    return ok({"fixed": fixed, "scanned": len(threads)}, message=f"已修复 {len(fixed)} 篇")
+

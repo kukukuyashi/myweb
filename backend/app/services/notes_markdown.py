@@ -91,6 +91,11 @@ def _inline(s: str) -> str:
     out = escape(s)
     out = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(
+        r"!\[([^\]]*)\]\(([^)]+)\)",
+        r'<img src="\2" alt="\1" loading="lazy" />',
+        out,
+    )
+    out = re.sub(
         r"\[([^\]]+)\]\(([^)]+)\)",
         r'<a href="\2" target="_blank" rel="noopener">\1</a>',
         out,

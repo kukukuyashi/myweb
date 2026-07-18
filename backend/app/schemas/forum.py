@@ -7,6 +7,7 @@ class ForumAuthor(BaseModel):
     id: int
     username: str
     nickname: str
+    avatar: str | None = None
     level: int = 1
     level_title: str = "见习"
 

@@ -13,6 +13,8 @@ from app.models.forum import ForumCategory, ForumThread
 from app.models.user import User
 
 BOT_NICKNAME = "ACG 资讯姬"
+# 站点静态图（约 32KB），前端用 resolvePublicUrl / imgUrl 解析；勿用用户 uploads
+BOT_AVATAR = "img/xiaoqing.thumb.webp"
 
 
 def get_or_create_bot_user(db: Session) -> User:
@@ -21,6 +23,15 @@ def get_or_create_bot_user(db: Session) -> User:
     username = settings.acg_bot_username or "acg-bot"
     bot = db.query(User).filter(User.username == username).first()
     if bot:
+        dirty = False
+        if bot.nickname != BOT_NICKNAME:
+            bot.nickname = BOT_NICKNAME
+            dirty = True
+        if not bot.avatar or bot.avatar != BOT_AVATAR:
+            bot.avatar = BOT_AVATAR
+            dirty = True
+        if dirty:
+            db.flush()
         return bot
 
     bot = User(
@@ -28,6 +39,7 @@ def get_or_create_bot_user(db: Session) -> User:
         email=f"{username}@bot.cyinc.ink",
         password_hash=get_password_hash(secrets.token_urlsafe(24)),
         nickname=BOT_NICKNAME,
+        avatar=BOT_AVATAR,
     )
     db.add(bot)
     db.flush()

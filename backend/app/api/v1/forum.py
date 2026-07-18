@@ -51,6 +51,7 @@ def _author_dict(user: User | None) -> ForumAuthor | None:
         id=user.id,
         username=user.username,
         nickname=user.nickname,
+        avatar=user.avatar,
         level=user.level,
         level_title=tier.title,
     )

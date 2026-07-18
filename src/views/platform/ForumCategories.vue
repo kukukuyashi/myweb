@@ -80,7 +80,15 @@
               <li v-for="t in pagedThreads" :key="t.id || t.title" class="forum-thread-card platform-panel">
                 <router-link v-if="t.id" :to="`/app/forum/t/${t.id}`" class="forum-thread-link">
                   <div class="forum-thread-head">
-                    <img v-if="t.cover" :src="imgUrl(t.cover)" alt="" class="forum-thread-avatar">
+                    <img
+                      v-if="authorAvatar(t)"
+                      :src="authorAvatar(t)"
+                      alt=""
+                      class="forum-thread-avatar"
+                    >
+                    <span v-else class="forum-thread-avatar forum-thread-avatar--placeholder" aria-hidden="true">
+                      {{ (t.author?.nickname || t.author?.username || '?').slice(0, 1) }}
+                    </span>
                     <div class="forum-thread-meta-top">
                       <span class="forum-thread-author">{{ t.author?.nickname || t.author?.username || '访客' }}</span>
                       <span class="forum-thread-time">{{ formatDate(t.created_at) }}</span>
@@ -154,13 +162,13 @@ import ForumCheckinCard from '../../components/forum/ForumCheckinCard.vue'
 import { PLATFORM_FORUM_INK_IMAGE, PLATFORM_FORUM_INK_POSITION } from '../../data/inkTheme.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { forumAnnouncements, pickCover } from '../../data/forumDemo.js'
-import { imgUrl } from '../../data/profile.js'
 import {
   fetchForumCategories,
   fetchForumFeaturedThreads,
   fetchForumRecentThreads,
   fetchMyForumThreads,
   getPlatformToken,
+  resolvePublicUrl,
 } from '../../api/platform.js'
 
 usePageMeta({ title: '论坛', description: 'CYINC ACG 社区论坛。' })
@@ -230,6 +238,10 @@ const hotThreads = computed(() =>
 function formatDate(iso) {
   if (!iso) return '刚刚'
   return new Date(iso).toLocaleString('zh-CN', { hour12: false })
+}
+
+function authorAvatar(t) {
+  return resolvePublicUrl(t?.author?.avatar || '')
 }
 
 async function load() {
@@ -457,6 +469,17 @@ onMounted(load)
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.forum-thread-avatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-paper);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
 }
 
 .forum-thread-meta-top {

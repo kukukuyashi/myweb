@@ -36,7 +36,12 @@ class RssItem:
     category: str
     published: str = ""
     published_ts: float = 0.0
+    # 短摘要（常为纯文本 description）
     summary: str = ""
+    # 完整 HTML（content:encoded / entry.content），含配图
+    content_html: str = ""
+    # media:content / enclosure 等结构化图链
+    media_urls: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -92,6 +97,61 @@ def _struct_to_iso(t: struct_time | None) -> tuple[str, float]:
         return "", 0.0
 
 
+def _entry_content_html(entry) -> str:
+    """优先 content:encoded / content[]，否则回落 summary。"""
+    best = ""
+    for c in getattr(entry, "content", None) or []:
+        if isinstance(c, dict):
+            val = (c.get("value") or "").strip()
+        else:
+            val = (getattr(c, "value", None) or "").strip()
+        if len(val) > len(best):
+            best = val
+    if not best:
+        best = (getattr(entry, "summary", "") or "").strip()
+    return best
+
+
+def _entry_media_urls(entry) -> list[str]:
+    urls: list[str] = []
+    seen: set[str] = set()
+
+    def add(u: str | None) -> None:
+        if not u:
+            return
+        u = str(u).strip()
+        if not u or u in seen:
+            return
+        seen.add(u)
+        urls.append(u)
+
+    for m in getattr(entry, "media_content", None) or []:
+        if isinstance(m, dict):
+            add(m.get("url"))
+        else:
+            add(getattr(m, "url", None))
+
+    for m in getattr(entry, "media_thumbnail", None) or []:
+        if isinstance(m, dict):
+            add(m.get("url"))
+        else:
+            add(getattr(m, "url", None))
+
+    for enc in getattr(entry, "enclosures", None) or []:
+        if isinstance(enc, dict):
+            href = enc.get("href") or enc.get("url")
+            ctype = (enc.get("type") or "").lower()
+        else:
+            href = getattr(enc, "href", None) or getattr(enc, "url", None)
+            ctype = (getattr(enc, "type", None) or "").lower()
+        if href and (ctype.startswith("image") or str(href).lower().endswith(
+            (".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif")
+        )):
+            add(href)
+
+    return urls
+
+
 async def _fetch_one(client: httpx.AsyncClient, feed: dict, per_feed_limit: int) -> FeedResult:
     result = FeedResult()
     url = feed["url"]
@@ -114,6 +174,8 @@ async def _fetch_one(client: httpx.AsyncClient, feed: dict, per_feed_limit: int)
             entry, "updated_parsed", None
         )
         published, ts = _struct_to_iso(published_struct)
+        summary = (getattr(entry, "summary", "") or "").strip()
+        content_html = _entry_content_html(entry)
         result.items.append(
             RssItem(
                 title=title,
@@ -122,7 +184,9 @@ async def _fetch_one(client: httpx.AsyncClient, feed: dict, per_feed_limit: int)
                 category=category,
                 published=published,
                 published_ts=ts,
-                summary=(getattr(entry, "summary", "") or "").strip(),
+                summary=summary,
+                content_html=content_html,
+                media_urls=_entry_media_urls(entry),
             )
         )
     return result

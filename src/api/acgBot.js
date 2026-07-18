@@ -77,6 +77,10 @@ export function publishSubmission(id) {
   return request(`/submissions/${id}/publish`, { method: 'POST' })
 }
 
+export function repairPublishedMedia(limit = 20) {
+  return request(`/repair-published-media?limit=${limit}`, { method: 'POST' })
+}
+
 export function discardSubmission(id) {
   return request(`/submissions/${id}`, { method: 'DELETE' })
 }

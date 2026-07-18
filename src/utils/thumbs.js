@@ -30,6 +30,15 @@ export function hasThumb(relativePath) {
  */
 export function thumbUrl(relativePath) {
   if (!relativePath) return ''
+  const s = String(relativePath)
+  if (
+    s.startsWith('http://') ||
+    s.startsWith('https://') ||
+    s.startsWith('data:') ||
+    s.startsWith('blob:')
+  ) {
+    return s
+  }
   if (hasThumb(relativePath)) return imgUrl(toThumbRel(relativePath))
   return imgUrl(relativePath)
 }
@@ -43,5 +52,15 @@ export function onThumbError(event, originalRel) {
   if (!el || !originalRel) return
   if (el.dataset.thumbFallback === '1') return
   el.dataset.thumbFallback = '1'
+  const s = String(originalRel)
+  if (
+    s.startsWith('http://') ||
+    s.startsWith('https://') ||
+    s.startsWith('data:') ||
+    s.startsWith('blob:')
+  ) {
+    el.src = s
+    return
+  }
   el.src = imgUrl(originalRel)
 }

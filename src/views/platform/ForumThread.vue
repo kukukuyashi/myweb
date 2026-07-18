@@ -8,16 +8,24 @@
           ← {{ thread.category_name }}
         </router-link>
         <h1 class="page-title">{{ thread.title }}</h1>
-        <p class="meta">
-          {{ thread.author?.nickname || thread.author?.username }}
-          <LevelBadge
-            v-if="thread.author?.level >= 2"
-            :level="thread.author?.level"
-            :level-title="thread.author?.level_title"
-          />
-          <span v-if="thread.author?.level >= 4" class="master-tag">达人</span>
-          · {{ formatDate(thread.created_at) }} · {{ thread.view_count }} 浏览
-        </p>
+        <div class="thread-author-row">
+          <img
+            v-if="authorAvatarUrl"
+            :src="authorAvatarUrl"
+            alt=""
+            class="thread-author-avatar"
+          >
+          <p class="meta">
+            {{ thread.author?.nickname || thread.author?.username }}
+            <LevelBadge
+              v-if="thread.author?.level >= 2"
+              :level="thread.author?.level"
+              :level-title="thread.author?.level_title"
+            />
+            <span v-if="thread.author?.level >= 4" class="master-tag">达人</span>
+            · {{ formatDate(thread.created_at) }} · {{ thread.view_count }} 浏览
+          </p>
+        </div>
         <router-link
           v-if="canEdit"
           :to="`/app/forum/t/${thread.id}/edit`"
@@ -117,6 +125,7 @@ import {
   likeForumReply,
   likeForumThread,
   resolveMediaUrl,
+  resolvePublicUrl,
   shareForumThread,
 } from '../../api/platform.js'
 
@@ -139,6 +148,7 @@ const canEdit = computed(() => {
 })
 
 const coverUrl = computed(() => resolveMediaUrl(thread.value?.cover_url))
+const authorAvatarUrl = computed(() => resolvePublicUrl(thread.value?.author?.avatar || ''))
 
 usePageMeta(() => ({
   title: thread.value?.title || '帖子',
@@ -257,6 +267,26 @@ onMounted(load)
   font-size: 0.72rem;
   color: var(--text-muted);
   margin-top: 0.35rem;
+}
+
+.thread-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.thread-author-row .meta {
+  margin-top: 0;
+}
+
+.thread-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .edit-link {

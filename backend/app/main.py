@@ -78,6 +78,18 @@ async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
     _ensure_schema_patches()
     seed_forum_categories()
+    try:
+        from app.core.db import SessionLocal
+        from app.services.acg_publish import get_or_create_bot_user
+
+        db = SessionLocal()
+        try:
+            get_or_create_bot_user(db)
+            db.commit()
+        finally:
+            db.close()
+    except Exception:  # noqa: BLE001 - 机器人资料失败不影响主服务
+        pass
     start_scheduler()
     try:
         yield
