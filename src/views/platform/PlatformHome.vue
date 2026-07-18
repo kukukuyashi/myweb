@@ -31,7 +31,7 @@
           <div class="hero-main compact">
             <div class="acg-frame acg-frame--profile">
               <img
-                :src="profile?.avatar ? imgUrl(profile.avatar) : imgUrl('img/xiaoqing.png')"
+                :src="heroAvatarSrc"
                 :alt="profile?.nickname || 'Cyinc'"
                 width="100"
                 height="100"
@@ -323,6 +323,7 @@ import {
   fetchProfile,
   fetchQaMessages,
   getPlatformToken,
+  resolveMediaUrl,
 } from '../../api/platform.js'
 
 usePageMeta({
@@ -353,6 +354,14 @@ const heroTags = siteProfile.acgTags.slice(0, 5)
 const welcomeSubtitle = computed(() => {
   if (profile.value?.nickname) return `欢迎回来，${profile.value.nickname}。`
   return '随便逛逛，有事去留言板说～'
+})
+
+/** 上传头像走 /uploads（API 同源），本地图走 /myweb/img；禁止对 /uploads 用 imgUrl */
+const heroAvatarSrc = computed(() => {
+  const avatar = profile.value?.avatar
+  if (!avatar) return imgUrl('img/xiaoqing.png')
+  if (avatar.startsWith('/uploads/') || avatar.startsWith('http')) return resolveMediaUrl(avatar)
+  return imgUrl(avatar)
 })
 
 const siteDays = computed(() => {
