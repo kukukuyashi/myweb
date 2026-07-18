@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:api": "powershell -NoProfile -ExecutionPolicy Bypass -File backend/scripts/dev.ps1",
     "cursors:generate": "python scripts/generate-cursors.py",
-    "build": "node scripts/export-posts-json.mjs && node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && python scripts/generate-cursors.py && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
+    "build": "node scripts/export-posts-json.mjs && node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && node scripts/generate-thumbnails.mjs && python scripts/generate-cursors.py && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs && node scripts/generate-prerender.mjs docs",
     "build:local": "vite build --base /gerenboke/docs/",
     "preview": "vite preview --base /myweb/",
     "music:upload": "node scripts/upload-music-cdn.mjs",
@@ -28,6 +28,7 @@
     "@aws-sdk/client-s3": "^3.888.0",
     "@aws-sdk/lib-storage": "^3.888.0",
     "@vitejs/plugin-vue": "^6.0.2",
+    "sharp": "^0.35.3",
     "vite": "^7.3.1",
     "vite-plugin-static-copy": "^3.2.0"
   }

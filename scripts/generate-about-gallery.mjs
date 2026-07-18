@@ -7,9 +7,10 @@ const aboutDir = path.join(__dirname, '../img/关于')
 const outFile = path.join(__dirname, '../src/data/aboutGallery.js')
 
 const IMAGE_RE = /\.(jpe?g|jfif|png|gif|webp)$/i
+const THUMB_RE = /\.thumb\.webp$/i
 
 const files = fs.readdirSync(aboutDir)
-  .filter(f => IMAGE_RE.test(f))
+  .filter(f => IMAGE_RE.test(f) && !THUMB_RE.test(f))
   .sort((a, b) => a.localeCompare(b, 'en'))
 
 const gallery = files.map((file, i) => {

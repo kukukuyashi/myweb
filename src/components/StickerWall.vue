@@ -3,7 +3,7 @@
     <div class="sticker-masonry">
       <component
         :is="cardTag(item)"
-        v-for="(item, index) in items"
+        v-for="(item, index) in visibleItems"
         :key="itemKey(item, index)"
         :to="item.to || undefined"
         class="sticker-card"
@@ -23,7 +23,7 @@
         <span class="sticker-badge">{{ item.label }}</span>
         <div v-if="item.path" class="sticker-img">
           <img
-            :src="imgUrl(item.path)"
+            :src="thumbUrl(item.path)"
             :alt="item.title || item.label"
             loading="lazy"
             decoding="async"
@@ -45,6 +45,16 @@
       </component>
     </div>
 
+    <div
+      v-if="hasMore"
+      ref="sentinelRef"
+      class="sticker-more"
+    >
+      <button type="button" class="sticker-more-btn" @click="loadMore">
+        加载更多（{{ visibleCount }}/{{ items.length }}）
+      </button>
+    </div>
+
     <Teleport v-if="mode === 'gallery'" to="body">
       <div v-if="lightboxIndex >= 0" class="sticker-lightbox" @click.self="closeLightbox">
         <button type="button" class="lb-close" aria-label="关闭" @click="closeLightbox">✕</button>
@@ -60,9 +70,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { imgUrl } from '../data/profile'
+import { thumbUrl } from '../utils/thumbs.js'
+
+const BATCH = 24
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
@@ -73,6 +86,24 @@ const props = defineProps({
 const activeIndex = ref(-1)
 const lightboxIndex = ref(-1)
 const canTilt = ref(false)
+const visibleCount = ref(BATCH)
+const sentinelRef = ref(null)
+let loadObserver = null
+
+const visibleItems = computed(() => props.items.slice(0, visibleCount.value))
+const hasMore = computed(() => visibleCount.value < props.items.length)
+
+watch(
+  () => props.items.length,
+  () => {
+    visibleCount.value = Math.min(BATCH, props.items.length || BATCH)
+  },
+)
+
+function loadMore() {
+  if (!hasMore.value) return
+  visibleCount.value = Math.min(visibleCount.value + BATCH, props.items.length)
+}
 
 const TILT_MAX = 12
 
@@ -152,10 +183,26 @@ onMounted(() => {
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     && window.matchMedia('(hover: hover)').matches
   window.addEventListener('keydown', onKeydown)
+
+  if ('IntersectionObserver' in window) {
+    loadObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore()
+      },
+      { rootMargin: '240px' },
+    )
+    // sentinel 可能稍后才挂载，用 nextTick + watch 更稳
+    const tryObserve = () => {
+      if (sentinelRef.value && loadObserver) loadObserver.observe(sentinelRef.value)
+    }
+    tryObserve()
+    watch(sentinelRef, tryObserve)
+  }
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
   document.body.style.overflow = ''
+  loadObserver?.disconnect()
 })
 </script>
 
@@ -169,6 +216,28 @@ a.sticker-card {
   columns: 5 148px;
   column-gap: 12px;
   perspective: 1100px;
+}
+
+.sticker-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.sticker-more-btn {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border);
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+}
+
+.sticker-more-btn:hover {
+  color: var(--text);
+  border-color: var(--orange);
 }
 
 .sticker-card {

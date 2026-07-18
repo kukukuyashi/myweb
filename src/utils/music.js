@@ -2,8 +2,9 @@
  * 将 musicTracks 条目转为播放器可用的曲目列表（含 URL）
  */
 
-function encodePathSegments(relativePath) {
-  return relativePath
+/** 对路径每一段做 encode，避免中文/空格/# 等导致偶发 404 */
+export function encodePathSegments(relativePath) {
+  return String(relativePath || '')
     .replace(/\\/g, '/')
     .split('/')
     .map((seg) => (seg ? encodeURIComponent(seg) : ''))

@@ -32,7 +32,8 @@ const canvasRef = ref(null)
 const bgReady = ref(false)
 
 const bgStyle = computed(() => ({
-  backgroundImage: bgReady.value ? `url(${imgUrl(props.image)})` : 'none',
+  // 加引号，避免路径含空格/括号时 CSS url() 解析失败
+  backgroundImage: bgReady.value ? `url("${imgUrl(props.image)}")` : 'none',
   backgroundPosition: props.position,
 }))
 

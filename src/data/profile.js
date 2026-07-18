@@ -1,6 +1,8 @@
 /**
  * 个人资料与 ACG 画廊 — 图片统一用 acg-frame 样式，只在关于页/侧栏展示
  */
+import { encodePathSegments } from '../utils/music.js'
+
 export const profile = {
   name: 'Cyinc',
   handle: 'CYINC.LOG',
@@ -31,6 +33,8 @@ export const profile = {
 }
 
 export function imgUrl(relativePath) {
+  if (!relativePath) return ''
   const base = import.meta.env.BASE_URL || '/'
-  return base + relativePath.replace(/^\//, '')
+  const path = encodePathSegments(String(relativePath).replace(/^\//, ''))
+  return `${base}${path}`
 }

@@ -41,7 +41,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getCategoryColor, getCategoryIcon, estimateReadingMinutesFromText, imgUrl, tagUrl, getPostCover, hasPostCover } from '../data/posts'
+import { getCategoryColor, getCategoryIcon, estimateReadingMinutesFromText, tagUrl, getPostCover, hasPostCover } from '../data/posts'
+import { thumbUrl as makeThumbUrl } from '../utils/thumbs.js'
 import { onArticleHover } from '../composables/useLinkPrefetch'
 
 const props = defineProps({
@@ -62,6 +63,6 @@ const categoryIcon = computed(() => getCategoryIcon(props.post.category))
 const readingMinutes = computed(() => estimateReadingMinutesFromText(`${props.post.title}${props.post.excerpt}`))
 const thumbUrl = computed(() => {
   if (!hasPostCover(props.post)) return ''
-  return imgUrl(getPostCover(props.post))
+  return makeThumbUrl(getPostCover(props.post))
 })
 </script>

@@ -14,6 +14,12 @@ server {
 
     client_max_body_size 16m;
 
+    # 静态文件打开缓存（大图站很有用，减轻磁盘 IO）
+    open_file_cache max=2000 inactive=60s;
+    open_file_cache_valid 30s;
+    open_file_cache_min_uses 2;
+    open_file_cache_errors on;
+
     # FastAPI API
     location /api {
         proxy_pass http://cyinc_api;
@@ -36,7 +42,7 @@ server {
         proxy_set_header Connection "";
     }
 
-    # 用户头像等上传文件（FastAPI StaticFiles）
+    # 用户头像等上传文件（FastAPI StaticFiles）— 浏览器可缓存一天
     location /uploads {
         proxy_pass http://cyinc_api;
         proxy_http_version 1.1;
@@ -45,6 +51,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Connection "";
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
     }
 
     # 博客文章正文（必须存在，勿 fallback 到 index.html）
@@ -53,15 +61,25 @@ server {
         try_files $uri =404;
     }
 
+    # Vite hashed assets — 文件名带 hash，可长期缓存
+    location ^~ /myweb/assets/ {
+        root /var/www/cyinc;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable";
+        access_log off;
+    }
+
     # 大图 / 音乐 — 与前端包分离，Nginx 直出（部署快、可长期缓存）
     location ^~ /myweb/img/ {
         alias /var/www/cyinc/img/;
+        expires 7d;
         add_header Cache-Control "public, max-age=604800";
         access_log off;
     }
 
     location ^~ /myweb/Music/ {
         alias /var/www/cyinc/Music/;
+        expires 365d;
         add_header Cache-Control "public, max-age=31536000, immutable";
         add_header Accept-Ranges bytes;
         types {

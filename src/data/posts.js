@@ -1,6 +1,8 @@
 /**
  * 文章目录 — 发新文章只需在这里加一条，并放入 Content/ 对应 html 文件
  */
+import { encodePathSegments } from '../utils/music.js'
+
 export const SITE_NAME = 'Cyinc 的学习日志'
 export const SITE_URL = 'https://kukukuyashi.github.io/myweb'
 export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。'
@@ -415,8 +417,10 @@ export function estimateReadingMinutesFromText(text) {
 }
 
 export function imgUrl(relativePath) {
+  if (!relativePath) return ''
   const base = import.meta.env.BASE_URL || '/'
-  return base + String(relativePath).replace(/^\//, '')
+  const path = encodePathSegments(String(relativePath).replace(/^\//, ''))
+  return `${base}${path}`
 }
 
 /** 判断文章是否匹配 ACG 粉丝标签筛选 */
