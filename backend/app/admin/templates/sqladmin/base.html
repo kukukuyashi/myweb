@@ -7,12 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   {% endblock %}
   {% block head_css %}
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/tabler.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/tabler-icons.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/fontawesome-all.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/select2.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/flatpickr.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/main.css') }}">
+  {# 用相对路径，避免反代未传 X-Forwarded-Proto 时生成 http:// 导致 HTTPS 混合内容拦截 #}
+  <link rel="stylesheet" href="/admin/statics/css/tabler.min.css">
+  <link rel="stylesheet" href="/admin/statics/css/tabler-icons.min.css">
+  <link rel="stylesheet" href="/admin/statics/css/fontawesome-all.min.css">
+  <link rel="stylesheet" href="/admin/statics/css/select2.min.css">
+  <link rel="stylesheet" href="/admin/statics/css/flatpickr.min.css">
+  <link rel="stylesheet" href="/admin/statics/css/main.css">
   {% endblock %}
   {% if admin.favicon_url %}
   <link rel="icon" href="{{ admin.favicon_url }}">
@@ -32,11 +33,11 @@
   </main>
   {% endblock %}
   {% block tail_js %}
-  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/jquery.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/tabler.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/select2.full.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/flatpickr.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/main.js') }}"></script>
+  <script type="text/javascript" src="/admin/statics/js/jquery.min.js"></script>
+  <script type="text/javascript" src="/admin/statics/js/tabler.min.js"></script>
+  <script type="text/javascript" src="/admin/statics/js/select2.full.min.js"></script>
+  <script type="text/javascript" src="/admin/statics/js/flatpickr.min.js"></script>
+  <script type="text/javascript" src="/admin/statics/js/main.js"></script>
   <script>
     $(document).off('shown.bs.modal', '#modal-delete').on('shown.bs.modal', '#modal-delete', function (event) {
       var element = $(event.relatedTarget);
