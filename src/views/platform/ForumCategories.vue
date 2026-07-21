@@ -697,4 +697,35 @@ onMounted(load)
     margin-top: 0;
   }
 }
+
+/* 毛玻璃卡片：让内容与模糊背景融合（放最后提高优先级） */
+.forum-community :deep(.platform-panel) {
+  background: color-mix(in srgb, var(--bg-paper) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 14px;
+}
+
+.forum-community :deep(.forum-hero--ink.ink-panel) {
+  background: color-mix(in srgb, var(--bg-paper) 34%, transparent);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.forum-community .forum-search-input {
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.forum-community .forum-tabs button:not(.active) {
+  background: color-mix(in srgb, var(--bg-paper) 58%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 </style>
