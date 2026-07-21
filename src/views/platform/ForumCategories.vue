@@ -85,16 +85,35 @@
                       :src="authorAvatar(t)"
                       alt=""
                       class="forum-thread-avatar"
+                      :class="{ 'is-clickable': t.author?.id }"
+                      @click="goUser($event, t.author?.id)"
                     >
-                    <span v-else class="forum-thread-avatar forum-thread-avatar--placeholder" aria-hidden="true">
+                    <span
+                      v-else
+                      class="forum-thread-avatar forum-thread-avatar--placeholder"
+                      :class="{ 'is-clickable': t.author?.id }"
+                      aria-hidden="true"
+                      @click="goUser($event, t.author?.id)"
+                    >
                       {{ (t.author?.nickname || t.author?.username || '?').slice(0, 1) }}
                     </span>
                     <div class="forum-thread-meta-top">
-                      <span class="forum-thread-author">{{ t.author?.nickname || t.author?.username || '访客' }}</span>
+                      <span
+                        class="forum-thread-author"
+                        :class="{ 'is-clickable': t.author?.id }"
+                        @click="goUser($event, t.author?.id)"
+                      >{{ t.author?.nickname || t.author?.username || '访客' }}</span>
                       <span class="forum-thread-time">{{ formatDate(t.created_at) }}</span>
                       <span v-if="t.category_name" class="forum-thread-cat">{{ t.category_name }}</span>
                     </div>
                   </div>
+                  <img
+                    v-if="t.cover_url"
+                    :src="resolvePublicUrl(t.cover_url)"
+                    alt=""
+                    class="forum-thread-cover"
+                    loading="lazy"
+                  >
                   <h3 class="forum-thread-title">{{ t.title }}</h3>
                   <p v-if="t.excerpt" class="forum-thread-excerpt">{{ t.excerpt }}</p>
                   <div class="forum-thread-stats">
@@ -156,6 +175,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import InkRevealPanel from '../../components/InkRevealPanel.vue'
 import ForumFeaturedWall from '../../components/forum/ForumFeaturedWall.vue'
 import ForumCheckinCard from '../../components/forum/ForumCheckinCard.vue'
@@ -242,6 +262,15 @@ function formatDate(iso) {
 
 function authorAvatar(t) {
   return resolvePublicUrl(t?.author?.avatar || '')
+}
+
+const router = useRouter()
+
+function goUser(event, userId) {
+  if (!userId) return
+  event.preventDefault()
+  event.stopPropagation()
+  router.push(`/app/u/${userId}`)
 }
 
 async function load() {
@@ -493,6 +522,24 @@ onMounted(load)
 
 .forum-thread-cat {
   color: var(--orange);
+}
+
+.is-clickable {
+  cursor: pointer;
+}
+
+.forum-thread-author.is-clickable:hover {
+  color: var(--orange);
+}
+
+.forum-thread-cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin: 0 0 0.6rem;
 }
 
 .forum-thread-title {

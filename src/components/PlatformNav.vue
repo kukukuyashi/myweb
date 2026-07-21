@@ -41,6 +41,7 @@
         </router-link>
         <router-link v-if="hasToken" to="/app/me" @click="menuOpen = false">
           <span class="nav-icon">◉</span> 个人中心
+          <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </router-link>
         <router-link v-else to="/app/login" @click="menuOpen = false">
           <span class="nav-icon">→</span> 登录
@@ -64,33 +65,52 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-backdrop-ctrl">
-          <label class="sidebar-slider">
+          <label class="sidebar-switch">
+            <span>隐藏背景图</span>
+            <input
+              type="checkbox"
+              :checked="bgHidden"
+              @change="setForumBgHidden($event.target.checked)"
+            />
+          </label>
+          <label class="sidebar-switch">
+            <span>卡片不透明</span>
+            <input
+              type="checkbox"
+              :checked="cardSolid"
+              @change="setForumCardSolid($event.target.checked)"
+            />
+          </label>
+          <label class="sidebar-slider" :class="{ 'is-disabled': bgHidden }">
             <span class="sidebar-slider-label">背景模糊 <em>{{ backdropBlur }}</em></span>
             <input
               type="range"
               :min="BLUR_RANGE.min"
               :max="BLUR_RANGE.max"
               :value="backdropBlur"
+              :disabled="bgHidden"
               @input="setForumBlur($event.target.value)"
             />
           </label>
-          <label class="sidebar-slider">
+          <label class="sidebar-slider" :class="{ 'is-disabled': bgHidden }">
             <span class="sidebar-slider-label">背景暗度 <em>{{ backdropDark }}</em></span>
             <input
               type="range"
               :min="DARK_RANGE.min"
               :max="DARK_RANGE.max"
               :value="backdropDark"
+              :disabled="bgHidden"
               @input="setForumDark($event.target.value)"
             />
           </label>
-          <label class="sidebar-slider">
-            <span class="sidebar-slider-label">卡片不透明度 <em>{{ cardOpacity }}</em></span>
+          <label class="sidebar-slider" :class="{ 'is-disabled': cardSolid }">
+            <span class="sidebar-slider-label">卡片不透明度 <em>{{ cardSolid ? 100 : cardOpacity }}</em></span>
             <input
               type="range"
               :min="CARD_RANGE.min"
               :max="CARD_RANGE.max"
               :value="cardOpacity"
+              :disabled="cardSolid"
               @input="setForumCardOpacity($event.target.value)"
             />
           </label>
@@ -126,7 +146,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getPlatformToken } from '../api/platform.js'
+import { getPlatformToken, fetchNotificationUnread } from '../api/platform.js'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
@@ -137,10 +157,37 @@ const menuOpen = ref(false)
 const { collapsed, togglePlatformSidebar } = usePlatformSidebar()
 const hasToken = ref(!!getPlatformToken())
 const isDarkMode = ref(getInitialDarkState())
-const { blur: backdropBlur, dark: backdropDark, cardOpacity, setForumBlur, setForumDark, setForumCardOpacity } = useForumBackdrop()
+const {
+  blur: backdropBlur,
+  dark: backdropDark,
+  cardOpacity,
+  bgHidden,
+  cardSolid,
+  setForumBlur,
+  setForumDark,
+  setForumCardOpacity,
+  setForumBgHidden,
+  setForumCardSolid,
+} = useForumBackdrop()
+
+const unreadCount = ref(0)
+
+async function loadUnread() {
+  if (!getPlatformToken()) {
+    unreadCount.value = 0
+    return
+  }
+  try {
+    const json = await fetchNotificationUnread()
+    unreadCount.value = json.data?.unread || 0
+  } catch {
+    /* ignore */
+  }
+}
 
 function syncToken() {
   hasToken.value = !!getPlatformToken()
+  loadUnread()
 }
 
 function toggleDarkMode() {
@@ -151,15 +198,19 @@ applyTheme(isDarkMode.value)
 
 onMounted(() => {
   window.addEventListener('platform-auth-changed', syncToken)
+  window.addEventListener('platform-notify-changed', loadUnread)
+  loadUnread()
 })
 
 onUnmounted(() => {
   window.removeEventListener('platform-auth-changed', syncToken)
+  window.removeEventListener('platform-notify-changed', loadUnread)
 })
 
 watch(() => route.path, () => {
   menuOpen.value = false
   syncToken()
+  loadUnread()
 })
 
 watch(menuOpen, (open) => {
@@ -304,6 +355,20 @@ watch(menuOpen, (open) => {
   opacity: 0.85;
 }
 
+.nav-badge {
+  margin-left: auto;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
 .sidebar-divider {
   height: 1px;
   background: var(--border);
@@ -333,9 +398,31 @@ watch(menuOpen, (open) => {
   margin-bottom: 0.15rem;
 }
 
+.sidebar-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.sidebar-switch input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
 .sidebar-slider {
   display: grid;
   gap: 0.25rem;
+}
+
+.sidebar-slider.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .sidebar-slider-label {

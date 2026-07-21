@@ -142,7 +142,11 @@ function insertMarkdownImage(url, alt = 'image') {
   const ta = textareaRef.value
   const start = ta?.selectionStart ?? props.modelValue.length
   const text = props.modelValue
-  emitValue(text.slice(0, start) + insert + text.slice(start))
+  const before = text.slice(0, start)
+  const after = text.slice(start)
+  const lead = before && !before.endsWith('\n\n') ? (before.endsWith('\n') ? '\n' : '\n\n') : ''
+  const trail = after && !after.startsWith('\n') ? '\n\n' : ''
+  emitValue(before + lead + insert + trail + after)
   nextTick(() => {
     ta?.focus()
     if (viewMode.value === 'rich' || viewMode.value === 'split') {

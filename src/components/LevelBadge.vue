@@ -8,11 +8,11 @@
 import { computed } from 'vue'
 
 const LEVEL_TITLES = {
-  1: '见习',
-  2: '旅人',
-  3: '同好',
-  4: '达人',
-  5: '传说',
+  1: '一阶',
+  2: '二阶',
+  3: '三阶',
+  4: '四阶',
+  5: '五阶',
 }
 
 const props = defineProps({
@@ -20,7 +20,7 @@ const props = defineProps({
   levelTitle: { type: String, default: '' },
 })
 
-const title = computed(() => props.levelTitle || LEVEL_TITLES[props.level] || '见习')
+const title = computed(() => props.levelTitle || LEVEL_TITLES[props.level] || '一阶')
 </script>
 
 <style scoped>

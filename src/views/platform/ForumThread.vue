@@ -9,20 +9,34 @@
         </router-link>
         <h1 class="page-title">{{ thread.title }}</h1>
         <div class="thread-author-row">
-          <img
-            v-if="authorAvatarUrl"
-            :src="authorAvatarUrl"
-            alt=""
-            class="thread-author-avatar"
+          <router-link
+            v-if="thread.author?.id"
+            :to="`/app/u/${thread.author.id}`"
+            class="thread-author-avatar-link"
           >
+            <img
+              v-if="authorAvatarUrl"
+              :src="authorAvatarUrl"
+              alt=""
+              class="thread-author-avatar"
+            >
+            <span v-else class="thread-author-avatar thread-author-avatar--ph" aria-hidden="true">
+              {{ (thread.author?.nickname || thread.author?.username || '?').slice(0, 1) }}
+            </span>
+          </router-link>
           <p class="meta">
-            {{ thread.author?.nickname || thread.author?.username }}
+            <router-link
+              v-if="thread.author?.id"
+              :to="`/app/u/${thread.author.id}`"
+              class="author-link"
+            >{{ thread.author?.nickname || thread.author?.username }}</router-link>
+            <template v-else>{{ thread.author?.nickname || thread.author?.username }}</template>
             <LevelBadge
               v-if="thread.author?.level >= 2"
               :level="thread.author?.level"
               :level-title="thread.author?.level_title"
             />
-            <span v-if="thread.author?.level >= 4" class="master-tag">达人</span>
+            <span v-if="thread.author?.level >= 4" class="master-tag">四阶</span>
             · {{ formatDate(thread.created_at) }} · {{ thread.view_count }} 浏览
           </p>
         </div>
@@ -71,7 +85,12 @@
         <h2>{{ thread.replies.length }} 条回复</h2>
         <div v-for="r in thread.replies" :key="r.id" class="platform-panel ink-panel reply">
           <p class="reply-meta">
-            {{ r.author?.nickname || r.author?.username }}
+            <router-link
+              v-if="r.author?.id"
+              :to="`/app/u/${r.author.id}`"
+              class="author-link"
+            >{{ r.author?.nickname || r.author?.username }}</router-link>
+            <template v-else>{{ r.author?.nickname || r.author?.username }}</template>
             <LevelBadge
               v-if="r.author?.level >= 2"
               :level="r.author?.level"
@@ -217,19 +236,66 @@ async function toggleReplyLike(reply) {
   }
 }
 
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch {
+    /* fall through to legacy copy */
+  }
+  try {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    const done = document.execCommand('copy')
+    document.body.removeChild(ta)
+    return done
+  } catch {
+    return false
+  }
+}
+
 async function shareThread() {
   if (!token.value || actionBusy.value || !thread.value) return
   actionBusy.value = true
   try {
     const url = window.location.href
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(url)
+    const title = thread.value.title || 'CYINC 社区'
+
+    let countMsg = ''
+    try {
+      const json = await shareForumThread(thread.value.id)
+      thread.value.share_count = json.data?.share_count ?? thread.value.share_count
+      countMsg = json.message || ''
+    } catch (e) {
+      countMsg = e.message || ''
     }
-    const json = await shareForumThread(thread.value.id)
-    thread.value.share_count = json.data?.share_count ?? thread.value.share_count
-    showActionToast(json.message || '链接已复制')
-  } catch (e) {
-    showActionToast(e.message)
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url })
+        showActionToast(countMsg || '已分享')
+        return
+      } catch (e) {
+        if (e?.name === 'AbortError') {
+          if (countMsg) showActionToast(countMsg)
+          return
+        }
+      }
+    }
+
+    const copied = await copyToClipboard(url)
+    if (copied) {
+      showActionToast(countMsg ? `链接已复制 · ${countMsg}` : '链接已复制')
+    } else {
+      showActionToast(countMsg || '复制失败，请手动复制地址栏链接')
+    }
   } finally {
     actionBusy.value = false
   }
@@ -289,6 +355,32 @@ onMounted(load)
   flex-shrink: 0;
 }
 
+.thread-author-avatar-link {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.thread-author-avatar--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--orange-light);
+  color: var(--orange);
+  font-family: var(--mono);
+  font-size: 1rem;
+}
+
+.author-link {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.author-link:hover {
+  color: var(--orange);
+  border-bottom-color: color-mix(in srgb, var(--orange) 45%, transparent);
+}
+
 .edit-link {
   display: inline-block;
   margin-top: 0.5rem;
@@ -306,7 +398,12 @@ onMounted(load)
 }
 
 .post-body, .reply-body {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.post-body {
+  padding: clamp(1rem, 2.5vw, 1.6rem);
 }
 
 .post-cover img,

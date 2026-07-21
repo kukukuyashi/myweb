@@ -243,6 +243,37 @@
           </ul>
         </div>
 
+        <div v-show="activeTab === 'messages'" class="platform-panel ink-panel tab-panel">
+          <div class="panel-head">
+            <button
+              v-if="notifications.some((n) => !n.is_read)"
+              type="button"
+              class="platform-btn-ghost"
+              @click="readAllNotifications"
+            >
+              全部已读
+            </button>
+          </div>
+          <p v-if="notificationsLoading" class="muted">加载中…</p>
+          <p v-else-if="!notifications.length" class="muted">暂无消息。收到点赞或回复会显示在这里。</p>
+          <ul v-else class="notify-list">
+            <li
+              v-for="n in notifications"
+              :key="n.id"
+              class="notify-item"
+              :class="{ unread: !n.is_read }"
+              @click="openNotification(n)"
+            >
+              <span class="notify-dot" :class="{ on: !n.is_read }" aria-hidden="true" />
+              <div class="notify-body">
+                <p class="notify-text">{{ notificationText(n) }}</p>
+                <p v-if="n.thread_title" class="notify-thread">《{{ n.thread_title }}》</p>
+                <span class="date">{{ formatDate(n.created_at) }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
         <div v-show="activeTab === 'timeline'" class="tab-panel">
           <p v-if="timelineLoading" class="muted">加载中…</p>
           <p v-else-if="!timelineDays.length" class="muted">暂无专注记录，去番茄钟开始第一段吧。</p>
@@ -267,7 +298,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
 import AvatarFrame from '../components/AvatarFrame.vue'
 import LevelBadge from '../components/LevelBadge.vue'
@@ -278,6 +309,9 @@ import {
   deletePost,
   fetchMyForumThreads,
   fetchMyPosts,
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
   fetchPomodoroTimeline,
   fetchProfile,
   getPlatformToken,
@@ -301,21 +335,26 @@ const tabs = [
   { id: 'checkin', label: '签到' },
   { id: 'posts', label: '我的文章' },
   { id: 'threads', label: '我的帖子' },
+  { id: 'messages', label: '消息' },
   { id: 'timeline', label: '专注时间线' },
 ]
 
 const route = useRoute()
+const router = useRouter()
 const token = ref(getPlatformToken())
 const activeTab = ref(
   route.query.tab === 'threads' ? 'threads'
     : route.query.tab === 'posts' ? 'posts'
-      : route.query.tab === 'checkin' ? 'checkin'
-        : 'profile',
+      : route.query.tab === 'messages' ? 'messages'
+        : route.query.tab === 'checkin' ? 'checkin'
+          : 'profile',
 )
 const profile = ref(null)
 const editForm = ref({ nickname: '', avatar: '' })
 const posts = ref([])
 const forumThreads = ref([])
+const notifications = ref([])
+const notificationsLoading = ref(false)
 const timelineDays = ref([])
 const loading = ref(false)
 const postsLoading = ref(false)
@@ -468,6 +507,52 @@ async function loadThreads() {
   }
 }
 
+async function loadNotifications() {
+  if (!token.value) return
+  notificationsLoading.value = true
+  try {
+    const json = await fetchNotifications()
+    notifications.value = json.data.items || []
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    notificationsLoading.value = false
+  }
+}
+
+function notificationText(n) {
+  const who = n.actor?.nickname || n.actor?.username || '有人'
+  if (n.type === 'reply') return `${who} 回复了你的帖子`
+  if (n.type === 'thread_like') return `${who} 点赞了你的帖子`
+  if (n.type === 'reply_like') return `${who} 点赞了你的评论`
+  return `${who} 与你互动`
+}
+
+async function openNotification(n) {
+  try {
+    if (!n.is_read) {
+      await markNotificationRead(n.id)
+      n.is_read = true
+      window.dispatchEvent(new CustomEvent('platform-notify-changed'))
+    }
+  } catch {
+    /* ignore */
+  }
+  if (n.thread_id) {
+    router.push(`/app/forum/t/${n.thread_id}`)
+  }
+}
+
+async function readAllNotifications() {
+  try {
+    await markAllNotificationsRead()
+    notifications.value = notifications.value.map((n) => ({ ...n, is_read: true }))
+    window.dispatchEvent(new CustomEvent('platform-notify-changed'))
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
 async function loadCheckin() {
   if (!token.value) return
   checkinLoading.value = true
@@ -605,7 +690,7 @@ async function loadAll() {
 }
 
 watch(() => route.query.tab, (tab) => {
-  if (tab === 'posts' || tab === 'threads' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
+  if (tab === 'posts' || tab === 'threads' || tab === 'messages' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
     activeTab.value = tab
   }
 })
@@ -614,6 +699,7 @@ watch(activeTab, (tab) => {
   if (!token.value) return
   if (tab === 'posts') loadPosts()
   if (tab === 'threads') loadThreads()
+  if (tab === 'messages') loadNotifications()
   if (tab === 'timeline') loadTimeline()
   if (tab === 'checkin') loadCheckin()
 })
@@ -1083,4 +1169,66 @@ input::placeholder {
 @media (max-width: 720px) {
   .me-grid { grid-template-columns: 1fr; }
 }
-</style>
+
+.notify-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.notify-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.notify-item:hover {
+  border-color: color-mix(in srgb, var(--orange) 45%, var(--border));
+  background: color-mix(in srgb, var(--orange) 5%, transparent);
+}
+
+.notify-item.unread {
+  background: color-mix(in srgb, var(--orange) 7%, transparent);
+}
+
+.notify-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 0.35rem;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.notify-dot.on {
+  background: var(--orange);
+}
+
+.notify-body {
+  min-width: 0;
+}
+
+.notify-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.notify-thread {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.notify-item .date {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}</style>

@@ -10,8 +10,10 @@ from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.response import ok
 from app.core.security import get_password_hash, verify_password
+from app.services.level_config import get_tier
+from app.models.forum import ForumThread
 from app.models.user import User
-from app.schemas.user import PasswordChange, UserPublic, UserUpdate
+from app.schemas.user import PasswordChange, UserProfilePublic, UserPublic, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -122,3 +124,72 @@ async def upload_avatar(
     db.commit()
     db.refresh(current_user)
     return ok(UserPublic.model_validate(current_user).model_dump(), message="头像已更新")
+
+
+@router.get("/{user_id}", summary="用户公开资料")
+def get_user_profile(
+    user_id: int,
+    db: Annotated[Session, Depends(get_db)],
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    thread_count = db.query(ForumThread).filter(ForumThread.user_id == user_id).count()
+    tier = get_tier(user.level)
+    data = UserProfilePublic.model_validate(user).model_copy(
+        update={"level_title": tier.title, "thread_count": thread_count}
+    )
+    return ok(data.model_dump())
+
+
+@router.get("/{user_id}/threads", summary="用户的帖子")
+def get_user_threads(
+    user_id: int,
+    db: Annotated[Session, Depends(get_db)],
+):
+    from sqlalchemy.orm import joinedload
+
+    from app.schemas.forum import ForumThreadListItem
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    rows = (
+        db.query(ForumThread)
+        .options(joinedload(ForumThread.user), joinedload(ForumThread.category))
+        .filter(ForumThread.user_id == user_id)
+        .order_by(ForumThread.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    tier = get_tier(user.level)
+    items = []
+    for r in rows:
+        items.append(
+            ForumThreadListItem(
+                id=r.id,
+                category_id=r.category_id,
+                category_name=r.category.name if r.category else None,
+                category_slug=r.category.slug if r.category else None,
+                title=r.title,
+                reply_count=r.reply_count,
+                view_count=r.view_count,
+                like_count=r.like_count,
+                is_pinned=r.is_pinned,
+                is_locked=r.is_locked,
+                is_featured=r.is_featured,
+                cover_url=r.cover_url,
+                featured_order=r.featured_order,
+                created_at=r.created_at,
+                updated_at=r.updated_at,
+                author={
+                    "id": user.id,
+                    "username": user.username,
+                    "nickname": user.nickname,
+                    "avatar": user.avatar,
+                    "level": user.level,
+                    "level_title": tier.title,
+                },
+            ).model_dump()
+        )
+    return ok({"items": items})

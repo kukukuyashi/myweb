@@ -23,4 +23,5 @@ class CyAdmin(Admin):
                 request, "sqladmin/login.html", context, status_code=400
             )
 
-        return RedirectResponse(request.url_for("admin:index"), status_code=302)
+        # 用 path 相对跳转，避免反代场景下 url_for 生成 http:// 把会话弄丢
+        return RedirectResponse(url="/admin/", status_code=302)

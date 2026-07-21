@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "mysql+pymysql://root:password@127.0.0.1:3306/cyinc"
     secret_key: str = "dev-secret-change-in-production"
     access_token_expire_minutes: int = 60 * 24 * 7
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174"
     api_prefix: str = "/api/v1"
     admin_username: str = "admin"
     admin_password_hash: str = ""
@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     notes_root: str = ""
     site_web_root: str = ""
     notes_admin_token_expire_minutes: int = 60 * 8
+    # 生产在 Nginx HTTPS 后：强制把请求 scheme 视为 https（兜底，防 sqladmin url_for 出 http://）
+    force_https: bool = False
     # ACG 资讯机器人
     acg_bot_username: str = "acg-bot"
     acg_bot_category_slug: str = ""

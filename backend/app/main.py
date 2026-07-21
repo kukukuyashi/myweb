@@ -9,6 +9,7 @@ from sqlalchemy import inspect, text
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, RedirectResponse
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.admin import setup_admin
 from app.api.v1.router import api_router
@@ -21,9 +22,22 @@ from app.models.checkin import UserCheckin  # noqa: F401
 from app.models.anime_watchlist import AnimeWatchlist  # noqa: F401
 from app.models.acg import AcgSubmission  # noqa: F401
 from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare, UserXpLog  # noqa: F401
+from app.models.notification import Notification  # noqa: F401
 from app.services.forum_seed import seed_forum_categories
 from app.services.acg_scheduler import shutdown_scheduler, start_scheduler
 
+
+class ForceHttpsMiddleware:
+    """生产 HTTPS 终结后兜底：把 ASGI scope.scheme 设为 https，供 url_for 使用。"""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and get_settings().force_https:
+            scope = dict(scope)
+            scope["scheme"] = "https"
+        await self.app(scope, receive, send)
 
 def _ensure_schema_patches() -> None:
     insp = inspect(engine)
@@ -113,10 +127,18 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
+        # Vite 端口常被占用会落到 5174/5175；本地任意端口放行，避免改 .env
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    # Nginx 终结 HTTPS 后反代到容器；必须信任 X-Forwarded-Proto，
+    # 否则 SQLAdmin 的 url_for 会生成 http:// 链接 → 浏览器混合内容拦截（无样式）+ 登录 POST 被 301 成 GET。
+    # Docker 端口映射下来源 IP 常是桥接网关而非 127.0.0.1，故 trusted_hosts="*"。
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+    if settings.force_https:
+        app.add_middleware(ForceHttpsMiddleware)
 
     app.include_router(api_router, prefix=settings.api_prefix)
     setup_admin(app)

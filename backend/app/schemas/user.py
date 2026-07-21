@@ -79,3 +79,17 @@ class UserPublic(BaseModel):
     level: int = 1
     checkin_streak: int = 0
     created_at: datetime
+
+
+class UserProfilePublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    nickname: str
+    avatar: str | None = None
+    level: int = 1
+    level_title: str = "一阶"
+    xp: int = 0
+    thread_count: int = 0
+    created_at: datetime

@@ -8,7 +8,7 @@
     :style="layoutStyle"
   >
     <div
-      v-if="!isAuthRoute && backdropUrl"
+      v-if="!isAuthRoute && backdropUrl && !bgHidden"
       class="platform-backdrop"
       :style="backdropStyle"
       aria-hidden="true"
@@ -52,9 +52,9 @@ const footerYear = computed(() => new Date().getFullYear())
 const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
 
 const backdropUrl = imgUrl(PLATFORM_POST_INK_IMAGE)
-const { blur: backdropBlur, dark: backdropDark, cardOpacity } = useForumBackdrop()
+const { blur: backdropBlur, dark: backdropDark, cardOpacity, bgHidden, cardSolid } = useForumBackdrop()
 const layoutStyle = computed(() => ({
-  '--platform-card-opacity': `${cardOpacity.value}%`,
+  '--platform-card-opacity': cardSolid.value ? '100%' : `${cardOpacity.value}%`,
 }))
 const backdropStyle = computed(() => {
   if (!backdropUrl) return {}

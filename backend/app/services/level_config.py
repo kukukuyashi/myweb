@@ -19,11 +19,11 @@ class XpAction:
 
 
 LEVEL_TIERS: tuple[LevelTier, ...] = (
-    LevelTier(1, "见习", 0, ()),
-    LevelTier(2, "旅人", 500, ("论坛昵称旁显示 Lv.2 徽章",)),
-    LevelTier(3, "同好", 1500, ("头像橙色描边",)),
-    LevelTier(4, "达人", 4000, ("发帖带「达人」标记",)),
-    LevelTier(5, "传说", 10000, ("头像动态光环框",)),
+    LevelTier(1, "一阶", 0, ()),
+    LevelTier(2, "二阶", 500, ("论坛昵称旁显示 Lv.2 徽章",)),
+    LevelTier(3, "三阶", 1500, ("头像橙色描边",)),
+    LevelTier(4, "四阶", 4000, ("发帖带「四阶」标记",)),
+    LevelTier(5, "五阶", 10000, ("头像动态光环框",)),
 )
 
 XP_ACTIONS: dict[str, XpAction] = {

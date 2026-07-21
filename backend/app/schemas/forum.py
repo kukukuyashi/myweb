@@ -9,7 +9,7 @@ class ForumAuthor(BaseModel):
     nickname: str
     avatar: str | None = None
     level: int = 1
-    level_title: str = "见习"
+    level_title: str = "一阶"
 
 
 class ForumCategoryPublic(BaseModel):

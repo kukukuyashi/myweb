@@ -71,9 +71,24 @@ const html = computed(() => renderMarkdown(props.content))
 }
 
 .md-body :deep(img) {
+  display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  margin: 1em auto;
+  border-radius: 8px;
+  border: 1px solid var(--border, #ddd);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.md-body :deep(figure) {
+  margin: 1.1em 0;
+  text-align: center;
+}
+
+.md-body :deep(figcaption) {
+  margin-top: 0.4em;
+  font-size: 0.8rem;
+  color: var(--text-muted, #666);
 }
 
 .md-body :deep(hr) {

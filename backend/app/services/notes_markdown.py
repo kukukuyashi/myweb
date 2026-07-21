@@ -87,17 +87,21 @@ def infer_excerpt(body: str, title: str) -> str:
     return f"{title} — 学习笔记。"
 
 
+# URL 段：允许一层括号，如 ./01-准备工作(部署笔记).md 或 /myweb/content/31
+_MD_URL = r"(?:[^()\s]|\([^)]*\))+"
+
+
 def _inline(s: str) -> str:
     out = escape(s)
     out = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(
-        r"!\[([^\]]*)\]\(([^)]+)\)",
+        rf"!\[([^\]]*)\]\(({_MD_URL})\)",
         r'<img src="\2" alt="\1" loading="lazy" />',
         out,
     )
     out = re.sub(
-        r"\[([^\]]+)\]\(([^)]+)\)",
-        r'<a href="\2" target="_blank" rel="noopener">\1</a>',
+        rf"\[([^\]]+)\]\(({_MD_URL})\)",
+        r'<a href="\2">\1</a>',
         out,
     )
     out = re.sub(r"`([^`]+)`", r"<code>\1</code>", out)

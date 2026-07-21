@@ -173,6 +173,11 @@
             <div class="panel-label preview-panel">
               <div class="preview-head">
                 <span>预览 {{ previewing ? '（更新中…）' : '' }}</span>
+                <div class="layout-toggle layout-toggle--preview">
+                  <button type="button" :class="{ active: editorLayout === 'split' }" @click="editorLayout = 'split'">分栏</button>
+                  <button type="button" :class="{ active: editorLayout === 'edit' }" @click="editorLayout = 'edit'">编辑</button>
+                  <button type="button" :class="{ active: editorLayout === 'preview' }" @click="editorLayout = 'preview'">预览</button>
+                </div>
               </div>
               <div class="preview-box article-body">
                 <div v-if="previewHtml" v-html="previewHtml" />
@@ -927,6 +932,11 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.editor-panels.layout-split .layout-toggle--preview {
+  display: none;
 }
 
 .editor-panels.layout-edit .preview-panel {

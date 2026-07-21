@@ -110,6 +110,12 @@ const routes = [
         component: () => import('../views/Me.vue'),
       },
       {
+        path: 'u/:id',
+        name: 'UserProfile',
+        component: () => import('../views/platform/UserProfile.vue'),
+        props: true,
+      },
+      {
         path: 'login',
         name: 'Login',
         component: () => import('../views/auth/Login.vue'),

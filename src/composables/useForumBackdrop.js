@@ -1,8 +1,10 @@
-﻿import { ref } from 'vue'
+import { ref } from 'vue'
 
 const BLUR_KEY = 'cyinc_forum_backdrop_blur'
 const DARK_KEY = 'cyinc_forum_backdrop_dark'
 const CARD_KEY = 'cyinc_forum_card_opacity'
+const BG_HIDDEN_KEY = 'cyinc_forum_bg_hidden'
+const CARD_SOLID_KEY = 'cyinc_forum_card_solid'
 
 const DEFAULT_BLUR = 22
 const DEFAULT_DARK = 45
@@ -29,9 +31,22 @@ function readNumber(key, fallback, range) {
   }
 }
 
+function readBool(key, fallback) {
+  if (typeof localStorage === 'undefined') return fallback
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw === null) return fallback
+    return raw === '1' || raw === 'true'
+  } catch {
+    return fallback
+  }
+}
+
 const blur = ref(readNumber(BLUR_KEY, DEFAULT_BLUR, BLUR_RANGE))
 const dark = ref(readNumber(DARK_KEY, DEFAULT_DARK, DARK_RANGE))
 const cardOpacity = ref(readNumber(CARD_KEY, DEFAULT_CARD, CARD_RANGE))
+const bgHidden = ref(readBool(BG_HIDDEN_KEY, false))
+const cardSolid = ref(readBool(CARD_SOLID_KEY, false))
 
 export function setForumBlur(value) {
   blur.value = clamp(value, BLUR_RANGE.min, BLUR_RANGE.max)
@@ -60,14 +75,36 @@ export function setForumCardOpacity(value) {
   }
 }
 
+export function setForumBgHidden(value) {
+  bgHidden.value = !!value
+  try {
+    localStorage.setItem(BG_HIDDEN_KEY, bgHidden.value ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
+}
+
+export function setForumCardSolid(value) {
+  cardSolid.value = !!value
+  try {
+    localStorage.setItem(CARD_SOLID_KEY, cardSolid.value ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useForumBackdrop() {
   return {
     blur,
     dark,
     cardOpacity,
+    bgHidden,
+    cardSolid,
     setForumBlur,
     setForumDark,
     setForumCardOpacity,
+    setForumBgHidden,
+    setForumCardSolid,
     BLUR_RANGE,
     DARK_RANGE,
     CARD_RANGE,

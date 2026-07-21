@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare
 from app.services.image_upload import save_uploaded_image
 from app.services.level_config import get_tier
+from app.services.notification_service import create_notification
 from app.services.xp_service import apply_xp, today, xp_payload
 from app.schemas.forum import (
     ForumAuthor,
@@ -363,6 +364,14 @@ def create_reply(
     db.add(reply)
     db.flush()
     xp_result = apply_xp(db, current_user, "reply_create", ref_type="reply", ref_id=reply.id)
+    create_notification(
+        db,
+        user_id=thread.user_id,
+        actor_id=current_user.id,
+        type="reply",
+        thread_id=thread.id,
+        reply_id=reply.id,
+    )
     db.commit()
     db.refresh(reply)
     xp = xp_payload(xp_result)
@@ -411,6 +420,13 @@ def like_thread(
             r = apply_xp(db, author, "thread_like_received", ref_type="thread", ref_id=thread_id)
             if p := xp_payload(r):
                 xp_msgs.append(f"作者 {p['message']}")
+        create_notification(
+            db,
+            user_id=thread.user_id,
+            actor_id=current_user.id,
+            type="thread_like",
+            thread_id=thread_id,
+        )
 
     db.commit()
     db.refresh(thread)
@@ -447,6 +463,14 @@ def like_reply(
         author = db.query(User).filter(User.id == reply.user_id).first()
         if author:
             apply_xp(db, author, "reply_like_received", ref_type="reply", ref_id=reply_id)
+        create_notification(
+            db,
+            user_id=reply.user_id,
+            actor_id=current_user.id,
+            type="reply_like",
+            thread_id=reply.thread_id,
+            reply_id=reply_id,
+        )
 
     db.commit()
     db.refresh(reply)

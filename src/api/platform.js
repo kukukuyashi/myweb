@@ -333,6 +333,30 @@ export async function shareForumThread(threadId) {
   return platformFetch(`/forum/threads/${threadId}/share`, { method: 'POST', auth: true })
 }
 
+export async function fetchUserProfile(userId) {
+  return platformFetch(`/users/${userId}`)
+}
+
+export async function fetchUserThreads(userId) {
+  return platformFetch(`/users/${userId}/threads`)
+}
+
+export async function fetchNotifications(page = 1, pageSize = 20) {
+  return platformFetch(`/notifications?page=${page}&page_size=${pageSize}`, { auth: true })
+}
+
+export async function fetchNotificationUnread() {
+  return platformFetch('/notifications/unread-count', { auth: true })
+}
+
+export async function markNotificationRead(id) {
+  return platformFetch(`/notifications/${id}/read`, { method: 'POST', auth: true })
+}
+
+export async function markAllNotificationsRead() {
+  return platformFetch('/notifications/read-all', { method: 'POST', auth: true })
+}
+
 export async function fetchCheckinStatus() {
   return platformFetch('/users/me/checkin/status', { auth: true })
 }
