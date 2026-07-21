@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import html
 import re
+import shutil
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from app.services.notes_markdown import (
     build_article_html,
@@ -19,6 +21,7 @@ from app.services.notes_markdown import (
 )
 from app.services.notes_paths import content_dir, site_web_root
 from app.services.posts_catalog import load_posts, save_posts, upsert_post
+from app.core.config import get_settings
 
 _PRERENDER_MAIN = re.compile(
     r'(<main class="prerender-fallback"[^>]*>)\s*.*?\s*(<p class="prerender-note">)',
@@ -143,6 +146,45 @@ def update_prerender_article(post: dict[str, Any], article_html: str) -> Path | 
     return prerender
 
 
+def _localize_note_images(*, body_html: str, md_path: Path, html_file: str) -> str:
+    """Copy note-relative images into uploads/notes/<slug>/ and rewrite <img src>.
+
+    Notes authored in Typora often reference images with relative paths like
+    ``./images/a.png`` or ``imgs/b.jpg``. Those files live next to the .md source and
+    are NOT served by the site. On publish we copy them into the uploads volume (already
+    mounted + reverse-proxied at /uploads) and rewrite the tag to an absolute URL so the
+    published article can display them anywhere.
+    """
+    upload_root = Path(get_settings().upload_dir).resolve()
+    slug = Path(html_file).stem
+    dest_dir = upload_root / "notes" / slug
+    src_base = md_path.parent
+
+    def _repl(match: "re.Match[str]") -> str:
+        prefix, src, suffix = match.group(1), match.group(2), match.group(3)
+        raw = html.unescape(src.strip())
+        # Leave absolute URLs / already-hosted paths untouched.
+        if re.match(r"^(https?:|data:|//|/)", raw):
+            return match.group(0)
+        rel = raw.split("?", 1)[0].split("#", 1)[0]
+        candidate = (src_base / rel).resolve()
+        try:
+            candidate.relative_to(src_base.resolve())
+        except ValueError:
+            return match.group(0)
+        if not candidate.is_file():
+            return match.group(0)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / candidate.name
+        try:
+            shutil.copy2(candidate, dest)
+        except OSError:
+            return match.group(0)
+        new_url = f"/uploads/notes/{quote(slug)}/{quote(candidate.name)}"
+        return f"{prefix}{new_url}{suffix}"
+
+    return re.sub(r'(<img[^>]*\ssrc=")([^"]+)(")', _repl, body_html)
+
 def publish_markdown_file(rel_path: str, posts: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     from app.services.notes_store import assert_note_abs
 
@@ -154,6 +196,7 @@ def publish_markdown_file(rel_path: str, posts: list[dict[str, Any]] | None = No
     meta, body = parse_frontmatter(abs_path.read_text(encoding="utf-8"))
     post = resolve_post_meta(meta=meta, body=body, md_path=abs_path, posts=posts)
     body_html = markdown_to_html(body)
+    body_html = _localize_note_images(body_html=body_html, md_path=abs_path, html_file=post["file"])
     article_html = build_article_html(
         title=post["title"],
         date_str=post["date"],

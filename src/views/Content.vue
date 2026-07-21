@@ -9,11 +9,25 @@
     <NavBar />
     <main class="page-main">
       <div class="container">
-        <div class="content-layout">
-          <aside class="toc-sidebar" v-if="tocItems.length > 0">
+        <div class="content-layout" :class="{ 'content-layout--toc-collapsed': tocCollapsed }">
+          <aside
+            v-if="tocItems.length > 0 && !tocCollapsed"
+            class="toc-sidebar"
+          >
             <div class="toc">
-              <h3>Contents</h3>
-              <ul>
+              <div class="toc-header">
+                <h3>Contents</h3>
+                <button
+                  type="button"
+                  class="toc-toggle-btn"
+                  title="隐藏目录"
+                  aria-label="隐藏目录"
+                  @click="tocCollapsed = true"
+                >
+                  ⟨
+                </button>
+              </div>
+              <ul ref="tocListRef">
                 <li v-for="item in tocItems" :key="item.id" :class="'toc-level-' + item.level">
                   <a
                     :href="`#${item.id}`"
@@ -26,6 +40,17 @@
               </ul>
             </div>
           </aside>
+
+          <button
+            v-if="tocItems.length > 0 && tocCollapsed"
+            type="button"
+            class="toc-fab"
+            title="显示目录"
+            aria-label="显示目录"
+            @click="tocCollapsed = false"
+          >
+            目录
+          </button>
 
           <div class="article-wrap">
             <div v-if="tocItems.length" class="toc-mobile">
@@ -172,13 +197,15 @@ const readingMinutes = ref(0)
 const tocItems = ref([])
 const activeSection = ref('')
 const tocOpen = ref(false)
+const tocCollapsed = ref(false)
+const tocListRef = ref(null)
 const articleBodyRef = ref(null)
 const adjacent = ref({ newer: null, older: null })
 const relatedPosts = ref([])
 const readProgress = ref(0)
 const copyDone = ref(false)
-let observer = null
 let scrollHandler = null
+const TOC_SPY_OFFSET = 100
 
 const postId = computed(() => route.params.id)
 const currentPost = computed(() => getPostById(postId.value))
@@ -278,8 +305,8 @@ async function loadArticleContent() {
     await nextTick()
     await highlightArticle(articleBodyRef.value)
     generateTOC()
-    setupIntersectionObserver()
     setupScrollProgress()
+    updateActiveFromScroll()
     if (route.hash) {
       const id = decodeURIComponent(route.hash.slice(1))
       scrollToSection(id)
@@ -320,19 +347,41 @@ function scrollToSection(id) {
     const offset = element.getBoundingClientRect().top + window.pageYOffset - 80
     window.scrollTo({ top: offset, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
     activeSection.value = id
+    scrollTocActiveIntoView()
   }
 }
 
-function setupIntersectionObserver() {
-  if (observer) observer.disconnect()
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) activeSection.value = entry.target.id
-    })
-  }, { rootMargin: '-20% 0px -80% 0px', threshold: 0 })
-  tocItems.value.forEach(item => {
+/** 根据当前滚动位置，高亮读者正在看的章节 */
+function updateActiveFromScroll() {
+  if (!tocItems.value.length) return
+  let current = tocItems.value[0].id
+  for (const item of tocItems.value) {
     const el = document.getElementById(item.id)
-    if (el) observer.observe(el)
+    if (!el) continue
+    if (el.getBoundingClientRect().top <= TOC_SPY_OFFSET) {
+      current = item.id
+    } else {
+      break
+    }
+  }
+  if (current !== activeSection.value) {
+    activeSection.value = current
+    scrollTocActiveIntoView()
+  }
+}
+
+/** 目录面板内把当前高亮项滚进可视区 */
+function scrollTocActiveIntoView() {
+  nextTick(() => {
+    const list = tocListRef.value
+    if (!list || tocCollapsed.value) return
+    const link = list.querySelector('a.active')
+    if (!link) return
+    const listRect = list.getBoundingClientRect()
+    const linkRect = link.getBoundingClientRect()
+    if (linkRect.top < listRect.top || linkRect.bottom > listRect.bottom) {
+      link.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    }
   })
 }
 
@@ -340,16 +389,18 @@ function setupScrollProgress() {
   teardownScrollProgress()
   scrollHandler = () => {
     const el = articleBodyRef.value
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const start = window.scrollY + rect.top - 80
-    const end = start + el.offsetHeight - window.innerHeight * 0.35
-    if (end <= start) {
-      readProgress.value = 100
-      return
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const start = window.scrollY + rect.top - 80
+      const end = start + el.offsetHeight - window.innerHeight * 0.35
+      if (end <= start) {
+        readProgress.value = 100
+      } else {
+        const ratio = (window.scrollY - start) / (end - start)
+        readProgress.value = Math.min(100, Math.max(0, Math.round(ratio * 100)))
+      }
     }
-    const ratio = (window.scrollY - start) / (end - start)
-    readProgress.value = Math.min(100, Math.max(0, Math.round(ratio * 100)))
+    updateActiveFromScroll()
   }
   scrollHandler()
   window.addEventListener('scroll', scrollHandler, { passive: true })
@@ -363,9 +414,11 @@ function teardownScrollProgress() {
 }
 
 onMounted(() => loadArticleContent())
-watch(postId, () => loadArticleContent())
+watch(postId, () => {
+  tocCollapsed.value = false
+  loadArticleContent()
+})
 onUnmounted(() => {
-  if (observer) observer.disconnect()
   teardownScrollProgress()
 })
 </script>
@@ -701,5 +754,42 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .toc-mobile { display: block; }
+}
+
+.toc-fab {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .toc-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 1.25rem;
+    top: calc(var(--topbar-height) + 1.5rem);
+    z-index: 40;
+    padding: 0.45rem 0.7rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--topbar-bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: background 0.15s, transform 0.15s;
+  }
+
+  .toc-fab:hover {
+    background: var(--orange);
+    border-color: var(--orange);
+    transform: translateY(-1px);
+  }
+
+  [data-theme="dark"] .toc-fab {
+    background: #0d0d0d;
+  }
 }
 </style>

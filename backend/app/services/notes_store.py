@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -266,6 +267,7 @@ def delete_note(rel_path: str, *, unpublish: bool = False, posts: list | None = 
     from app.services.posts_catalog import remove_post_by_file, save_posts
     from app.services.notes_paths import content_dir
     from app.services.notes_publish import resolve_post_meta
+    from app.core.config import get_settings
 
     normalized = _safe_rel(rel_path)
     abs_path = assert_note_abs(normalized)
@@ -291,6 +293,10 @@ def delete_note(rel_path: str, *, unpublish: bool = False, posts: list | None = 
             removed_html = True
 
     abs_path.unlink()
+    if unpublish and html_file:
+        images_dir = Path(get_settings().upload_dir).resolve() / "notes" / Path(html_file).stem
+        if images_dir.exists():
+            shutil.rmtree(images_dir, ignore_errors=True)
     return {"ok": True, "removedPost": removed_post, "removedHtml": removed_html, "htmlFile": html_file}
 
 

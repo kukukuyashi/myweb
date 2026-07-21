@@ -1083,15 +1083,35 @@
   border-color: var(--steel);
 }
 
+.toc-sidebar {
+  /* 必须与正文同高，sticky 才有「可贴住」的滚动区间；align-items:start 时侧栏只有目录高，一滚就整块飞走 */
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
 .toc-sidebar .toc {
   background: var(--bg-paper);
   border: 1px solid var(--border);
   position: sticky;
   top: calc(var(--topbar-height) + 1.5rem);
+  max-height: calc(100vh - var(--topbar-height) - 2.5rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.toc-sidebar .toc-header {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  background: var(--topbar-bg);
 }
 
 .toc-sidebar .toc h3 {
-  background: var(--topbar-bg);
+  flex: 1;
+  margin: 0;
+  background: transparent;
   color: #fff;
   font-family: var(--mono);
   font-size: 0.65rem;
@@ -1101,13 +1121,36 @@
   font-weight: 500;
 }
 
-[data-theme="dark"] .toc-sidebar .toc h3 {
+.toc-sidebar .toc-toggle-btn {
+  flex-shrink: 0;
+  width: 1.75rem;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.toc-sidebar .toc-toggle-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .toc-sidebar .toc-header {
   background: #0d0d0d;
 }
 
 .toc-sidebar .toc ul {
   list-style: none;
   padding: 0.75rem;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
 }
 
 .toc-sidebar .toc a {
@@ -1119,13 +1162,17 @@
   cursor: pointer;
   border-left: 2px solid transparent;
   padding-left: 0.5rem;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .toc-sidebar .toc a:hover,
 .toc-sidebar .toc a.active {
   color: var(--orange);
   border-left-color: var(--orange);
+}
+
+.toc-sidebar .toc a.active {
+  background: var(--orange-light);
 }
 
 .toc-level-2 { padding-left: 0.75rem; }
@@ -1135,7 +1182,13 @@
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
   gap: 2rem;
-  align-items: start;
+  /* stretch：侧栏拉满正文高度，目录才能 sticky 全程可见 */
+  align-items: stretch;
+  position: relative;
+}
+
+.content-layout--toc-collapsed {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .article-wrap {
