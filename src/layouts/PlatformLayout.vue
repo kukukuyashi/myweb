@@ -5,6 +5,7 @@
       'platform-layout--auth': isAuthRoute,
       'platform-layout--sidebar-collapsed': sidebarCollapsed && !isAuthRoute,
     }"
+    :style="layoutStyle"
   >
     <div
       v-if="!isAuthRoute && backdropUrl"
@@ -51,7 +52,10 @@ const footerYear = computed(() => new Date().getFullYear())
 const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
 
 const backdropUrl = imgUrl(PLATFORM_POST_INK_IMAGE)
-const { blur: backdropBlur, dark: backdropDark } = useForumBackdrop()
+const { blur: backdropBlur, dark: backdropDark, cardOpacity } = useForumBackdrop()
+const layoutStyle = computed(() => ({
+  '--platform-card-opacity': `${cardOpacity.value}%`,
+}))
 const backdropStyle = computed(() => {
   if (!backdropUrl) return {}
   const brightness = Math.max(0, 1 - backdropDark.value / 100)
@@ -105,7 +109,7 @@ const backdropStyle = computed(() => {
 }
 
 .platform-layout:not(.platform-layout--auth) :deep(.platform-panel) {
-  background: color-mix(in srgb, var(--bg-paper) 62%, transparent);
+  background: color-mix(in srgb, var(--bg-paper) var(--platform-card-opacity, 62%), transparent);
   backdrop-filter: blur(14px) saturate(1.15);
   -webkit-backdrop-filter: blur(14px) saturate(1.15);
   border-color: color-mix(in srgb, var(--border) 60%, transparent);

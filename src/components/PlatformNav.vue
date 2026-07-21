@@ -84,6 +84,16 @@
               @input="setForumDark($event.target.value)"
             />
           </label>
+          <label class="sidebar-slider">
+            <span class="sidebar-slider-label">卡片不透明度 <em>{{ cardOpacity }}</em></span>
+            <input
+              type="range"
+              :min="CARD_RANGE.min"
+              :max="CARD_RANGE.max"
+              :value="cardOpacity"
+              @input="setForumCardOpacity($event.target.value)"
+            />
+          </label>
         </div>
         <button type="button" class="sidebar-theme" @click="toggleDarkMode">
           {{ isDarkMode ? '☀ 浅色模式' : '☾ 深色模式' }}
@@ -120,14 +130,14 @@ import { getPlatformToken } from '../api/platform.js'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
-import { useForumBackdrop, BLUR_RANGE, DARK_RANGE } from '../composables/useForumBackdrop.js'
+import { useForumBackdrop, BLUR_RANGE, DARK_RANGE, CARD_RANGE } from '../composables/useForumBackdrop.js'
 
 const route = useRoute()
 const menuOpen = ref(false)
 const { collapsed, togglePlatformSidebar } = usePlatformSidebar()
 const hasToken = ref(!!getPlatformToken())
 const isDarkMode = ref(getInitialDarkState())
-const { blur: backdropBlur, dark: backdropDark, setForumBlur, setForumDark } = useForumBackdrop()
+const { blur: backdropBlur, dark: backdropDark, cardOpacity, setForumBlur, setForumDark, setForumCardOpacity } = useForumBackdrop()
 
 function syncToken() {
   hasToken.value = !!getPlatformToken()

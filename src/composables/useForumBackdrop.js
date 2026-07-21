@@ -1,13 +1,16 @@
-import { ref } from 'vue'
+﻿import { ref } from 'vue'
 
 const BLUR_KEY = 'cyinc_forum_backdrop_blur'
 const DARK_KEY = 'cyinc_forum_backdrop_dark'
+const CARD_KEY = 'cyinc_forum_card_opacity'
 
 const DEFAULT_BLUR = 22
 const DEFAULT_DARK = 45
+const DEFAULT_CARD = 62
 
 export const BLUR_RANGE = { min: 0, max: 40 }
 export const DARK_RANGE = { min: 0, max: 80 }
+export const CARD_RANGE = { min: 20, max: 100 }
 
 function clamp(value, min, max) {
   const n = Number(value)
@@ -28,6 +31,7 @@ function readNumber(key, fallback, range) {
 
 const blur = ref(readNumber(BLUR_KEY, DEFAULT_BLUR, BLUR_RANGE))
 const dark = ref(readNumber(DARK_KEY, DEFAULT_DARK, DARK_RANGE))
+const cardOpacity = ref(readNumber(CARD_KEY, DEFAULT_CARD, CARD_RANGE))
 
 export function setForumBlur(value) {
   blur.value = clamp(value, BLUR_RANGE.min, BLUR_RANGE.max)
@@ -47,13 +51,25 @@ export function setForumDark(value) {
   }
 }
 
+export function setForumCardOpacity(value) {
+  cardOpacity.value = clamp(value, CARD_RANGE.min, CARD_RANGE.max)
+  try {
+    localStorage.setItem(CARD_KEY, String(cardOpacity.value))
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useForumBackdrop() {
   return {
     blur,
     dark,
+    cardOpacity,
     setForumBlur,
     setForumDark,
+    setForumCardOpacity,
     BLUR_RANGE,
     DARK_RANGE,
+    CARD_RANGE,
   }
 }

@@ -53,7 +53,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
   border-radius: 16px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--bg-paper) 34%, transparent);
+  background: color-mix(in srgb, var(--bg-paper) var(--platform-card-opacity, 62%), transparent);
   backdrop-filter: blur(10px) saturate(1.1);
   -webkit-backdrop-filter: blur(10px) saturate(1.1);
 }
