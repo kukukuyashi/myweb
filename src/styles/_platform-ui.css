@@ -58,7 +58,7 @@
   -webkit-backdrop-filter: blur(10px) saturate(1.1);
 }
 
-.platform-page__header--ink :deep(.ink-panel__content) {
+.platform-page__header--ink .ink-panel__content {
   padding: clamp(1.15rem, 3vw, 1.85rem);
   min-height: 140px;
   display: flex;
