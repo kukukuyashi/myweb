@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field
 
@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.core.response import ok
 from app.core.security import ALGORITHM, create_notes_admin_token, verify_password
 from app.services import notes_store
+from app.services.image_upload import save_uploaded_image
 from app.services.notes_paths import content_dir, notes_root, posts_json_path
 from app.services.notes_publish import get_note_publish_status, preview_markdown, publish_markdown_file, resolve_post_meta
 from app.services.posts_catalog import (
@@ -58,6 +59,11 @@ class PreviewBody(BaseModel):
 
 class SyncBody(BaseModel):
     files: list[str] | None = None
+
+
+class AdoptBody(BaseModel):
+    htmlFile: str | None = None
+    file: str | None = None
 
 
 def require_notes_admin(
@@ -134,6 +140,21 @@ def me(username: Annotated[str, Depends(require_notes_admin)]):
 def categories(_: Annotated[str, Depends(require_notes_admin)]):
     posts = load_posts()
     return ok({"categories": notes_store.list_categories(posts), "folders": str(notes_root())})
+
+
+@router.post("/uploads/image", summary="上传笔记正文图片")
+async def upload_note_image(
+    _: Annotated[str, Depends(require_notes_admin)],
+    file: UploadFile = File(...),
+):
+    settings = get_settings()
+    url = await save_uploaded_image(
+        file,
+        subdir="notes",
+        user_id=0,
+        max_bytes=settings.max_forum_image_bytes,
+    )
+    return ok({"url": url, "markdown": f"![图片说明]({url})"})
 
 
 @router.get("/covers")
@@ -235,6 +256,33 @@ def notes_create(body: NoteCreateBody, _: Annotated[str, Depends(require_notes_a
 def preview(body: PreviewBody, _: Annotated[str, Depends(require_notes_admin)]):
     html = preview_markdown(meta=body.meta or {}, body=body.body or "")
     return ok({"html": html})
+
+
+
+@router.post("/notes/adopt", summary="认领单篇仅站点文章为可编辑笔记")
+def notes_adopt(body: AdoptBody, _: Annotated[str, Depends(require_notes_admin)]):
+    html_file = (body.htmlFile or body.file or "").strip()
+    if html_file.startswith("__site__/"):
+        html_file = html_file[len("__site__/") :]
+    posts = load_posts()
+    post = next((p for p in posts if p.get("file") == html_file), None)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="站点文章不存在")
+    try:
+        result = notes_store.adopt_site_note(post, posts)
+        return ok({"ok": True, **result})
+    except Exception as exc:
+        raise _http_error(exc) from exc
+
+
+@router.post("/notes/adopt-all", summary="一键认领全部仅站点文章")
+def notes_adopt_all(_: Annotated[str, Depends(require_notes_admin)]):
+    posts = load_posts()
+    try:
+        result = notes_store.adopt_all_site_notes(posts)
+        return ok({"ok": True, **result})
+    except Exception as exc:
+        raise _http_error(exc) from exc
 
 
 @router.get("/notes/{rel_path:path}")

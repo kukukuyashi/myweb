@@ -430,3 +430,76 @@ def enrich_notes(posts: list[dict[str, Any]], notes: list[dict[str, Any]]) -> li
             }
         )
     return enriched
+
+
+def adopt_site_note(post: dict[str, Any], posts: list | None = None) -> dict[str, Any]:
+    """Reverse-convert a site-only Content/*.html into an editable .md source.
+
+    The generated markdown carries ``file:`` frontmatter pointing back to the
+    original HTML so a later publish overwrites the same file / keeps the post id.
+    """
+    from app.services.html_to_markdown import html_to_markdown
+    from app.services.notes_paths import content_dir
+
+    html_file = str(post.get("file") or "").strip()
+    if not html_file:
+        raise ValueError("站点文章缺少 file 字段")
+    html_path = content_dir() / html_file
+    if not html_path.is_file():
+        raise FileNotFoundError("Content 中找不到对应 HTML")
+
+    body_md = html_to_markdown(html_path.read_text(encoding="utf-8"))
+
+    category = str(post.get("category") or "").strip() or "学习"
+    title = str(post.get("title") or Path(html_file).stem).strip()
+    safe_title = sanitize_file_name(title) or Path(html_file).stem
+    folder = sanitize_file_name(category) or "学习"
+
+    rel_path = f"{folder}/{safe_title}.md"
+    abs_path = assert_note_abs(rel_path)
+    if abs_path.exists():
+        suffix = post.get("id") or "adopted"
+        rel_path = f"{folder}/{safe_title}-{suffix}.md"
+        abs_path = assert_note_abs(rel_path)
+        if abs_path.exists():
+            raise FileExistsError(f"笔记已存在：{rel_path}")
+
+    tags = post.get("tags") or [category]
+    meta: dict[str, Any] = {
+        "title": title,
+        "date": post.get("date") or today_iso(),
+        "category": category,
+        "tags": list(tags),
+        "excerpt": post.get("excerpt") or "",
+        "file": html_file,
+    }
+    if post.get("cover"):
+        meta["cover"] = post["cover"]
+    write_note(rel_path, meta=meta, body=body_md)
+    return {
+        "relPath": rel_path,
+        "htmlFile": html_file,
+        "title": title,
+        "postId": post.get("id"),
+    }
+
+
+def adopt_all_site_notes(posts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Adopt every site-only post; returns per-item results and errors."""
+    adopted: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+    for item in list_site_only_notes(posts):
+        post = {
+            "id": item.get("postId"),
+            "title": item.get("title"),
+            "date": item.get("date"),
+            "category": item.get("category"),
+            "tags": item.get("tags"),
+            "excerpt": item.get("excerpt"),
+            "file": item.get("htmlFile"),
+        }
+        try:
+            adopted.append(adopt_site_note(post, posts))
+        except Exception as exc:  # noqa: BLE001
+            errors.append({"file": post.get("file"), "error": str(exc)})
+    return {"adopted": adopted, "count": len(adopted), "errors": errors}

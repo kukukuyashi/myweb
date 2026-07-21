@@ -20,6 +20,16 @@
         >
           {{ syncingContent ? '同步中…' : contentOrphans.length ? `同步 Content (${contentOrphans.length})` : '同步 Content' }}
         </button>
+        <button
+          v-if="authed"
+          type="button"
+          class="btn btn-ghost"
+          :disabled="adoptingAll"
+          title="把全部仅站点文章生成 Markdown 源，使其可在管理台编辑"
+          @click="handleAdoptAll"
+        >
+          {{ adoptingAll ? '认领中…' : '认领全部仅站点' }}
+        </button>
         <button v-if="authed" type="button" class="btn btn-ghost" @click="reloadAll">刷新</button>
         <button v-if="authed" type="button" class="btn btn-primary" @click="showCreate = true">新建笔记</button>
         <button v-if="authed" type="button" class="btn btn-ghost" @click="logout">退出</button>
@@ -172,13 +182,24 @@
                 {{ deleting ? '删除中…' : '删除' }}
               </button>
               </template>
-              <a
-                v-else-if="currentPostId"
+              <template v-if="currentSiteOnly">
+              <button
+                type="button"
                 class="btn btn-primary"
+                :disabled="adopting"
+                title="把本文反解析为 Markdown 源，生成后即可在管理台编辑 / 删除"
+                @click="handleAdoptCurrent"
+              >
+                {{ adopting ? '转换中…' : '转为可编辑' }}
+              </button>
+              <a
+                v-if="currentPostId"
+                class="btn btn-ghost"
                 :href="postPreviewUrl"
                 target="_blank"
                 rel="noopener"
               >打开站点预览</a>
+              </template>
             </div>
           </div>
 
@@ -254,10 +275,20 @@
                   <button type="button" class="md-btn" title="斜体" @click="insertMarkdown('*', '*', '斜体')">I</button>
                   <button type="button" class="md-btn" title="二级标题" @click="insertLinePrefix('## ')">H2</button>
                   <button type="button" class="md-btn" title="链接" @click="insertMarkdown('[', '](url)', '文字')">链</button>
+                  <button type="button" class="md-btn" title="插入图片" :disabled="uploadingImage" @click="pickNoteImage">
+                    {{ uploadingImage ? '…' : '图' }}
+                  </button>
                   <button type="button" class="md-btn" title="行内代码" @click="insertMarkdown('`', '`', 'code')">`</button>
                   <button type="button" class="md-btn" title="代码块" @click="insertCodeBlock">```</button>
                   <button type="button" class="md-btn" title="列表" @click="insertLinePrefix('- ')">•</button>
                   <button type="button" class="md-btn" title="引用" @click="insertLinePrefix('> ')">引</button>
+                  <input
+                    ref="imageInputRef"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    class="md-file-input"
+                    @change="onNoteImageSelected"
+                  />
                 </div>
                 <div class="layout-toggle">
                   <button type="button" :class="{ active: editorLayout === 'split' }" @click="editorLayout = 'split'">分栏</button>
@@ -271,9 +302,16 @@
             <div class="panel-label preview-panel">
               <div class="preview-head">
                 <span>预览 {{ previewing ? '（更新中…）' : '' }}</span>
-                <span v-if="currentStatus" class="status" :data-status="currentStatus">
-                  {{ statusLabel(currentStatus) }}
-                </span>
+                <div class="preview-head-right">
+                  <span v-if="currentStatus" class="status" :data-status="currentStatus">
+                    {{ statusLabel(currentStatus) }}
+                  </span>
+                  <div class="layout-toggle layout-toggle--preview">
+                    <button type="button" :class="{ active: editorLayout === 'split' }" @click="editorLayout = 'split'">分栏</button>
+                    <button type="button" :class="{ active: editorLayout === 'edit' }" @click="editorLayout = 'edit'">编辑</button>
+                    <button type="button" :class="{ active: editorLayout === 'preview' }" @click="editorLayout = 'preview'">预览</button>
+                  </div>
+                </div>
               </div>
               <div class="preview-box article-body">
                 <div v-if="previewHtml" v-html="previewHtml" />
@@ -337,6 +375,9 @@ import {
   publishNote,
   saveNote,
   syncContent,
+  uploadNoteImage,
+  adoptSiteNote,
+  adoptAllSiteNotes,
 } from '../../api/notesAdmin'
 
 const authed = ref(Boolean(getNotesAdminToken()))
@@ -359,6 +400,7 @@ const loadingList = ref(false)
 const saving = ref(false)
 const publishing = ref(false)
 const previewing = ref(false)
+const uploadingImage = ref(false)
 const deleting = ref(false)
 const search = ref('')
 const statusFilter = ref('all')
@@ -367,6 +409,7 @@ const messageType = ref('info')
 const previewHtml = ref('')
 const createDialog = ref(null)
 const textareaRef = ref(null)
+const imageInputRef = ref(null)
 const showCreate = ref(false)
 const draggingPath = ref('')
 const dropTarget = ref('')
@@ -377,6 +420,8 @@ const coverImgError = ref(false)
 const editorLayout = ref('split')
 const contentOrphans = ref([])
 const syncingContent = ref(false)
+const adopting = ref(false)
+const adoptingAll = ref(false)
 
 const statusFilterOptions = [
   { value: 'all', label: '全部' },
@@ -629,6 +674,46 @@ async function handleSyncContent() {
   }
 }
 
+async function handleAdoptCurrent() {
+  if (adopting.value || !currentHtmlFile.value) return
+  adopting.value = true
+  try {
+    const res = await adoptSiteNote(currentHtmlFile.value)
+    flash('已转为可编辑笔记', 'success')
+    await reloadAll()
+    if (res?.relPath) {
+      currentRelPath.value = ''
+      await openNote(res.relPath)
+    }
+  } catch (err) {
+    flash(err.message, 'error')
+  } finally {
+    adopting.value = false
+  }
+}
+
+async function handleAdoptAll() {
+  if (adoptingAll.value) return
+  if (!window.confirm('将把当前全部「仅站点」文章反解析生成 Markdown 源文件，以便在管理台编辑。是否继续？')) return
+  adoptingAll.value = true
+  try {
+    const res = await adoptAllSiteNotes()
+    const count = res?.count || 0
+    const failed = res?.errors?.length || 0
+    if (!count && !failed) {
+      flash('没有需要认领的文章', 'info')
+    } else {
+      const tail = failed ? ('，' + failed + ' 篇失败') : ''
+      flash('已认领 ' + count + ' 篇为可编辑笔记' + tail, failed ? 'info' : 'success')
+    }
+    await reloadAll()
+  } catch (err) {
+    flash(err.message, 'error')
+  } finally {
+    adoptingAll.value = false
+  }
+}
+
 async function selectCategory(name) {
   if (!confirmIfDirty()) return
   activeCategory.value = name
@@ -777,6 +862,48 @@ function insertCodeBlock() {
   const block = selected ? `\`\`\`javascript\n${selected}\n\`\`\`` : '```javascript\n\n```'
   form.body = form.body.slice(0, start) + block + form.body.slice(end)
   nextTick(() => ta.focus())
+}
+
+function pickNoteImage() {
+  imageInputRef.value?.click()
+}
+
+function insertAtCursor(text) {
+  const ta = textareaRef.value
+  if (!ta) {
+    form.body = `${form.body}\n${text}\n`
+    return
+  }
+  const start = ta.selectionStart
+  const end = ta.selectionEnd
+  const padBefore = start > 0 && form.body[start - 1] !== '\n' ? '\n' : ''
+  const padAfter = '\n'
+  const insertion = padBefore + text + padAfter
+  form.body = form.body.slice(0, start) + insertion + form.body.slice(end)
+  nextTick(() => {
+    ta.focus()
+    const pos = start + insertion.length
+    ta.setSelectionRange(pos, pos)
+  })
+}
+
+async function onNoteImageSelected(event) {
+  const input = event.target
+  const file = input?.files?.[0]
+  if (!file) return
+  uploadingImage.value = true
+  try {
+    const data = await uploadNoteImage(file)
+    const md = data?.markdown || (data?.url ? `![图片说明](${data.url})` : '')
+    if (!md) throw new Error('上传成功但未返回图片地址')
+    insertAtCursor(md)
+    flash('图片已插入', 'success')
+  } catch (err) {
+    flash(err.message || '图片上传失败', 'error')
+  } finally {
+    uploadingImage.value = false
+    if (input) input.value = ''
+  }
 }
 
 function onNoteDragStart(note, event) {
@@ -1306,10 +1433,31 @@ textarea {
   padding: 0.85rem 1rem;
 }
 
+.preview-box :deep(img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.75rem 0;
+  border: 1px solid var(--border);
+}
+
 .preview-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.preview-head-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+/* 分栏时编辑侧已有切换；预览侧重复的隐藏。纯预览时编辑侧被藏，只留预览侧切换 */
+.editor-panels.layout-split .layout-toggle--preview {
+  display: none;
 }
 
 .btn {
@@ -1528,6 +1676,19 @@ textarea {
   font-family: var(--mono);
   font-size: 0.72rem;
   cursor: pointer;
+}
+
+.md-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.md-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .layout-toggle {
