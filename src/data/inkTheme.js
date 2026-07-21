@@ -28,3 +28,19 @@ export const PLATFORM_ME_INK_POSITION = '72% top'
 
 export const PLATFORM_POST_INK_IMAGE = 'img/BA/A/爱莉/2fd0a12728327701054df80f0686eb0f.jpeg'
 export const PLATFORM_POST_INK_POSITION = '80% center'
+
+/** 论坛页模糊背景候选（img/BA 精选，每次访问随机一张） */
+export const FORUM_BACKDROP_POOL = [
+  'img/BA/X/星野/d6db50f9097db958e26f0fc42c67eb16.jpeg',
+  'img/BA/R/日奈/458780fd5ec25ccaefe0fd36ccfbabaa_720.jpg',
+  'img/BA/mika/acdcfb54cb622b0e8bdf29af195398f6_720.jpg',
+  'img/BA/A/爱莉/2fd0a12728327701054df80f0686eb0f.jpeg',
+  'img/BA/魔法伊蕾娜/c9d5e22d00c44a9139f12f3139620173_720.jpg',
+  'img/BA/G/宫子/07d8a069f0ffec88d536ccf3a067d4d0.png',
+]
+
+export function pickForumBackdrop() {
+  const pool = FORUM_BACKDROP_POOL
+  if (!pool.length) return ''
+  return pool[Math.floor(Math.random() * pool.length)]
+}

@@ -1,5 +1,11 @@
 <template>
   <div class="forum-community platform-page container layout-single">
+    <div
+      v-if="backdropUrl"
+      class="forum-backdrop"
+      :style="backdropStyle"
+      aria-hidden="true"
+    ></div>
     <!-- 顶栏统计 -->
     <InkRevealPanel
       tag="header"
@@ -159,7 +165,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import InkRevealPanel from '../../components/InkRevealPanel.vue'
 import ForumFeaturedWall from '../../components/forum/ForumFeaturedWall.vue'
 import ForumCheckinCard from '../../components/forum/ForumCheckinCard.vue'
-import { PLATFORM_FORUM_INK_IMAGE, PLATFORM_FORUM_INK_POSITION } from '../../data/inkTheme.js'
+import { PLATFORM_FORUM_INK_IMAGE, PLATFORM_FORUM_INK_POSITION, pickForumBackdrop } from '../../data/inkTheme.js'
+import { imgUrl } from '../../data/profile.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { forumAnnouncements, pickCover } from '../../data/forumDemo.js'
 import {
@@ -174,6 +181,10 @@ import {
 usePageMeta({ title: '论坛', description: 'CYINC ACG 社区论坛。' })
 
 const token = ref(getPlatformToken())
+const backdropUrl = ref(imgUrl(pickForumBackdrop()))
+const backdropStyle = computed(() =>
+  backdropUrl.value ? { backgroundImage: `url("${backdropUrl.value}")` } : {},
+)
 const categories = ref([])
 const allThreads = ref([])
 const featuredThreads = ref([])
@@ -278,6 +289,34 @@ onMounted(load)
 </script>
 
 <style scoped>
+.forum-community {
+  position: relative;
+}
+
+.forum-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(22px) saturate(1.08) brightness(0.55);
+  transform: scale(1.12);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.forum-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 55%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 78%, transparent) 100%
+  );
+}
+
 .forum-hero {
   display: grid;
   grid-template-columns: 1fr auto;
