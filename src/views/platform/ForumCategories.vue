@@ -167,6 +167,7 @@ import ForumFeaturedWall from '../../components/forum/ForumFeaturedWall.vue'
 import ForumCheckinCard from '../../components/forum/ForumCheckinCard.vue'
 import { PLATFORM_FORUM_INK_IMAGE, PLATFORM_FORUM_INK_POSITION, pickForumBackdrop } from '../../data/inkTheme.js'
 import { imgUrl } from '../../data/profile.js'
+import { useForumBackdrop } from '../../composables/useForumBackdrop.js'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { forumAnnouncements, pickCover } from '../../data/forumDemo.js'
 import {
@@ -182,9 +183,17 @@ usePageMeta({ title: '论坛', description: 'CYINC ACG 社区论坛。' })
 
 const token = ref(getPlatformToken())
 const backdropUrl = ref(imgUrl(pickForumBackdrop()))
-const backdropStyle = computed(() =>
-  backdropUrl.value ? { backgroundImage: `url("${backdropUrl.value}")` } : {},
-)
+const { blur: backdropBlur, dark: backdropDark } = useForumBackdrop()
+const backdropStyle = computed(() => {
+  if (!backdropUrl.value) return {}
+  const brightness = Math.max(0, 1 - backdropDark.value / 100)
+  const mask = Math.min(0.92, 0.25 + backdropDark.value / 130)
+  return {
+    backgroundImage: `url("${backdropUrl.value}")`,
+    filter: `blur(${backdropBlur.value}px) saturate(1.08) brightness(${brightness})`,
+    '--backdrop-mask': String(mask),
+  }
+})
 const categories = ref([])
 const allThreads = ref([])
 const featuredThreads = ref([])
@@ -302,8 +311,9 @@ onMounted(load)
   background-repeat: no-repeat;
   filter: blur(22px) saturate(1.08) brightness(0.55);
   transform: scale(1.12);
-  opacity: 0.5;
+  opacity: 0.85;
   pointer-events: none;
+  transition: filter 0.2s ease;
 }
 
 .forum-backdrop::after {
@@ -312,8 +322,8 @@ onMounted(load)
   inset: 0;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--bg) 55%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 78%, transparent) 100%
+    color-mix(in srgb, var(--bg) calc(var(--backdrop-mask, 0.45) * 70%), transparent) 0%,
+    color-mix(in srgb, var(--bg) calc(var(--backdrop-mask, 0.45) * 100%), transparent) 100%
   );
 }
 

@@ -63,6 +63,28 @@
       <SidebarMusicPanel variant="sidebar" @navigate="menuOpen = false" />
 
       <div class="sidebar-footer">
+        <div class="sidebar-backdrop-ctrl">
+          <label class="sidebar-slider">
+            <span class="sidebar-slider-label">背景模糊 <em>{{ backdropBlur }}</em></span>
+            <input
+              type="range"
+              :min="BLUR_RANGE.min"
+              :max="BLUR_RANGE.max"
+              :value="backdropBlur"
+              @input="setForumBlur($event.target.value)"
+            />
+          </label>
+          <label class="sidebar-slider">
+            <span class="sidebar-slider-label">背景暗度 <em>{{ backdropDark }}</em></span>
+            <input
+              type="range"
+              :min="DARK_RANGE.min"
+              :max="DARK_RANGE.max"
+              :value="backdropDark"
+              @input="setForumDark($event.target.value)"
+            />
+          </label>
+        </div>
         <button type="button" class="sidebar-theme" @click="toggleDarkMode">
           {{ isDarkMode ? '☀ 浅色模式' : '☾ 深色模式' }}
         </button>
@@ -98,12 +120,14 @@ import { getPlatformToken } from '../api/platform.js'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
+import { useForumBackdrop, BLUR_RANGE, DARK_RANGE } from '../composables/useForumBackdrop.js'
 
 const route = useRoute()
 const menuOpen = ref(false)
 const { collapsed, togglePlatformSidebar } = usePlatformSidebar()
 const hasToken = ref(!!getPlatformToken())
 const isDarkMode = ref(getInitialDarkState())
+const { blur: backdropBlur, dark: backdropDark, setForumBlur, setForumDark } = useForumBackdrop()
 
 function syncToken() {
   hasToken.value = !!getPlatformToken()
@@ -291,6 +315,61 @@ watch(menuOpen, (open) => {
   padding-top: 0.85rem;
   border-top: 1px dashed var(--border);
   margin-top: 0.75rem;
+}
+
+.sidebar-backdrop-ctrl {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.sidebar-slider {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.sidebar-slider-label {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.sidebar-slider-label em {
+  font-style: normal;
+  color: var(--orange);
+}
+
+.sidebar-slider input[type='range'] {
+  width: 100%;
+  height: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sidebar-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--orange);
+  border: 2px solid var(--bg-paper);
+  cursor: pointer;
+}
+
+.sidebar-slider input[type='range']::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--orange);
+  border: 2px solid var(--bg-paper);
+  cursor: pointer;
 }
 
 .sidebar-theme {
