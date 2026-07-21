@@ -6,6 +6,12 @@
       'platform-layout--sidebar-collapsed': sidebarCollapsed && !isAuthRoute,
     }"
   >
+    <div
+      v-if="!isAuthRoute && backdropUrl"
+      class="platform-backdrop"
+      :style="backdropStyle"
+      aria-hidden="true"
+    ></div>
     <PlatformNav v-if="!isAuthRoute" />
     <div class="platform-body">
       <main class="platform-main">
@@ -35,11 +41,27 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import PlatformNav from '../components/PlatformNav.vue'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
+import { useForumBackdrop } from '../composables/useForumBackdrop.js'
+import { PLATFORM_POST_INK_IMAGE } from '../data/inkTheme.js'
+import { imgUrl } from '../data/profile.js'
 
 const route = useRoute()
 const { collapsed: sidebarCollapsed } = usePlatformSidebar()
 const footerYear = computed(() => new Date().getFullYear())
 const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
+
+const backdropUrl = imgUrl(PLATFORM_POST_INK_IMAGE)
+const { blur: backdropBlur, dark: backdropDark } = useForumBackdrop()
+const backdropStyle = computed(() => {
+  if (!backdropUrl) return {}
+  const brightness = Math.max(0, 1 - backdropDark.value / 100)
+  const mask = Math.min(0.92, 0.25 + backdropDark.value / 130)
+  return {
+    backgroundImage: `url("${backdropUrl}")`,
+    filter: `blur(${backdropBlur.value}px) saturate(1.08) brightness(${brightness})`,
+    '--backdrop-mask': String(mask),
+  }
+})
 </script>
 
 <style scoped>
@@ -47,6 +69,47 @@ const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Reg
   --platform-sidebar-width: 240px;
   min-height: 100vh;
   background: var(--bg);
+}
+
+/* 统一模糊背景（爱莉固定图）+ 毛玻璃卡片 */
+.platform-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(22px) saturate(1.08) brightness(0.55);
+  transform: scale(1.12);
+  opacity: 0.85;
+  pointer-events: none;
+  transition: filter 0.2s ease;
+}
+
+.platform-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) calc(var(--backdrop-mask, 0.45) * 70%), transparent) 0%,
+    color-mix(in srgb, var(--bg) calc(var(--backdrop-mask, 0.45) * 100%), transparent) 100%
+  );
+}
+
+/* 背景存在时让主内容区透出背景 */
+.platform-layout:not(.platform-layout--auth) .platform-main::before {
+  background: color-mix(in srgb, var(--bg-paper) 30%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.platform-layout:not(.platform-layout--auth) :deep(.platform-panel) {
+  background: color-mix(in srgb, var(--bg-paper) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 14px;
 }
 
 .platform-layout:not(.platform-layout--auth) .platform-body {
@@ -59,6 +122,8 @@ const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Reg
 }
 
 .platform-body {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
