@@ -265,6 +265,7 @@ def move_note(rel_path: str, target_category: str) -> dict[str, Any]:
 def delete_note(rel_path: str, *, unpublish: bool = False, posts: list | None = None) -> dict[str, Any]:
     from app.services.posts_catalog import remove_post_by_file, save_posts
     from app.services.notes_paths import content_dir
+    from app.services.notes_publish import resolve_post_meta
 
     normalized = _safe_rel(rel_path)
     abs_path = assert_note_abs(normalized)
