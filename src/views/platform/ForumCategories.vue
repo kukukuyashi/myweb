@@ -535,7 +535,7 @@ onMounted(load)
 .forum-thread-cover {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 140px;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid var(--border);

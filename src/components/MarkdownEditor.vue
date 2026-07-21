@@ -540,6 +540,12 @@ watch(
   color: var(--text);
 }
 
+.preview-pane :deep(img) {
+  max-height: 240px;
+  width: auto;
+  max-width: 100%;
+}
+
 .mode-md .preview-pane,
 .mode-rich .preview-pane,
 .mode-preview .preview-pane {
