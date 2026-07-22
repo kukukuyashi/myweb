@@ -122,6 +122,28 @@ body {
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-wrap: pretty;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+.markdown-body img,
+.forum-thread-cover img,
+.post-card img,
+.featured-card img {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
+
+[data-theme="dark"] .markdown-body img,
+[data-theme="dark"] .forum-thread-cover img,
+[data-theme="dark"] .post-card img,
+[data-theme="dark"] .featured-card img {
+  outline-color: rgba(255, 255, 255, 0.1);
 }
 
 body::before {

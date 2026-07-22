@@ -22,7 +22,51 @@
   .content-layout { grid-template-columns: 1fr; }
   .toc-sidebar { display: none; }
 
-  .article-title { font-size: 1.35rem; }
+  .article-content {
+    padding: 1.4rem 1.15rem;
+  }
+
+  .article-title {
+    font-size: 1.45rem;
+    line-height: 1.35;
+  }
+
+  /* 移动端正文可读性：更大字号、更深的字色、更宽松行距 */
+  .article-body p,
+  .article-body li {
+    color: var(--text);
+    font-size: 1.02rem;
+    line-height: 1.85;
+    margin-bottom: 1rem;
+  }
+
+  .article-body h2 {
+    font-size: 1.2rem;
+    margin: 1.8rem 0 0.7rem;
+    scroll-margin-top: calc(var(--topbar-height) + 1rem);
+  }
+
+  .article-body h3 {
+    font-size: 1.06rem;
+    margin: 1.4rem 0 0.5rem;
+    scroll-margin-top: calc(var(--topbar-height) + 1rem);
+  }
+
+  .article-body ul,
+  .article-body ol {
+    padding-left: 1.35rem;
+  }
+
+  .article-body pre {
+    font-size: 0.82rem;
+    padding: 0.9rem;
+    border-radius: 8px;
+  }
+
+  /* 段内代码换行，避免撑破窄屏 */
+  .article-body :not(pre) > code {
+    word-break: break-word;
+  }
 
   .hero-stats {
     display: grid;
@@ -44,13 +88,21 @@
 
   .filter-bar { flex-direction: column; align-items: stretch; }
   .search-box { margin-left: 0; }
-  .search-input { width: 100%; flex: 1; }
+  /* 16px 防止 iOS 聚焦时自动放大页面 */
+  .search-input { width: 100%; flex: 1; font-size: 16px; padding: 0.5rem 0.7rem; }
+  .filter-btn { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
   .hero { padding: 1.5rem; }
   .hero h1 { font-size: 1.5rem; }
   .post-table .hide-mobile { display: none; }
 
   .featured { padding: 1.25rem 1rem; }
-  .featured h3 { font-size: 1.05rem; }
+  .featured h3 { font-size: 1.1rem; line-height: 1.4; }
+  .featured p { font-size: 0.95rem; line-height: 1.7; }
+
+  .post-card-text h3 { font-size: 1.08rem; line-height: 1.4; }
+  .post-card-text p { font-size: 0.92rem; line-height: 1.65; color: var(--text); }
+
+  .archive-items li { font-size: 0.95rem; }
 
   .archive-row {
     grid-template-columns: 2rem 1fr auto;

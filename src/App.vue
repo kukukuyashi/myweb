@@ -1,4 +1,5 @@
 <template>
+  <div v-if="showBlogBackdrop" class="blog-backdrop" :style="blogBackdropStyle" aria-hidden="true"></div>
   <PageRails v-if="!isAdminRoute && !isPlatformRoute" />
   <PlatformRails v-if="!isAdminRoute && isPlatformRoute" />
   <div class="route-stage" :class="{ 'route-stage--admin': isAdminRoute }">
@@ -30,6 +31,8 @@ import { useClickRipple } from './composables/useClickRipple'
 import { useAnimatedCursor } from './composables/useAnimatedCursor'
 import { initMusicEngine, useMusicPlayback } from './composables/useMusicPlayback'
 import { bindGlobalAudio } from './utils/musicAudio.js'
+import { PLATFORM_POST_INK_IMAGE } from './data/inkTheme.js'
+import { imgUrl } from './data/profile.js'
 
 const PageRails = defineAsyncComponent(() => import('./components/PageRails.vue'))
 const PlatformRails = defineAsyncComponent(() => import('./components/PlatformRails.vue'))
@@ -39,6 +42,11 @@ const route = useRoute()
 const isAdminRoute = computed(() => route.name === 'NotesAdmin')
 const isPlatformRoute = computed(() => route.path.startsWith('/app'))
 const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
+
+/* 博客区移动端毛玻璃背景（与主站同款爱莉图，仅 CSS 在 ≤768px 显示） */
+const blogBackdropUrl = imgUrl(PLATFORM_POST_INK_IMAGE)
+const showBlogBackdrop = computed(() => !isAdminRoute.value && !isPlatformRoute.value)
+const blogBackdropStyle = computed(() => (blogBackdropUrl ? { backgroundImage: `url("${blogBackdropUrl}")` } : {}))
 
 /** 主站除音乐室外不挂底栏播放器，避免挡住侧边栏主题切换 */
 const showMusicPlayer = computed(() => {
@@ -63,6 +71,70 @@ const { transitionName } = useRouteTransition(router)
 </script>
 
 <style>
+/* 博客区移动端：与主站同款毛玻璃背景 + 卡片，桌面端保持纸感风不变 */
+.blog-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .blog-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(22px) saturate(1.08) brightness(0.55);
+    transform: scale(1.12);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .blog-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 55%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 82%, transparent) 100%
+    );
+  }
+
+  /* 内容层透出背景 */
+  .home,
+  .content-page,
+  .archive,
+  .about,
+  .projects,
+  .changelog-page,
+  .guestbook,
+  .tag-view {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+  }
+
+  body::before {
+    opacity: 0.4;
+  }
+
+  /* 博客卡片毛玻璃化，对齐主站质感 */
+  .featured,
+  .post-card,
+  .article-content,
+  .hero.ink-panel,
+  .about-hero--ink,
+  .archive-timeline--ink {
+    background: color-mix(in srgb, var(--bg-paper) 68%, transparent) !important;
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
+    border-radius: 14px;
+  }
+}
+
 .route-stage {
   position: relative;
   min-height: calc(100vh - var(--topbar-height));

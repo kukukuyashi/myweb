@@ -66,6 +66,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
+  border-radius: 16px;
 }
 
 .platform-page__header--ink .platform-title {
@@ -87,10 +88,13 @@
 }
 
 .platform-panel {
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
   background: var(--bg-paper);
   padding: clamp(1.1rem, 2.5vw, 1.45rem);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px color-mix(in srgb, var(--text) 5%, transparent),
+    0 4px 12px color-mix(in srgb, var(--text) 3%, transparent);
 }
 
 .platform-panel + .platform-panel {
@@ -105,11 +109,21 @@
   gap: 0.35rem;
   font-family: var(--mono);
   font-size: 0.76rem;
+  min-width: 44px;
+  min-height: 36px;
   padding: 0.48rem 0.95rem;
   border: 1px solid var(--border);
+  border-radius: 10px;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  transition-property: transform, border-color, background, color;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+
+.platform-btn-primary:active,
+.platform-btn-ghost:active {
+  transform: scale(0.96);
 }
 
 .platform-btn-primary {
@@ -153,17 +167,25 @@
   height: 100%;
   min-height: 9rem;
   padding: 1.15rem;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: 12px;
   background: var(--bg-paper);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition-property: border-color, box-shadow, transform;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
 }
 
 .platform-tile:hover {
   border-color: var(--orange);
   transform: translateY(-2px);
-  box-shadow: 0 4px 0 var(--orange);
+  box-shadow: 0 6px 0 var(--orange);
+}
+
+.platform-tile:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 2px 0 var(--orange);
 }
 
 .platform-tile__tag {
