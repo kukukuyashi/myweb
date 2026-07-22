@@ -49,7 +49,7 @@ import { imgUrl } from '../data/profile.js'
 const route = useRoute()
 const { collapsed: sidebarCollapsed } = usePlatformSidebar()
 const footerYear = computed(() => new Date().getFullYear())
-const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register')
+const isAuthRoute = computed(() => route.name === 'Login' || route.name === 'Register' || route.name === 'ForgotPassword')
 
 const backdropUrl = imgUrl(PLATFORM_POST_INK_IMAGE)
 const { blur: backdropBlur, dark: backdropDark, cardOpacity, bgHidden, cardSolid } = useForumBackdrop()

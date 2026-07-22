@@ -128,6 +128,12 @@ const routes = [
         meta: { guestOnly: true },
       },
       {
+        path: 'forgot-password',
+        name: 'ForgotPassword',
+        component: () => import('../views/auth/ForgotPassword.vue'),
+        meta: { guestOnly: true },
+      },
+      {
         path: 'pomo',
         name: 'Pomo',
         component: () => import('../views/Pomo.vue'),

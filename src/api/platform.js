@@ -106,6 +106,22 @@ export async function sendEmailVerificationCode(email) {
   return { ...(json.data || {}), message: json.message }
 }
 
+export async function sendPasswordResetCode(email) {
+  const json = await platformFetch('/auth/password/code', {
+    method: 'POST',
+    body: { email: String(email).trim() },
+  })
+  return { ...(json.data || {}), message: json.message }
+}
+
+export async function resetPassword({ email, code, password }) {
+  const json = await platformFetch('/auth/password/reset', {
+    method: 'POST',
+    body: { email: String(email).trim(), code: String(code).trim(), password },
+  })
+  return { ...(json.data || {}), message: json.message }
+}
+
 export async function platformRegister({ username, email, password, code, nickname }) {
   await platformFetch('/auth/register', {
     method: 'POST',

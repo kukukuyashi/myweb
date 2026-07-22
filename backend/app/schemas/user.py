@@ -20,6 +20,24 @@ class EmailCodeRequest(BaseModel):
         return _validate_email(v)
 
 
+class PasswordResetRequest(BaseModel):
+    email: str = Field(max_length=255)
+    code: str = Field(min_length=6, max_length=6)
+    password: str = Field(min_length=9, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def check_email_rs(cls, v: str) -> str:
+        return _validate_email(v)
+
+    @field_validator("password")
+    @classmethod
+    def password_strong_rs(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", v):
+            raise ValueError("密码须同时包含大写字母、小写字母和数字")
+        return v
+
+
 class UserRegister(BaseModel):
     username: str = Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")
     email: str = Field(max_length=255)
@@ -41,7 +59,7 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
-    username: str = Field(min_length=3, max_length=50)
+    username: str = Field(min_length=3, max_length=255)
     password: str = Field(min_length=6, max_length=128)
 
 

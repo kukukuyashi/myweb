@@ -11,13 +11,13 @@
   >
     <form class="auth-form" @submit.prevent="handleLogin">
       <label class="auth-field">
-        <span class="auth-field__label">账号</span>
+        <span class="auth-field__label">账号或邮箱</span>
         <div class="auth-field__wrap">
           <input
             v-model="form.username"
             required
             autocomplete="username"
-            placeholder="请输入您的账号"
+            placeholder="请输入账号或注册邮箱"
           />
           <span class="auth-field__icon" aria-hidden="true">👤</span>
         </div>
@@ -61,6 +61,8 @@
 
     <template #switch>
       还没有账号？<router-link to="/app/register">立即注册</router-link>
+      <span class="auth-switch-sep">·</span>
+      <router-link to="/app/forgot-password">忘记密码</router-link>
     </template>
   </AuthShell>
 </template>
@@ -110,3 +112,10 @@ async function handleLogin() {
   }
 }
 </script>
+
+<style scoped>
+.auth-switch-sep {
+  margin: 0 0.4rem;
+  color: var(--text-muted);
+}
+</style>

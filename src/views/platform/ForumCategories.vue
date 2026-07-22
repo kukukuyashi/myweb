@@ -107,18 +107,22 @@
                       <span v-if="t.category_name" class="forum-thread-cat">{{ t.category_name }}</span>
                     </div>
                   </div>
-                  <img
-                    v-if="t.cover_url"
-                    :src="resolvePublicUrl(t.cover_url)"
-                    alt=""
-                    class="forum-thread-cover"
-                    loading="lazy"
-                  >
-                  <h3 class="forum-thread-title">{{ t.title }}</h3>
-                  <p v-if="t.excerpt" class="forum-thread-excerpt">{{ t.excerpt }}</p>
-                  <div class="forum-thread-stats">
-                    <span>👁 {{ t.view_count || 0 }}</span>
-                    <span>💬 {{ t.reply_count || 0 }}</span>
+                  <div class="forum-thread-body" :class="{ 'has-cover': t.cover_url }">
+                    <div class="forum-thread-text">
+                      <h3 class="forum-thread-title">{{ t.title }}</h3>
+                      <p v-if="t.excerpt" class="forum-thread-excerpt">{{ t.excerpt }}</p>
+                      <div class="forum-thread-stats">
+                        <span>👁 {{ t.view_count || 0 }}</span>
+                        <span>💬 {{ t.reply_count || 0 }}</span>
+                      </div>
+                    </div>
+                    <img
+                      v-if="t.cover_url"
+                      :src="resolvePublicUrl(t.cover_url)"
+                      alt=""
+                      class="forum-thread-cover"
+                      loading="lazy"
+                    >
                   </div>
                 </router-link>
                 <div v-else class="forum-thread-link is-demo">
@@ -532,14 +536,41 @@ onMounted(load)
   color: var(--orange);
 }
 
+.forum-thread-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.forum-thread-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .forum-thread-cover {
-  display: block;
-  width: 100%;
-  height: 140px;
+  flex-shrink: 0;
+  width: 200px;
+  height: 120px;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid var(--border);
-  margin: 0 0 0.6rem;
+}
+
+/* 无封面时 text 占满 */
+.forum-thread-body:not(.has-cover) .forum-thread-text {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .forum-thread-body {
+    flex-direction: column;
+  }
+
+  .forum-thread-cover {
+    width: 100%;
+    height: 150px;
+    order: -1;
+  }
 }
 
 .forum-thread-title {
