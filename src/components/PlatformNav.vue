@@ -563,5 +563,15 @@ watch(menuOpen, (open) => {
     z-index: 1001;
     background: rgba(0, 0, 0, 0.35);
   }
+
+  /* 移动端：收起弹性占位，保证底部背景开关/滑块可见可滚动 */
+  .sidebar-spacer {
+    flex: 0 0 auto;
+    min-height: 0.5rem;
+  }
+
+  .sidebar-inner {
+    padding-bottom: 1.5rem;
+  }
 }
 </style>
