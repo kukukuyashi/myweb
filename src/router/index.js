@@ -153,6 +153,21 @@ const routes = [
         name: 'Arcade',
         component: () => import('../views/platform/Arcade.vue'),
       },
+      {
+        path: 'arcade/schulte',
+        name: 'ArcadeSchulte',
+        component: () => import('../views/platform/ArcadeSchulte.vue'),
+      },
+      {
+        path: 'arcade/stroop',
+        name: 'ArcadeStroop',
+        component: () => import('../views/platform/ArcadeStroop.vue'),
+      },
+      {
+        path: 'arcade/dots',
+        name: 'ArcadeDots',
+        component: () => import('../views/platform/ArcadeDots.vue'),
+      },
     ],
   },
   { path: '/hub', redirect: '/app' },
