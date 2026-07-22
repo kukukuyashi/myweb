@@ -148,6 +148,11 @@ const routes = [
         name: 'AnimeSchedule',
         component: () => import('../views/platform/AnimeSchedule.vue'),
       },
+      {
+        path: 'arcade',
+        name: 'Arcade',
+        component: () => import('../views/platform/Arcade.vue'),
+      },
     ],
   },
   { path: '/hub', redirect: '/app' },
