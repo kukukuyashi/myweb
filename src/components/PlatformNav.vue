@@ -497,7 +497,7 @@ watch(menuOpen, (open) => {
   position: fixed;
   top: 0.75rem;
   left: 0.75rem;
-  z-index: 1003;
+  z-index: 1006;
   width: 40px;
   height: 40px;
   border: 1px solid var(--border);
@@ -539,6 +539,7 @@ watch(menuOpen, (open) => {
   }
 
   .platform-sidebar {
+    transform: translateX(-105%);
     box-shadow: 8px 0 24px rgba(0, 0, 0, 0.12);
   }
 
