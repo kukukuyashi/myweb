@@ -168,6 +168,16 @@ const routes = [
         name: 'ArcadeDots',
         component: () => import('../views/platform/ArcadeDots.vue'),
       },
+      {
+        path: 'arcade/reaction',
+        name: 'ArcadeReaction',
+        component: () => import('../views/platform/ArcadeReaction.vue'),
+      },
+      {
+        path: 'arcade/size',
+        name: 'ArcadeSize',
+        component: () => import('../views/platform/ArcadeSize.vue'),
+      },
     ],
   },
   { path: '/hub', redirect: '/app' },
