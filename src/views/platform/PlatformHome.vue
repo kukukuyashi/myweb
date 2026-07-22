@@ -1,5 +1,6 @@
 <template>
   <div ref="homeRef" class="platform-home container">
+    <PlatformOnboarding />
     <InkRevealPanel
       tag="section"
       root-class="platform-hero platform-hero--ink"
@@ -24,6 +25,7 @@
         <a href="#guestboard" class="btn-ghost" @click.prevent="scrollToSection('guestboard')">留言板</a>
         <router-link to="/" class="btn-ghost">博客</router-link>
         <router-link to="/app/me" class="btn-ghost">{{ token ? '个人中心' : '登录' }}</router-link>
+        <button type="button" class="btn-ghost" @click="openOnboarding">新手指引</button>
       </div>
 
       <div class="hero-split">
@@ -300,6 +302,7 @@ import BaStripCarousel from '../../components/BaStripCarousel.vue'
 import HeroTicker from '../../components/HeroTicker.vue'
 import InkRevealPanel from '../../components/InkRevealPanel.vue'
 import PlatformHomeAside from '../../components/PlatformHomeAside.vue'
+import PlatformOnboarding from '../../components/PlatformOnboarding.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { useRevealOnScroll } from '../../composables/useRevealOnScroll'
 import {
@@ -333,6 +336,10 @@ usePageMeta({
 
 const homeRef = ref(null)
 useRevealOnScroll(homeRef)
+
+function openOnboarding() {
+  window.dispatchEvent(new Event('platform-open-onboarding'))
+}
 
 const token = ref(getPlatformToken())
 const profile = ref(null)
