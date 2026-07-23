@@ -13,8 +13,8 @@ class Notification(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     type: Mapped[str] = mapped_column(String(32), index=True)
-    thread_id: Mapped[int | None] = mapped_column(ForeignKey("forum_threads.id"), nullable=True)
-    reply_id: Mapped[int | None] = mapped_column(ForeignKey("forum_replies.id"), nullable=True)
+    thread_id: Mapped[int | None] = mapped_column(ForeignKey("forum_threads.id", ondelete="CASCADE"), nullable=True)
+    reply_id: Mapped[int | None] = mapped_column(ForeignKey("forum_replies.id", ondelete="CASCADE"), nullable=True)
     is_read: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), index=True)
 

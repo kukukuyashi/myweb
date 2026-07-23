@@ -25,7 +25,7 @@ class ForumThreadLike(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id"), index=True)
+    thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id", ondelete="CASCADE"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
@@ -35,7 +35,7 @@ class ForumReplyLike(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    reply_id: Mapped[int] = mapped_column(ForeignKey("forum_replies.id"), index=True)
+    reply_id: Mapped[int] = mapped_column(ForeignKey("forum_replies.id", ondelete="CASCADE"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
@@ -45,6 +45,6 @@ class ForumThreadShare(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id"), index=True)
+    thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id", ondelete="CASCADE"), index=True)
     share_date: Mapped[date] = mapped_column(Date, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

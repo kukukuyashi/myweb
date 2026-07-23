@@ -80,7 +80,49 @@ def _ensure_schema_patches() -> None:
         with engine.begin() as conn:
             if "cover_url" not in cols:
                 conn.execute(text("ALTER TABLE posts ADD COLUMN cover_url TEXT NULL"))
+    _ensure_cascade_fks(insp)
 
+
+def _ensure_cascade_fks(insp) -> None:
+    """Upgrade foreign keys referencing forum_threads/forum_replies to ON DELETE CASCADE.
+
+    Fixes SQL error 1451: deleting threads/replies in SQLAdmin fails because
+    notifications, likes, shares still hold reference.
+    """
+    targets = [
+        ("notifications", "thread_id", "forum_threads"),
+        ("notifications", "reply_id", "forum_replies"),
+        ("forum_thread_likes", "thread_id", "forum_threads"),
+        ("forum_reply_likes", "reply_id", "forum_replies"),
+        ("forum_thread_shares", "thread_id", "forum_threads"),
+    ]
+    with engine.begin() as conn:
+        db_name = conn.execute(text("SELECT DATABASE()")).scalar()
+        for table, column, ref_table in targets:
+            if not insp.has_table(table):
+                continue
+            rows = conn.execute(
+                text(
+                    "SELECT k.CONSTRAINT_NAME, r.DELETE_RULE "
+                    "FROM information_schema.KEY_COLUMN_USAGE k "
+                    "JOIN information_schema.REFERENTIAL_CONSTRAINTS r "
+                    "  ON r.CONSTRAINT_NAME = k.CONSTRAINT_NAME "
+                    " AND r.CONSTRAINT_SCHEMA = k.CONSTRAINT_SCHEMA "
+                    "WHERE k.TABLE_SCHEMA = :db AND k.TABLE_NAME = :t "
+                    "  AND k.COLUMN_NAME = :c AND k.REFERENCED_TABLE_NAME = :rt"
+                ),
+                {"db": db_name, "t": table, "c": column, "rt": ref_table},
+            ).fetchall()
+            for cname, rule in rows:
+                if (rule or "").upper() == "CASCADE":
+                    continue
+                conn.execute(text(f"ALTER TABLE `{table}` DROP FOREIGN KEY `{cname}`"))
+                conn.execute(
+                    text(
+                        f"ALTER TABLE `{table}` ADD CONSTRAINT `{cname}` "
+                        f"FOREIGN KEY (`{column}`) REFERENCES `{ref_table}`(`id`) ON DELETE CASCADE"
+                    )
+                )
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
