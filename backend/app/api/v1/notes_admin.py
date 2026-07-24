@@ -113,6 +113,11 @@ def login(payload: LoginBody, request: Request):
         raise HTTPException(status_code=401, detail="用户名或密码错误")
 
     clear_failures(ip)
+    # 单点登录：顺带种下 SQLAdmin 的 session，使数据管理 iframe 免二次登录
+    import time as _time
+
+    request.session["admin_authenticated"] = True
+    request.session["admin_expires_at"] = _time.time() + 8 * 3600
     token = create_notes_admin_token(username)
     return ok(
         {

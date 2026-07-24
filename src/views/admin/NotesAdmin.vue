@@ -1,7 +1,7 @@
 <template>
   <div class="notes-admin">
     <header class="admin-topbar">
-      <div class="admin-brand">
+      <div v-if="!embedded" class="admin-brand">
         <span class="admin-badge">NOTES</span>
         <h1>笔记管理台</h1>
         <p>
@@ -32,11 +32,11 @@
         </button>
         <button v-if="authed" type="button" class="btn btn-ghost" @click="reloadAll">刷新</button>
         <button v-if="authed" type="button" class="btn btn-primary" @click="showCreate = true">新建笔记</button>
-        <button v-if="authed" type="button" class="btn btn-ghost" @click="logout">退出</button>
+        <button v-if="authed && !embedded" type="button" class="btn btn-ghost" @click="logout">退出</button>
       </div>
     </header>
 
-    <div v-if="!authed" class="admin-login-card">
+    <div v-if="!authed && !embedded" class="admin-login-card">
       <h2>登录笔记管理台</h2>
       <p class="login-hint">使用与 SQLAdmin 相同的运维账号（ADMIN_USERNAME / 密码）。</p>
       <form class="login-form" @submit.prevent="handleLogin">
@@ -379,6 +379,10 @@ import {
   adoptSiteNote,
   adoptAllSiteNotes,
 } from '../../api/notesAdmin'
+
+defineProps({
+  embedded: { type: Boolean, default: false },
+})
 
 const authed = ref(Boolean(getNotesAdminToken()))
 const loggingIn = ref(false)

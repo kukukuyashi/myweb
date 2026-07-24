@@ -1,0 +1,275 @@
+<p class="article-intro">02-前端打包与静态资源准备(部署笔记) — 学习笔记。</p>
+<h1>02 · 前端打包与静态资源准备</h1>
+<p>把 Vue 源码变成 Nginx 能直接端出去的静态文件，并单独准备大图 / 音乐（不打进前端包）。</p>
+<hr>
+<h2>学习目标</h2>
+<p>学完本篇，你能够：</p>
+<ol>
+<li>配置生产用的 <code>.env.production</code>（同域 API：<code>/api/v1</code>）</li>
+<li>在本机执行 <code>npm run build</code>，理解产物在 <code>docs/</code></li>
+<li>确认 <strong>不打包</strong> <code>img/</code>、<code>Music/</code>（由 Nginx 提供）</li>
+<li>用项目脚本打出 <code>frontend.zip</code> 与 <code>media.tar.gz</code>，并上传到 ECS</li>
+</ol>
+<hr>
+<h2>前置条件</h2>
+<table><thead><tr>
+<th>条件</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>本机已安装 Node.js 18+</td>
+<td><code>node -v</code> / <code>npm -v</code> 可用</td>
+</tr>
+<tr>
+<td>项目依赖已装过</td>
+<td>在仓库根目录执行过 <code>npm install</code> 或 <code>npm ci</code></td>
+</tr>
+<tr>
+<td>01 篇完成</td>
+<td>ECS 上已有 <code>/var/www/cyinc</code>，能 SSH 上传文件</td>
+</tr>
+<tr>
+<td>理解路径</td>
+<td>前端路由与 Vite <code>base</code> 都是 <code>/myweb/</code></td>
+</tr>
+</tbody></table>
+<p>本机项目根目录（示例）：</p>
+<pre><code class="language-text">
+D:\phpstudy\phpstudy_pro\WWW\gerenboke
+</code></pre>
+<hr>
+<h2>为什么要「打包」？打完长什么样？</h2>
+<p>开发时 <code>npm run dev</code> 像「现炒现卖」：改代码立刻刷新。</p>
+<p>上线需要「盒饭」：提前编译成浏览器能直接打开的 HTML/JS/CSS。</p>
+<p>对本项目：</p>
+<pre><code class="language-text">
+npm run build
+    ↓
+docs/                 ← 构建输出（不要手改里面的 hashed 文件名）
+  index.html
+  assets/             ← 带 hash 的 JS/CSS
+  Content/            ← 博客文章 HTML（脚本会处理）
+  data/               ← 导出的 JSON 等
+</code></pre>
+<p><strong>刻意不打进包的</strong>：</p>
+<ul>
+<li><code>img/</code>（尤其 <code>img/BA</code> 大图库）</li>
+<li><code>Music/</code></li>
+</ul>
+<p>原因：体积巨大；ECS 上由 Nginx 用 <code>alias</code> 直接提供，构建更快、上传更小。</p>
+<p>开关在 <code>.env.production</code> 的 <code>VITE_BUNDLE_STATIC_MEDIA=0</code>（ECS 推荐）。</p>
+<hr>
+<h2>详细操作步骤</h2>
+<h3>步骤 1：准备 <code>.env.production</code></h3>
+<p>在<strong>本机项目根目录</strong>（不是 <code>backend/</code>）：</p>
+<pre><code class="language-powershell">
+cd D:\phpstudy\phpstudy_pro\WWW\gerenboke
+copy .env.production.example .env.production
+notepad .env.production
+</code></pre>
+<p>推荐内容（与仓库示例一致）：</p>
+<pre><code class="language-env">
+# 与 ECS Nginx 同域，用相对路径，不要写死 http://127.0.0.1:8000
+VITE_API_BASE_URL=/api/v1
+
+# Twikoo 等按你实际填写；没有可留示例或空
+VITE_TWIKOO_ENV_ID=https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
+
+# 音乐同域：留空 = /myweb/Music/
+VITE_MUSIC_BASE_URL=
+
+# 0 = 不打包 img/Music（ECS + Nginx）；GitHub Pages 才需要改成 1
+VITE_BUNDLE_STATIC_MEDIA=0
+</code></pre>
+<p>类比：环境变量像给程序设的「开关和路牌」。</p>
+<p><code>VITE_API_BASE_URL=/api/v1</code> 告诉前端：「请求接口时走当前网站下的 <code>/api/v1</code>」，这样浏览器访问 <code>https://域名/myweb/</code> 时，API 自动变成 <code>https://域名/api/v1</code>，不会跨域。</p>
+<p><strong>注意</strong>：<code>.env.production</code> 已在 <code>.gitignore</code>，不要提交。</p>
+<hr>
+<h3>步骤 2：安装依赖并构建</h3>
+<pre><code class="language-powershell">
+cd D:\phpstudy\phpstudy_pro\WWW\gerenboke
+npm ci
+npm run build
+</code></pre>
+<p>命令含义：</p>
+<ul>
+<li><code>npm ci</code>：按 <code>package-lock.json</code> 干净安装（比 <code>npm install</code> 更适合发布前）</li>
+<li><code>npm run build</code>：实际会跑一串脚本（见 <code>package.json</code>），包括：</li>
+</ul>
+<p>- 导出文章 JSON、生成缩略图、音乐列表等</p>
+<p>- <code>vite build --base /myweb/</code> ← <strong>base 必须是 <code>/myweb/</code></strong></p>
+<p>- 生成站点文件与预渲染到 <code>docs/</code></p>
+<p>构建时若看到类似提示是<strong>正常</strong>的：</p>
+<pre><code class="language-text">
+[vite] 生产构建不打包 img/Music（由 Nginx 同域提供）...
+</code></pre>
+<p><strong>成功标志</strong>：</p>
+<pre><code class="language-powershell">
+Test-Path docs\index.html
+# 应为 True
+
+Get-ChildItem docs\assets | Select-Object -First 5
+# 应有 .js / .css 等文件
+</code></pre>
+<p>打开 <code>docs/index.html</code>，确认资源路径带 <code>/myweb/</code>，例如：</p>
+<pre><code class="language-html">
+&lt;script type=&quot;module&quot; src=&quot;/myweb/assets/index-xxxxx.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>若写成 <code>/assets/...</code> 而没有 <code>/myweb</code>，说明 base 错了，检查是否用了错误的 build 命令。</p>
+<hr>
+<h3>步骤 3：用官方脚本打前端包（推荐）</h3>
+<p>仓库已提供 PowerShell 脚本：</p>
+<pre><code class="language-powershell">
+cd D:\phpstudy\phpstudy_pro\WWW\gerenboke
+.\deploy\scripts\pack-frontend.ps1
+</code></pre>
+<p>脚本会：</p>
+<ol>
+<li>若无 <code>.env.production</code> 则从 example 复制</li>
+<li>执行 <code>npm run build</code></li>
+<li>把 <code>Content\*.html</code> 拷进 <code>docs\Content</code></li>
+<li>把 <code>docs\*</code> 压成项目根目录的 <code>frontend.zip</code></li>
+</ol>
+<p><strong>成功标志</strong>：根目录出现 <code>frontend.zip</code>，且控制台打印文章数量，例如：</p>
+<pre><code class="language-text">
+Content articles: 12
+Done: ...\frontend.zip
+</code></pre>
+<hr>
+<h3>步骤 4：打包媒体（img / Music）</h3>
+<p>大图和音乐单独打包（Windows zip 容易把中文路径弄乱，所以用 tar.gz）：</p>
+<pre><code class="language-powershell">
+.\deploy\scripts\pack-media.ps1
+</code></pre>
+<p>脚本会打包存在的 <code>img/BA</code> 与 <code>Music/</code>，生成 <code>media.tar.gz</code>。</p>
+<p><strong>成功标志</strong>：</p>
+<pre><code class="language-text">
+Done: ...\media.tar.gz (xxx MB)
+</code></pre>
+<p>若本地没有 <code>img/BA</code> 或 <code>Music</code>，脚本会报错——那说明媒体本来就不在仓库里，需要你从备份拷回本机后再打。</p>
+<hr>
+<h3>步骤 5：上传到 ECS</h3>
+<p>把 <code>你的ECS公网IP</code> 换成真实 IP，用户用 <code>deploy</code>（或 root）：</p>
+<pre><code class="language-powershell">
+# 上传前端包
+scp frontend.zip deploy@你的ECS公网IP:/var/www/cyinc/
+
+# 上传媒体包（体积大，耐心等待）
+scp media.tar.gz deploy@你的ECS公网IP:/var/www/cyinc/
+</code></pre>
+<p>在 <strong>ECS</strong> 上解压：</p>
+<pre><code class="language-bash">
+ssh deploy@你的ECS公网IP
+
+cd /var/www/cyinc
+
+# 前端 → myweb/
+mkdir -p myweb
+cd myweb
+unzip -o ../frontend.zip
+cd ..
+
+# 媒体 → 仓库根下的 img/、Music/
+# 先备份旧目录（若有）再解压
+rm -rf img/BA Music
+tar -xzf media.tar.gz
+
+# 抽查中文路径是否正常
+ls img/BA/ | head
+ls Music/ | head
+</code></pre>
+<p>含义：</p>
+<ul>
+<li><code>unzip -o</code>：覆盖解压到 <code>myweb/</code></li>
+<li><code>tar -xzf</code>：解压 tar.gz，保留目录结构</li>
+<li>Nginx 配置里会把 <code>/myweb/img/</code> alias 到 <code>/var/www/cyinc/img/</code>（见 05 篇）</li>
+</ul>
+<p><strong>备选：rsync 直接同步 docs/</strong>（本机有 rsync + SSH 时）：</p>
+<pre><code class="language-bash">
+# Git Bash / WSL
+npm run build
+bash deploy/scripts/sync-frontend.sh deploy@你的ECS公网IP
+</code></pre>
+<p>该脚本把本机 <code>docs/</code> 同步到 ECS 的 <code>/var/www/cyinc/myweb/</code>。</p>
+<hr>
+<h3>步骤 6：核对服务器文件树</h3>
+<p>在 ECS：</p>
+<pre><code class="language-bash">
+ls -la /var/www/cyinc/myweb/index.html
+ls /var/www/cyinc/myweb/assets | head
+ls /var/www/cyinc/myweb/Content | head
+ls /var/www/cyinc/img /var/www/cyinc/Music
+</code></pre>
+<p>期望结构：</p>
+<pre><code class="language-text">
+/var/www/cyinc/
+├── myweb/
+│   ├── index.html
+│   ├── assets/
+│   ├── Content/
+│   └── data/          # 视构建结果而定
+├── img/
+│   └── BA/            # 大图
+└── Music/
+</code></pre>
+<p>此时 Nginx 可能还没配好，<strong>浏览器暂时打不开很正常</strong>；本篇只要求文件就位。</p>
+<hr>
+<h2>检查点</h2>
+<ul>
+<li>[ ] <code>.env.production</code> 中 <code>VITE_API_BASE_URL=/api/v1</code>、<code>VITE_BUNDLE_STATIC_MEDIA=0</code></li>
+<li>[ ] <code>docs/index.html</code> 存在，资源路径含 <code>/myweb/</code></li>
+<li>[ ] ECS <code>/var/www/cyinc/myweb/index.html</code> 存在</li>
+<li>[ ] ECS <code>/var/www/cyinc/img</code> 与 <code>/var/www/cyinc/Music</code> 内容正确（若站点需要）</li>
+<li>[ ] <code>docs/</code> 里<strong>没有</strong>整棵巨大的 <code>img/BA</code>（说明没误打包媒体）</li>
+</ul>
+<p>本机快速确认是否误打包媒体：</p>
+<pre><code class="language-powershell">
+Test-Path docs\img\BA
+# 期望 False（ECS 模式）
+
+Test-Path docs\Music
+# 期望 False
+</code></pre>
+<hr>
+<h2>常见问题与解决方案</h2>
+<h3>Q1：页面能开，但图片 / 音乐全是 404</h3>
+<p><strong>原因</strong>：前端包上去了，但 <code>img/</code>、<code>Music/</code> 没上传，或 Nginx 的 alias 路径不对。</p>
+<p><strong>处理</strong>：</p>
+<ol>
+<li>确认 ECS 上 <code>ls /var/www/cyinc/img</code>、<code>ls /var/www/cyinc/Music</code> 有内容</li>
+<li>确认 Nginx 含有（05 篇会配）：</li>
+</ol>
+<pre><code class="language-nginx">
+location ^~ /myweb/img/ {
+    alias /var/www/cyinc/img/;
+}
+location ^~ /myweb/Music/ {
+    alias /var/www/cyinc/Music/;
+}
+</code></pre>
+<ol>
+<li>若中文文件名乱码：不要用 Windows 资源管理器随便 zip 媒体，改用 <code>pack-media.ps1</code> 生成的 <code>media.tar.gz</code></li>
+</ol>
+<h3>Q2：打开 <code>https://域名/myweb/</code> 白屏，控制台报 JS 404</h3>
+<p><strong>原因</strong>：构建 base 不是 <code>/myweb/</code>，或文件没解压到 <code>myweb/</code> 而是解压到了别的目录。</p>
+<p><strong>处理</strong>：</p>
+<pre><code class="language-bash">
+# 看 index.html 里的脚本路径是否带 /myweb/
+head -n 30 /var/www/cyinc/myweb/index.html
+
+# 确认 assets 真实存在
+ls /var/www/cyinc/myweb/assets | head
+</code></pre>
+<p>本机重建时确认命令是 <code>npm run build</code>（内部已 <code>--base /myweb/</code>），不要误用 <code>build:local</code>（那是另一套 base）。</p>
+<h3>Q3：<code>npm run build</code> 很慢或 sharp / python 报错</h3>
+<p><strong>原因</strong>：构建链会跑缩略图（sharp）和部分 Python 脚本（如 cursors）。</p>
+<p><strong>处理</strong>：</p>
+<ol>
+<li>确保本机 <code>npm ci</code> 完整成功</li>
+<li>Python 相关：<code>python --version</code> 可用，或按报错安装依赖</li>
+<li>若仅想先验证 Vite：可临时排查是哪一步脚本失败（看终端最后一条报错）；修好后再完整 <code>npm run build</code></li>
+</ol>
+<hr>
+<h2>下一步</h2>
+<p>静态文件就位后，准备把 FastAPI 装进容器：</p>
+<p>→ <a href="./03-后端Docker化(部署笔记).md">03-后端Docker化(部署笔记).md</a></p>

@@ -1,0 +1,149 @@
+<p class="article-intro">00-目录与总览(部署笔记) — 学习笔记。</p>
+<h1>CYINC.LOG 新手部署笔记 · 目录与总览</h1>
+<blockquote>面向：<strong>懂一点 HTML/CSS/JS/Python，但从未把网站放到服务器上过的人</strong>。</blockquote>
+<blockquote>目标：把本地跑通的 <strong>CYINC.LOG</strong> 整站，部署到阿里云 ECS（Ubuntu 22.04），用 Docker + Nginx + HTTPS 对外访问。</blockquote>
+<hr>
+<h2>这套笔记在讲什么？</h2>
+<p>把网站上线，可以想成「搬家」：</p>
+<table><thead><tr>
+<th>本地（开发）</th>
+<th>生产（服务器）</th>
+</tr></thead><tbody>
+<tr>
+<td>Windows + phpStudy MySQL</td>
+<td>Ubuntu ECS + MySQL（Docker 或 RDS）</td>
+</tr>
+<tr>
+<td><code>npm run dev</code> 热更新</td>
+<td>构建后的静态文件放在 Nginx 目录</td>
+</tr>
+<tr>
+<td><code>uvicorn</code> 直接跑后端</td>
+<td>Docker 容器里跑 FastAPI</td>
+</tr>
+<tr>
+<td><code>http://localhost:5173/myweb/</code></td>
+<td><code>https://你的域名/myweb/</code></td>
+</tr>
+</tbody></table>
+<p>本仓库的正式运维文档是 <a href="../README-m6-ecs.md"><code>../README-m6-ecs.md</code></a>。本目录是<strong>分阶段、带命令解释</strong>的新手版，按顺序做完即可上线。</p>
+<hr>
+<h2>推荐阅读顺序（共 8 篇）</h2>
+<table><thead><tr>
+<th>编号</th>
+<th>文件</th>
+<th>你将完成什么</th>
+</tr></thead><tbody>
+<tr>
+<td>01</td>
+<td><a href="/myweb/content/31">01-准备工作</a></td>
+<td>买服务器、解析域名、SSH 登录、装 Docker/Nginx</td>
+</tr>
+<tr>
+<td>02</td>
+<td>02-前端打包与静态资源准备（未发布）</td>
+<td><code>npm run build</code>、检查 <code>docs/</code>、打包 <code>img/</code>/<code>Music/</code></td>
+</tr>
+<tr>
+<td>03</td>
+<td>03-后端Docker化（未发布）</td>
+<td>理解 <code>Dockerfile</code>、<code>docker-compose.prod.yml</code>、写好 <code>backend/.env</code></td>
+</tr>
+<tr>
+<td>04</td>
+<td>04-数据库迁移与生产配置（未发布）</td>
+<td>从 phpStudy 导出数据，导入生产 MySQL</td>
+</tr>
+<tr>
+<td>05</td>
+<td>05-Nginx部署与HTTPS（未发布）</td>
+<td>静态站 + API 反代 + Let&#x27;s Encrypt 证书</td>
+</tr>
+<tr>
+<td>06</td>
+<td>06-启动服务与验证（未发布）</td>
+<td>一键启动、冒烟测试、日常发布流程</td>
+</tr>
+<tr>
+<td>07</td>
+<td>07-日志与基本监控（未发布）</td>
+<td>看日志、排 502/跨域/白页等常见故障</td>
+</tr>
+<tr>
+<td>08</td>
+<td>08-部署名词表与关系（未发布）</td>
+<td>专有名词词典：镜像/容器/Compose/Nginx…及它们的关系</td>
+</tr>
+</tbody></table>
+<p>01～07 结构统一：<strong>学习目标 → 前置条件 → 详细步骤 → 检查点 → 常见问题</strong>。</p>
+<p>08 可随时当词典翻；也可在读 01 之前先扫一遍。</p>
+<hr>
+<h2>上线后的访问形态（务必先记住）</h2>
+<p>生产采用<strong>前后端同域</strong>：</p>
+<pre><code class="language-javascript">
+https://你的域名/myweb/          →  Vue 静态站（base=/myweb/）
+https://你的域名/myweb/app       →  平台 Hub
+https://你的域名/api/v1/...      →  FastAPI（Nginx 反代到 127.0.0.1:8000）
+https://你的域名/api/health      →  健康检查
+https://你的域名/admin           →  SQLAdmin
+https://你的域名/uploads/...     →  用户头像等上传文件
+https://你的域名/myweb/img/...   →  大图（Nginx 直出，不打进前端包）
+https://你的域名/myweb/Music/... →  音乐（同上）
+</code></pre>
+<p>服务器上的主目录约定为：</p>
+<pre><code class="language-text">
+/var/www/cyinc/                 ← 仓库根目录（git clone 到这里）
+├── myweb/                      ← 前端构建产物（来自 docs/）
+├── img/                        ← 大图媒体
+├── Music/                      ← 音乐媒体
+├── backend/
+│   ├── .env                    ← 生产密钥（勿提交 Git）
+│   └── Dockerfile
+├── docker-compose.prod.yml
+└── deploy/
+    └── nginx.conf.example
+</code></pre>
+<hr>
+<h2>预计时间与费用（心里有数）</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>粗略预估</th>
+</tr></thead><tbody>
+<tr>
+<td>首次完整上线</td>
+<td>半天～1 天（不含备案等待）</td>
+</tr>
+<tr>
+<td>ECS</td>
+<td>约 2 核 2～4G 内存，Ubuntu 22.04</td>
+</tr>
+<tr>
+<td>域名</td>
+<td>已有即可；国内 ECS 对外服务通常需备案</td>
+</tr>
+<tr>
+<td>证书</td>
+<td>Let&#x27;s Encrypt 免费</td>
+</tr>
+</tbody></table>
+<h2>我运气可能比较好，买服务器加备案成功就 5 天</h2>
+<p><img src="./images/icp-beian-passed.png" alt="管局审核已通过 · 阿里云备案进度" loading="lazy" /></p>
+<p>上图为实拍：从提交审核到管局通过大约几天（本例约 2026-07-11 → 07-15）。通过后记得：</p>
+<ol>
+<li>网站首页底部挂备案号，并链到 <a href="https://beian.miit.gov.cn">工信部备案查询</a></li>
+<li>网站开通后 <strong>30 日内</strong> 另做公安备案（与 ICP 备案不是同一件事）</li>
+</ol>
+<p>国内地域 ECS：<strong>备案通过前</strong>，可用 IP + HTTP 自测；对外正式访问建议 HTTPS + 备案完成。</p>
+<hr>
+<h2>安全底线（写笔记前先说清楚）</h2>
+<ol>
+<li><strong>永远不要</strong>把 <code>backend/.env</code>、真实密码、<code>SECRET_KEY</code> 提交到 Git 或发到公开聊天。</li>
+<li>安全组只开放 <strong>22 / 80 / 443</strong>；<strong>不要</strong>把 8000、3306、6379 对公网开放。</li>
+<li>生产 <code>SECRET_KEY</code> 必须用随机值生成，不要用示例里的 <code>change-me</code>。</li>
+</ol>
+<hr>
+<h2>下一步</h2>
+<ul>
+<li>先搞清名词 → 08-部署名词表与关系（未发布到站点；源文件在仓库 deploy/新手部署笔记）  </li>
+<li>直接上手实操 → <a href="/myweb/content/31">01-准备工作</a></li>
+</ul>

@@ -192,15 +192,35 @@ const routes = [
   },
   {
     path: '/admin',
-    name: 'NotesAdmin',
-    component: () => import('../views/admin/NotesAdmin.vue'),
-    meta: { title: '笔记管理台' },
-  },
-  {
-    path: '/admin/acg-bot',
-    name: 'AcgBotAdmin',
-    component: () => import('../views/admin/AcgBotAdmin.vue'),
-    meta: { title: 'ACG 资讯机器人' },
+    component: () => import('../views/admin/AdminConsole.vue'),
+    children: [
+      {
+        path: '',
+        name: 'AdminDashboard',
+        component: () => import('../views/admin/AdminDashboard.vue'),
+        meta: { title: '管理控制台 · 仪表盘' },
+      },
+      {
+        path: 'notes',
+        name: 'NotesAdmin',
+        component: () => import('../views/admin/NotesAdmin.vue'),
+        props: { embedded: true },
+        meta: { title: '笔记管理' },
+      },
+      {
+        path: 'acg-bot',
+        name: 'AcgBotAdmin',
+        component: () => import('../views/admin/AcgBotAdmin.vue'),
+        props: { embedded: true },
+        meta: { title: 'ACG 资讯机器人' },
+      },
+      {
+        path: 'data',
+        name: 'DataAdmin',
+        component: () => import('../views/admin/DataAdmin.vue'),
+        meta: { title: '数据管理' },
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',

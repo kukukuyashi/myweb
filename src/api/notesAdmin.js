@@ -30,6 +30,7 @@ async function request(path, options = {}) {
   const res = await fetch(`${apiBase()}${path}`, {
     ...options,
     headers,
+    credentials: 'include',
   })
 
   let json = {}
@@ -69,6 +70,23 @@ export function loginNotesAdmin(username, password) {
 
 export function fetchNotesAdminMe() {
   return request('/me')
+}
+
+export function fetchAdminSummary() {
+  const env = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '')
+  const token = getNotesAdminToken()
+  return fetch(`${env}/admin-stats/summary`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: 'include',
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      if (json && typeof json === 'object' && Object.prototype.hasOwnProperty.call(json, 'code')) {
+        if (json.code !== 0) throw new Error(json.message || '请求失败')
+        return json.data
+      }
+      return json
+    })
 }
 
 export function fetchCategories() {

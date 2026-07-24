@@ -1,0 +1,289 @@
+<p class="article-intro">01-准备工作(部署笔记) — 学习笔记。</p>
+<h1>01 · 准备工作</h1>
+<p>把「空服务器」变成「能跑 CYINC.LOG 的地基」：买机器、连上去、装好 Docker 和 Nginx。</p>
+<hr>
+<h2>学习目标</h2>
+<p>学完本篇，你能够：</p>
+<ol>
+<li>购买并登录一台阿里云 ECS（Ubuntu 22.04）</li>
+<li>用 SSH 安全连接服务器</li>
+<li>把域名 A 记录解析到 ECS 公网 IP</li>
+<li>安装 Docker、Nginx、Certbot，并创建部署目录 <code>/var/www/cyinc</code></li>
+</ol>
+<hr>
+<h2>前置条件</h2>
+<p>在开始前请准备好：</p>
+<table><thead><tr>
+<th>需要什么</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>阿里云账号</td>
+<td>能买 ECS；有实名认证</td>
+</tr>
+<tr>
+<td>域名（推荐）</td>
+<td>如 <code>example.com</code>；国内 ECS 正式对外常需备案</td>
+</tr>
+<tr>
+<td>本机终端</td>
+<td>Windows 可用 PowerShell，或装 <a href="https://git-scm.com/" target="_blank" rel="noopener">Git Bash</a> / Windows Terminal</td>
+</tr>
+<tr>
+<td>SSH 公钥（推荐）</td>
+<td>比每次输密码更安全；没有也能先用密码登录</td>
+</tr>
+</tbody></table>
+<p>本机已有项目仓库（路径示例）：</p>
+<pre><code class="language-text">
+D:\phpstudy\phpstudy_pro\WWW\gerenboke
+</code></pre>
+<hr>
+<h2>详细操作步骤</h2>
+<h3>步骤 1：购买 ECS</h3>
+<ol>
+<li>打开阿里云控制台 → <strong>云服务器 ECS</strong> → <strong>创建实例</strong>。</li>
+<li>建议规格（够跑本站）：</li>
+</ol>
+<p>- 地域：选离你用户近的（如华东）</p>
+<p>- 镜像：<strong>Ubuntu 22.04 64 位</strong></p>
+<p>- 规格：2 vCPU / 2～4 GiB 内存</p>
+<p>- 系统盘：40 GiB 及以上</p>
+<p>- 带宽：按量或固定带宽均可（入门可先 3～5 Mbps）</p>
+<ol>
+<li>设置 <strong>root / 自定义用户密码</strong>，或绑定 <strong>SSH 密钥对</strong>（更推荐）。</li>
+<li>创建完成后，在实例列表记下 <strong>公网 IP</strong>，下文记作 <code>你的ECS公网IP</code>。</li>
+</ol>
+<p><strong>安全组（防火墙规则）</strong>必须放行：</p>
+<table><thead><tr>
+<th>端口</th>
+<th>用途</th>
+</tr></thead><tbody>
+<tr>
+<td>22</td>
+<td>SSH 登录</td>
+</tr>
+<tr>
+<td>80</td>
+<td>HTTP（证书申请、跳转 HTTPS）</td>
+</tr>
+<tr>
+<td>443</td>
+<td>HTTPS 正式访问</td>
+</tr>
+</tbody></table>
+<p><strong>不要</strong>放行 8000（API）、3306（MySQL）、6379（Redis）到公网。</p>
+<p><strong>成功标志</strong>：控制台显示实例「运行中」，能看到公网 IP。</p>
+<hr>
+<h3>步骤 2：用 SSH 登录服务器</h3>
+<p>在本机 PowerShell 或终端执行（把 IP 换成你的）：</p>
+<pre><code class="language-bash">
+ssh root@你的ECS公网IP
+</code></pre>
+<p>逐行含义：</p>
+<ul>
+<li><code>ssh</code>：远程登录工具</li>
+<li><code>root@...</code>：以 root 用户连到那台机器</li>
+<li>第一次会问 <code>Are you sure you want to continue connecting?</code> → 输入 <code>yes</code></li>
+</ul>
+<p>若用密钥：</p>
+<pre><code class="language-bash">
+ssh -i C:\Users\你的用户名\.ssh\id_rsa root@你的ECS公网IP
+</code></pre>
+<ul>
+<li><code>-i</code>：指定私钥文件路径</li>
+</ul>
+<p><strong>预期输出</strong>：出现类似 <code>root@iZxxxxx:~#</code> 的命令提示符，说明已进服务器。</p>
+<hr>
+<h3>步骤 3：域名解析（有域名时）</h3>
+<h2>！！！注意：是有域名的时候</h2>
+<ol>
+<li>在域名服务商（阿里云 / Cloudflare 等）进入 <strong>DNS 解析</strong>。</li>
+<li>添加 <strong>A 记录</strong>：</li>
+</ol>
+<table><thead><tr>
+<th>主机记录</th>
+<th>记录类型</th>
+<th>记录值</th>
+</tr></thead><tbody>
+<tr>
+<td><code>@</code></td>
+<td>A</td>
+<td><code>你的ECS公网IP</code></td>
+</tr>
+<tr>
+<td><code>www</code></td>
+<td>A</td>
+<td><code>你的ECS公网IP</code></td>
+</tr>
+</tbody></table>
+<ol>
+<li>等待几分钟到几十分钟生效。</li>
+</ol>
+<p>在本机检查：</p>
+<pre><code class="language-bash">
+ping 你的域名.com
+</code></pre>
+<p><strong>成功标志</strong>：能 ping 通，或至少解析出的 IP 等于 ECS 公网 IP。</p>
+<p>（部分服务器禁 ping，解析正确即可。）</p>
+<p>用 <code>nslookup</code> 更稳：</p>
+<pre><code class="language-bash">
+nslookup 你的域名.com
+</code></pre>
+<hr>
+<h3>步骤 4：创建部署用户与目录（推荐）</h3>
+<p>长期用 root 跑业务不理想。创建专用用户 <code>deploy</code>：</p>
+<pre><code class="language-bash">
+# 创建用户 deploy，并给 sudo 权限（可选）
+adduser deploy
+usermod -aG sudo deploy
+
+# 创建网站根目录，并交给 deploy
+mkdir -p /var/www/cyinc
+chown -R deploy:deploy /var/www/cyinc
+</code></pre>
+<h3>这个是看你自己的网站文件夹是怎么样，注意区分</h3>
+<p>含义：</p>
+<ul>
+<li><code>adduser deploy</code>：新建系统用户</li>
+<li><code>usermod -aG sudo deploy</code>：允许用 <code>sudo</code> 执行管理命令</li>
+<li><code>/var/www/cyinc</code>：本站约定的「家」，后面所有文件都放这里</li>
+</ul>
+<p>切换到 deploy：</p>
+<pre><code class="language-bash">
+su - deploy
+cd /var/www/cyinc
+</code></pre>
+<hr>
+<h3>步骤 5：克隆仓库到服务器</h3>
+<p>把 GitHub 地址换成你的真实仓库：</p>
+<pre><code class="language-bash">
+cd /var/www/cyinc
+git clone https://github.com/你的用户名/gerenboke.git .
+</code></pre>
+<p>说明：</p>
+<ul>
+<li>末尾的 <code>.</code>：克隆到<strong>当前目录</strong>，而不是再套一层文件夹</li>
+<li>若仓库是私有的，需配置 Deploy Key 或 Personal Access Token</li>
+</ul>
+<p><strong>成功标志</strong>：</p>
+<pre><code class="language-bash">
+ls /var/www/cyinc
+</code></pre>
+<p>应能看到 <code>backend/</code>、<code>deploy/</code>、<code>docker-compose.prod.yml</code>、<code>package.json</code> 等。</p>
+<blockquote>若暂时不想在服务器装前端构建环境：可以只克隆代码跑后端，前端在 Windows 本机构建后上传（见 02 篇）。这是推荐做法。</blockquote>
+<hr>
+<h3>步骤 6：一键安装 Docker / Nginx / Certbot</h3>
+<p>项目已提供初始化脚本：</p>
+<pre><code class="language-bash">
+cd /var/www/cyinc
+sudo bash deploy/scripts/setup-server.sh
+</code></pre>
+<p>脚本会大致做这些事（见 <code>deploy/scripts/setup-server.sh</code>）：</p>
+<ol>
+<li><code>apt-get install</code> 安装 <code>git</code>、<code>nginx</code>、<code>certbot</code>、<code>python3-certbot-nginx</code>、<code>ufw</code></li>
+<li>安装 Docker 与 <code>docker-compose-plugin</code></li>
+<li>确保 <code>deploy</code> 用户在 <code>docker</code> 组</li>
+<li>创建 <code>/var/www/cyinc/myweb</code></li>
+<li>防火墙放行 SSH 与 Nginx</li>
+</ol>
+<p>若脚本里的 <code>REPO_URL</code> 还是占位符，可先手动 <code>git clone</code>（上一步），再跑脚本装软件。</p>
+<p><strong>手动核对版本</strong>（脚本跑完后执行）：</p>
+<pre><code class="language-bash">
+docker --version
+# 预期类似：Docker version 24.x.x 或更高
+
+docker compose version
+# 预期类似：Docker Compose version v2.x.x
+
+nginx -v
+# 预期：nginx version: nginx/1.18.x 或更高
+
+certbot --version
+# 预期：certbot 1.x 或 2.x
+</code></pre>
+<p>让当前用户免 sudo 使用 Docker（若提示 permission denied）：</p>
+<pre><code class="language-bash">
+sudo usermod -aG docker $USER
+# 重新登录 SSH 后生效
+exit
+ssh deploy@你的ECS公网IP
+</code></pre>
+<hr>
+<h3>步骤 7：（可选）本机装 Node / 仅用于本地构建</h3>
+<p>前端打包通常在 <strong>Windows 开发机</strong>完成，服务器不必装 Node。</p>
+<p>本机检查：</p>
+<pre><code class="language-powershell">
+node -v
+# 建议 v18 或 v20+
+
+npm -v
+</code></pre>
+<p>没有就从 <a href="https://nodejs.org" target="_blank" rel="noopener">https://nodejs.org</a> 安装 LTS。</p>
+<p>后端生产用 Docker 镜像内的 Python，<strong>服务器一般不必单独装 Python 跑 API</strong>；仅当你要在宿主机跑 <code>set_admin_password.py</code> 时，才需要：</p>
+<pre><code class="language-bash">
+python3 --version
+# Ubuntu 22.04 自带多为 3.10+
+</code></pre>
+<hr>
+<h2>检查点</h2>
+<p>全部通过再进入下一篇：</p>
+<ul>
+<li>[ ] SSH 能稳定登录 ECS</li>
+<li>[ ] <code>docker --version</code> 与 <code>docker compose version</code> 正常</li>
+<li>[ ] <code>nginx -v</code> 正常</li>
+<li>[ ] 目录 <code>/var/www/cyinc</code> 存在且属主为 <code>deploy</code></li>
+<li>[ ] 仓库代码已在 <code>/var/www/cyinc</code>（或至少 <code>deploy/</code>、<code>backend/</code>、<code>docker-compose.prod.yml</code> 在）</li>
+<li>[ ] 安全组仅开放 22/80/443</li>
+<li>[ ] （有域名）A 记录已指向 ECS</li>
+</ul>
+<p>快速自检命令：</p>
+<pre><code class="language-bash">
+whoami
+# 预期：deploy（或你创建的部署用户）
+
+pwd
+# 建议在：/var/www/cyinc
+
+ls backend/Dockerfile docker-compose.prod.yml deploy/nginx.conf.example
+# 三个文件都应存在
+</code></pre>
+<hr>
+<h2>常见问题与解决方案</h2>
+<h3>Q1：<code>ssh: connect to host ... port 22: Connection timed out</code></h3>
+<p><strong>可能原因</strong>：安全组没开 22；本机网络限制；IP 填错。</p>
+<p><strong>处理</strong>：</p>
+<ol>
+<li>阿里云控制台 → 安全组 → 入方向添加 TCP 22</li>
+<li>确认实例公网 IP 是否变更（停机再开会变的情况较少，但按量带宽注意）</li>
+<li>用控制台「远程连接 / Workbench」验证机器本身是否正常</li>
+</ol>
+<h3>Q2：<code>Permission denied (publickey)</code> 或一直要密码却登不进</h3>
+<p><strong>可能原因</strong>：只用密钥登录但本机没带对私钥；或密码输错次数过多。</p>
+<p><strong>处理</strong>：</p>
+<pre><code class="language-bash">
+# 明确指定私钥
+ssh -i ~/.ssh/id_rsa root@你的ECS公网IP
+
+# Windows 路径示例
+ssh -i $env:USERPROFILE\.ssh\id_rsa root@你的ECS公网IP
+</code></pre>
+<p>仍不行：在阿里云控制台重置实例密码，或绑定新密钥对后重试。</p>
+<h3>Q3：<code>docker: command not found</code> 或 <code>docker compose</code> 不可用</h3>
+<p><strong>处理</strong>：</p>
+<pre><code class="language-bash">
+curl -fsSL https://get.docker.com | sudo sh
+sudo apt-get update
+sudo apt-get install -y docker-compose-plugin
+sudo systemctl enable --now docker
+docker compose version
+</code></pre>
+<p>若只有旧版 <code>docker-compose</code>（带连字符），后续命令写成：</p>
+<pre><code class="language-bash">
+docker-compose -f docker-compose.prod.yml ps
+</code></pre>
+<p>本仓库的 <code>deploy/scripts/deploy.sh</code> 两种写法都支持。</p>
+<hr>
+<h2>下一步</h2>
+<p>地基打好后，先在本机把前端「盖好楼」再搬上去：</p>
+<p>→ <a href="./02-前端打包与静态资源准备(部署笔记" target="_blank" rel="noopener">02-前端打包与静态资源准备(部署笔记).md</a>.md)</p>
