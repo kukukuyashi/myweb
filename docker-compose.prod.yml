@@ -16,9 +16,12 @@ services:
     restart: unless-stopped
     volumes:
       - uploads_data:/app/uploads
-      # 笔记管理台：读写 Markdown 与静态站 Content / posts.json
+      # 笔记管理台：读写 Markdown 源
       - ./笔记:/data/notes
+      # 前端静态站（仅供读取 img/ 等）
       - ./myweb:/data/web
+      # 运行时数据（posts.json + Content/）：独立目录，与 myweb/ 物理隔离，防 rsync 覆盖
+      - ./site-data:/data/site
     depends_on:
       redis:
         condition: service_started

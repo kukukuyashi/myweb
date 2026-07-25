@@ -44,15 +44,32 @@ def site_web_root() -> Path:
 
 
 @lru_cache
+def site_data_root() -> Path | None:
+    """Isolated runtime-data root (posts.json + Content/).
+
+    When SITE_DATA_ROOT is set it lives OUTSIDE the frontend deploy tree
+    (myweb/), so `rsync --delete docs/ myweb/` can never wipe it.
+    Empty => fall back to legacy layout under site_web_root().
+    """
+    settings = get_settings()
+    if settings.site_data_root.strip():
+        return Path(settings.site_data_root).expanduser().resolve()
+    return None
+
+
+@lru_cache
 def content_dir() -> Path:
-    root = site_web_root()
-    if root == repo_root():
-        return (root / "Content").resolve()
-    return (root / "Content").resolve()
+    data_root = site_data_root()
+    if data_root is not None:
+        return (data_root / "Content").resolve()
+    return (site_web_root() / "Content").resolve()
 
 
 @lru_cache
 def posts_json_path() -> Path:
+    data_root = site_data_root()
+    if data_root is not None:
+        return (data_root / "data" / "posts.json").resolve()
     root = site_web_root()
     if root == repo_root():
         return (root / "public" / "data" / "posts.json").resolve()
@@ -62,6 +79,7 @@ def posts_json_path() -> Path:
 def clear_path_cache() -> None:
     notes_root.cache_clear()
     site_web_root.cache_clear()
+    site_data_root.cache_clear()
     content_dir.cache_clear()
     posts_json_path.cache_clear()
     repo_root.cache_clear()

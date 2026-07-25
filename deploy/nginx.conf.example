@@ -55,10 +55,16 @@ server {
         add_header Cache-Control "public, max-age=86400";
     }
 
-    # 博客文章正文（必须存在，勿 fallback 到 index.html）
+    # 博客文章正文（运行时数据，住在 site-data/，与前端部署隔离）
     location ^~ /myweb/Content/ {
-        root /var/www/cyinc;
+        alias /var/www/cyinc/site-data/Content/;
         try_files $uri =404;
+    }
+
+    # 文章目录 posts.json（运行时数据，同样住在 site-data/）
+    location = /myweb/data/posts.json {
+        alias /var/www/cyinc/site-data/data/posts.json;
+        add_header Cache-Control "no-store";
     }
 
     # Vite hashed assets — 文件名带 hash，可长期缓存

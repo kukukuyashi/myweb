@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     # 笔记管理台：空则自动推断仓库布局 / ECS /var/www/cyinc
     notes_root: str = ""
     site_web_root: str = ""
+    # 运行时数据根（posts.json + Content/）：与前端部署目录 myweb/ 物理隔离，防 rsync 覆盖
+    site_data_root: str = ""
     notes_admin_token_expire_minutes: int = 60 * 8
     # 生产在 Nginx HTTPS 后：强制把请求 scheme 视为 https（兜底，防 sqladmin url_for 出 http://）
     force_https: bool = False

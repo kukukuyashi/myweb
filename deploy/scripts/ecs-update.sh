@@ -15,18 +15,31 @@ echo "==> git pull ($BRANCH)"
 git fetch origin
 git reset --hard "origin/$BRANCH"
 
-echo "==> sync frontend docs/ -> myweb/ (exclude runtime data)"
-mkdir -p myweb myweb/data myweb/Content
-# 排除后端运行时数据：posts.json/Content/*.html/uploads 由笔记发布 API 维护
+# 运行时数据（posts.json + Content/）住在独立的 site-data/，与 myweb/ 物理隔离
+SITE_DATA="${SITE_DATA:-$APP_ROOT/site-data}"
+mkdir -p "$SITE_DATA/Content" "$SITE_DATA/data"
+
+echo "==> sync frontend docs/ -> myweb/ (runtime data lives in site-data/, untouched)"
+mkdir -p myweb
+# 前端构建产物里的 posts.json/Content 仅为占位，真正运行数据在 site-data/
 rsync -a --delete \
   --exclude='data/posts.json' \
   --exclude='Content/' \
   --exclude='uploads/' \
   docs/ myweb/
 
-echo "==> sync Content/*.html (avoid Windows zip mojibake)"
-mkdir -p myweb/Content
-cp -f Content/*.html myweb/Content/
+echo "==> seed git-tracked Content/*.html -> site-data/Content (add/update, never delete)"
+if ls Content/*.html >/dev/null 2>&1; then
+  cp -f Content/*.html "$SITE_DATA/Content/"
+fi
+# 首次迁移：若 site-data 空而旧 myweb 有数据，先搬过来（只补不覆盖）
+if [ ! -s "$SITE_DATA/data/posts.json" ] && [ -s myweb/data/posts.json ]; then
+  echo "   migrate myweb/data/posts.json -> site-data/data/"
+  cp -n myweb/data/posts.json "$SITE_DATA/data/posts.json"
+fi
+if [ -d myweb/Content ]; then
+  cp -rn myweb/Content/. "$SITE_DATA/Content/" 2>/dev/null || true
+fi
 
 echo "==> docker compose build & up"
 docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
