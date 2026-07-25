@@ -81,7 +81,18 @@ def _ensure_schema_patches() -> None:
             if "cover_url" not in cols:
                 conn.execute(text("ALTER TABLE posts ADD COLUMN cover_url TEXT NULL"))
     _ensure_cascade_fks(insp)
+    _cleanup_discarded_submissions(insp)
 
+
+def _cleanup_discarded_submissions(insp) -> None:
+    """把历史遗留的 status='discarded' 记录物理删除；现在“丢弃”即真删。"""
+    if not insp.has_table("acg_submissions"):
+        return
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("DELETE FROM acg_submissions WHERE status = 'discarded'"))
+    except Exception:  # noqa: BLE001
+        pass
 
 def _ensure_cascade_fks(insp) -> None:
     """Upgrade foreign keys referencing forum_threads/forum_replies to ON DELETE CASCADE.

@@ -222,9 +222,9 @@ def discard(
     sub = _get_or_404(db, submission_id)
     if sub.status == "published":
         raise HTTPException(status_code=400, detail="已发布投稿不可丢弃")
-    sub.status = "discarded"
+    db.delete(sub)
     db.commit()
-    return ok({"id": sub.id, "status": sub.status}, message="已丢弃")
+    return ok({"id": sub.id, "deleted": True}, message="已删除")
 
 
 @router.get("/categories", summary="论坛板块列表（发布目标）")
