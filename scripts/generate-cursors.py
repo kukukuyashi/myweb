@@ -20,6 +20,10 @@ OUT_DIR = ROOT / 'public' / 'cursors'
 OUT_SIZE = 96
 HOTSPOT = (12, 12)
 CONTENT_FILL = 0.88
+# 各光标单独填充比：文本是竖直 I-beam，长边=高，用 88% 会显得比其他光标高一截。
+CONTENT_FILL_PER = {
+    'text': 0.55,
+}
 FRAME_MS = 33
 TRANSPARENT_INDEX = 255
 
@@ -78,7 +82,7 @@ def normalize_frame(img: Image.Image, anchor: str) -> Image.Image:
 
     cropped = img.crop(bbox)
     cw, ch = cropped.size
-    target = OUT_SIZE * CONTENT_FILL
+    target = OUT_SIZE * CONTENT_FILL_PER.get(CURRENT_CURSOR_ID, CONTENT_FILL)
     scale = target / max(cw, ch)
     nw = max(1, round(cw * scale))
     nh = max(1, round(ch * scale))
@@ -161,6 +165,8 @@ def main() -> None:
             print(f'缺少源目录: {src}', file=sys.stderr)
             sys.exit(1)
 
+        global CURRENT_CURSOR_ID
+        CURRENT_CURSOR_ID = cursor_id
         anchor = CURSOR_ANCHORS[cursor_id]
         frames = load_rgba_frames(src, anchor)
         save_gif(frames, OUT_DIR / f'{cursor_id}.gif')
@@ -172,7 +178,7 @@ def main() -> None:
         nh = round(OUT_SIZE * CONTENT_FILL)
         if first_bbox:
             cw, ch = first_bbox[2] - first_bbox[0], first_bbox[3] - first_bbox[1]
-            target = OUT_SIZE * CONTENT_FILL
+            target = OUT_SIZE * CONTENT_FILL_PER.get(CURRENT_CURSOR_ID, CONTENT_FILL)
             scale = target / max(cw, ch)
             nw, nh = max(1, round(cw * scale)), max(1, round(ch * scale))
             hs_x, hs_y = anchor_hotspot(anchor, nw, nh)

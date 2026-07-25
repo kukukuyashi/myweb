@@ -13,40 +13,117 @@
         {{ tab.label }}
       </button>
       <div class="data-tabs-tail">
-        <a class="platform-btn-ghost" :href="currentUrl" target="_blank" rel="noopener">新标签打开 ↗</a>
+        <a class="platform-btn-ghost" href="/admin" target="_blank" rel="noopener">高级 / SQLAdmin ↗</a>
       </div>
     </div>
 
-    <div class="frame-wrap platform-panel" @mouseenter="onEnterFrame" @mouseleave="onLeaveFrame">
-      <iframe :key="activeSlug" :src="currentUrl" class="data-frame" title="数据管理" />
-    </div>
+    <AdminTable
+      v-if="active"
+      :key="active.slug"
+      :resource="active.resource"
+      :columns="active.columns"
+      :field-types="active.fieldTypes"
+      :default-sort="active.defaultSort || '-id'"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, ref } from 'vue'
+import AdminTable from '../../components/admin/AdminTable.vue'
 
 const tabs = [
-  { slug: 'user', label: '用户', icon: '👤' },
-  { slug: 'post', label: '博客文章', icon: '📝' },
-  { slug: 'forum-category', label: '论坛板块', icon: '📁' },
-  { slug: 'forum-thread', label: '论坛帖子', icon: '💬' },
-  { slug: 'forum-reply', label: '论坛回复', icon: '↩' },
-  { slug: 'qa-message', label: '留言板', icon: '✉' },
+  {
+    slug: 'users',
+    resource: 'users',
+    label: '用户',
+    icon: '👤',
+    defaultSort: '-id',
+    columns: [
+      { field: 'id', label: 'ID' },
+      { field: 'username', label: '用户名', searchable: true },
+      { field: 'email', label: '邮箱', searchable: true },
+      { field: 'nickname', label: '昵称', searchable: true },
+      { field: 'level', label: '等级' },
+      { field: 'xp', label: '经验' },
+      { field: 'checkin_streak', label: '连续签到' },
+      { field: 'created_at', label: '注册时间' },
+    ],
+    fieldTypes: {
+      level: 'number',
+      xp: 'number',
+      checkin_streak: 'number',
+      last_checkin_date: 'date',
+    },
+  },
+  {
+    slug: 'threads',
+    resource: 'threads',
+    label: '论坛帖子',
+    icon: '💬',
+    defaultSort: '-id',
+    columns: [
+      { field: 'id', label: 'ID' },
+      { field: 'category_id', label: '板块 ID' },
+      { field: 'user_id', label: '作者 ID' },
+      { field: 'title', label: '标题', searchable: true },
+      { field: 'reply_count', label: '回复' },
+      { field: 'view_count', label: '浏览' },
+      { field: 'like_count', label: '点赞' },
+      { field: 'is_pinned', label: '置顶' },
+      { field: 'is_featured', label: '精选' },
+      { field: 'created_at', label: '创建时间' },
+    ],
+    fieldTypes: {
+      content: 'textarea',
+      category_id: 'number',
+      is_pinned: 'boolean',
+      is_locked: 'boolean',
+      is_featured: 'boolean',
+      featured_order: 'number',
+      view_count: 'number',
+      like_count: 'number',
+      share_count: 'number',
+    },
+  },
+  {
+    slug: 'replies',
+    resource: 'replies',
+    label: '论坛回复',
+    icon: '↩',
+    defaultSort: '-id',
+    columns: [
+      { field: 'id', label: 'ID' },
+      { field: 'thread_id', label: '帖子 ID' },
+      { field: 'user_id', label: '作者 ID' },
+      { field: 'content', label: '内容', searchable: true },
+      { field: 'like_count', label: '点赞' },
+      { field: 'created_at', label: '创建时间' },
+    ],
+    fieldTypes: {
+      content: 'textarea',
+    },
+  },
+  {
+    slug: 'qa',
+    resource: 'qa',
+    label: '留言板',
+    icon: '✉',
+    defaultSort: '-id',
+    columns: [
+      { field: 'id', label: 'ID' },
+      { field: 'name', label: '昵称', searchable: true },
+      { field: 'content', label: '内容', searchable: true },
+      { field: 'created_at', label: '时间' },
+    ],
+    fieldTypes: {
+      content: 'textarea',
+    },
+  },
 ]
 
 const activeSlug = ref(tabs[0].slug)
-const currentUrl = computed(() => `/admin/${activeSlug.value}/list`)
-
-/** 鼠标进入 iframe 时，主站的 canvas 动画光标会因无法监听 iframe 内 mousemove 而“卡在原地”。
- *  这里给 html 加一个类：父页 CSS 会临时隐藏 canvas；iframe 内部通过自身 CSS 显示 GIF 光标。 */
-function onEnterFrame() {
-  document.documentElement.classList.add('cursor-hide-in-frame')
-}
-function onLeaveFrame() {
-  document.documentElement.classList.remove('cursor-hide-in-frame')
-}
-onBeforeUnmount(() => onLeaveFrame())
+const active = computed(() => tabs.find((t) => t.slug === activeSlug.value))
 </script>
 
 <style scoped>
@@ -84,7 +161,10 @@ onBeforeUnmount(() => onLeaveFrame())
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.data-tab:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.data-tab:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
 .data-tab.active {
   background: color-mix(in srgb, var(--primary-color) 14%, transparent);
   color: var(--primary-color);
@@ -92,29 +172,13 @@ onBeforeUnmount(() => onLeaveFrame())
   font-weight: 600;
 }
 
-.tab-icon { font-size: 1rem; }
-.data-tabs-tail { margin-left: auto; display: flex; align-items: center; }
-
-.frame-wrap {
-  padding: 0;
-  overflow: hidden;
-  flex: 1;
-  border-radius: 14px;
-  min-height: 640px;
+.tab-icon {
+  font-size: 1rem;
 }
 
-.data-frame {
-  width: 100%;
-  height: calc(100vh - 200px);
-  min-height: 620px;
-  border: 0;
-  display: block;
-  background: #fff;
-  border-radius: 14px;
+.data-tabs-tail {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
-</style>
-
-<style>
-/* 全局：鼠标位于 iframe 内时隐藏父页的 canvas 动画光标，避免残影卡住 */
-html.cursor-hide-in-frame .animated-cursor { visibility: hidden !important; }
 </style>

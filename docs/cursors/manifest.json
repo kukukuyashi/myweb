@@ -25,8 +25,8 @@
       "sheet": "text-sheet.png",
       "anchor": "center-top",
       "hotspotX": 12,
-      "hotspotY": 54,
-      "contentHeight": 84
+      "hotspotY": 38,
+      "contentHeight": 53
     },
     "busy": {
       "frames": 45,
