@@ -29,6 +29,33 @@ turndown.addRule('strikethrough', {
   },
 })
 
+const ALLOWED_STYLE_PROPS = ['color', 'background-color', 'font-size']
+
+export function sanitizeInlineStyle(raw) {
+  if (!raw) return ''
+  const out = []
+  for (const part of String(raw).split(';')) {
+    const idx = part.indexOf(':')
+    if (idx === -1) continue
+    const prop = part.slice(0, idx).trim().toLowerCase()
+    const val = part.slice(idx + 1).trim()
+    if (!ALLOWED_STYLE_PROPS.includes(prop)) continue
+    if (/url\s*\(|expression|javascript:|@import/i.test(val)) continue
+    out.push(prop + ': ' + val)
+  }
+  return out.join('; ')
+}
+
+turndown.addRule('inlineStyledSpan', {
+  filter(node) {
+    return node.nodeName === 'SPAN' && !!sanitizeInlineStyle(node.getAttribute('style'))
+  },
+  replacement(content, node) {
+    const style = sanitizeInlineStyle(node.getAttribute('style'))
+    if (!style || !content.trim()) return content
+    return '<span style="' + style + '">' + content + '</span>'
+  },
+})
 turndown.addRule('uploadImage', {
   filter: 'img',
   replacement(_content, node) {
@@ -46,7 +73,7 @@ turndown.addRule('uploadImage', {
 export function renderMarkdown(text) {
   if (!text) return ''
   const raw = marked.parse(text, { async: false })
-  return DOMPurify.sanitize(raw)
+  return DOMPurify.sanitize(raw, { ADD_ATTR: ['style'] })
 }
 
 /** HTML → Markdown（富文本模式同步用） */

@@ -7,32 +7,64 @@
           :key="m.id"
           type="button"
           :class="{ active: viewMode === m.id }"
+          :title="m.hint"
           @click="switchMode(m.id)"
         >
           {{ m.label }}
         </button>
       </div>
       <div class="fmt-btns">
-        <button type="button" title="粗体" @click="applyFormat('bold')"><strong>B</strong></button>
-        <button type="button" title="斜体" @click="applyFormat('italic')"><em>I</em></button>
-        <button type="button" title="删除线" @click="applyFormat('strike')"><s>S</s></button>
+        <button type="button" class="ico" title="加粗" @click="applyFormat('bold')"><strong>B</strong></button>
+        <button type="button" class="ico" title="斜体" @click="applyFormat('italic')"><em>I</em></button>
+        <button type="button" class="ico" title="删除线" @click="applyFormat('strike')"><s>S</s></button>
+
         <span class="sep" />
-        <button type="button" title="标题" @click="applyFormat('heading')">H</button>
-        <button type="button" title="引用" @click="applyFormat('quote')">❝</button>
-        <button type="button" title="无序列表" @click="applyFormat('ul')">≡</button>
-        <button type="button" title="有序列表" @click="applyFormat('ol')">1.</button>
-        <button type="button" title="代码" @click="applyFormat('code')">&lt;/&gt;</button>
-        <button type="button" title="链接" @click="applyFormat('link')">🔗</button>
+
+        <label class="fmt-select" title="字号">
+          <select :value="''" @change="onFontSizeChange">
+            <option value="" disabled>字号</option>
+            <option v-for="s in fontSizes" :key="s.value" :value="s.value">{{ s.label }}</option>
+          </select>
+        </label>
+
+        <div class="color-group" title="文字颜色">
+          <button
+            v-for="c in presetColors"
+            :key="c"
+            type="button"
+            class="swatch"
+            :style="{ background: c }"
+            @click="applyColor(c)"
+          />
+          <label class="swatch swatch-pick" :style="{ background: customColor }">
+            <input type="color" v-model="customColor" @change="applyColor(customColor)" />
+          </label>
+        </div>
+
+        <span class="sep" />
+
+        <button type="button" class="txt" title="标题" @click="applyFormat('heading')">标题</button>
+        <button type="button" class="txt" title="引用" @click="applyFormat('quote')">引用</button>
+        <button type="button" class="txt" title="无序列表" @click="applyFormat('ul')">• 列表</button>
+        <button type="button" class="txt" title="有序列表" @click="applyFormat('ol')">1. 编号</button>
+        <button type="button" class="txt" title="代码" @click="applyFormat('code')">代码</button>
+        <button type="button" class="txt" title="插入链接" @click="applyFormat('link')">链接</button>
         <button
           type="button"
-          :title="enableImageUpload ? '上传图片' : '图片'"
+          class="txt upload"
+          :title="enableImageUpload ? '上传图片' : '插入图片链接'"
           :disabled="imageUploading"
           @click="onImageClick"
         >
-          {{ imageUploading ? '上传中…' : (enableImageUpload ? '上传图片' : '🖼') }}
+          {{ imageUploading ? '上传中…' : (enableImageUpload ? '图片' : '图片') }}
         </button>
       </div>
     </div>
+
+    <p v-if="viewMode === 'rich'" class="md-hint">
+      直接打字就行。想改样式：先选中文字，再点上方按钮（加粗 / 字号 / 颜色…）。
+    </p>
+
     <input
       ref="imageInputRef"
       type="file"
@@ -62,6 +94,7 @@
           class="rich-area"
           contenteditable="true"
           spellcheck="false"
+          :data-placeholder="placeholder"
           @input="onRichInput"
           @blur="syncRichToModel"
           @paste="onPaste"
@@ -90,7 +123,7 @@
 <script setup>
 import { nextTick, ref, watch } from 'vue'
 import MarkdownBody from './MarkdownBody.vue'
-import { htmlToMarkdown, markdownToHtml } from '../utils/markdown.js'
+import { htmlToMarkdown, markdownToHtml, sanitizeInlineStyle } from '../utils/markdown.js'
 import { resolveMediaUrl, uploadForumImage, uploadPostImage } from '../api/platform.js'
 
 const props = defineProps({
@@ -98,26 +131,45 @@ const props = defineProps({
   rows: { type: Number, default: 16 },
   placeholder: { type: String, default: '支持 Markdown · 可切换富文本模式' },
   enableImageUpload: { type: Boolean, default: false },
-  /** forum | post — 决定图片上传到哪个目录 */
+  /** forum | post —— 决定图片上传到哪个目录 */
   imageUploadScope: { type: String, default: 'forum' },
+  /** 默认显示模式 */
+  defaultMode: { type: String, default: 'rich' },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const modes = [
-  { id: 'rich', label: '富文本' },
-  { id: 'md', label: 'Markdown' },
-  { id: 'split', label: '分屏' },
-  { id: 'preview', label: '预览' },
+  { id: 'rich', label: '所见即所得', hint: '直接写，不用记语法' },
+  { id: 'md', label: 'Markdown', hint: '纯文本 Markdown 源码' },
+  { id: 'split', label: '分屏', hint: '左源码、右预览' },
+  { id: 'preview', label: '预览', hint: '只看最终渲染效果' },
 ]
 
-const viewMode = ref('split')
+const fontSizes = [
+  { label: '小字 12px', value: '12px' },
+  { label: '正文 14px', value: '14px' },
+  { label: '稍大 16px', value: '16px' },
+  { label: '大字 18px', value: '18px' },
+  { label: '标题 20px', value: '20px' },
+]
+
+const presetColors = [
+  '#e85d04',
+  '#0096c7',
+  '#38b000',
+  '#d00000',
+  '#ffbe0b',
+]
+
+const viewMode = ref(props.defaultMode)
 const textareaRef = ref(null)
 const richRef = ref(null)
 const richDirty = ref(false)
 const imageInputRef = ref(null)
 const imageUploading = ref(false)
 const dragOver = ref(false)
+const customColor = ref('#e85d04')
 
 function triggerImageUpload() {
   imageInputRef.value?.click()
@@ -283,6 +335,33 @@ function insertLinePrefix(prefix) {
   nextTick(() => ta.focus())
 }
 
+function applyRichStyle(prop, val) {
+  const selection = window.getSelection()
+  if (!selection || !selection.toString().trim()) return
+  document.execCommand('styleWithCSS', false, 'true')
+  document.execCommand(prop, false, val)
+  richDirty.value = true
+  syncRichToModel()
+}
+
+function onFontSizeChange(e) {
+  if (viewMode.value === 'rich' || viewMode.value === 'split') {
+    if (viewMode.value === 'split') richRef.value?.focus()
+    applyRichStyle('fontSize', e.target.value)
+  }
+  e.target.value = ''
+}
+
+function applyColor(color) {
+  if (viewMode.value === 'rich' || viewMode.value === 'split') {
+    if (viewMode.value === 'split') richRef.value?.focus()
+    document.execCommand('styleWithCSS', false, 'true')
+    document.execCommand('foreColor', false, color)
+    richDirty.value = true
+    syncRichToModel()
+  }
+}
+
 function applyFormat(type) {
   if (viewMode.value === 'rich' || (viewMode.value === 'split' && document.activeElement === richRef.value)) {
     applyRichFormat(type)
@@ -351,6 +430,7 @@ function applyRichFormat(type) {
   const el = richRef.value
   if (!el) return
   el.focus()
+  document.execCommand('styleWithCSS', false, 'true')
   switch (type) {
     case 'bold':
       document.execCommand('bold')
@@ -442,6 +522,10 @@ watch(
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
+.fmt-btns button.ico {
+  min-width: 2rem;
+}
+
 .mode-tabs button:hover:not(.active),
 .fmt-btns button:hover {
   border-color: color-mix(in srgb, var(--orange) 55%, var(--border));
@@ -458,14 +542,67 @@ watch(
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .fmt-btns .sep {
   width: 1px;
-  height: 1rem;
+  height: 1.1rem;
   background: var(--border);
   margin: 0 0.15rem;
+}
+
+.fmt-select select {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-paper) 55%, var(--bg));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.color-group {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.color-group .swatch {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, #000 20%, var(--border));
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-group .swatch:hover {
+  transform: scale(1.12);
+}
+
+.color-group .swatch-pick input[type='color'] {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.md-hint {
+  margin: 0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--orange) 8%, transparent);
+  border-bottom: 1px solid var(--border);
 }
 
 .md-panes {
@@ -515,6 +652,12 @@ watch(
   outline: none;
 }
 
+.rich-area:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 .rich-area :deep(h2) {
   font-size: 1.1rem;
   margin: 0.75em 0 0.35em;
@@ -531,6 +674,12 @@ watch(
   padding-left: 0.75em;
   border-left: 3px solid var(--orange);
   color: var(--text-muted);
+}
+
+.rich-area :deep(img) {
+  max-height: 240px;
+  width: auto;
+  max-width: 100%;
 }
 
 .preview-pane {
@@ -564,6 +713,9 @@ watch(
   .preview-pane {
     border-left: none;
     border-top: 1px solid var(--border);
+  }
+  .md-toolbar {
+    gap: 0.35rem;
   }
 }
 
