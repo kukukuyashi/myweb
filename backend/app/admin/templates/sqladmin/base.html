@@ -24,6 +24,20 @@
   {% block head_tail %}
   {% endblock %}
   <style>
+    /* 与主站一致的自定义 GIF 光标（iframe 是独立文档，需单独注入） */
+    html {
+      cursor: url('/myweb/cursors/normal.gif') 12 12, auto;
+    }
+    a, button, [role="button"], .btn, label, summary, .cursor-pointer {
+      cursor: url('/myweb/cursors/pointer.gif') 12 12, pointer;
+    }
+    input, textarea, select, [contenteditable="true"] {
+      cursor: url('/myweb/cursors/text.gif') 12 54, text;
+    }
+    [disabled], .disabled, .not-allowed {
+      cursor: not-allowed;
+    }
+
     /* 在 iframe（父页管理控制台）中嵌入时隐藏自身外壳，只保留 CRUD 表格 */
     body.sa-embedded .navbar.navbar-vertical { display: none !important; }
     body.sa-embedded .page-wrapper { margin-left: 0 !important; }

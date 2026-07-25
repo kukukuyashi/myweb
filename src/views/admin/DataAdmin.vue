@@ -17,14 +17,14 @@
       </div>
     </div>
 
-    <div class="frame-wrap platform-panel">
+    <div class="frame-wrap platform-panel" @mouseenter="onEnterFrame" @mouseleave="onLeaveFrame">
       <iframe :key="activeSlug" :src="currentUrl" class="data-frame" title="数据管理" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 
 const tabs = [
   { slug: 'user', label: '用户', icon: '👤' },
@@ -37,6 +37,16 @@ const tabs = [
 
 const activeSlug = ref(tabs[0].slug)
 const currentUrl = computed(() => `/admin/${activeSlug.value}/list`)
+
+/** 鼠标进入 iframe 时，主站的 canvas 动画光标会因无法监听 iframe 内 mousemove 而“卡在原地”。
+ *  这里给 html 加一个类：父页 CSS 会临时隐藏 canvas；iframe 内部通过自身 CSS 显示 GIF 光标。 */
+function onEnterFrame() {
+  document.documentElement.classList.add('cursor-hide-in-frame')
+}
+function onLeaveFrame() {
+  document.documentElement.classList.remove('cursor-hide-in-frame')
+}
+onBeforeUnmount(() => onLeaveFrame())
 </script>
 
 <style scoped>
@@ -74,10 +84,7 @@ const currentUrl = computed(() => `/admin/${activeSlug.value}/list`)
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.data-tab:hover {
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-}
-
+.data-tab:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
 .data-tab.active {
   background: color-mix(in srgb, var(--primary-color) 14%, transparent);
   color: var(--primary-color);
@@ -85,15 +92,8 @@ const currentUrl = computed(() => `/admin/${activeSlug.value}/list`)
   font-weight: 600;
 }
 
-.tab-icon {
-  font-size: 1rem;
-}
-
-.data-tabs-tail {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
+.tab-icon { font-size: 1rem; }
+.data-tabs-tail { margin-left: auto; display: flex; align-items: center; }
 
 .frame-wrap {
   padding: 0;
@@ -112,4 +112,9 @@ const currentUrl = computed(() => `/admin/${activeSlug.value}/list`)
   background: #fff;
   border-radius: 14px;
 }
+</style>
+
+<style>
+/* 全局：鼠标位于 iframe 内时隐藏父页的 canvas 动画光标，避免残影卡住 */
+html.cursor-hide-in-frame .animated-cursor { visibility: hidden !important; }
 </style>
