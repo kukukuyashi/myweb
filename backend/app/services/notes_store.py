@@ -362,6 +362,34 @@ def list_site_only_notes(posts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+RESERVED_CATEGORY_NAMES = {"全部", "草稿", "未分类", "站点文章", "_drafts"}
+
+
+def list_category_folders() -> list[str]:
+    root = ensure_note_folders()
+    folders: list[str] = []
+    for entry in root.iterdir():
+        if not entry.is_dir():
+            continue
+        if entry.name == "_drafts" or should_skip_note_dir(entry.name):
+            continue
+        folders.append(entry.name)
+    return folders
+
+
+def create_category(name: str) -> dict[str, Any]:
+    safe = sanitize_file_name(name)
+    if not safe:
+        raise ValueError("分类名不能为空")
+    if safe in RESERVED_CATEGORY_NAMES or should_skip_note_dir(safe):
+        raise ValueError(f"该名称不可用作分类：{safe}")
+    abs_path = assert_note_abs(safe)
+    if abs_path.exists():
+        raise FileExistsError(f"分类已存在：{safe}")
+    abs_path.mkdir(parents=True, exist_ok=False)
+    return {"name": safe}
+
+
 def list_categories(posts: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
     posts = posts or []
     notes = list_notes()
@@ -375,6 +403,9 @@ def list_categories(posts: list[dict[str, Any]] | None = None) -> list[dict[str,
     }
     for cat in COMMON_CATEGORIES:
         counts[cat] = 0
+    custom_folders = [f for f in list_category_folders() if f not in counts]
+    for folder_name in custom_folders:
+        counts.setdefault(folder_name, 0)
     for note in notes:
         if note["isDraft"]:
             counts["草稿"] = counts.get("草稿", 0) + 1
@@ -401,6 +432,7 @@ def list_categories(posts: list[dict[str, Any]] | None = None) -> list[dict[str,
             or name == "站点文章"
             or count > 0
             or name in COMMON_CATEGORIES
+            or name in custom_folders
         ):
             result.append({"name": name, "count": count})
     return result

@@ -93,6 +93,13 @@ export function fetchCategories() {
   return request('/categories')
 }
 
+export function createCategory(name) {
+  return request('/categories', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+}
+
 export function fetchNotes(category = '全部') {
   const q = category && category !== '全部' ? `?category=${encodeURIComponent(category)}` : ''
   return request(`/notes${q}`)

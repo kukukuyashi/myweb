@@ -70,6 +70,7 @@
       <aside class="admin-sidebar">
         <h2>分类</h2>
         <p class="sidebar-hint">拖拽笔记到分类上即可移动</p>
+        <button type="button" class="btn btn-ghost btn-add-category" @click="handleCreateCategory">+ 新建分类</button>
         <ul class="category-list">
           <li
             v-for="cat in droppableCategories"
@@ -360,6 +361,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import {
   clearNotesAdminToken,
+  createCategory,
   createNote,
   deleteNote,
   fetchCategories,
@@ -643,6 +645,19 @@ function flash(text, type = 'info') {
   setTimeout(() => {
     if (message.value === text) message.value = ''
   }, 3200)
+}
+
+async function handleCreateCategory() {
+  const name = (window.prompt('新分类名称（会在 笔记/ 下创建同名目录）') || '').trim()
+  if (!name) return
+  try {
+    await createCategory(name)
+    flash(`已新建分类：${name}`, 'success')
+    await reloadAll()
+    await selectCategory(name)
+  } catch (err) {
+    flash(err.message, 'error')
+  }
 }
 
 async function reloadAll() {
@@ -1277,6 +1292,14 @@ textarea,
   font-size: 0.72rem;
   color: var(--text-muted);
   line-height: 1.4;
+}
+
+.btn-add-category {
+  width: 100%;
+  margin: 0 0 0.75rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  border-style: dashed;
 }
 
 .category-list li.drop-target button {

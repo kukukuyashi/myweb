@@ -52,6 +52,10 @@ class MoveBody(BaseModel):
     category: str
 
 
+class CategoryCreateBody(BaseModel):
+    name: str
+
+
 class PreviewBody(BaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
     body: str = ""
@@ -145,6 +149,16 @@ def me(username: Annotated[str, Depends(require_notes_admin)]):
 def categories(_: Annotated[str, Depends(require_notes_admin)]):
     posts = load_posts()
     return ok({"categories": notes_store.list_categories(posts), "folders": str(notes_root())})
+
+
+@router.post("/categories", status_code=201, summary="新建笔记分类（创建空目录）")
+def create_category(body: CategoryCreateBody, _: Annotated[str, Depends(require_notes_admin)]):
+    try:
+        created = notes_store.create_category(body.name)
+        posts = load_posts()
+        return ok({"ok": True, **created, "categories": notes_store.list_categories(posts)})
+    except Exception as exc:
+        raise _http_error(exc) from exc
 
 
 @router.post("/uploads/image", summary="上传笔记正文图片")
