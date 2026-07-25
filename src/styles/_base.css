@@ -82,7 +82,7 @@ input,
 textarea,
 select,
 [contenteditable="true"] {
-  cursor: url('/myweb/cursors/text.gif') 12 54, text;
+  cursor: url('/myweb/cursors/text.gif') 12 38, text;
 }
 
 .not-allowed,

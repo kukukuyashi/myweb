@@ -14,8 +14,11 @@ if [[ ! -f "$ROOT/docs/index.html" ]]; then
   exit 1
 fi
 
-echo "==> rsync docs/ -> $TARGET:$DEST"
+echo "==> rsync docs/ -> $TARGET:$DEST (exclude runtime data)"
 rsync -avz --delete \
+  --exclude='data/posts.json' \
+  --exclude='Content/' \
+  --exclude='uploads/' \
   -e ssh \
   "$ROOT/docs/" \
   "$TARGET:$DEST"

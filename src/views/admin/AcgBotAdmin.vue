@@ -251,7 +251,6 @@ const statusFilterOptions = [
   { value: 'all', label: '全部' },
   { value: 'draft', label: '草稿' },
   { value: 'published', label: '已发布' },
-  { value: 'discarded', label: '已丢弃' },
 ]
 
 const isDirty = computed(() => savedSnapshot.value !== '' && savedSnapshot.value !== snapshotForm())

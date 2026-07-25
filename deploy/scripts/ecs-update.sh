@@ -15,9 +15,14 @@ echo "==> git pull ($BRANCH)"
 git fetch origin
 git reset --hard "origin/$BRANCH"
 
-echo "==> sync frontend docs/ -> myweb/"
-mkdir -p myweb
-rsync -a --delete docs/ myweb/
+echo "==> sync frontend docs/ -> myweb/ (exclude runtime data)"
+mkdir -p myweb myweb/data myweb/Content
+# 排除后端运行时数据：posts.json/Content/*.html/uploads 由笔记发布 API 维护
+rsync -a --delete \
+  --exclude='data/posts.json' \
+  --exclude='Content/' \
+  --exclude='uploads/' \
+  docs/ myweb/
 
 echo "==> sync Content/*.html (avoid Windows zip mojibake)"
 mkdir -p myweb/Content
