@@ -63,6 +63,7 @@ def _unique_post_slug(base: str, exclude_id: int | None = None) -> str:
 
 
 class UserAdmin(ModelView, model=User):
+    identity = "user"
     name = "用户"
     name_plural = "用户"
     icon = "fa-solid fa-user"
@@ -90,6 +91,7 @@ class UserAdmin(ModelView, model=User):
 
 
 class PostAdmin(ModelView, model=Post):
+    identity = "post"
     """博客 API 文章（与静态 Content/*.html 不同，供主站 / 发文 API 使用）。"""
 
     name = "文章"
@@ -185,6 +187,7 @@ class PostAdmin(ModelView, model=Post):
 
 
 class ForumCategoryAdmin(ModelView, model=ForumCategory):
+    identity = "forum-category"
     name = "论坛板块"
     name_plural = "论坛板块"
     icon = "fa-solid fa-folder"
@@ -228,6 +231,7 @@ class ForumCategoryAdmin(ModelView, model=ForumCategory):
 
 
 class ForumThreadAdmin(ModelView, model=ForumThread):
+    identity = "forum-thread"
     name = "论坛帖子"
     name_plural = "论坛帖子"
     icon = "fa-solid fa-comments"
@@ -307,6 +311,7 @@ class ForumThreadAdmin(ModelView, model=ForumThread):
 
 
 class ForumReplyAdmin(ModelView, model=ForumReply):
+    identity = "forum-reply"
     name = "论坛回复"
     name_plural = "论坛回复"
     icon = "fa-solid fa-reply"
@@ -360,6 +365,7 @@ class ForumReplyAdmin(ModelView, model=ForumReply):
 
 
 class QaMessageAdmin(ModelView, model=QaMessage):
+    identity = "qa-message"
     name = "留言板"
     name_plural = "留言板"
     icon = "fa-solid fa-message"

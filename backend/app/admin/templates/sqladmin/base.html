@@ -23,6 +23,27 @@
   {% endblock %}
   {% block head_tail %}
   {% endblock %}
+  <style>
+    /* 在 iframe（父页管理控制台）中嵌入时隐藏自身外壳，只保留 CRUD 表格 */
+    body.sa-embedded .navbar.navbar-vertical { display: none !important; }
+    body.sa-embedded .page-wrapper { margin-left: 0 !important; }
+    body.sa-embedded .page-header { padding-top: 0.5rem; padding-bottom: 0; }
+    body.sa-embedded .page-header .page-pretitle { display: none; }
+    body.sa-embedded .page-header .page-title { font-size: 1.05rem; margin: 0; }
+    body.sa-embedded { background: transparent; }
+  </style>
+  <script>
+    (function () {
+      try {
+        if (window.self !== window.top) {
+          document.documentElement.classList.add('sa-embedded');
+          document.addEventListener('DOMContentLoaded', function () {
+            document.body.classList.add('sa-embedded');
+          });
+        }
+      } catch (e) { /* cross-origin: 非嵌入，忽略 */ }
+    })();
+  </script>
 </head>
 
 <body>
