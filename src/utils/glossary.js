@@ -117,7 +117,16 @@ export function setupGlossaryTooltip(root) {
   function position(el) {
     const r = el.getBoundingClientRect()
     const tr = tip.getBoundingClientRect()
-    let top = r.bottom + window.scrollY + 8
+    const gap = 10
+    // 浼樺厛鏄剧ず鍦ㄨ瘝鏉ｄ笂鏂癸紝閬垮厤鑷畾涔夊厜鏍囷紙浠庡厜鏍囧皹寮€濮嬪悜鍙充笅寤朵几锛夐伄浣忔诞灞?    const spaceAbove = r.top
+    const spaceBelow = document.documentElement.clientHeight - r.bottom
+    let top
+    if (spaceAbove >= tr.height + gap || spaceAbove >= spaceBelow) {
+      top = r.top + window.scrollY - tr.height - gap
+    } else {
+      top = r.bottom + window.scrollY + gap
+    }
+    if (top < window.scrollY + 8) top = window.scrollY + 8
     let left = r.left + window.scrollX
     const maxLeft = window.scrollX + document.documentElement.clientWidth - tr.width - 12
     if (left > maxLeft) left = Math.max(window.scrollX + 8, maxLeft)
