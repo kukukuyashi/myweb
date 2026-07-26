@@ -22,6 +22,8 @@ docker-compose -f docker-compose.prod.yml rm -f api
 docker-compose -f docker-compose.prod.yml up -d --build api
 ```
 
+> ⚠️ 兼容性：本服务器装的是老版 docker-compose（v1，带横杠），没有 docker compose（v2，空格）。上线命令一律用横杠版 docker-compose。ecs-update.sh 已内置自动探测（v1/v2 都兼容），改脚本时别写死成空格版 docker compose。
+
 绝对禁止：
 - ❌ 不要手敲 `rsync -a --delete docs/ myweb/`（尤其不带 exclude）——会删掉/覆盖运行时数据。
 - ❌ 不要把 posts.json / Content/ 写回 myweb/。
