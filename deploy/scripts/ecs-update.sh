@@ -11,6 +11,17 @@ BRANCH="${BRANCH:-main}"
 
 cd "$APP_ROOT"
 
+# 鍏煎 docker-compose(v1) 涓?docker compose(v2)
+if docker compose version >/dev/null 2>&1; then
+  DC="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  DC="docker-compose"
+else
+  echo "ERROR: neither 'docker compose' nor 'docker-compose' found" >&2
+  exit 1
+fi
+echo "==> using compose command: $DC"
+
 echo "==> git pull ($BRANCH)"
 git fetch origin
 git reset --hard "origin/$BRANCH"
@@ -42,13 +53,13 @@ if [ -d myweb/Content ]; then
 fi
 
 echo "==> docker compose build & up"
-docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
+$DC -f "$COMPOSE_FILE" up -d --build --remove-orphans
 
 echo "==> wait for API health"
 for i in $(seq 1 30); do
   if curl -sf http://127.0.0.1:8000/api/health >/dev/null; then
     echo "API healthy"
-    docker compose -f "$COMPOSE_FILE" ps
+    $DC -f "$COMPOSE_FILE" ps
     echo "Frontend index:"
     head -c 200 myweb/index.html || true
     echo
@@ -58,5 +69,5 @@ for i in $(seq 1 30); do
 done
 
 echo "ERROR: API health check failed" >&2
-docker compose -f "$COMPOSE_FILE" logs --tail=80 api
+$DC -f "$COMPOSE_FILE" logs --tail=80 api
 exit 1
