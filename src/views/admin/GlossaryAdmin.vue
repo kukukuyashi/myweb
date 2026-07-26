@@ -16,6 +16,10 @@
         placeholder="搜索术语 / 别名 / 释义…"
         @keyup.enter="reload"
       />
+      <select v-model="categoryFilter" class="ga-cat-select" @change="onCategoryChange">
+        <option value="">全部分类</option>
+        <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+      </select>
       <button type="button" class="platform-btn-ghost" @click="reload">搜索</button>
       <span class="ga-count">共 {{ total }} 条</span>
     </div>
@@ -86,6 +90,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
   fetchGlossaryAdmin,
+  fetchGlossaryCategories,
   createGlossaryTerm,
   updateGlossaryTerm,
   deleteGlossaryTerm,
@@ -96,6 +101,8 @@ const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
 const search = ref('')
+const categoryFilter = ref('')
+const categories = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const showForm = ref(false)
@@ -115,7 +122,7 @@ function flash(text, type = 'info') {
 async function reload() {
   loading.value = true
   try {
-    const data = await fetchGlossaryAdmin({ q: search.value.trim(), page: page.value, pageSize: pageSize.value })
+    const data = await fetchGlossaryAdmin({ q: search.value.trim(), category: categoryFilter.value, page: page.value, pageSize: pageSize.value })
     terms.value = data.terms || []
     total.value = data.total || 0
   } catch (err) {
@@ -127,6 +134,18 @@ async function reload() {
 
 function go(p) {
   page.value = p
+  reload()
+}
+
+async function loadCategories() {
+  try {
+    const data = await fetchGlossaryCategories()
+    categories.value = data.categories || []
+  } catch { /* ignore */ }
+}
+
+function onCategoryChange() {
+  page.value = 1
   reload()
 }
 
@@ -169,6 +188,7 @@ async function submit() {
     }
     closeForm()
     await reload()
+    await loadCategories()
   } catch (err) {
     flash(err.message, 'error')
   } finally {
@@ -188,7 +208,7 @@ async function remove(t) {
   }
 }
 
-onMounted(reload)
+onMounted(() => { reload(); loadCategories() })
 </script>
 
 <style scoped>
@@ -200,6 +220,10 @@ onMounted(reload)
 .ga-search {
   flex: 1; min-width: 200px; padding: 0.5rem 0.75rem;
   border: 1px solid var(--border); border-radius: 8px; background: var(--bg-paper); color: var(--text);
+}
+.ga-cat-select {
+  padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-paper); color: var(--text); font-size: 0.85rem; font-family: inherit; cursor: pointer;
 }
 .ga-count { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
 .ga-table-wrap { padding: 0; overflow-x: auto; }

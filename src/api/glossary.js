@@ -34,9 +34,13 @@ export function fetchGlossaryPublic() {
 }
 
 // ???????
-export function fetchGlossaryAdmin({ q = '', page = 1, pageSize = 20 } = {}) {
-  const params = new URLSearchParams({ q, page: String(page), pageSize: String(pageSize) })
+export function fetchGlossaryAdmin({ q = '', category = '', page = 1, pageSize = 20 } = {}) {
+  const params = new URLSearchParams({ q, category, page: String(page), pageSize: String(pageSize) })
   return request(`/admin?${params.toString()}`)
+}
+
+export function fetchGlossaryCategories() {
+  return request('/admin/categories')
 }
 
 export function createGlossaryTerm(payload) {

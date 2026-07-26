@@ -43,11 +43,27 @@ def list_public(db: Annotated[Session, Depends(get_db)]):
     return ok({"terms": [_serialize(r) for r in rows]})
 
 
+@router.get("/admin/categories", summary="\u7ba1\u7406\uff1a\u83b7\u53d6\u5206\u7c7b\u5217\u8868")
+def list_categories(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    rows = (
+        db.query(GlossaryTerm.category)
+        .filter(GlossaryTerm.category.isnot(None), GlossaryTerm.category != "")
+        .distinct()
+        .order_by(GlossaryTerm.category.asc())
+        .all()
+    )
+    return ok({"categories": [r[0] for r in rows]})
+
+
 @router.get("/admin", summary="\u7ba1\u7406\uff1a\u5206\u9875\u641c\u7d22\u672f\u8bed")
 def list_admin(
     _: Annotated[str, Depends(require_notes_admin)],
     db: Annotated[Session, Depends(get_db)],
     q: str = Query(""),
+    category: str = Query(""),
     page: int = Query(1, ge=1),
     pageSize: int = Query(20, ge=1, le=200),
 ):
@@ -62,6 +78,9 @@ def list_admin(
                 GlossaryTerm.definition.like(like),
             )
         )
+    category = (category or "").strip()
+    if category:
+        query = query.filter(GlossaryTerm.category == category)
     total = query.count()
     rows = (
         query.order_by(GlossaryTerm.term.asc())
