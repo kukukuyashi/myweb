@@ -184,6 +184,7 @@ import {
 import { getSeriesForPost } from '../data/series'
 import { usePageMeta, pageUrl, buildArticleJsonLd, absoluteAssetUrl } from '../composables/usePageMeta'
 import { highlightArticle, estimateReadingMinutes } from '../utils/highlightCode'
+import { loadGlossaryTerms, annotateGlossary, setupGlossaryTooltip } from '../utils/glossary'
 
 const route = useRoute()
 const currentDate = ref('')
@@ -205,6 +206,7 @@ const relatedPosts = ref([])
 const readProgress = ref(0)
 const copyDone = ref(false)
 let scrollHandler = null
+let glossaryTeardown = null
 const TOC_SPY_OFFSET = 100
 
 const postId = computed(() => route.params.id)
@@ -304,6 +306,12 @@ async function loadArticleContent() {
     loading.value = false
     await nextTick()
     await highlightArticle(articleBodyRef.value)
+    try {
+      const terms = await loadGlossaryTerms()
+      if (glossaryTeardown) { glossaryTeardown(); glossaryTeardown = null }
+      annotateGlossary(articleBodyRef.value, terms)
+      glossaryTeardown = setupGlossaryTooltip(articleBodyRef.value)
+    } catch (e) { /* 术语库失败不影响正文 */ }
     generateTOC()
     setupScrollProgress()
     updateActiveFromScroll()
@@ -420,6 +428,7 @@ watch(postId, () => {
 })
 onUnmounted(() => {
   teardownScrollProgress()
+  if (glossaryTeardown) { glossaryTeardown(); glossaryTeardown = null }
 })
 </script>
 

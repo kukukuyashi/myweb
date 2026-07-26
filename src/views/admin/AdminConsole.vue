@@ -107,7 +107,10 @@ const navGroups = [
   },
   {
     title: '内容管理',
-    items: [{ label: '笔记管理', icon: '✎', to: '/admin/notes' }],
+    items: [
+      { label: '笔记管理', icon: '✎', to: '/admin/notes' },
+      { label: '术语库', icon: '☷', to: '/admin/glossary' },
+    ],
   },
   {
     title: '论坛',

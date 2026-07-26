@@ -8,6 +8,7 @@ from app.models.pomodoro import PomodoroSession
 from app.models.post import Post
 from app.models.qa import QaMessage
 from app.models.user import User
+from app.models.glossary import GlossaryTerm
 
 __all__ = [
     "User",
@@ -21,4 +22,5 @@ __all__ = [
     "QaMessage",
     "UserCheckin",
     "AnimeWatchlist",
+    "GlossaryTerm",
 ]

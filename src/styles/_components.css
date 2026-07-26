@@ -1306,3 +1306,51 @@
 [data-theme="dark"] .article-body pre[class*="language-"] {
   background: #1e1e1e;
 }
+
+/* ===== 术语库：正文高亮 + 悬停浮层 ===== */
+.glossary-term {
+  border-bottom: 1px dashed var(--orange);
+  cursor: help;
+  transition: background 0.15s, color 0.15s;
+}
+
+.glossary-term:hover,
+.glossary-term:focus-visible {
+  background: var(--orange-light);
+  color: var(--orange);
+  outline: none;
+}
+
+.glossary-tooltip {
+  position: absolute;
+  z-index: 300;
+  max-width: min(340px, 86vw);
+  padding: 0.7rem 0.85rem;
+  background: var(--bg-paper, #fff);
+  color: var(--text, #1a1a1a);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  animation: glossary-fade 0.14s ease-out;
+}
+
+.glossary-tooltip .gt-term {
+  display: block;
+  font-family: var(--mono, monospace);
+  font-size: 0.8rem;
+  color: var(--orange);
+  margin-bottom: 0.3rem;
+}
+
+.glossary-tooltip .gt-def {
+  display: block;
+  white-space: pre-wrap;
+  color: var(--text-muted, #555);
+}
+
+@keyframes glossary-fade {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -208,6 +208,13 @@ const routes = [
         meta: { title: '笔记管理' },
       },
       {
+        path: 'glossary',
+        name: 'GlossaryAdmin',
+        component: () => import('../views/admin/GlossaryAdmin.vue'),
+        props: { embedded: true },
+        meta: { title: '术语库' },
+      },
+      {
         path: 'acg-bot',
         name: 'AcgBotAdmin',
         component: () => import('../views/admin/AcgBotAdmin.vue'),
