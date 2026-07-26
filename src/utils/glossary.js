@@ -118,7 +118,7 @@ export function setupGlossaryTooltip(root) {
     const r = el.getBoundingClientRect()
     const tr = tip.getBoundingClientRect()
     const gap = 10
-    // 浼樺厛鏄剧ず鍦ㄨ瘝鏉ｄ笂鏂癸紝閬垮厤鑷畾涔夊厜鏍囷紙浠庡厜鏍囧皹寮€濮嬪悜鍙充笅寤朵几锛夐伄浣忔诞灞?    const spaceAbove = r.top
+    const spaceAbove = r.top
     const spaceBelow = document.documentElement.clientHeight - r.bottom
     let top
     if (spaceAbove >= tr.height + gap || spaceAbove >= spaceBelow) {
