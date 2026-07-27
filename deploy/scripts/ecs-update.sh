@@ -53,7 +53,12 @@ if [ -d myweb/Content ]; then
 fi
 
 echo "==> docker compose build & up"
-$DC -f "$COMPOSE_FILE" up -d --build --remove-orphans
+# docker-compose v1.29.2 recreate 有 ContainerConfig bug，改用 build + stop + rm + up 规避
+$DC -f "$COMPOSE_FILE" build api
+$DC -f "$COMPOSE_FILE" up -d --no-recreate redis
+$DC -f "$COMPOSE_FILE" stop api || true
+$DC -f "$COMPOSE_FILE" rm -f api || true
+$DC -f "$COMPOSE_FILE" up -d --no-deps api
 
 echo "==> wait for API health"
 for i in $(seq 1 30); do
