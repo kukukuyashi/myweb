@@ -26,7 +26,7 @@
         <div v-else-if="!myToday.length" class="muted">今日没有在追的番更新，去下方本季列表添加吧。</div>
         <div v-else class="anime-card-grid">
           <article v-for="item in myToday" :key="item.bangumi_id" class="anime-card is-mine">
-            <img v-if="item.cover_url" :src="item.cover_url" alt="" class="anime-cover">
+            <img v-if="item.cover_url" :src="item.cover_url" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
               <div class="anime-card-actions">
@@ -78,7 +78,7 @@
         </div>
         <div class="anime-card-grid">
           <article v-for="item in filteredSeason" :key="item.bangumi_id" class="anime-card">
-            <img v-if="item.cover_url" :src="item.cover_url" alt="" class="anime-cover">
+            <img v-if="item.cover_url" :src="item.cover_url" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
               <p class="anime-air">

@@ -327,12 +327,41 @@ function wrapTextarea(before, after, placeholder = '文字') {
 function insertLinePrefix(prefix) {
   const ta = textareaRef.value
   if (!ta) return
-  const start = ta.selectionStart
   const text = props.modelValue
-  const lineStart = text.lastIndexOf('\n', start - 1) + 1
-  const next = `${text.slice(0, lineStart)}${prefix}${text.slice(lineStart)}`
+  const selStart = ta.selectionStart ?? 0
+  const selEnd = ta.selectionEnd ?? selStart
+  const blockStart = text.lastIndexOf('\n', selStart - 1) + 1
+  let blockEnd = text.indexOf('\n', selEnd)
+  if (blockEnd === -1) blockEnd = text.length
+  const block = text.slice(blockStart, blockEnd)
+  const lines = block.split('\n')
+  const isOrdered = prefix === '1. '
+  const matcher = isOrdered
+    ? /^\d+\.\s/
+    : new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const nonEmpty = lines.filter((l) => l.trim().length > 0)
+  const allHave = nonEmpty.length > 0 && nonEmpty.every((l) => matcher.test(l))
+  let newLines
+  if (allHave) {
+    // 整段已带该前缀 → 再点一次移除（可回退）
+    newLines = lines.map((l) => l.replace(matcher, ''))
+  } else {
+    let n = 1
+    newLines = lines.map((l) => {
+      if (l.trim().length === 0) return l
+      if (matcher.test(l)) return l
+      return (isOrdered ? `${n++}. ` : prefix) + l
+    })
+  }
+  const newBlock = newLines.join('\n')
+  const next = text.slice(0, blockStart) + newBlock + text.slice(blockEnd)
   emitValue(next)
-  nextTick(() => ta.focus())
+  nextTick(() => {
+    ta.focus()
+    const delta = newBlock.length - block.length
+    ta.selectionStart = blockStart
+    ta.selectionEnd = blockEnd + delta
+  })
 }
 
 function applyRichStyle(prop, val) {
@@ -426,6 +455,18 @@ function applyFormat(type) {
   }
 }
 
+function isSelectionInside(tagName) {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0) return false
+  let node = sel.anchorNode
+  const root = richRef.value
+  while (node && node !== root) {
+    if (node.nodeType === 1 && node.tagName === tagName) return true
+    node = node.parentNode
+  }
+  return false
+}
+
 function applyRichFormat(type) {
   const el = richRef.value
   if (!el) return
@@ -442,10 +483,10 @@ function applyRichFormat(type) {
       document.execCommand('strikeThrough')
       break
     case 'heading':
-      document.execCommand('formatBlock', false, 'h2')
+      document.execCommand('formatBlock', false, isSelectionInside('H2') ? 'div' : 'h2')
       break
     case 'quote':
-      document.execCommand('formatBlock', false, 'blockquote')
+      document.execCommand('formatBlock', false, isSelectionInside('BLOCKQUOTE') ? 'div' : 'blockquote')
       break
     case 'ul':
       document.execCommand('insertUnorderedList')
