@@ -178,6 +178,11 @@ const routes = [
         name: 'ArcadeSize',
         component: () => import('../views/platform/ArcadeSize.vue'),
       },
+      {
+        path: 'links',
+        name: 'FriendLinks',
+        component: () => import('../views/platform/FriendLinks.vue'),
+      },
     ],
   },
   { path: '/hub', redirect: '/app' },
@@ -213,6 +218,13 @@ const routes = [
         component: () => import('../views/admin/GlossaryAdmin.vue'),
         props: { embedded: true },
         meta: { title: '术语库' },
+      },
+      {
+        path: 'links',
+        name: 'FriendLinksAdmin',
+        component: () => import('../views/admin/FriendLinksAdmin.vue'),
+        props: { embedded: true },
+        meta: { title: '友链管理' },
       },
       {
         path: 'acg-bot',

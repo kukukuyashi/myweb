@@ -42,6 +42,9 @@
         <router-link to="/app/arcade" @click="menuOpen = false">
           <span class="nav-icon">◈</span> 奇怪的游戏厅
         </router-link>
+        <router-link to="/app/links" @click="menuOpen = false">
+          <span class="nav-icon">⚯</span> 友链
+        </router-link>
         <router-link v-if="hasToken" to="/app/me" @click="menuOpen = false">
           <span class="nav-icon">◉</span> 个人中心
           <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>

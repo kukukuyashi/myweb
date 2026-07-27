@@ -9,6 +9,7 @@ from app.models.post import Post
 from app.models.qa import QaMessage
 from app.models.user import User
 from app.models.glossary import GlossaryTerm
+from app.models.friend_link import FriendLink
 
 __all__ = [
     "User",
@@ -23,4 +24,5 @@ __all__ = [
     "UserCheckin",
     "AnimeWatchlist",
     "GlossaryTerm",
+    "FriendLink",
 ]

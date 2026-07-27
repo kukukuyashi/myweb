@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import acg_bot, admin_crud, admin_stats, ai, anime, auth, checkin, forum, glossary, integrations, notes_admin, notifications, pomodoro, posts, qa, users
+from app.api.v1 import acg_bot, admin_crud, admin_stats, ai, anime, auth, checkin, forum, friend_links, glossary, integrations, notes_admin, notifications, pomodoro, posts, qa, users
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
@@ -19,3 +19,4 @@ api_router.include_router(acg_bot.router)
 api_router.include_router(admin_stats.router)
 api_router.include_router(admin_crud.router)
 api_router.include_router(glossary.router)
+api_router.include_router(friend_links.router)
