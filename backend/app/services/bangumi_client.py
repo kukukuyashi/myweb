@@ -122,9 +122,17 @@ def _items_to_calendar_days(items: list[dict]) -> list[dict]:
     return days
 
 
+def _cover_or_fallback(images: dict, subject_id) -> str:
+    cover = images.get("large") or images.get("common") or images.get("medium") or images.get("small") or ""
+    if not cover and subject_id:
+        # 兜底：用 Bangumi 官方按 id 取封面的接口（302 跳到真实图），配合前端 no-referrer 可正常加载
+        return f"https://api.bgm.tv/v0/subjects/{subject_id}/image?type=large"
+    return cover
+
+
 def normalize_calendar_item(item: dict, weekday_id: int) -> dict:
     images = item.get("images") or {}
-    cover = images.get("large") or images.get("common") or images.get("medium") or images.get("small") or ""
+    cover = _cover_or_fallback(images, item.get("id"))
     name_cn = item.get("name_cn") or item.get("name") or ""
     out = {
         "bangumi_id": item.get("id"),
@@ -143,8 +151,8 @@ def normalize_calendar_item(item: dict, weekday_id: int) -> dict:
 
 def normalize_subject_item(item: dict, weekday_map: dict[int, int] | None = None) -> dict:
     images = item.get("images") or {}
-    cover = images.get("large") or images.get("common") or images.get("medium") or images.get("small") or ""
     bid = item.get("id")
+    cover = _cover_or_fallback(images, bid)
     air_date = item.get("date") or item.get("air_date")
     weekday = (weekday_map or {}).get(bid) or item.get("air_weekday") or _weekday_from_air_date(air_date)
     name_cn = item.get("name_cn") or item.get("name") or ""
