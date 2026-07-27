@@ -77,7 +77,7 @@
           <input v-model="search" type="search" placeholder="搜索番名…" class="anime-search">
         </div>
         <div class="anime-card-grid">
-          <article v-for="item in filteredSeason" :key="item.bangumi_id" class="anime-card">
+          <article v-for="item in visibleSeason" :key="item.bangumi_id" class="anime-card">
             <img v-if="item.cover_url" :src="item.cover_url" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
@@ -106,6 +106,11 @@
               </div>
             </div>
           </article>
+        </div>
+        <div v-if="canToggleSeason || seasonExpanded" class="anime-season-more">
+          <button type="button" class="platform-btn-ghost sm" @click="seasonExpanded = !seasonExpanded">
+            {{ seasonExpanded ? '收起' : ('查看全部 ' + filteredSeason.length + ' 部') }}
+          </button>
         </div>
       </section>
 
@@ -161,6 +166,8 @@ const weekdays = ref([])
 const watchlist = ref([])
 const search = ref('')
 const busyId = ref(null)
+const seasonExpanded = ref(false)
+const SEASON_PREVIEW = 12
 const fallbackNotice = ref('')
 
 const watchIds = computed(() => new Set(watchlist.value.map((w) => w.bangumi_id)))
@@ -173,6 +180,13 @@ const filteredSeason = computed(() => {
     || (i.name || '').toLowerCase().includes(q),
   )
 })
+
+const visibleSeason = computed(() => {
+  if (seasonExpanded.value || search.value.trim()) return filteredSeason.value
+  return filteredSeason.value.slice(0, SEASON_PREVIEW)
+})
+
+const canToggleSeason = computed(() => !search.value.trim() && filteredSeason.value.length > SEASON_PREVIEW)
 
 function displayName(item) {
   return item.name_cn || item.name || '未知'
@@ -353,6 +367,12 @@ onMounted(load)
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 0.85rem;
+}
+
+.anime-season-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.95rem;
 }
 
 .anime-card {

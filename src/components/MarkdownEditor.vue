@@ -96,6 +96,8 @@
           spellcheck="false"
           :data-placeholder="placeholder"
           @input="onRichInput"
+          @compositionstart="onCompositionStart"
+          @compositionend="onCompositionEnd"
           @blur="syncRichToModel"
           @paste="onPaste"
         />
@@ -121,7 +123,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import MarkdownBody from './MarkdownBody.vue'
 import { htmlToMarkdown, markdownToHtml, sanitizeInlineStyle } from '../utils/markdown.js'
 import { resolveMediaUrl, uploadForumImage, uploadPostImage } from '../api/platform.js'
@@ -166,6 +168,7 @@ const viewMode = ref(props.defaultMode)
 const textareaRef = ref(null)
 const richRef = ref(null)
 const richDirty = ref(false)
+const composing = ref(false)
 const imageInputRef = ref(null)
 const imageUploading = ref(false)
 const dragOver = ref(false)
@@ -281,8 +284,19 @@ function onTextareaInput(e) {
   emitValue(e.target.value)
 }
 
+function onCompositionStart() {
+  composing.value = true
+}
+
+function onCompositionEnd() {
+  composing.value = false
+  onRichInput()
+}
+
 function onRichInput() {
+  if (composing.value) return
   richDirty.value = true
+  emitValue(htmlToMarkdown(richRef.value.innerHTML))
 }
 
 function syncRichToModel() {
@@ -520,11 +534,21 @@ function applyRichFormat(type) {
 watch(
   () => props.modelValue,
   () => {
-    if (viewMode.value === 'rich' || viewMode.value === 'split') {
-      if (!richDirty.value) fillRichFromModel()
-    }
+    if (viewMode.value !== 'rich' && viewMode.value !== 'split') return
+    const el = richRef.value
+    if (!el) return
+    if (composing.value) return
+    if (document.activeElement === el) return
+    if (richDirty.value) return
+    fillRichFromModel()
   },
 )
+
+onMounted(() => {
+  if (viewMode.value === 'rich' || viewMode.value === 'split') {
+    fillRichFromModel()
+  }
+})
 </script>
 
 <style scoped>
