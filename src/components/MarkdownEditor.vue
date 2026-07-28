@@ -717,7 +717,7 @@ onMounted(() => {
   outline: none;
 }
 
-.rich-area:empty::before {
+.rich-area:empty:not(:focus)::before {
   content: attr(data-placeholder);
   color: var(--text-muted);
   pointer-events: none;

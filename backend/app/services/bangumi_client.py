@@ -124,9 +124,6 @@ def _items_to_calendar_days(items: list[dict]) -> list[dict]:
 
 def _cover_or_fallback(images: dict, subject_id) -> str:
     cover = images.get("large") or images.get("common") or images.get("medium") or images.get("small") or ""
-    if not cover and subject_id:
-        # 兜底：用 Bangumi 官方按 id 取封面的接口（302 跳到真实图），配合前端 no-referrer 可正常加载
-        return f"https://api.bgm.tv/v0/subjects/{subject_id}/image?type=large"
     return cover
 
 
