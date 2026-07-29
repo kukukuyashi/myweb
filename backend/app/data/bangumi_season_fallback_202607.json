@@ -1,350 +1,1488 @@
 {
   "season_code": "202607",
-  "season_label": "2026年7月新番",
+  "season_label": "2026?7???",
   "items": [
     {
-      "id": 920101,
-      "name": "アズールレーン びそくぜんしんっ！にっ！！",
-      "name_cn": "碧蓝航线 微速前行 第二季",
+      "id": 456080,
+      "name": "転校先の清楚可憐な美少女が、昔男子と思って一緒に遊んだ幼馴染だった件",
+      "name_cn": "转学后班上的清纯可爱美少女，竟是小时候玩在一起的哥们儿",
       "air_weekday": 1,
-      "air_date": "2026-07-06"
+      "air_date": "2026-07-06",
+      "rating": 5.1,
+      "rank": 9536,
+      "images": {
+        "large": "/myweb/anime-covers/456080.jpg",
+        "common": "/myweb/anime-covers/456080.jpg"
+      }
     },
     {
-      "id": 920102,
-      "name": "骸骨騎士大人異世界冒険中II",
+      "id": 456081,
+      "name": "最強出涸らし皇子の暗躍帝位争い",
+      "name_cn": "最强废渣皇子暗中活跃于帝位之争",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "rating": 4.9,
+      "rank": 9051,
+      "images": {
+        "large": "/myweb/anime-covers/456081.jpg",
+        "common": "/myweb/anime-covers/456081.jpg"
+      }
+    },
+    {
+      "id": 491582,
+      "name": "天子传奇：姬发篇",
+      "name_cn": "天子传奇：姬发篇",
+      "air_weekday": 1,
+      "air_date": "2026-07-20",
+      "rating": 6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/491582.jpg",
+        "common": "/myweb/anime-covers/491582.jpg"
+      }
+    },
+    {
+      "id": 528828,
+      "name": "骸骨騎士様、只今異世界へお出掛け中Ⅱ",
       "name_cn": "骸骨骑士大人异世界冒险中 第二季",
       "air_weekday": 1,
       "air_date": "2026-07-06",
-      "mgnacg_vod_id": 212
+      "rating": 5.4,
+      "rank": 8491,
+      "images": {
+        "large": "/myweb/anime-covers/528828.jpg",
+        "common": "/myweb/anime-covers/528828.jpg"
+      }
     },
     {
-      "id": 920103,
-      "name": "お前はまだグンマを弾いていない",
-      "name_cn": "斗球儿弹子",
+      "id": 569116,
+      "name": "ぐらんぶる Season 3",
+      "name_cn": "碧蓝之海 第三季",
       "air_weekday": 1,
-      "air_date": "2026-07-06"
+      "air_date": "2026-07-06",
+      "rating": 7.1,
+      "rank": 2145,
+      "images": {
+        "large": "/myweb/anime-covers/569116.jpg",
+        "common": "/myweb/anime-covers/569116.jpg"
+      }
     },
     {
-      "id": 920104,
-      "name": "捨てられ聖女の異世界ごはん旅",
-      "name_cn": "被遗弃的圣女的异世界饭旅",
+      "id": 569671,
+      "name": "炎の闘球女 ドッジ弾子",
+      "name_cn": "斗球女弹子",
       "air_weekday": 1,
-      "air_date": "2026-07-06"
+      "air_date": "2026-07-06",
+      "rating": 6.1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/569671.jpg",
+        "common": "/myweb/anime-covers/569671.jpg"
+      }
     },
     {
-      "id": 920105,
-      "name": "転校先の清楚可憐な美少女は、昔男子と思って一緒に遊んだ幼馴染だった",
-      "name_cn": "转学后班上的清纯可爱美少女，竟是小时候玩在一起的哥们儿",
+      "id": 579246,
+      "name": "ブチ切れ令嬢は報復を誓いました。～魔導書の力で祖国を叩き潰します～",
+      "name_cn": "暴怒千金发誓复仇。～凭借魔导书之力打垮祖国～",
       "air_weekday": 1,
-      "air_date": "2026-07-06"
+      "air_date": "2026-07-06",
+      "rating": 4.9,
+      "rank": 9111,
+      "images": {
+        "large": "/myweb/anime-covers/579246.jpg",
+        "common": "/myweb/anime-covers/579246.jpg"
+      }
     },
     {
-      "id": 920201,
+      "id": 590786,
+      "name": "ここは俺に任せて先に行けと言ってから10年がたったら伝説になっていた。",
+      "name_cn": "『你们先走我断后』，于是10年后我成为了传说",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "rating": 5.7,
+      "rank": 8273,
+      "images": {
+        "large": "/myweb/anime-covers/590786.jpg",
+        "common": "/myweb/anime-covers/590786.jpg"
+      }
+    },
+    {
+      "id": 595884,
+      "name": "Marvel's Spidey and His Amazing Friends Season 5",
+      "name_cn": "蜘蛛侠与他的神奇朋友们 第五季",
+      "air_weekday": 1,
+      "air_date": "2026-07-13",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/595884.jpg",
+        "common": "/myweb/anime-covers/595884.jpg"
+      }
+    },
+    {
+      "id": 607340,
+      "name": "透明な夜に駆ける君と、目に見えない恋をした。",
+      "name_cn": "与奔驰于透明之夜的你，谈一场看不见的恋爱。",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "rating": 6.9,
+      "rank": 3105,
+      "images": {
+        "large": "/myweb/anime-covers/607340.jpg",
+        "common": "/myweb/anime-covers/607340.jpg"
+      }
+    },
+    {
+      "id": 607933,
+      "name": "万古至尊：李云霄传",
+      "name_cn": "万古至尊：李云霄传",
+      "air_weekday": 1,
+      "air_date": "2026-07-20",
+      "rating": 3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/607933.jpg",
+        "common": "/myweb/anime-covers/607933.jpg"
+      }
+    },
+    {
+      "id": 636067,
+      "name": "捨てられ聖女の異世界ごはん旅 隠れスキルでキャンピングカーを召喚しました",
+      "name_cn": "无用圣女的异世界美食之旅 凭借隐藏技能召唤露营车",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "rating": 5.5,
+      "rank": 7317,
+      "images": {
+        "large": "/myweb/anime-covers/636067.jpg",
+        "common": "/myweb/anime-covers/636067.jpg"
+      }
+    },
+    {
+      "id": 637339,
+      "name": "北斗の拳 拳王軍ザコたちの挽歌 第2クール",
+      "name_cn": "北斗神拳 拳王军杂兵们的挽歌 第二季",
+      "air_weekday": 1,
+      "air_date": "2026-07-06",
+      "rating": 6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/637339.jpg",
+        "common": "/myweb/anime-covers/637339.jpg"
+      }
+    },
+    {
+      "id": 663444,
+      "name": "King of the Hill Season 15",
+      "name_cn": "一家之主 第15季",
+      "air_weekday": 1,
+      "air_date": "2026-07-20",
+      "rating": 6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/663444.jpg",
+        "common": "/myweb/anime-covers/663444.jpg"
+      }
+    },
+    {
+      "id": 325767,
+      "name": "対ありでした。 ～お嬢さまは格闘ゲームなんてしない～",
+      "name_cn": "感谢对战。 ～大小姐才不玩格斗游戏～",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "rating": 6.8,
+      "rank": 3400,
+      "images": {
+        "large": "/myweb/anime-covers/325767.jpg",
+        "common": "/myweb/anime-covers/325767.jpg"
+      }
+    },
+    {
+      "id": 496276,
       "name": "攻殻機動隊 THE GHOST IN THE SHELL",
       "name_cn": "攻壳机动队 THE GHOST IN THE SHELL",
       "air_weekday": 2,
-      "air_date": "2026-07-07"
-    },
-    {
-      "id": 920202,
-      "name": "鎧真伝サムライトルーパー",
-      "name_cn": "铠真传 武士军团 第二季",
-      "air_weekday": 2,
-      "air_date": "2026-07-07"
-    },
-    {
-      "id": 920203,
-      "name": "対ありでした。",
-      "name_cn": "感谢对战。～大小姐才不玩格斗游戏～",
-      "air_weekday": 2,
       "air_date": "2026-07-07",
-      "mgnacg_vod_id": 1622
+      "rating": 7.6,
+      "rank": 838,
+      "images": {
+        "large": "/myweb/anime-covers/496276.jpg",
+        "common": "/myweb/anime-covers/496276.jpg"
+      }
     },
     {
-      "id": 920204,
-      "name": "天は赤い河のほとり",
-      "name_cn": "天是红河岸",
+      "id": 516426,
+      "name": "一斩苍穹",
+      "name_cn": "一斩苍穹",
       "air_weekday": 2,
-      "air_date": "2026-07-07"
+      "air_date": "2026-07-28",
+      "rating": 4.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/516426.jpg",
+        "common": "/myweb/anime-covers/516426.jpg"
+      }
     },
     {
-      "id": 920205,
-      "name": "無自覚聖女は今日も無意識に力を垂れ流す",
-      "name_cn": "无自觉圣女今天也无意识地释放力量",
-      "air_weekday": 2,
-      "air_date": "2026-07-07",
-      "mgnacg_vod_id": 1591
-    },
-    {
-      "id": 920206,
-      "name": "身代わり令嬢を救ったのは冷酷無慈悲な氷の王子の愛でした",
-      "name_cn": "拯救替身千金的是冷酷无情冰之王子的爱",
-      "air_weekday": 2,
-      "air_date": "2026-07-07"
-    },
-    {
-      "id": 920207,
-      "name": "手札が多めのビクトリア",
-      "name_cn": "奇招百出的维多利亚",
-      "air_weekday": 2,
-      "air_date": "2026-07-07",
-      "mgnacg_vod_id": 1624
-    },
-    {
-      "id": 920208,
+      "id": 541285,
       "name": "きみが死ぬまで恋をしたい",
       "name_cn": "与你相恋到生命尽头",
       "air_weekday": 2,
       "air_date": "2026-07-07",
-      "mgnacg_vod_id": 1623
+      "rating": 7.2,
+      "rank": 1966,
+      "images": {
+        "large": "/myweb/anime-covers/541285.jpg",
+        "common": "/myweb/anime-covers/541285.jpg"
+      }
     },
     {
-      "id": 920301,
-      "name": "Re:ゼロから始める異世界生活 4th season",
-      "name_cn": "Re：从零开始的异世界生活 第四季",
+      "id": 584641,
+      "name": "手札が多めのビクトリア",
+      "name_cn": "奇招百出的维多利亚",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "rating": 6.2,
+      "rank": 5985,
+      "images": {
+        "large": "/myweb/anime-covers/584641.jpg",
+        "common": "/myweb/anime-covers/584641.jpg"
+      }
+    },
+    {
+      "id": 607929,
+      "name": "百日成王",
+      "name_cn": "百日成王",
+      "air_weekday": 2,
+      "air_date": "2026-07-03",
+      "rating": 6.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/607929.jpg",
+        "common": "/myweb/anime-covers/607929.jpg"
+      }
+    },
+    {
+      "id": 612697,
+      "name": "鎧真伝サムライトルーパー 第2クール",
+      "name_cn": "铠真传 武士军团 第2部分",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "rating": 5.8,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/612697.jpg",
+        "common": "/myweb/anime-covers/612697.jpg"
+      }
+    },
+    {
+      "id": 627648,
+      "name": "天は赤い河のほとり",
+      "name_cn": "天是红河岸",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "rating": 4.4,
+      "rank": 9174,
+      "images": {
+        "large": "/myweb/anime-covers/627648.jpg",
+        "common": "/myweb/anime-covers/627648.jpg"
+      }
+    },
+    {
+      "id": 638995,
+      "name": "身代わり令嬢を救ったのは冷酷無慈悲な氷の王子の愛でした",
+      "name_cn": "拯救替身千金的是冷酷无情冰之王子的爱",
+      "air_weekday": 2,
+      "air_date": "2026-07-07",
+      "rating": 3.9,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/638995.jpg",
+        "common": "/myweb/anime-covers/638995.jpg"
+      }
+    },
+    {
+      "id": 662681,
+      "name": "万古神帝",
+      "name_cn": "万古神帝",
+      "air_weekday": 2,
+      "air_date": "2026-07-21",
+      "rating": 1.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/662681.jpg",
+        "common": "/myweb/anime-covers/662681.jpg"
+      }
+    },
+    {
+      "id": 975,
+      "name": "ONE PIECE",
+      "name_cn": "航海王",
       "air_weekday": 3,
-      "air_date": "2026-07-08",
-      "mgnacg_vod_id": 1572
+      "air_date": "1999-10-20",
+      "rating": 8.3,
+      "rank": 104,
+      "images": {
+        "large": "/myweb/anime-covers/975.jpg",
+        "common": "/myweb/anime-covers/975.jpg"
+      }
     },
     {
-      "id": 920302,
-      "name": "片田舎のおっさん、剣聖になる",
-      "name_cn": "乡下大叔成为剑圣 第二季",
-      "air_weekday": 3,
-      "air_date": "2026-07-08"
-    },
-    {
-      "id": 920303,
-      "name": "幼女戦記 II",
+      "id": 339515,
+      "name": "幼女戦記Ⅱ",
       "name_cn": "幼女战记 第二季",
       "air_weekday": 3,
       "air_date": "2026-07-08",
-      "mgnacg_vod_id": 730
+      "rating": 7.2,
+      "rank": 1888,
+      "images": {
+        "large": "/myweb/anime-covers/339515.jpg",
+        "common": "/myweb/anime-covers/339515.jpg"
+      }
     },
     {
-      "id": 920304,
-      "name": "クレバテス II",
-      "name_cn": "克雷瓦提斯 第二季",
+      "id": 412144,
+      "name": "乙女ゲー世界はモブに厳しい世界です2",
+      "name_cn": "恋爱游戏世界对路人角色很不友好 第二季",
       "air_weekday": 3,
       "air_date": "2026-07-08",
-      "mgnacg_vod_id": 1449
+      "rating": 5.1,
+      "rank": 9182,
+      "images": {
+        "large": "/myweb/anime-covers/412144.jpg",
+        "common": "/myweb/anime-covers/412144.jpg"
+      }
     },
     {
-      "id": 920305,
+      "id": 481295,
+      "name": "X-Men '97 Season 2",
+      "name_cn": "X战警97 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-01",
+      "rating": 6.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/481295.jpg",
+        "common": "/myweb/anime-covers/481295.jpg"
+      }
+    },
+    {
+      "id": 500458,
+      "name": "胶囊计划·奇迹",
+      "name_cn": "胶囊计划 奇迹",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 6.4,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/500458.jpg",
+        "common": "/myweb/anime-covers/500458.jpg"
+      }
+    },
+    {
+      "id": 532053,
+      "name": "地球大好き！きっくん",
+      "name_cn": "地球大好き！きっくん",
+      "air_weekday": 3,
+      "air_date": "2026-07-01",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/532053.jpg",
+        "common": "/myweb/anime-covers/532053.jpg"
+      }
+    },
+    {
+      "id": 558064,
+      "name": "ヒロイン？聖女？いいえ、オールワークスメイドです（誇）！",
+      "name_cn": "女主角？圣女？不，我是杂役女仆（自豪）！",
+      "air_weekday": 3,
+      "air_date": "2026-07-01",
+      "rating": 6.2,
+      "rank": 6407,
+      "images": {
+        "large": "/myweb/anime-covers/558064.jpg",
+        "common": "/myweb/anime-covers/558064.jpg"
+      }
+    },
+    {
+      "id": 565701,
+      "name": "片田舎のおっさん、剣聖になるⅡ",
+      "name_cn": "乡下大叔成为剑圣 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 5.9,
+      "rank": 7076,
+      "images": {
+        "large": "/myweb/anime-covers/565701.jpg",
+        "common": "/myweb/anime-covers/565701.jpg"
+      }
+    },
+    {
+      "id": 572613,
+      "name": "いびってこない義母と義姉",
+      "name_cn": "不虐待我的继母与继姐",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 6.1,
+      "rank": 6672,
+      "images": {
+        "large": "/myweb/anime-covers/572613.jpg",
+        "common": "/myweb/anime-covers/572613.jpg"
+      }
+    },
+    {
+      "id": 572768,
+      "name": "一念永恒 完结季",
+      "name_cn": "一念永恒 完结季",
+      "air_weekday": 3,
+      "air_date": "2026-07-22",
+      "rating": 7.3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/572768.jpg",
+        "common": "/myweb/anime-covers/572768.jpg"
+      }
+    },
+    {
+      "id": 579787,
       "name": "LV999の村人",
       "name_cn": "LV999的村民",
       "air_weekday": 3,
-      "air_date": "2026-07-08",
-      "mgnacg_vod_id": 1590
+      "air_date": "2026-07-01",
+      "rating": 5,
+      "rank": 9551,
+      "images": {
+        "large": "/myweb/anime-covers/579787.jpg",
+        "common": "/myweb/anime-covers/579787.jpg"
+      }
     },
     {
-      "id": 920306,
-      "name": "メイドインアビス 烈日の黄金郷",
-      "name_cn": "来自深渊 烈日的黄金乡",
+      "id": 585820,
+      "name": "クレバテスⅡ-魔獣の王と偽りの勇者伝承-",
+      "name_cn": "Clevatess II-魔兽之王与虚假的勇者传承-",
       "air_weekday": 3,
       "air_date": "2026-07-08",
-      "mgnacg_vod_id": 1482
+      "rating": 6.8,
+      "rank": 3537,
+      "images": {
+        "large": "/myweb/anime-covers/585820.jpg",
+        "common": "/myweb/anime-covers/585820.jpg"
+      }
     },
     {
-      "id": 920401,
-      "name": "BanG Dream! YUME∞MITA",
+      "id": 621835,
+      "name": "도굴왕",
+      "name_cn": "盗墓王",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 4.5,
+      "rank": 9629,
+      "images": {
+        "large": "/myweb/anime-covers/621835.jpg",
+        "common": "/myweb/anime-covers/621835.jpg"
+      }
+    },
+    {
+      "id": 625215,
+      "name": "サンダー3",
+      "name_cn": "雷霆三人行",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 5.7,
+      "rank": 7810,
+      "images": {
+        "large": "/myweb/anime-covers/625215.jpg",
+        "common": "/myweb/anime-covers/625215.jpg"
+      }
+    },
+    {
+      "id": 630163,
+      "name": "落第賢者の学院無双～二度目の転生、Sランクチート魔術師冒険録～",
+      "name_cn": "落第贤者的学院无双～第二次转生的S级开外挂魔术师冒险录～",
+      "air_weekday": 3,
+      "air_date": "2026-07-01",
+      "rating": 4.6,
+      "rank": 9782,
+      "images": {
+        "large": "/myweb/anime-covers/630163.jpg",
+        "common": "/myweb/anime-covers/630163.jpg"
+      }
+    },
+    {
+      "id": 630164,
+      "name": "パーフェクトアディクション",
+      "name_cn": "澈底对你成瘾",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 3.3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/630164.jpg",
+        "common": "/myweb/anime-covers/630164.jpg"
+      }
+    },
+    {
+      "id": 637124,
+      "name": "花ざかりの君たちへ 第2期",
+      "name_cn": "花样少年少女 第二季",
+      "air_weekday": 3,
+      "air_date": "2026-07-01",
+      "rating": 5.8,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/637124.jpg",
+        "common": "/myweb/anime-covers/637124.jpg"
+      }
+    },
+    {
+      "id": 642666,
+      "name": "李熊猫",
+      "name_cn": "李熊猫",
+      "air_weekday": 3,
+      "air_date": "2026-07-29",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/642666.jpg",
+        "common": "/myweb/anime-covers/642666.jpg"
+      }
+    },
+    {
+      "id": 658254,
+      "name": "ようじょしぇんき2",
+      "name_cn": "ようじょしぇんき2",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": 4.7,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/658254.jpg",
+        "common": "/myweb/anime-covers/658254.jpg"
+      }
+    },
+    {
+      "id": 662682,
+      "name": "顾长歌：我！天命大反派",
+      "name_cn": "顾长歌：我！天命大反派",
+      "air_weekday": 3,
+      "air_date": "2026-07-15",
+      "rating": 1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/662682.jpg",
+        "common": "/myweb/anime-covers/662682.jpg"
+      }
+    },
+    {
+      "id": 668113,
+      "name": "NARUTO x PUBG MOBILE Exclusive Collab Anime",
+      "name_cn": "《PUBG MOBILE：绝地求生M》×《火影忍者疾风传》",
+      "air_weekday": 3,
+      "air_date": "2026-07-08",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/668113.jpg",
+        "common": "/myweb/anime-covers/668113.jpg"
+      }
+    },
+    {
+      "id": 276787,
+      "name": "メビウス・ダスト",
+      "name_cn": "梅比乌斯之尘",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "rating": 4.3,
+      "rank": 9769,
+      "images": {
+        "large": "/myweb/anime-covers/276787.jpg",
+        "common": "/myweb/anime-covers/276787.jpg"
+      }
+    },
+    {
+      "id": 449354,
+      "name": "花仙子之魔法香对论",
+      "name_cn": "花仙子之魔法香对论",
+      "air_weekday": 4,
+      "air_date": "2026-07-04",
+      "rating": 6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/449354.jpg",
+        "common": "/myweb/anime-covers/449354.jpg"
+      }
+    },
+    {
+      "id": 511177,
+      "name": "追放された転生重騎士はゲーム知識で無双する",
+      "name_cn": "遭到流放的转生重骑士凭借游戏知识大开无双",
+      "air_weekday": 4,
+      "air_date": "2026-07-02",
+      "rating": 5.1,
+      "rank": 9463,
+      "images": {
+        "large": "/myweb/anime-covers/511177.jpg",
+        "common": "/myweb/anime-covers/511177.jpg"
+      }
+    },
+    {
+      "id": 571784,
+      "name": "スーパーの裏でヤニ吸うふたり",
+      "name_cn": "在超市后门吸烟的二人",
+      "air_weekday": 4,
+      "air_date": "2026-07-09",
+      "rating": 7,
+      "rank": 2403,
+      "images": {
+        "large": "/myweb/anime-covers/571784.jpg",
+        "common": "/myweb/anime-covers/571784.jpg"
+      }
+    },
+    {
+      "id": 574794,
+      "name": "是王者啊？ 第六季",
+      "name_cn": "是王者啊？ 第6季",
+      "air_weekday": 4,
+      "air_date": "2026-07-23",
+      "rating": 3.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/574794.jpg",
+        "common": "/myweb/anime-covers/574794.jpg"
+      }
+    },
+    {
+      "id": 583729,
+      "name": "BanG Dream! ゆめ∞みた",
       "name_cn": "BanG Dream! YUME∞MITA",
       "air_weekday": 4,
-      "air_date": "2026-07-09",
-      "mgnacg_vod_id": 1595
+      "air_date": "2026-07-02",
+      "rating": 6.7,
+      "rank": 3764,
+      "images": {
+        "large": "/myweb/anime-covers/583729.jpg",
+        "common": "/myweb/anime-covers/583729.jpg"
+      }
     },
     {
-      "id": 920402,
-      "name": "花ざかりの君たちへ",
-      "name_cn": "花样少年少女 第二季",
+      "id": 592111,
+      "name": "东大高武学院",
+      "name_cn": "东大高武学院",
       "air_weekday": 4,
-      "air_date": "2026-07-09",
-      "mgnacg_vod_id": 1520
+      "air_date": "2026-07-16",
+      "rating": 3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/592111.jpg",
+        "common": "/myweb/anime-covers/592111.jpg"
+      }
     },
     {
-      "id": 920403,
-      "name": "文豪ストレイドッグス わん！",
+      "id": 603352,
+      "name": "文豪ストレイドッグス わん！２",
       "name_cn": "文豪野犬 汪！第二季",
       "air_weekday": 4,
-      "air_date": "2026-07-09"
+      "air_date": "2026-07-02",
+      "rating": 6.4,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/603352.jpg",
+        "common": "/myweb/anime-covers/603352.jpg"
+      }
     },
     {
-      "id": 920404,
-      "name": "ニコニコニチアニメ",
+      "id": 614594,
+      "name": "令和のダラさん",
+      "name_cn": "令和妖神斑小姐",
+      "air_weekday": 4,
+      "air_date": "2026-07-02",
+      "rating": 5.9,
+      "rank": 7240,
+      "images": {
+        "large": "/myweb/anime-covers/614594.jpg",
+        "common": "/myweb/anime-covers/614594.jpg"
+      }
+    },
+    {
+      "id": 617123,
+      "name": "乙女怪獣キャラメリゼ",
+      "name_cn": "少女怪兽焦糖味",
+      "air_weekday": 4,
+      "air_date": "2026-07-02",
+      "rating": 6.7,
+      "rank": 4188,
+      "images": {
+        "large": "/myweb/anime-covers/617123.jpg",
+        "common": "/myweb/anime-covers/617123.jpg"
+      }
+    },
+    {
+      "id": 622206,
+      "name": "ヤニねこ",
       "name_cn": "尼古喵喵",
       "air_weekday": 4,
-      "air_date": "2026-07-09",
-      "mgnacg_vod_id": 1628
+      "air_date": "2026-07-02",
+      "rating": 7.1,
+      "rank": 2052,
+      "images": {
+        "large": "/myweb/anime-covers/622206.jpg",
+        "common": "/myweb/anime-covers/622206.jpg"
+      }
     },
     {
-      "id": 920405,
-      "name": "世界は踊る",
-      "name_cn": "世界在起舞",
+      "id": 622633,
+      "name": "ワールド イズ ダンシング",
+      "name_cn": "THE WORLD IS DANCING 世界在起舞",
       "air_weekday": 4,
-      "air_date": "2026-07-09",
-      "mgnacg_vod_id": 1596
+      "air_date": "2026-07-02",
+      "rating": 5.7,
+      "rank": 8538,
+      "images": {
+        "large": "/myweb/anime-covers/622633.jpg",
+        "common": "/myweb/anime-covers/622633.jpg"
+      }
     },
     {
-      "id": 920406,
-      "name": "スーパーの裏でヤニ吸うふたり",
-      "name_cn": "躲在超市后门抽烟的两人",
+      "id": 663982,
+      "name": "精灵梦叶罗丽 第11季 下",
+      "name_cn": "精灵梦叶罗丽 第十一季 下",
       "air_weekday": 4,
-      "air_date": "2026-07-09"
+      "air_date": "2026-07-16",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/663982.jpg",
+        "common": "/myweb/anime-covers/663982.jpg"
+      }
     },
     {
-      "id": 920407,
-      "name": "落第賢者の学院無双",
-      "name_cn": "落第贤者的学院无双",
+      "id": 668407,
+      "name": "つかめ！理科ダマン",
+      "name_cn": "つかめ！理科ダマン",
       "air_weekday": 4,
-      "air_date": "2026-07-09",
-      "mgnacg_vod_id": 1594
+      "air_date": "2026-07-16",
+      "rating": 1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/668407.jpg",
+        "common": "/myweb/anime-covers/668407.jpg"
+      }
     },
     {
-      "id": 920501,
-      "name": "逃げ上手の若君",
+      "id": 517106,
+      "name": "逃げ上手の若君 第二期",
       "name_cn": "擅长逃跑的殿下 第二季",
       "air_weekday": 5,
-      "air_date": "2026-07-10"
+      "air_date": "2026-07-17",
+      "rating": 6.7,
+      "rank": 3572,
+      "images": {
+        "large": "/myweb/anime-covers/517106.jpg",
+        "common": "/myweb/anime-covers/517106.jpg"
+      }
     },
     {
-      "id": 920502,
-      "name": "命短し恋せよ乙女",
-      "name_cn": "描绘直至生命尽头",
+      "id": 542847,
+      "name": "怪物大师之穿越时空的怪物",
+      "name_cn": "怪物大师之穿越时空的怪物",
+      "air_weekday": 5,
+      "air_date": "2026-07-24",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/542847.jpg",
+        "common": "/myweb/anime-covers/542847.jpg"
+      }
+    },
+    {
+      "id": 545917,
+      "name": "これ描いて死ね",
+      "name_cn": "画完这个再去死",
+      "air_weekday": 5,
+      "air_date": "2026-07-03",
+      "rating": 7.7,
+      "rank": 525,
+      "images": {
+        "large": "/myweb/anime-covers/545917.jpg",
+        "common": "/myweb/anime-covers/545917.jpg"
+      }
+    },
+    {
+      "id": 571895,
+      "name": "領民0人スタートの辺境領主様",
+      "name_cn": "从0位居民开始的边境领主大人",
       "air_weekday": 5,
       "air_date": "2026-07-10",
-      "mgnacg_vod_id": 1601
+      "rating": 5.6,
+      "rank": 8340,
+      "images": {
+        "large": "/myweb/anime-covers/571895.jpg",
+        "common": "/myweb/anime-covers/571895.jpg"
+      }
     },
     {
-      "id": 920503,
-      "name": "鉄鍋のジャン！",
-      "name_cn": "铁锅的ジャン！",
+      "id": 613438,
+      "name": "うちの弟どもがすみません",
+      "name_cn": "我家的弟弟们真是让您费心了",
       "air_weekday": 5,
-      "air_date": "2026-07-10"
+      "air_date": "2026-07-03",
+      "rating": 5.6,
+      "rank": 7035,
+      "images": {
+        "large": "/myweb/anime-covers/613438.jpg",
+        "common": "/myweb/anime-covers/613438.jpg"
+      }
     },
     {
-      "id": 920504,
-      "name": "正反対な君と僕",
-      "name_cn": "相反的你和我 第二季",
+      "id": 624691,
+      "name": "喜羊羊与灰太狼之破界山海诀",
+      "name_cn": "喜羊羊与灰太狼之破界山海诀",
       "air_weekday": 5,
       "air_date": "2026-07-10",
-      "mgnacg_vod_id": 1538
+      "rating": 6.6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/624691.jpg",
+        "common": "/myweb/anime-covers/624691.jpg"
+      }
     },
     {
-      "id": 920601,
-      "name": "無職転生 ～異世界行ったら本気だす～ 第3期",
-      "name_cn": "无职转生 第三季",
+      "id": 627136,
+      "name": "うしろの正面カムイさん",
+      "name_cn": "从后面来的神威先生",
+      "air_weekday": 5,
+      "air_date": "2026-07-03",
+      "rating": 5.6,
+      "rank": 8793,
+      "images": {
+        "large": "/myweb/anime-covers/627136.jpg",
+        "common": "/myweb/anime-covers/627136.jpg"
+      }
+    },
+    {
+      "id": 638151,
+      "name": "ヘルモード ～やり込み好きのゲーマーは廃設定の異世界で無双する～ 2nd Season",
+      "name_cn": "地狱模式～喜欢挑战特殊成就的玩家在废设定的异世界成为无双～第二季",
+      "air_weekday": 5,
+      "air_date": "2026-07-03",
+      "rating": 6,
+      "rank": 6977,
+      "images": {
+        "large": "/myweb/anime-covers/638151.jpg",
+        "common": "/myweb/anime-covers/638151.jpg"
+      }
+    },
+    {
+      "id": 662680,
+      "name": "死灵法师！我即是天灾",
+      "name_cn": "死灵法师！我即是天灾",
+      "air_weekday": 5,
+      "air_date": "2026-07-24",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/662680.jpg",
+        "common": "/myweb/anime-covers/662680.jpg"
+      }
+    },
+    {
+      "id": 663695,
+      "name": "Breaking Bear",
+      "name_cn": "Breaking Bear",
+      "air_weekday": 5,
+      "air_date": "2026-07-24",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/663695.jpg",
+        "common": "/myweb/anime-covers/663695.jpg"
+      }
+    },
+    {
+      "id": 664856,
+      "name": "ばなにゃ あっとほーむぱーてぃー",
+      "name_cn": "香蕉喵10周年纪念特别篇",
+      "air_weekday": 5,
+      "air_date": "2026-07-10",
+      "rating": 5.2,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/664856.jpg",
+        "common": "/myweb/anime-covers/664856.jpg"
+      }
+    },
+    {
+      "id": 668586,
+      "name": "Dodgers x ONE PIECE | 特別アニメーション映像 2026",
+      "name_cn": "Dodgers x ONE PIECE | 特別アニメーション映像 2026",
+      "air_weekday": 5,
+      "air_date": "2026-07-03",
+      "rating": 5.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/668586.jpg",
+        "common": "/myweb/anime-covers/668586.jpg"
+      }
+    },
+    {
+      "id": 679732,
+      "name": "SEALOOK 2nd season",
+      "name_cn": "SEALOOK 2nd season",
+      "air_weekday": 5,
+      "air_date": "2026-07-24",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/679732.jpg",
+        "common": "/myweb/anime-covers/679732.jpg"
+      }
+    },
+    {
+      "id": 899,
+      "name": "名探偵コナン",
+      "name_cn": "名侦探柯南",
       "air_weekday": 6,
-      "air_date": "2026-07-11",
-      "mgnacg_vod_id": 1604
+      "air_date": "1996-01-08",
+      "rating": 7.5,
+      "rank": 885,
+      "images": {
+        "large": "/myweb/anime-covers/899.jpg",
+        "common": "/myweb/anime-covers/899.jpg"
+      }
     },
     {
-      "id": 920602,
+      "id": 491578,
+      "name": "择日飞升",
+      "name_cn": "择日飞升",
+      "air_weekday": 6,
+      "air_date": "2026-07-18",
+      "rating": 5.9,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/491578.jpg",
+        "common": "/myweb/anime-covers/491578.jpg"
+      }
+    },
+    {
+      "id": 529723,
+      "name": "株式会社マジルミエ 第2期",
+      "name_cn": "魔法光源股份有限公司 第二季",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 6.1,
+      "rank": 5651,
+      "images": {
+        "large": "/myweb/anime-covers/529723.jpg",
+        "common": "/myweb/anime-covers/529723.jpg"
+      }
+    },
+    {
+      "id": 530725,
       "name": "BLEACH 千年血戦篇-禍進譚-",
       "name_cn": "死神 千年血战篇-祸进谭-",
       "air_weekday": 6,
-      "air_date": "2026-07-11"
+      "air_date": "2026-07-25",
+      "rating": 7.9,
+      "rank": 491,
+      "images": {
+        "large": "/myweb/anime-covers/530725.jpg",
+        "common": "/myweb/anime-covers/530725.jpg"
+      }
     },
     {
-      "id": 920603,
+      "id": 530729,
+      "name": "魔法少女リリカルなのは EXCEEDS Gun Blaze Vengeance",
+      "name_cn": "魔法少女奈叶 EXCEEDS Gun Blaze Vengeance",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 5.7,
+      "rank": 8038,
+      "images": {
+        "large": "/myweb/anime-covers/530729.jpg",
+        "common": "/myweb/anime-covers/530729.jpg"
+      }
+    },
+    {
+      "id": 538760,
       "name": "猫と竜",
       "name_cn": "猫与龙",
       "air_weekday": 6,
-      "air_date": "2026-07-11",
-      "mgnacg_vod_id": 1589
+      "air_date": "2026-07-04",
+      "rating": 6.7,
+      "rank": 4103,
+      "images": {
+        "large": "/myweb/anime-covers/538760.jpg",
+        "common": "/myweb/anime-covers/538760.jpg"
+      }
     },
     {
-      "id": 920604,
+      "id": 542603,
       "name": "BLACK TORCH",
-      "name_cn": "BLACK TORCH 暗黑灯火",
+      "name_cn": "暗黑灯火",
       "air_weekday": 6,
-      "air_date": "2026-07-11"
+      "air_date": "2026-07-04",
+      "rating": 5.7,
+      "rank": 7585,
+      "images": {
+        "large": "/myweb/anime-covers/542603.jpg",
+        "common": "/myweb/anime-covers/542603.jpg"
+      }
     },
     {
-      "id": 920605,
-      "name": "魔法少女リリカルなのは EXCEEDS",
-      "name_cn": "魔法少女奈叶 EXCEEDS",
+      "id": 549975,
+      "name": "Avatar Aang: The Last Airbender",
+      "name_cn": "神通安昂：最后的气宗",
       "air_weekday": 6,
-      "air_date": "2026-07-11",
-      "mgnacg_vod_id": 1610
+      "air_date": "2026-07-25",
+      "rating": 6.7,
+      "rank": 3231,
+      "images": {
+        "large": "/myweb/anime-covers/549975.jpg",
+        "common": "/myweb/anime-covers/549975.jpg"
+      }
     },
     {
-      "id": 920606,
-      "name": "岩元先輩ノ推薦",
-      "name_cn": "岩元前辈的推荐",
-      "air_weekday": 6,
-      "air_date": "2026-07-11",
-      "mgnacg_vod_id": 1607
-    },
-    {
-      "id": 920607,
+      "id": 552533,
       "name": "天幕のジャードゥーガル",
       "name_cn": "穹庐下的魔女",
       "air_weekday": 6,
-      "air_date": "2026-07-11"
+      "air_date": "2026-07-04",
+      "rating": 7.9,
+      "rank": 306,
+      "images": {
+        "large": "/myweb/anime-covers/552533.jpg",
+        "common": "/myweb/anime-covers/552533.jpg"
+      }
     },
     {
-      "id": 920608,
-      "name": "株式会社マジルミエ",
-      "name_cn": "魔法光源股份有限公司 第二季",
+      "id": 563745,
+      "name": "鬼の花嫁",
+      "name_cn": "鬼的新娘",
       "air_weekday": 6,
-      "air_date": "2026-07-11"
+      "air_date": "2026-07-04",
+      "rating": 3.8,
+      "rank": 9929,
+      "images": {
+        "large": "/myweb/anime-covers/563745.jpg",
+        "common": "/myweb/anime-covers/563745.jpg"
+      }
     },
     {
-      "id": 920609,
-      "name": "ふつつかな悪女ではございますが",
-      "name_cn": "我是不才恶女",
+      "id": 570583,
+      "name": "グロウアップショウ ～ひまわりのサーカス団～",
+      "name_cn": "Grow Up Show ～向日葵马戏团～",
       "air_weekday": 6,
-      "air_date": "2026-07-12"
+      "air_date": "2026-07-04",
+      "rating": 7.2,
+      "rank": 1948,
+      "images": {
+        "large": "/myweb/anime-covers/570583.jpg",
+        "common": "/myweb/anime-covers/570583.jpg"
+      }
     },
     {
-      "id": 920701,
-      "name": "ONE PIECE HEROINES",
-      "name_cn": "航海王 女英雄们的故事",
-      "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "id": 576780,
+      "name": "炼气十万年特别篇 阳极天下",
+      "name_cn": "炼气十万年特别篇 阳极天下",
+      "air_weekday": 6,
+      "air_date": "2026-07-18",
+      "rating": 6.2,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/576780.jpg",
+        "common": "/myweb/anime-covers/576780.jpg"
+      }
     },
     {
-      "id": 920702,
-      "name": "刃牙道",
-      "name_cn": "刃牙道",
-      "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "id": 587109,
+      "name": "花織さんは転生しても喧嘩がしたい",
+      "name_cn": "花织即使是转生也想打架",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "rating": 6.8,
+      "rank": 3621,
+      "images": {
+        "large": "/myweb/anime-covers/587109.jpg",
+        "common": "/myweb/anime-covers/587109.jpg"
+      }
     },
     {
-      "id": 920703,
-      "name": "君のことが大大大大大好きな100人の彼女",
-      "name_cn": "超超超超超喜欢你的100个女朋友 第三季",
-      "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "id": 589368,
+      "name": "如果历史是一群喵 大明皇朝篇",
+      "name_cn": "如果历史是一群喵 大明皇朝篇",
+      "air_weekday": 6,
+      "air_date": "2026-07-11",
+      "rating": 3.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/589368.jpg",
+        "common": "/myweb/anime-covers/589368.jpg"
+      }
     },
     {
-      "id": 920704,
-      "name": "二十世紀電氣目録",
+      "id": 602733,
+      "name": "才女のお世話 高嶺の花だらけな名門校で、学院一のお嬢様（生活能力皆無）を陰ながらお世話することになりました",
+      "name_cn": "才女的侍从 在满是高岭之花的贵族学校暗中照顾（毫无生活自理能力的）学院第一大小姐",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 6.1,
+      "rank": 7094,
+      "images": {
+        "large": "/myweb/anime-covers/602733.jpg",
+        "common": "/myweb/anime-covers/602733.jpg"
+      }
+    },
+    {
+      "id": 621843,
+      "name": "岩元先輩ノ推薦",
+      "name_cn": "岩元前辈的推荐",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 3.6,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/621843.jpg",
+        "common": "/myweb/anime-covers/621843.jpg"
+      }
+    },
+    {
+      "id": 631018,
+      "name": "「きみを愛する気はない」と言った次期公爵様がなぜか溺愛してきます",
+      "name_cn": "说了不打算爱我的公爵继承人，不知为何对我宠爱有加",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 5.4,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/631018.jpg",
+        "common": "/myweb/anime-covers/631018.jpg"
+      }
+    },
+    {
+      "id": 641326,
+      "name": "妖神记 第十季",
+      "name_cn": "妖神记 第十季",
+      "air_weekday": 6,
+      "air_date": "2026-07-18",
+      "rating": 5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/641326.jpg",
+        "common": "/myweb/anime-covers/641326.jpg"
+      }
+    },
+    {
+      "id": 651872,
+      "name": "パンの赤ちゃん",
+      "name_cn": "パンの赤ちゃん",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/651872.jpg",
+        "common": "/myweb/anime-covers/651872.jpg"
+      }
+    },
+    {
+      "id": 665747,
+      "name": "『斬 -ZAN-』Pilot Film",
+      "name_cn": "「斩-ZAN-」试播片",
+      "air_weekday": 6,
+      "air_date": "2026-07-04",
+      "rating": 3.8,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/665747.jpg",
+        "common": "/myweb/anime-covers/665747.jpg"
+      }
+    },
+    {
+      "id": 679578,
+      "name": "喜羊羊与灰太狼之破界山海诀番外篇",
+      "name_cn": "喜羊羊与灰太狼之破界山海诀番外篇",
+      "air_weekday": 6,
+      "air_date": "2026-07-25",
+      "rating": 10,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/679578.jpg",
+        "common": "/myweb/anime-covers/679578.jpg"
+      }
+    },
+    {
+      "id": 255209,
+      "name": "二十世紀電氣目録-ユーレカ・エヴリカ-",
       "name_cn": "二十世纪电气目录",
       "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "air_date": "2026-07-05",
+      "rating": 5.7,
+      "rank": 8651,
+      "images": {
+        "large": "/myweb/anime-covers/255209.jpg",
+        "common": "/myweb/anime-covers/255209.jpg"
+      }
     },
     {
-      "id": 920705,
+      "id": 454083,
+      "name": "アズールレーン びそくぜんしんっ！にっ!!",
+      "name_cn": "碧蓝航线：微速前行！第二季",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 6.6,
+      "rank": 3874,
+      "images": {
+        "large": "/myweb/anime-covers/454083.jpg",
+        "common": "/myweb/anime-covers/454083.jpg"
+      }
+    },
+    {
+      "id": 495291,
       "name": "さよならララ",
       "name_cn": "再见菈菈",
       "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "air_date": "2026-07-05",
+      "rating": 7.4,
+      "rank": 1091,
+      "images": {
+        "large": "/myweb/anime-covers/495291.jpg",
+        "common": "/myweb/anime-covers/495291.jpg"
+      }
     },
     {
-      "id": 920706,
-      "name": "GRAND BLUE 第3期",
-      "name_cn": "碧蓝之海 第三季",
+      "id": 501963,
+      "name": "無職転生Ⅲ ～異世界行ったら本気だす～",
+      "name_cn": "无职转生 第三季 ～到了异世界就拿出真本事～",
+      "air_weekday": 7,
+      "air_date": "2026-07-04",
+      "rating": 8,
+      "rank": 255,
+      "images": {
+        "large": "/myweb/anime-covers/501963.jpg",
+        "common": "/myweb/anime-covers/501963.jpg"
+      }
+    },
+    {
+      "id": 545008,
+      "name": "ふつつかな悪女ではございますが ～雛宮蝶鼠とりかえ伝～",
+      "name_cn": "恶女不才，请多关照 ～雏宫蝶鼠换身传～",
       "air_weekday": 7,
       "air_date": "2026-07-12",
-      "mgnacg_vod_id": 301
+      "rating": 6.9,
+      "rank": 3011,
+      "images": {
+        "large": "/myweb/anime-covers/545008.jpg",
+        "common": "/myweb/anime-covers/545008.jpg"
+      }
     },
     {
-      "id": 920707,
-      "name": "女性向けゲーム世界は市民にとって厳しい世界です",
-      "name_cn": "女性向游戏世界对路人角色很不友好 第二季",
+      "id": 571896,
+      "name": "サイボーグ009 ネメシス",
+      "name_cn": "人造人009 涅墨西斯",
       "air_weekday": 7,
-      "air_date": "2026-07-12"
+      "air_date": "2026-07-19",
+      "rating": 4,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/571896.jpg",
+        "common": "/myweb/anime-covers/571896.jpg"
+      }
+    },
+    {
+      "id": 574041,
+      "name": "President Curtis",
+      "name_cn": "柯蒂斯总统",
+      "air_weekday": 7,
+      "air_date": "2026-07-26",
+      "rating": 6.3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/574041.jpg",
+        "common": "/myweb/anime-covers/574041.jpg"
+      }
+    },
+    {
+      "id": 577191,
+      "name": "ONE PIECE HEROINES",
+      "name_cn": "航海王 女英雄们的故事",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 6.3,
+      "rank": 6133,
+      "images": {
+        "large": "/myweb/anime-covers/577191.jpg",
+        "common": "/myweb/anime-covers/577191.jpg"
+      }
+    },
+    {
+      "id": 583862,
+      "name": "世界最強の後衛 ～迷宮国の新人探索者～",
+      "name_cn": "世界最强的后卫 ～迷宫国的新人探索者～",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 4.7,
+      "rank": 9446,
+      "images": {
+        "large": "/myweb/anime-covers/583862.jpg",
+        "common": "/myweb/anime-covers/583862.jpg"
+      }
+    },
+    {
+      "id": 595106,
+      "name": "レッツゴー怪奇組",
+      "name_cn": "Let's Go 怪奇组",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 5.8,
+      "rank": 6402,
+      "images": {
+        "large": "/myweb/anime-covers/595106.jpg",
+        "common": "/myweb/anime-covers/595106.jpg"
+      }
+    },
+    {
+      "id": 598058,
+      "name": "君のことが大大大大大好きな100人の彼女 第3期",
+      "name_cn": "超超超超超喜欢你的100个女朋友 第三季",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 7.4,
+      "rank": 1109,
+      "images": {
+        "large": "/myweb/anime-covers/598058.jpg",
+        "common": "/myweb/anime-covers/598058.jpg"
+      }
+    },
+    {
+      "id": 613039,
+      "name": "茶啊二中第六季",
+      "name_cn": "茶啊二中 第6季",
+      "air_weekday": 7,
+      "air_date": "2026-07-26",
+      "rating": 6.2,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/613039.jpg",
+        "common": "/myweb/anime-covers/613039.jpg"
+      }
+    },
+    {
+      "id": 615835,
+      "name": "鉄鍋のジャン",
+      "name_cn": "炒翻天",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 7,
+      "rank": 2559,
+      "images": {
+        "large": "/myweb/anime-covers/615835.jpg",
+        "common": "/myweb/anime-covers/615835.jpg"
+      }
+    },
+    {
+      "id": 619052,
+      "name": "あはれ！名作くん 完全新作",
+      "name_cn": "あはれ！名作くん 完全新作",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 5.5,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/619052.jpg",
+        "common": "/myweb/anime-covers/619052.jpg"
+      }
+    },
+    {
+      "id": 633354,
+      "name": "同じゼミの染谷さんがセクシー女優だった話。",
+      "name_cn": "同一个研讨会的染谷同学是AV女优的事",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 4.7,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/633354.jpg",
+        "common": "/myweb/anime-covers/633354.jpg"
+      }
+    },
+    {
+      "id": 633711,
+      "name": "プラノサウルス ガチコセイブツ部",
+      "name_cn": "プラノサウルス ガチコセイブツ部",
+      "air_weekday": 7,
+      "air_date": "2026-07-12",
+      "rating": 3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/633711.jpg",
+        "common": "/myweb/anime-covers/633711.jpg"
+      }
+    },
+    {
+      "id": 638497,
+      "name": "正反対な君と僕 第2期",
+      "name_cn": "相反的你和我 第二季",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 7.5,
+      "rank": 870,
+      "images": {
+        "large": "/myweb/anime-covers/638497.jpg",
+        "common": "/myweb/anime-covers/638497.jpg"
+      }
+    },
+    {
+      "id": 642680,
+      "name": "天子传奇：洪武大帝",
+      "name_cn": "天子传奇：洪武大帝",
+      "air_weekday": 7,
+      "air_date": "2026-07-26",
+      "rating": null,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/642680.jpg",
+        "common": "/myweb/anime-covers/642680.jpg"
+      }
+    },
+    {
+      "id": 659686,
+      "name": "トミカとトム シーズン2",
+      "name_cn": "トミカとトム シーズン2",
+      "air_weekday": 7,
+      "air_date": "2026-07-05",
+      "rating": 1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/659686.jpg",
+        "common": "/myweb/anime-covers/659686.jpg"
+      }
+    },
+    {
+      "id": 662006,
+      "name": "闇芝居 十七期",
+      "name_cn": "暗芝居 第十七季",
+      "air_weekday": 7,
+      "air_date": "2026-07-12",
+      "rating": 4.3,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/662006.jpg",
+        "common": "/myweb/anime-covers/662006.jpg"
+      }
+    },
+    {
+      "id": 668108,
+      "name": "『モブサイコ100』アニメ10周年記念特別映像",
+      "name_cn": "《灵能百分百》动画10周年纪念特别映像",
+      "air_weekday": 7,
+      "air_date": "2026-07-12",
+      "rating": 6.1,
+      "rank": null,
+      "images": {
+        "large": "/myweb/anime-covers/668108.jpg",
+        "common": "/myweb/anime-covers/668108.jpg"
+      }
     }
   ]
 }
