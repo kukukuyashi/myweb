@@ -10,10 +10,6 @@
       </p>
       <p v-if="error" class="error">{{ error }}</p>
       <p v-else-if="loading" class="muted">加载 Bangumi 放送数据…</p>
-      <div v-if="fallbackNotice" class="anime-fallback-banner">
-        <p>{{ fallbackNotice }}</p>
-        <button type="button" class="platform-btn-ghost sm" :disabled="loading" @click="load">重试拉取</button>
-      </div>
     </header>
 
     <template v-if="!loading && !error">
@@ -132,7 +128,6 @@ const weekdays = ref([])
 const watchlist = ref([])
 const search = ref('')
 const busyId = ref(null)
-const fallbackNotice = ref('')
 
 const watchIds = computed(() => new Set(watchlist.value.map((w) => w.bangumi_id)))
 const watchStatusMap = computed(() => {
@@ -198,7 +193,6 @@ async function loadWatchlist() {
 async function load() {
   loading.value = true
   error.value = ''
-  fallbackNotice.value = ''
   try {
     const json = await fetchAnimeSchedule()
     const data = json.data || {}
@@ -207,9 +201,6 @@ async function load() {
     season.value = data.season || []
     todayItems.value = data.today_items || []
     myToday.value = data.my_updates || []
-    if (meta.value.source === 'fallback' || meta.value.source === 'stale_cache') {
-      fallbackNotice.value = meta.value.error || '当前为离线示例数据，Bangumi 暂不可用'
-    }
     await loadWatchlist()
   } catch (e) {
     error.value = e.message || '加载失败'
@@ -287,26 +278,6 @@ onMounted(load)
 .anime-updated {
   font-family: var(--mono);
   font-size: 0.68rem;
-}
-
-.anime-fallback-banner {
-  margin-top: 0.65rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px dashed rgba(232, 93, 4, 0.45);
-  background: rgba(232, 93, 4, 0.06);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.anime-fallback-banner p {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  flex: 1;
-  min-width: 200px;
 }
 
 .anime-section {
