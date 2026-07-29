@@ -90,3 +90,17 @@ def invalidate_post_lists() -> None:
 def post_list_cache_key(page: int, page_size: int, category: str | None, status: str) -> str:
     cat = category or "all"
     return f"{POST_LIST_PREFIX}p{page}:s{page_size}:c{cat}:st{status}"
+
+def cache_incr(key: str, ttl: int) -> int | None:
+    """原子自增计数器；首次自增时设置过期时间。Redis 不可用时返回 None。"""
+    client = _get_client()
+    if not client:
+        return None
+    try:
+        value = client.incr(key)
+        if value == 1:
+            client.expire(key, ttl)
+        return int(value)
+    except Exception:
+        return None
+

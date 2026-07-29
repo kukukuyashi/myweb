@@ -13,6 +13,7 @@
         <router-link to="/music">音乐室</router-link>
         <a :href="rssUrl" target="_blank" rel="noopener">RSS</a>
         <a href="https://github.com/kukukuyashi/myweb" target="_blank" rel="noopener">GitHub</a>
+        <a :href="reportMailto" class="footer-report">举报</a>
       </div>
 
       <div class="footer-bottom">
@@ -44,6 +45,10 @@
           订阅：
           <a :href="rssUrl" target="_blank" rel="noopener">{{ rssUrl }}</a>
         </p>
+        <p class="footer-rss">
+          举报 / 联系：
+          <a :href="reportMailto">{{ REPORT_EMAIL }}</a>
+        </p>
       </div>
     </div>
   </footer>
@@ -65,6 +70,10 @@ const year = new Date().getFullYear()
 const totalPosts = computed(() => posts.length)
 const rssUrl = `${import.meta.env.BASE_URL}feed.xml`
 const policeBeianUrl = 'https://beian.mps.gov.cn/#/query/webSearch'
+
+/** 内容举报邮箱（备案自评估：投诉举报机制入口） */
+const REPORT_EMAIL = '1344908013@qq.com'
+const reportMailto = `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent('[CYINC.LOG] 内容举报')}&body=${encodeURIComponent('举报内容链接：\n违规类型：\n补充说明：\n')}`
 </script>
 
 <style scoped>
@@ -118,6 +127,14 @@ const policeBeianUrl = 'https://beian.mps.gov.cn/#/query/webSearch'
 
 .footer-links a:hover {
   color: var(--orange);
+}
+
+.footer-report {
+  color: var(--orange);
+}
+
+.footer-report:hover {
+  text-decoration: underline;
 }
 
 .footer-bottom {

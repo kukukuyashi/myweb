@@ -108,11 +108,17 @@ async def upload_avatar(
     if not ext:
         raise HTTPException(status_code=400, detail="仅支持 JPG / PNG / WebP / GIF")
 
+    check_upload_rate(current_user.id, scope="avatars")
     data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail="文件为空")
     if len(data) > settings.max_avatar_bytes:
         raise HTTPException(status_code=400, detail="头像不能超过 2MB")
+
+    real_ext = sniff_image_ext(data)
+    if not real_ext:
+        raise HTTPException(status_code=400, detail="文件不是有效的图片")
+    ext = real_ext
 
     _remove_local_avatar(current_user.avatar)
     filename = f"{current_user.id}_{int(time.time())}{ext}"
@@ -193,3 +199,5 @@ def get_user_threads(
             ).model_dump()
         )
     return ok({"items": items})
+
+

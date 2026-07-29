@@ -12,6 +12,13 @@
         >
           {{ m.label }}
         </button>
+        <button
+          type="button"
+          class="guide-btn"
+          :class="{ active: showGuide }"
+          title="编辑器使用指引"
+          @click="showGuide = !showGuide"
+        >使用指引</button>
       </div>
       <div class="fmt-btns">
         <button type="button" class="ico" title="加粗" @click="applyFormat('bold')"><strong>B</strong></button>
@@ -59,6 +66,17 @@
           {{ imageUploading ? '上传中…' : (enableImageUpload ? '图片' : '图片') }}
         </button>
       </div>
+    </div>
+
+    <div v-if="showGuide" class="md-guide">
+      <p class="md-guide__title">编辑器指引 · 四种模式随时切换</p>
+      <ul class="md-guide__list">
+        <li><strong>所见即所得</strong>：直接打字排版，像 Word 一样，选中文字再点上方按钮改样式，不用记 Markdown 语法。</li>
+        <li><strong>Markdown</strong>：纯文本源码模式，熟悉语法的可直接写 <code>**粗体**</code>、<code>## 标题</code>。</li>
+        <li><strong>分屏</strong>：左边写 Markdown 源码，右边实时预览，一边写一边看效果。</li>
+        <li><strong>预览</strong>：只看最终渲染效果，不可编辑。</li>
+      </ul>
+      <p class="md-guide__tip">图片：点「图片」按钮上传，或直接把图片拖拽 / 粘贴进编辑区。引用 / 列表 / 标题等按钮，选中后再点一次即可取消。</p>
     </div>
 
     <p v-if="viewMode === 'rich'" class="md-hint">
@@ -165,6 +183,7 @@ const presetColors = [
 ]
 
 const viewMode = ref(props.defaultMode)
+const showGuide = ref(false)
 const textareaRef = ref(null)
 const richRef = ref(null)
 const richDirty = ref(false)
@@ -480,6 +499,27 @@ function isSelectionInside(tagName) {
   }
   return false
 }
+function findSelectionAncestor(tagName) {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0) return null
+  let node = sel.anchorNode
+  const root = richRef.value
+  while (node && node !== root) {
+    if (node.nodeType === 1 && node.tagName === tagName) return node
+    node = node.parentNode
+  }
+  return null
+}
+
+function unwrapSelectionBlock(tagName) {
+  const el = findSelectionAncestor(tagName)
+  if (!el || !el.parentNode) return
+  const parent = el.parentNode
+  const frag = document.createDocumentFragment()
+  while (el.firstChild) frag.appendChild(el.firstChild)
+  if (!frag.childNodes.length) frag.appendChild(document.createElement('br'))
+  parent.replaceChild(frag, el)
+}
 
 function applyRichFormat(type) {
   const el = richRef.value
@@ -500,7 +540,11 @@ function applyRichFormat(type) {
       document.execCommand('formatBlock', false, isSelectionInside('H2') ? 'div' : 'h2')
       break
     case 'quote':
-      document.execCommand('formatBlock', false, isSelectionInside('BLOCKQUOTE') ? 'div' : 'blockquote')
+      if (isSelectionInside('BLOCKQUOTE')) {
+        unwrapSelectionBlock('BLOCKQUOTE')
+      } else {
+        document.execCommand('formatBlock', false, 'blockquote')
+      }
       break
     case 'ul':
       document.execCommand('insertUnorderedList')
@@ -659,6 +703,54 @@ onMounted(() => {
   background: transparent;
   cursor: pointer;
   opacity: 0;
+}
+
+.guide-btn {
+  margin-left: 0.35rem;
+}
+
+.guide-btn.active {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 12%, var(--bg-paper));
+}
+
+.md-guide {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--orange) 6%, var(--bg-paper));
+  font-size: 0.76rem;
+  color: var(--text);
+}
+
+.md-guide__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--orange);
+  letter-spacing: 0.04em;
+}
+
+.md-guide__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.28rem;
+  line-height: 1.55;
+}
+
+.md-guide__list code {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  padding: 0 0.2rem;
+  border-radius: 2px;
+}
+
+.md-guide__tip {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .md-hint {

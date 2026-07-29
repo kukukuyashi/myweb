@@ -272,3 +272,4 @@ const avatarUrl = computed(() => imgUrl(profile.avatar))
   }
 }
 </style>
+

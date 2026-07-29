@@ -144,6 +144,7 @@ async def lifespan(_: FastAPI):
     (Path(settings.upload_dir) / "avatars").mkdir(parents=True, exist_ok=True)
     (Path(settings.upload_dir) / "forum").mkdir(parents=True, exist_ok=True)
     (Path(settings.upload_dir) / "posts").mkdir(parents=True, exist_ok=True)
+    (Path(settings.upload_dir) / "anime").mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
     _ensure_schema_patches()
     seed_forum_categories()
@@ -209,6 +210,7 @@ def create_app() -> FastAPI:
     upload_root.mkdir(parents=True, exist_ok=True)
     (upload_root / "avatars").mkdir(parents=True, exist_ok=True)
     (upload_root / "forum").mkdir(parents=True, exist_ok=True)
+    (upload_root / "anime").mkdir(parents=True, exist_ok=True)
     app.mount("/uploads", StaticFiles(directory=str(upload_root)), name="uploads")
 
     @app.get("/api/health", tags=["system"], summary="健康检查")

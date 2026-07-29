@@ -90,7 +90,7 @@
             <p class="mode-label">{{ minimalMode ? modeLabel : `${modeLabel} · ${activeCompanion.name} 监工中` }}</p>
           </div>
           <div class="top-actions">
-            <button type="button" class="icon-btn" title="设置" @click="showSettings = !showSettings">⚙</button>
+            <button type="button" class="icon-btn" title="设置" @click="toggleSettings">⚙</button>
             <button type="button" class="icon-btn" title="全屏专注" @click="toggleFullscreen">⛶</button>
           </div>
         </div>
@@ -163,7 +163,7 @@
         </figure>
       </section>
 
-      <section v-if="showSettings && !isFullscreen" class="platform-panel ink-panel settings reveal-item" data-reveal>
+      <section v-if="showSettings && !isFullscreen" ref="settingsRef" class="platform-panel ink-panel settings reveal-item" data-reveal>
         <header class="panel-head">
           <h2>计时设置</h2>
           <p class="panel-sub">{{ minimalMode ? 'TIMER CONFIG' : 'タイマー設定 · CONFIG' }}</p>
@@ -280,7 +280,7 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
 import PomoEnergyGrid from '../components/platform/PomoEnergyGrid.vue'
@@ -448,6 +448,7 @@ const sessions = ref([])
 const error = ref('')
 const message = ref('')
 const showSettings = ref(false)
+const settingsRef = ref(null)
 const isFullscreen = ref(false)
 const focusArea = ref(null)
 const showReflection = ref(false)
@@ -718,19 +719,44 @@ function skipReflection() {
   enterBreak()
 }
 
+function toggleSettings() {
+  showSettings.value = !showSettings.value
+  // 移动端设置面板在下方，展开后滚动过去，避免看起来「点了没反应」。
+  if (showSettings.value) {
+    nextTick(() => {
+      settingsRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+}
+
 async function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    await focusArea.value?.requestFullscreen?.()
+  // 桌面端优先用原生全屏；移动端（尤其 iOS Safari）不支持元素全屏，
+  // 原生调用可能不存在或直接 reject，这里统一兜底为纯 CSS 全屏，保证一定有反应。
+  if (!isFullscreen.value) {
     isFullscreen.value = true
+    try {
+      await focusArea.value?.requestFullscreen?.()
+    } catch {
+      /* 移动端不支持原生全屏，退回 CSS 全屏即可 */
+    }
   } else {
-    await document.exitFullscreen()
     isFullscreen.value = false
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen()
+    } catch {
+      /* ignore */
+    }
   }
 }
 
 function onFullscreenChange() {
   isFullscreen.value = !!document.fullscreenElement
 }
+
+watch(isFullscreen, (on) => {
+  // CSS 兜底全屏时锁定背景滚动；原生全屏由浏览器处理，这里也无副作用。
+  document.body.style.overflow = on ? 'hidden' : ''
+})
 
 async function loadData() {
   if (!token.value) return
@@ -772,7 +798,7 @@ onUnmounted(() => {
   clearTick()
   if (lineTickId) clearInterval(lineTickId)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
-  if (studyRoomOpen.value) document.body.style.overflow = ''
+  if (studyRoomOpen.value || isFullscreen.value) document.body.style.overflow = ''
 })
 </script>
 
@@ -1065,9 +1091,17 @@ onUnmounted(() => {
 }
 
 .pomo-core.fs-mode {
+  /* 兼顾原生全屏与移动端 CSS 兜底全屏：固定铺满视口。 */
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  width: 100vw;
+  height: 100vh;
   min-height: 100vh;
   margin: 0;
   border: none;
+  background: var(--bg);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;

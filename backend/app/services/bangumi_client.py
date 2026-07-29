@@ -10,6 +10,7 @@ import httpx
 
 from app.services.cache import cache_get, cache_set
 from app.services.mgnacg_client import enrich_schedule_watch_urls
+from app.services.cover_cache import localize_schedule_covers
 
 logger = logging.getLogger(__name__)
 
@@ -361,6 +362,10 @@ async def build_schedule() -> dict:
 
     season, today_items, weekdays = await enrich_schedule_watch_urls(
         season, today_items, weekdays, live_suggest=False,
+    )
+
+    season, today_items, weekdays = await localize_schedule_covers(
+        season, today_items, weekdays,
     )
 
     result = {
