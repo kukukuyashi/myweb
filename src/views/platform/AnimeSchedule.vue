@@ -52,13 +52,19 @@
               type="button"
               class="anime-day-tab"
               :class="{ active: d.id === activeDay }"
-              @click="activeDay = d.id"
+              @click="selectDay(d.id)"
             >{{ d.cn }}</button>
           </div>
+          <button
+            v-if="sortedOfDay.length > pageSize"
+            type="button"
+            class="anime-more-btn"
+            @click="expanded = !expanded"
+          >{{ expanded ? '收起' : '更多' }}</button>
         </div>
-        <p v-if="!hotOfDay.length" class="muted">这天暂无热门新番。</p>
+        <p v-if="!sortedOfDay.length" class="muted">这天暂无热门新番。</p>
         <div v-else class="anime-card-grid anime-timeline-row">
-          <article v-for="item in hotOfDay" :key="item.bangumi_id" class="anime-card" :class="{ 'is-mine': isWatching(item.bangumi_id) }">
+          <article v-for="item in visibleOfDay" :key="item.bangumi_id" class="anime-card" :class="{ 'is-mine': isWatching(item.bangumi_id) }">
             <div class="anime-poster">
               <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
               <span v-if="episodeNo(item)" class="anime-ep-badge">第{{ episodeNo(item) }}集</span>
@@ -103,6 +109,8 @@ const weekdays = ref([])
 const watchlist = ref([])
 const busyId = ref(null)
 const activeDay = ref(1)
+const expanded = ref(false)
+const pageSize = 7
 
 const dayTabs = [
   { id: 1, cn: '周一' },
@@ -137,7 +145,7 @@ const itemsByDay = computed(() => {
   return map
 })
 
-const hotOfDay = computed(() => {
+const sortedOfDay = computed(() => {
   const list = [...(itemsByDay.value[activeDay.value] || [])]
   list.sort((a, b) => {
     const ra = a.rank || Infinity
@@ -145,8 +153,17 @@ const hotOfDay = computed(() => {
     if (ra !== rb) return ra - rb
     return (b.rating || 0) - (a.rating || 0)
   })
-  return list.slice(0, 7)
+  return list
 })
+
+const visibleOfDay = computed(() =>
+  expanded.value ? sortedOfDay.value : sortedOfDay.value.slice(0, pageSize),
+)
+
+function selectDay(id) {
+  activeDay.value = id
+  expanded.value = false
+}
 
 function displayName(item) {
   return item.name_cn || item.name || '未知'
@@ -296,6 +313,23 @@ onMounted(load)
   align-items: center;
   gap: 0.75rem 1rem;
   margin-bottom: 1rem;
+}
+
+.anime-more-btn {
+  margin-left: auto;
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
+  font: inherit;
+  font-size: 0.76rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.anime-more-btn:hover {
+  opacity: 0.85;
 }
 
 .anime-timeline-head h2 {
