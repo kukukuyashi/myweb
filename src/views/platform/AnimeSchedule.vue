@@ -13,18 +13,21 @@
     </header>
 
     <template v-if="!loading && !error">
-      <!-- 今日更新 -->
+      <!-- 我的追番 · 今日更新 -->
       <section class="anime-section platform-panel ink-panel">
         <h2>我的追番 · 今日更新</h2>
         <p v-if="!token" class="muted">
           <router-link to="/app/login?redirect=/app/anime">登录</router-link> 后可标记追番，这里会高亮今日更新的番剧。
         </p>
-        <div v-else-if="!myToday.length" class="muted">今日没有在追的番更新，去下方本季列表添加吧。</div>
+        <div v-else-if="!myToday.length" class="muted">今日没有在追的番更新，去下方时间表添加吧。</div>
         <div v-else class="anime-card-grid">
           <article v-for="item in myToday" :key="item.bangumi_id" class="anime-card is-mine">
-            <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
+            <div class="anime-poster">
+              <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
+              <span v-if="episodeNo(item)" class="anime-ep-badge">第{{ episodeNo(item) }}集</span>
+            </div>
             <div class="anime-card-body">
-              <h3>{{ displayName(item) }}</h3>
+              <h3 :title="displayName(item)">{{ displayName(item) }}</h3>
               <div class="anime-card-actions">
                 <AnimeWatchControl
                   :status="watchStatus(item.bangumi_id)"
@@ -36,66 +39,38 @@
             </div>
           </article>
         </div>
-
-        <details class="anime-all-today">
-          <summary>全部今日更新（{{ todayItems.length }}）</summary>
-          <ul class="anime-today-list">
-            <li v-for="item in todayItems" :key="item.bangumi_id">
-              <span>{{ displayName(item) }}</span>
-              <div class="anime-list-actions">
-                <AnimeWatchControl
-                  v-if="token"
-                  compact
-                  :status="watchStatus(item.bangumi_id)"
-                  :disabled="busyId === item.bangumi_id"
-                  @set="(s) => setWatch(item, s)"
-                  @clear="clearWatch(item)"
-                />
-              </div>
-            </li>
-          </ul>
-        </details>
       </section>
-      <!-- TODAY CARDS: 1 row x 7 -->
-      <section class="anime-section platform-panel ink-panel">
-        <h2>今日新番</h2>
-        <p v-if="!todayItems.length" class="muted">今日暂无新番更新。</p>
-        <div v-else class="anime-card-grid anime-today-row">
-          <article v-for="item in todayItems.slice(0, 7)" :key="item.bangumi_id" class="anime-card">
-            <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
+
+      <!-- 新番时间表 -->
+      <section class="anime-section platform-panel ink-panel anime-timeline">
+        <div class="anime-timeline-head">
+          <h2>新番时间表</h2>
+          <div class="anime-day-tabs">
+            <button
+              v-for="d in dayTabs"
+              :key="d.id"
+              type="button"
+              class="anime-day-tab"
+              :class="{ active: d.id === activeDay }"
+              @click="activeDay = d.id"
+            >{{ d.cn }}</button>
+          </div>
+        </div>
+        <p v-if="!hotOfDay.length" class="muted">这天暂无热门新番。</p>
+        <div v-else class="anime-card-grid anime-timeline-row">
+          <article v-for="item in hotOfDay" :key="item.bangumi_id" class="anime-card" :class="{ 'is-mine': isWatching(item.bangumi_id) }">
+            <div class="anime-poster">
+              <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
+              <span v-if="episodeNo(item)" class="anime-ep-badge">第{{ episodeNo(item) }}集</span>
+            </div>
             <div class="anime-card-body">
-              <h3>{{ displayName(item) }}</h3>
+              <h3 :title="displayName(item)">{{ displayName(item) }}</h3>
               <div class="anime-card-actions">
                 <AnimeWatchControl v-if="token" :status="watchStatus(item.bangumi_id)" :disabled="busyId === item.bangumi_id" @set="(s) => setWatch(item, s)" @clear="clearWatch(item)" />
                 <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
               </div>
             </div>
           </article>
-        </div>
-      </section>
-
-      <!-- 周视图 -->
-      <section class="anime-section platform-panel ink-panel">
-        <h2>周放送表</h2>
-        <div class="anime-week-grid">
-          <div
-            v-for="day in weekdays"
-            :key="day.weekday?.id"
-            class="anime-week-col"
-            :class="{ 'is-today': day.weekday?.id === meta.today_weekday_id }"
-          >
-            <h3>{{ day.weekday?.cn }}</h3>
-            <ul>
-              <li
-                v-for="item in sortedWeekItems(day.items)"
-                :key="item.bangumi_id"
-                :class="{ mine: isWatching(item.bangumi_id) }"
-              >
-                <span v-if="isWatching(item.bangumi_id)" class="star">★</span>
-                {{ displayName(item) }}
-              </li>
-            </ul>
-          </div>
         </div>
       </section>
     </template>
@@ -126,8 +101,18 @@ const myToday = ref([])
 const season = ref([])
 const weekdays = ref([])
 const watchlist = ref([])
-const search = ref('')
 const busyId = ref(null)
+const activeDay = ref(1)
+
+const dayTabs = [
+  { id: 1, cn: '周一' },
+  { id: 2, cn: '周二' },
+  { id: 3, cn: '周三' },
+  { id: 4, cn: '周四' },
+  { id: 5, cn: '周五' },
+  { id: 6, cn: '周六' },
+  { id: 7, cn: '周日' },
+]
 
 const watchIds = computed(() => new Set(watchlist.value.map((w) => w.bangumi_id)))
 const watchStatusMap = computed(() => {
@@ -136,22 +121,35 @@ const watchStatusMap = computed(() => {
   return map
 })
 
-const filteredSeason = computed(() => {
-  const q = search.value.trim().toLowerCase()
-  if (!q) return season.value
-  return season.value.filter((i) =>
-    (i.name_cn || i.name || '').toLowerCase().includes(q)
-    || (i.name || '').toLowerCase().includes(q),
-  )
+const itemsByDay = computed(() => {
+  const map = {}
+  for (const day of weekdays.value) {
+    const id = day.weekday?.id
+    if (id) map[id] = day.items || []
+  }
+  if (!Object.keys(map).length) {
+    for (const it of season.value) {
+      const id = it.air_weekday
+      if (!id) continue
+      ;(map[id] = map[id] || []).push(it)
+    }
+  }
+  return map
+})
+
+const hotOfDay = computed(() => {
+  const list = [...(itemsByDay.value[activeDay.value] || [])]
+  list.sort((a, b) => {
+    const ra = a.rank || Infinity
+    const rb = b.rank || Infinity
+    if (ra !== rb) return ra - rb
+    return (b.rating || 0) - (a.rating || 0)
+  })
+  return list.slice(0, 7)
 })
 
 function displayName(item) {
   return item.name_cn || item.name || '未知'
-}
-
-function weekdayLabel(id) {
-  const map = { 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '日' }
-  return map[id] || '?'
 }
 
 function isWatching(id) {
@@ -162,14 +160,15 @@ function watchStatus(id) {
   return watchStatusMap.value[id] || null
 }
 
-function sortedWeekItems(items) {
-  const list = [...(items || [])]
-  list.sort((a, b) => {
-    const am = isWatching(a.bangumi_id) ? 0 : 1
-    const bm = isWatching(b.bangumi_id) ? 0 : 1
-    return am - bm
-  })
-  return list
+function episodeNo(item) {
+  if (!item.air_date) return null
+  const start = new Date(item.air_date + 'T00:00:00')
+  if (Number.isNaN(start.getTime())) return null
+  const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000)
+  if (diffDays < 0) return null
+  const ep = Math.floor(diffDays / 7) + 1
+  if (ep < 1 || ep > 60) return null
+  return ep
 }
 
 function formatUpdated(iso) {
@@ -201,6 +200,7 @@ async function load() {
     season.value = data.season || []
     todayItems.value = data.today_items || []
     myToday.value = data.my_updates || []
+    activeDay.value = meta.value.today_weekday_id || (new Date().getDay() || 7)
     await loadWatchlist()
   } catch (e) {
     error.value = e.message || '加载失败'
@@ -290,26 +290,45 @@ onMounted(load)
   font-size: 1rem;
 }
 
-.anime-section-head {
+.anime-timeline-head {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
 }
 
-.anime-section-head h2 {
+.anime-timeline-head h2 {
   margin: 0;
 }
 
-.anime-search {
+.anime-day-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.anime-day-tab {
   border: 1px solid var(--border);
-  padding: 0.45rem 0.65rem;
-  font: inherit;
   background: var(--bg);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.anime-day-tab:hover {
   color: var(--text);
-  min-width: 180px;
+  border-color: var(--steel);
+}
+
+.anime-day-tab.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
 }
 
 .anime-card-grid {
@@ -318,10 +337,8 @@ onMounted(load)
   gap: 0.85rem;
 }
 
-.anime-season-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.95rem;
+.anime-timeline-row {
+  grid-template-columns: repeat(7, 1fr);
 }
 
 .anime-card {
@@ -337,126 +354,49 @@ onMounted(load)
   box-shadow: 0 0 0 1px rgba(232, 93, 4, 0.15);
 }
 
+.anime-poster {
+  position: relative;
+}
+
 .anime-cover {
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   background: var(--border);
+  display: block;
+}
+
+.anime-ep-badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 0.66rem;
+  padding: 0.15rem 0.4rem;
+  border-top-left-radius: 4px;
 }
 
 .anime-card-body {
-  padding: 0.65rem;
+  padding: 0.55rem 0.6rem;
   display: grid;
   gap: 0.35rem;
 }
 
 .anime-card-body h3 {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.anime-air {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text-muted);
-}
-
-.anime-card-actions,
-.anime-list-actions {
+.anime-card-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
-}
-
-.anime-watch-link {
-  text-decoration: none;
-  border-color: rgba(232, 93, 4, 0.35);
-  color: var(--orange);
-}
-
-.anime-watch-link:hover {
-  background: rgba(232, 93, 4, 0.08);
-}
-
-.anime-all-today {
-  margin-top: 1rem;
-}
-
-.anime-all-today summary {
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--steel);
-}
-
-.anime-today-list {
-  list-style: none;
-  padding: 0.5rem 0 0;
-  margin: 0;
-  display: grid;
-  gap: 0.4rem;
-}
-
-.anime-today-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  border-bottom: 1px dashed var(--border);
-  padding-bottom: 0.35rem;
-}
-
-.anime-week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-  overflow-x: auto;
-}
-
-.anime-week-col {
-  border: 1px solid var(--border);
-  padding: 0.55rem;
-  min-height: 120px;
-  background: var(--bg);
-}
-
-.anime-week-col.is-today {
-  border-color: var(--orange);
-  background: rgba(232, 93, 4, 0.06);
-}
-
-.anime-week-col h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.78rem;
-  font-family: var(--mono);
-  color: var(--text-muted);
-}
-
-.anime-week-col.is-today h3 {
-  color: var(--orange);
-}
-
-.anime-week-col ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  line-height: 1.35;
-}
-
-.anime-week-col li.mine {
-  color: var(--orange);
-  font-weight: 500;
-}
-
-.star {
-  margin-right: 0.15rem;
 }
 
 .platform-btn-primary.sm,
@@ -465,25 +405,18 @@ onMounted(load)
   padding: 0.3rem 0.55rem;
 }
 
-.platform-btn-primary.active {
-  opacity: 0.85;
-}
-
 .error { color: #c0392b; }
 .muted { color: var(--text-muted); }
 
 @media (max-width: 900px) {
-  .anime-week-grid {
-    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  .anime-timeline-row {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 520px) {
-  .anime-week-grid {
-    grid-template-columns: repeat(2, minmax(140px, 1fr));
+@media (max-width: 560px) {
+  .anime-timeline-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
-.anime-today-row { grid-template-columns: repeat(7, 1fr); }
-@media (max-width: 900px) { .anime-today-row { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 560px) { .anime-today-row { grid-template-columns: repeat(2, 1fr); } }
 </style>
