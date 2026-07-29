@@ -61,39 +61,42 @@
         </details>
       </section>
 
-      <!-- 本季浏览 -->
+            <!-- WEEK-GROUPED CARDS -->
       <section class="anime-section platform-panel ink-panel">
         <div class="anime-section-head">
-          <h2>{{ meta.season_label || '本季番剧' }}</h2>
+          <h2>{{ meta.season_label || '本季新番' }}</h2>
           <input v-model="search" type="search" placeholder="搜索番名…" class="anime-search">
         </div>
-        <div class="anime-card-grid">
-          <article v-for="item in visibleSeason" :key="item.bangumi_id" class="anime-card">
+        <div v-if="search.trim()" class="anime-card-grid">
+          <article v-for="item in filteredSeason" :key="item.bangumi_id" class="anime-card">
             <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
-              <p class="anime-air">
-                <template v-if="item.air_weekday">周{{ weekdayLabel(item.air_weekday) }} 更新</template>
-                <template v-else>放送日未定</template>
-              </p>
+              <p class="anime-air">周{{ weekdayLabel(item.air_weekday) }} 更新</p>
               <div class="anime-card-actions">
-                <AnimeWatchControl
-                  v-if="token"
-                  :status="watchStatus(item.bangumi_id)"
-                  :disabled="busyId === item.bangumi_id"
-                  @set="(s) => setWatch(item, s)"
-                  @clear="clearWatch(item)"
-                />
+                <AnimeWatchControl v-if="token" :status="watchStatus(item.bangumi_id)" :disabled="busyId === item.bangumi_id" @set="(s) => setWatch(item, s)" @clear="clearWatch(item)" />
                 <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
               </div>
             </div>
           </article>
         </div>
-        <div v-if="canToggleSeason || seasonExpanded" class="anime-season-more">
-          <button type="button" class="platform-btn-ghost sm" @click="seasonExpanded = !seasonExpanded">
-            {{ seasonExpanded ? '收起' : ('查看全部 ' + filteredSeason.length + ' 部') }}
-          </button>
-        </div>
+        <template v-else>
+          <div v-for="day in weekdays" :key="day.weekday?.id" class="anime-week-card-group" :class="{ 'is-today': day.weekday?.id === meta.today_weekday_id }">
+            <div class="anime-week-card-group-head">周{{ weekdayLabel(day.weekday?.id) }} <span class="count">({{ day.items.length }} 部)</span></div>
+            <div class="anime-card-grid">
+              <article v-for="item in day.items" :key="item.bangumi_id" class="anime-card">
+                <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
+                <div class="anime-card-body">
+                  <h3>{{ displayName(item) }}</h3>
+                  <div class="anime-card-actions">
+                    <AnimeWatchControl v-if="token" :status="watchStatus(item.bangumi_id)" :disabled="busyId === item.bangumi_id" @set="(s) => setWatch(item, s)" @clear="clearWatch(item)" />
+                    <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </template>
       </section>
 
       <!-- 周视图 -->
@@ -150,8 +153,6 @@ const weekdays = ref([])
 const watchlist = ref([])
 const search = ref('')
 const busyId = ref(null)
-const seasonExpanded = ref(false)
-const SEASON_PREVIEW = 12
 const fallbackNotice = ref('')
 
 const watchIds = computed(() => new Set(watchlist.value.map((w) => w.bangumi_id)))
@@ -169,13 +170,6 @@ const filteredSeason = computed(() => {
     || (i.name || '').toLowerCase().includes(q),
   )
 })
-
-const visibleSeason = computed(() => {
-  if (seasonExpanded.value || search.value.trim()) return filteredSeason.value
-  return filteredSeason.value.slice(0, SEASON_PREVIEW)
-})
-
-const canToggleSeason = computed(() => !search.value.trim() && filteredSeason.value.length > SEASON_PREVIEW)
 
 function displayName(item) {
   return item.name_cn || item.name || '未知'
@@ -539,4 +533,8 @@ onMounted(load)
     grid-template-columns: repeat(2, minmax(140px, 1fr));
   }
 }
+.anime-week-card-group { margin-bottom: 2rem; }
+.anime-week-card-group.is-today .anime-week-card-group-head { color: var(--accent, #f40); font-weight: 600; }
+.anime-week-card-group-head { font-size: 1.1rem; margin-bottom: 1rem; color: var(--ink, #333); border-bottom: 1px solid var(--border, #eee); padding-bottom: 0.5rem; }
+.anime-week-card-group-head .count { color: var(--muted, #999); font-size: 0.9rem; font-weight: 400; margin-left: 0.2rem; }
 </style>
