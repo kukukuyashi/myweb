@@ -60,19 +60,15 @@
           </ul>
         </details>
       </section>
-
-            <!-- WEEK-GROUPED CARDS -->
+      <!-- TODAY CARDS: 1 row x 7 -->
       <section class="anime-section platform-panel ink-panel">
-        <div class="anime-section-head">
-          <h2>{{ meta.season_label || '本季新番' }}</h2>
-          <input v-model="search" type="search" placeholder="搜索番名…" class="anime-search">
-        </div>
-        <div v-if="search.trim()" class="anime-card-grid">
-          <article v-for="item in filteredSeason" :key="item.bangumi_id" class="anime-card">
+        <h2>今日新番</h2>
+        <p v-if="!todayItems.length" class="muted">今日暂无新番更新。</p>
+        <div v-else class="anime-card-grid anime-today-row">
+          <article v-for="item in todayItems.slice(0, 7)" :key="item.bangumi_id" class="anime-card">
             <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
-              <p class="anime-air">周{{ weekdayLabel(item.air_weekday) }} 更新</p>
               <div class="anime-card-actions">
                 <AnimeWatchControl v-if="token" :status="watchStatus(item.bangumi_id)" :disabled="busyId === item.bangumi_id" @set="(s) => setWatch(item, s)" @clear="clearWatch(item)" />
                 <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
@@ -80,23 +76,6 @@
             </div>
           </article>
         </div>
-        <template v-else>
-          <div v-for="day in weekdays" :key="day.weekday?.id" class="anime-week-card-group" :class="{ 'is-today': day.weekday?.id === meta.today_weekday_id }">
-            <div class="anime-week-card-group-head">周{{ weekdayLabel(day.weekday?.id) }} <span class="count">({{ day.items.length }} 部)</span></div>
-            <div class="anime-card-grid">
-              <article v-for="item in day.items" :key="item.bangumi_id" class="anime-card">
-                <img v-if="item.cover_url" :src="resolveMediaUrl(item.cover_url)" alt="" class="anime-cover" referrerpolicy="no-referrer" loading="lazy" @error="$event.target.style.display='none'">
-                <div class="anime-card-body">
-                  <h3>{{ displayName(item) }}</h3>
-                  <div class="anime-card-actions">
-                    <AnimeWatchControl v-if="token" :status="watchStatus(item.bangumi_id)" :disabled="busyId === item.bangumi_id" @set="(s) => setWatch(item, s)" @clear="clearWatch(item)" />
-                    <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </template>
       </section>
 
       <!-- 周视图 -->
@@ -533,8 +512,7 @@ onMounted(load)
     grid-template-columns: repeat(2, minmax(140px, 1fr));
   }
 }
-.anime-week-card-group { margin-bottom: 2rem; }
-.anime-week-card-group.is-today .anime-week-card-group-head { color: var(--accent, #f40); font-weight: 600; }
-.anime-week-card-group-head { font-size: 1.1rem; margin-bottom: 1rem; color: var(--ink, #333); border-bottom: 1px solid var(--border, #eee); padding-bottom: 0.5rem; }
-.anime-week-card-group-head .count { color: var(--muted, #999); font-size: 0.9rem; font-weight: 400; margin-left: 0.2rem; }
+.anime-today-row { grid-template-columns: repeat(7, 1fr); }
+@media (max-width: 900px) { .anime-today-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .anime-today-row { grid-template-columns: repeat(2, 1fr); } }
 </style>
