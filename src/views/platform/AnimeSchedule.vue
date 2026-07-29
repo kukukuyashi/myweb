@@ -79,6 +79,30 @@
           </article>
         </div>
       </section>
+
+      <!-- 文字版周放送表：一眼看全 -->
+      <section class="anime-section platform-panel ink-panel">
+        <h2>本季全表</h2>
+        <div class="anime-week-grid">
+          <div
+            v-for="d in dayTabs"
+            :key="d.id"
+            class="anime-week-col"
+            :class="{ 'is-today': d.id === (meta.today_weekday_id || activeDay) }"
+          >
+            <h3>{{ d.cn }}</h3>
+            <ul>
+              <li
+                v-for="item in sortedWeekItems(itemsByDay[d.id])"
+                :key="item.bangumi_id"
+                :class="{ mine: isWatching(item.bangumi_id) }"
+              >
+                <span v-if="isWatching(item.bangumi_id)" class="star">★</span>{{ displayName(item) }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
     </template>
   </div>
 </template>
@@ -171,6 +195,17 @@ function displayName(item) {
 
 function isWatching(id) {
   return watchIds.value.has(id)
+}
+
+function sortedWeekItems(items) {
+  const list = [...(items || [])]
+  list.sort((a, b) => {
+    const am = isWatching(a.bangumi_id) ? 0 : 1
+    const bm = isWatching(b.bangumi_id) ? 0 : 1
+    if (am !== bm) return am - bm
+    return (a.rank || Infinity) - (b.rank || Infinity)
+  })
+  return list
 }
 
 function watchStatus(id) {
@@ -451,6 +486,67 @@ onMounted(load)
 @media (max-width: 560px) {
   .anime-timeline-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.anime-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.anime-week-col {
+  border: 1px solid var(--border);
+  padding: 0.55rem;
+  min-height: 120px;
+  background: var(--bg);
+}
+
+.anime-week-col.is-today {
+  border-color: var(--orange);
+  background: rgba(232, 93, 4, 0.06);
+}
+
+.anime-week-col h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
+}
+
+.anime-week-col.is-today h3 {
+  color: var(--orange);
+}
+
+.anime-week-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.anime-week-col li.mine {
+  color: var(--orange);
+  font-weight: 500;
+}
+
+.star {
+  margin-right: 0.15rem;
+}
+
+@media (max-width: 900px) {
+  .anime-week-grid {
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .anime-week-grid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
   }
 }
 </style>
