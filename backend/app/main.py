@@ -82,6 +82,11 @@ def _ensure_schema_patches() -> None:
         with engine.begin() as conn:
             if "cover_url" not in cols:
                 conn.execute(text("ALTER TABLE posts ADD COLUMN cover_url TEXT NULL"))
+    if insp.has_table("anime_watchlist"):
+        cols = {c["name"] for c in insp.get_columns("anime_watchlist")}
+        if "status" not in cols:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE anime_watchlist ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT 'plan'"))
     _ensure_cascade_fks(insp)
     _cleanup_discarded_submissions(insp)
 

@@ -201,25 +201,45 @@
           </template>
         </div>
 
-        <div v-show="activeTab === 'posts'" class="platform-panel ink-panel tab-panel">
+        <div v-show="activeTab === 'anime'" class="platform-panel ink-panel tab-panel">
           <div class="panel-head">
-            <router-link to="/app/posts/new" class="platform-btn-primary">写文章</router-link>
+            <router-link to="/app/anime" class="platform-btn-primary">去追番表</router-link>
           </div>
-          <p v-if="postsLoading" class="muted">加载中…</p>
-          <p v-else-if="!posts.length" class="muted">暂无文章，点上方写第一篇吧。</p>
-          <ul v-else class="item-list">
-            <li v-for="post in posts" :key="post.id">
-              <div class="item-main">
-                <router-link :to="`/app/posts/${post.id}`">{{ post.title }}</router-link>
-                <span class="badge">{{ statusLabel(post.status) }}</span>
-              </div>
-              <span class="date">{{ formatDate(post.created_at) }}</span>
-              <div class="item-actions">
-                <router-link :to="`/app/posts/${post.id}/edit`" class="act">编辑</router-link>
-                <button type="button" class="act danger" @click="removePost(post)">删除</button>
-              </div>
-            </li>
-          </ul>
+          <p v-if="animeLoading" class="muted">加载中…</p>
+          <template v-else>
+            <div class="anime-group">
+              <h3 class="anime-group-title">正在追（{{ watchingList.length }}）</h3>
+              <p v-if="!watchingList.length" class="muted">还没有正在追的番。</p>
+              <ul v-else class="item-list">
+                <li v-for="a in watchingList" :key="a.bangumi_id">
+                  <div class="item-main">
+                    <span>{{ a.name_cn || a.name }}</span>
+                    <span v-if="a.air_weekday" class="badge">周{{ weekdayLabel(a.air_weekday) }}</span>
+                  </div>
+                  <div class="item-actions">
+                    <button type="button" class="act" @click="setAnimeStatus(a, 'plan')">改为想看</button>
+                    <button type="button" class="act danger" @click="removeAnime(a)">取消</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="anime-group">
+              <h3 class="anime-group-title">想看（{{ planList.length }}）</h3>
+              <p v-if="!planList.length" class="muted">还没有想看的番。</p>
+              <ul v-else class="item-list">
+                <li v-for="a in planList" :key="a.bangumi_id">
+                  <div class="item-main">
+                    <span>{{ a.name_cn || a.name }}</span>
+                    <span v-if="a.air_weekday" class="badge">周{{ weekdayLabel(a.air_weekday) }}</span>
+                  </div>
+                  <div class="item-actions">
+                    <button type="button" class="act" @click="setAnimeStatus(a, 'watching')">改为正在追</button>
+                    <button type="button" class="act danger" @click="removeAnime(a)">取消</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </template>
         </div>
 
         <div v-show="activeTab === 'threads'" class="platform-panel ink-panel tab-panel">
@@ -306,9 +326,10 @@ import { PLATFORM_ME_INK_IMAGE, PLATFORM_ME_INK_POSITION } from '../data/inkThem
 import { usePageMeta } from '../composables/usePageMeta'
 import {
   deleteForumThread,
-  deletePost,
   fetchMyForumThreads,
-  fetchMyPosts,
+  fetchAnimeWatchlist,
+  addAnimeWatchlist,
+  removeAnimeWatchlist,
   fetchNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -333,8 +354,8 @@ usePageMeta({
 const tabs = [
   { id: 'profile', label: '资料' },
   { id: 'checkin', label: '签到' },
-  { id: 'posts', label: '我的文章' },
   { id: 'threads', label: '我的帖子' },
+  { id: 'anime', label: '我的追番' },
   { id: 'messages', label: '消息' },
   { id: 'timeline', label: '专注时间线' },
 ]
@@ -344,20 +365,20 @@ const router = useRouter()
 const token = ref(getPlatformToken())
 const activeTab = ref(
   route.query.tab === 'threads' ? 'threads'
-    : route.query.tab === 'posts' ? 'posts'
+    : route.query.tab === 'anime' ? 'anime'
       : route.query.tab === 'messages' ? 'messages'
         : route.query.tab === 'checkin' ? 'checkin'
           : 'profile',
 )
 const profile = ref(null)
 const editForm = ref({ nickname: '', avatar: '' })
-const posts = ref([])
+const animeList = ref([])
 const forumThreads = ref([])
 const notifications = ref([])
 const notificationsLoading = ref(false)
 const timelineDays = ref([])
 const loading = ref(false)
-const postsLoading = ref(false)
+const animeLoading = ref(false)
 const threadsLoading = ref(false)
 const timelineLoading = ref(false)
 const error = ref('')
@@ -439,16 +460,37 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('zh-CN', { hour12: false })
 }
 
-function statusLabel(status) {
-  return status === 'published' ? '已发布' : '草稿'
+const watchingList = computed(() => animeList.value.filter((a) => a.status === 'watching'))
+const planList = computed(() => animeList.value.filter((a) => a.status !== 'watching'))
+
+function weekdayLabel(id) {
+  return { 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '日' }[id] || '?'
 }
 
-async function removePost(post) {
-  if (!window.confirm(`确定删除「${post.title}」？`)) return
+async function setAnimeStatus(a, status) {
   error.value = ''
   try {
-    await deletePost(post.id)
-    posts.value = posts.value.filter((p) => p.id !== post.id)
+    await addAnimeWatchlist({
+      bangumi_id: a.bangumi_id,
+      name: a.name,
+      name_cn: a.name_cn,
+      cover_url: a.cover_url,
+      air_weekday: a.air_weekday,
+      air_time: a.air_time,
+      status,
+    })
+    await loadAnime()
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+async function removeAnime(a) {
+  if (!window.confirm(`确定取消追番「${a.name_cn || a.name}」？`)) return
+  error.value = ''
+  try {
+    await removeAnimeWatchlist(a.bangumi_id)
+    animeList.value = animeList.value.filter((x) => x.bangumi_id !== a.bangumi_id)
   } catch (e) {
     error.value = e.message
   }
@@ -481,16 +523,16 @@ async function loadProfile() {
   }
 }
 
-async function loadPosts() {
+async function loadAnime() {
   if (!token.value) return
-  postsLoading.value = true
+  animeLoading.value = true
   try {
-    const json = await fetchMyPosts()
-    posts.value = json.data.items || []
+    const json = await fetchAnimeWatchlist()
+    animeList.value = json.data?.items || []
   } catch (e) {
     error.value = e.message
   } finally {
-    postsLoading.value = false
+    animeLoading.value = false
   }
 }
 
@@ -679,25 +721,25 @@ function logout() {
   token.value = ''
   profile.value = null
   avatarPreviewOverride.value = ''
-  posts.value = []
+  animeList.value = []
   forumThreads.value = []
   timelineDays.value = []
 }
 
 async function loadAll() {
   await loadProfile()
-  await Promise.all([loadPosts(), loadThreads(), loadTimeline(), loadCheckin()])
+  await Promise.all([loadAnime(), loadThreads(), loadTimeline(), loadCheckin()])
 }
 
 watch(() => route.query.tab, (tab) => {
-  if (tab === 'posts' || tab === 'threads' || tab === 'messages' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
+  if (tab === 'anime' || tab === 'threads' || tab === 'messages' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
     activeTab.value = tab
   }
 })
 
 watch(activeTab, (tab) => {
   if (!token.value) return
-  if (tab === 'posts') loadPosts()
+  if (tab === 'anime') loadAnime()
   if (tab === 'threads') loadThreads()
   if (tab === 'messages') loadNotifications()
   if (tab === 'timeline') loadTimeline()
@@ -800,6 +842,9 @@ input::placeholder {
   color: var(--text-muted);
   opacity: 0.85;
 }
+
+.anime-group { margin-bottom: 1.2rem; }
+.anime-group-title { margin: 0 0 0.6rem; font-size: 1rem; color: var(--ink, #333); }
 
 .item-list {
   list-style: none;

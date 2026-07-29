@@ -397,21 +397,35 @@ function insertLinePrefix(prefix) {
   })
 }
 
-function applyRichStyle(prop, val) {
-  const selection = window.getSelection()
-  if (!selection || !selection.toString().trim()) return
+
+function applyFontSize(size) {
+  const el = richRef.value
+  if (!el) return
+  el.focus()
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return
+  // execCommand('fontSize') 只认 1-7 的旧标度，直接传 '18px' 无效；
+  // 先生成 <font size="7">，再替换成带真实 CSS 字号的 <span>（可被 Markdown 往返保留）。
+  document.execCommand('styleWithCSS', false, 'false')
+  document.execCommand('fontSize', false, '7')
   document.execCommand('styleWithCSS', false, 'true')
-  document.execCommand(prop, false, val)
+  el.querySelectorAll('font[size="7"]').forEach((font) => {
+    const span = document.createElement('span')
+    span.style.fontSize = size
+    while (font.firstChild) span.appendChild(font.firstChild)
+    font.replaceWith(span)
+  })
   richDirty.value = true
   syncRichToModel()
 }
 
 function onFontSizeChange(e) {
-  if (viewMode.value === 'rich' || viewMode.value === 'split') {
-    if (viewMode.value === 'split') richRef.value?.focus()
-    applyRichStyle('fontSize', e.target.value)
-  }
+  const size = e.target.value
   e.target.value = ''
+  if (!size) return
+  if (viewMode.value === 'rich' || viewMode.value === 'split') {
+    applyFontSize(size)
+  }
 }
 
 function applyColor(color) {

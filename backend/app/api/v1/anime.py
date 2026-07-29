@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -30,6 +30,7 @@ class WatchlistAdd(BaseModel):
     cover_url: str | None = Field(default=None, max_length=512)
     air_weekday: int | None = Field(default=None, ge=1, le=7)
     air_time: str | None = Field(default=None, max_length=32)
+    status: Literal["plan", "watching"] = "plan"
 
 
 def _watchlist_item(row: AnimeWatchlist) -> dict:
@@ -41,6 +42,7 @@ def _watchlist_item(row: AnimeWatchlist) -> dict:
         "air_weekday": row.air_weekday,
         "air_time": row.air_time,
         "sort_order": row.sort_order,
+        "status": row.status or "plan",
     }
 
 
@@ -140,7 +142,12 @@ def add_watchlist(
         .first()
     )
     if exists:
-        return ok(_watchlist_item(exists), message="已在追番列表")
+        # 已存在则更新状态（想看/正在追）
+        exists.status = payload.status
+        db.commit()
+        db.refresh(exists)
+        label = "正在追" if payload.status == "watching" else "想看"
+        return ok(_watchlist_item(exists), message=f"已标记为「{label}」")
     row = AnimeWatchlist(
         user_id=current_user.id,
         bangumi_id=payload.bangumi_id,
@@ -149,11 +156,13 @@ def add_watchlist(
         cover_url=payload.cover_url,
         air_weekday=payload.air_weekday,
         air_time=payload.air_time,
+        status=payload.status,
     )
     db.add(row)
     db.commit()
     db.refresh(row)
-    return ok(_watchlist_item(row), message="已加入追番")
+    label = "正在追" if payload.status == "watching" else "想看"
+    return ok(_watchlist_item(row), message=f"已标记为「{label}」")
 
 
 @router.delete("/watchlist/{bangumi_id}", summary="取消追番")

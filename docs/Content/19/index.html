@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。">
+  <meta property="og:title" content="留言板 Twikoo 部署笔记 · Cyinc 的学习日志">
+  <meta property="og:description" content="Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。">
+  <meta property="og:url" content="https://kukukuyashi.github.io/myweb/content/19">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://kukukuyashi.github.io/myweb/img/bkm/1.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="留言板 Twikoo 部署笔记 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。">
+  <meta name="twitter:image" content="https://kukukuyashi.github.io/myweb/img/bkm/1.jfif">
+  <link rel="canonical" href="https://kukukuyashi.github.io/myweb/content/19">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>留言板 Twikoo 部署笔记 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"留言板 Twikoo 部署笔记","description":"Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。","datePublished":"2026-06-11","dateModified":"2026-06-11","author":{"@type":"Person","name":"Cyinc","url":"https://kukukuyashi.github.io/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kukukuyashi.github.io/myweb/content/19"},"url":"https://kukukuyashi.github.io/myweb/content/19","image":"https://kukukuyashi.github.io/myweb/img/bkm/1.jfif","keywords":"","articleSection":"学习","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dq7oS3m0.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>留言板 Twikoo 部署笔记</h1>
+<p class="prerender-meta">2026-06-11 · 学习</p>
+<div class="prerender-article"><p class="article-intro">Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。</p>
+<h1>留言板 Twikoo 部署笔记</h1>
+<blockquote>日期：2026-06-11  </blockquote>
+<blockquote>博客：https://kukukuyashi.github.io/myweb/  </blockquote>
+<blockquote>留言板页：https://kukukuyashi.github.io/myweb/guestbook</blockquote>
+<hr>
+<h2>介绍</h2>
+<h3>Twikoo 是什么？</h3>
+<p><strong>Twikoo</strong> 是一款<strong>开源、轻量、可自建</strong>的评论 / 留言系统，由国内开发者维护（<a href="https://twikoo.js.org/" target="_blank" rel="noopener">官方文档</a>）。名字来自「Twitter + 微博（weibo）+ 评论（comment）」的缩写组合。</p>
+<p>它不是一个完整的论坛，而是一套可以<strong>嵌入任意网页</strong>的评论组件：你在页面里放一块区域，Twikoo 会自动渲染「输入框 + 留言列表 + 回复、点赞等交互」。</p>
+<h3>用来干什么？</h3>
+<p>常见用途：</p>
+<table><thead><tr>
+<th>场景</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>博客留言板</strong></td>
+<td>单独一页，访客随便聊、打招呼、提建议（本博客 <code>/guestbook</code> 就是这样）</td>
+</tr>
+<tr>
+<td><strong>文章评论</strong></td>
+<td>挂在每篇文章下面，针对正文讨论</td>
+</tr>
+<tr>
+<td><strong>静态站互动</strong></td>
+<td>GitHub Pages、Vite、Hexo、Hugo 等没有后端的站点，也能有评论功能</td>
+</tr>
+</tbody></table>
+<p>本博客是 <strong>Vue 静态站 + GitHub Pages</strong>，本身不能存留言，所以需要 Twikoo 提供「后端 API + 数据库」。</p>
+<h3>和别的评论方案比</h3>
+<table><thead><tr>
+<th>方案</th>
+<th>特点</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Disqus</strong></td>
+<td>省事，但数据在第三方、广告多、国内慢</td>
+</tr>
+<tr>
+<td><strong>Gitalk / Giscus</strong></td>
+<td>评论存在 GitHub Issues，适合技术博客，非 GitHub 用户难用</td>
+</tr>
+<tr>
+<td><strong>Twikoo</strong></td>
+<td>数据在自己 MongoDB 里，界面简洁，国内博主用得较多，免费云函数能跑</td>
+</tr>
+</tbody></table>
+<p>选 Twikoo 的原因：<strong>留言数据自己掌控</strong>，不依赖 GitHub 账号，免费额度对个人博客够用。</p>
+<h3>Netlify 云函数是什么？</h3>
+<p><strong>Netlify</strong> 是一个网站托管平台（类似「帮你把代码跑在服务器上」的服务）。<strong>Netlify Functions（云函数）</strong> 是它提供的一种 <strong>Serverless 后端</strong>：你不用自己买 VPS、装 Node.js，只要把 Twikoo 的后端代码部署上去，Netlify 会在有人访问时<strong>临时启动一段程序</strong>来处理请求。</p>
+<p>可以把它理解成：</p>
+<table><thead><tr>
+<th>概念</th>
+<th>通俗理解</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>云函数</strong></td>
+<td>按需运行的一小段后端代码，像「按一下才工作的服务员」</td>
+</tr>
+<tr>
+<td><strong>Netlify</strong></td>
+<td>提供运行环境的平台，本笔记里负责跑 Twikoo 后端</td>
+</tr>
+<tr>
+<td><strong>envId</strong></td>
+<td>云函数的网址，前端 Twikoo JS 往这个地址发请求</td>
+</tr>
+</tbody></table>
+<p><strong>用来干什么？</strong></p>
+<ul>
+<li>接收留言板发来的「发评论、拉评论列表」等请求  </li>
+<li>校验内容、写入数据库、返回结果给浏览器  </li>
+<li>本项目的 envId：<code>https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo</code></li>
+</ul>
+<p><strong>为什么用 Netlify 而不是 Hugging Face？</strong></p>
+<p>本次部署中 Hugging Face 免费 Docker Space 经常 <strong>Paused / Preparing / 503</strong>；Netlify 免费额度对个人博客留言够用，部署 twikoo-netlify 仓库即可，<strong>相对稳定</strong>。</p>
+<h3>MongoDB Atlas 是什么？</h3>
+<p><strong>MongoDB</strong> 是一种 <strong>NoSQL 数据库</strong>，数据以「文档」（类似 JSON）形式存储，适合存评论这种结构不固定的内容。<strong>MongoDB Atlas</strong> 是 MongoDB 官方提供的 <strong>云端托管服务</strong>，有免费套餐（M0），不用在自己电脑上装数据库。</p>
+<p>可以把它理解成：</p>
+<table><thead><tr>
+<th>概念</th>
+<th>通俗理解</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>MongoDB</strong></td>
+<td>专门存数据的「仓库」，留言文字、昵称、时间都放这里</td>
+</tr>
+<tr>
+<td><strong>Atlas</strong></td>
+<td>MongoDB 的云版本，注册账号就能用，不用自己维护服务器</td>
+</tr>
+<tr>
+<td><strong>MONGODB_URI</strong></td>
+<td>连接串，告诉 Twikoo 后端「数据库在哪、用户名密码是什么」</td>
+</tr>
+</tbody></table>
+<p><strong>用来干什么？</strong></p>
+<ul>
+<li><strong>持久化保存</strong>所有留言——关掉网页、重启云函数，数据仍在  </li>
+<li>Twikoo 后端通过 <code>MONGODB_URI</code> 连接 Atlas，读写 <code>comment</code> 等集合（表）  </li>
+<li>本博客不直接连 MongoDB，只有 Netlify 上的 Twikoo 云函数会连</li>
+</ul>
+<p><strong>免费够用吗？</strong></p>
+<p>个人博客留言量很小，<strong>M0 免费集群</strong>足够；注意在 Atlas 里配置 <strong>IP 白名单 <code>0.0.0.0/0</code></strong>，否则云函数连不上库。</p>
+<h3>三者在本项目里怎么配合？</h3>
+<p>一句话：<strong>网页只负责显示；Netlify 负责处理请求；MongoDB 负责存数据。</strong></p>
+<table><thead><tr>
+<th>角色</th>
+<th>技术</th>
+<th>在本项目中的地址 / 配置</th>
+</tr></thead><tbody>
+<tr>
+<td>前端展示</td>
+<td>Twikoo JS + <code>Guestbook.vue</code></td>
+<td>博客 <code>/guestbook</code> 页</td>
+</tr>
+<tr>
+<td>后端逻辑</td>
+<td>Netlify Functions</td>
+<td>envId → <code>…netlify.app/.netlify/functions/twikoo</code></td>
+</tr>
+<tr>
+<td>数据存储</td>
+<td>MongoDB Atlas</td>
+<td>Netlify 环境变量 <code>MONGODB_URI</code></td>
+</tr>
+</tbody></table>
+<pre><code class="language-javascript">
+访客在留言板输入内容
+    → 浏览器里的 Twikoo 前端 JS 发送请求
+    → Netlify 上的 Twikoo 云函数处理
+    → MongoDB Atlas 保存 / 读取留言
+    → 页面展示评论列表
+</code></pre>
+<p>博客代码里只需要：</p>
+<ol>
+<li>一个 <code>&lt;div id="tcomment"&gt;</code> 容器（在 <code>Guestbook.vue</code>）</li>
+<li>加载 Twikoo 的 JS，并填入 <strong>envId</strong>（后端地址）</li>
+</ol>
+<p>后面章节记录的是：<strong>MongoDB、Netlify、博客构建</strong> 怎么一步步配通。</p>
+<hr>
+<h2>一、今天做了什么（总览）</h2>
+<p>给个人博客接入了 <strong>Twikoo 评论/留言系统</strong>，访客可以在留言板页发表评论，数据存在 <strong>MongoDB Atlas</strong> 云数据库里。</p>
+<p>整体分三层：</p>
+<pre><code class="language-javascript">
+访客浏览器
+    ↓ 加载 Twikoo 前端 JS
+博客 Guestbook.vue（GitHub Pages 静态站）
+    ↓ 请求云函数 API
+Twikoo 后端（Netlify Functions）
+    ↓ 读写数据
+MongoDB Atlas（存留言内容）
+</code></pre>
+<p><strong>最终方案：Netlify + MongoDB Atlas + 博客 <code>.env.local</code></strong></p>
+<p>中间尝试过 Hugging Face Docker Space，因免费实例不稳定（Paused / Preparing / 503）放弃。</p>
+<p><strong>Git 已 push</strong>，相关 commit：</p>
+<table><thead><tr>
+<th>Commit</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td><code>217d348</code></td>
+<td>首次把 Twikoo envId 打进 GitHub Pages 构建</td>
+</tr>
+<tr>
+<td><code>42e5b02</code></td>
+<td>留言板加载状态、去掉「还没做好」占位文案</td>
+</tr>
+<tr>
+<td><code>0b90c0b</code></td>
+<td>从 Hugging Face 切换到 Netlify 后端</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>二、Twikoo 的三部分（技术组成）</h2>
+<p>上面「介绍」说了整体用途，这里补充三个具体模块：</p>
+<table><thead><tr>
+<th>模块</th>
+<th>是什么</th>
+<th>在本项目里</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>前端</strong></td>
+<td><code>twikoo.all.min.js</code>，从 CDN 加载</td>
+<td><code>Guestbook.vue</code> 里动态引入</td>
+</tr>
+<tr>
+<td><strong>后端（云函数）</strong></td>
+<td>处理发评论、拉列表、管理员操作</td>
+<td>Netlify Functions</td>
+</tr>
+<tr>
+<td><strong>数据库</strong></td>
+<td>存留言正文、昵称、时间等</td>
+<td>MongoDB Atlas 免费集群</td>
+</tr>
+</tbody></table>
+<p>三者通过 <strong>envId</strong>（后端 URL）串联；数据库通过 <strong>MONGODB_URI</strong>（连接串）与后端相连。</p>
+<p>官方文档：https://twikoo.js.org/</p>
+<hr>
+<h2>三、MongoDB Atlas 配置（数据库）</h2>
+<h3>3.1 注册与建集群</h3>
+<ol>
+<li>打开 https://cloud.mongodb.com/ 注册</li>
+<li><strong>Build a Database</strong> → 选 <strong>M0 FREE</strong>（免费）</li>
+<li>区域选离国内近的（如 Singapore）</li>
+<li>集群名默认 <code>Cluster0</code> 即可</li>
+</ol>
+<blockquote>若已有 Cluster0，不用重复建，直接在 Connect 里拿连接信息。</blockquote>
+<h3>3.2 创建数据库用户</h3>
+<p><strong>Security → Database Access → Add New Database User</strong></p>
+<table><thead><tr>
+<th>项</th>
+<th>建议</th>
+</tr></thead><tbody>
+<tr>
+<td>Authentication</td>
+<td>Password</td>
+</tr>
+<tr>
+<td>Username</td>
+<td><code>twikoo2</code>（任意英文名）</td>
+</tr>
+<tr>
+<td>Password</td>
+<td><strong>手动设纯字母数字</strong>，如 <code>TwikooPass2026</code>（避免特殊字符要 URL 编码）</td>
+</tr>
+<tr>
+<td>权限</td>
+<td><strong>Built-in Role</strong> → <strong>Read and write to any database</strong> 或 <strong>Atlas admin</strong></td>
+</tr>
+</tbody></table>
+<h3>3.3 IP 白名单</h3>
+<p><strong>Security → Network Access → Add IP Address</strong></p>
+<ul>
+<li>选 <strong>Allow Access from Anywhere</strong> → <code>0.0.0.0/0</code></li>
+<li>Twikoo 云函数 IP 不固定，必须放行所有 IP（仍需要用户名+密码才能连库）</li>
+</ul>
+<h3>3.4 连接字符串（MONGODB_URI）</h3>
+<p><strong>Database → Clusters → Cluster0 → Connect → Drivers → Node.js</strong></p>
+<p>Atlas 会给类似：</p>
+<pre><code class="language-javascript">
+mongodb+srv://twikoo2:&lt;db_password&gt;@cluster0.atlgggo.mongodb.net/?appName=Cluster0
+</code></pre>
+<p><strong>重要：</strong></p>
+<ul>
+<li><code>&lt;db_password&gt;</code> 是占位符，要换成真实密码</li>
+<li><strong>不要保留尖括号</strong> <code>&lt;</code> <code>&gt;</code></li>
+<li>正确示例：</li>
+</ul>
+<pre><code class="language-javascript">
+mongodb+srv://twikoo2:TwikooPass2026@cluster0.atlgggo.mongodb.net/?retryWrites=true&amp;w=majority
+</code></pre>
+<h3>3.5 常见错误</h3>
+<table><thead><tr>
+<th>报错</th>
+<th>原因</th>
+</tr></thead><tbody>
+<tr>
+<td><code>bad auth : authentication failed</code></td>
+<td>密码错、用户名错、或连接串里还留着 <code>&lt;db_password&gt;</code></td>
+</tr>
+<tr>
+<td>连不上</td>
+<td>没加 <code>0.0.0.0/0</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>四、Hugging Face 尝试（已放弃，作踩坑记录）</h2>
+<h3>4.1 做法</h3>
+<ol>
+<li><strong>New Space</strong> → SDK 选 <strong>Docker</strong> + <strong>Blank</strong> + CPU Free</li>
+<li><strong>Settings → Secret</strong>：<code>MONGODB_URI</code> = 上面连接串</li>
+<li><strong>Files → Dockerfile</strong>：</li>
+</ol>
+<pre><code class="language-dockerfile">
+FROM imaegoo/twikoo
+ENV TWIKOO_PORT 7860
+EXPOSE 7860
+</code></pre>
+<ol>
+<li>envId 填 Direct URL：<code>https://用户名-space名.hf.space</code></li>
+</ol>
+<h3>4.2 遇到的问题</h3>
+<table><thead><tr>
+<th>现象</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>选成 Gradio SDK</td>
+<td>会要求 <code>app.py</code>，Twikoo 跑不起来</td>
+</tr>
+<tr>
+<td><code>bad auth</code></td>
+<td>密码/尖括号问题（后来 v3 曾成功 <code>Connected to database</code>）</td>
+</tr>
+<tr>
+<td><strong>Preparing Space 一直转</strong></td>
+<td>免费 Docker Space 冷启动极慢或失败</td>
+</tr>
+<tr>
+<td><strong>Paused</strong></td>
+<td>不用就自动休眠</td>
+</tr>
+<tr>
+<td>Restart / Factory reboot → <strong>503</strong></td>
+<td>容器未就绪或反复重启</td>
+</tr>
+</tbody></table>
+<p><strong>结论：HF 免费 Docker 不适合当 Twikoo 长期在线后端。</strong></p>
+<hr>
+<h2>五、Netlify 部署（最终方案 ✅）</h2>
+<p>文档：https://twikoo.js.org/backend.html#netlify-部署</p>
+<h3>5.1 Fork 仓库</h3>
+<p>https://github.com/twikoojs/twikoo-netlify → <strong>Fork</strong> 到自己 GitHub（如 <code>kukukuyashi/twikoo-netlify</code>）</p>
+<h3>5.2 Netlify 导入</h3>
+<ol>
+<li>https://app.netlify.com/ → <strong>Add new project → Import from Git → GitHub</strong></li>
+<li>授权时 <strong>仅选择存储库</strong> → 勾选 <code>twikoo-netlify</code></li>
+<li><strong>Deploy site</strong>（先部署建站点）</li>
+</ol>
+<h3>5.3 环境变量（在 Netlify，不在 GitHub）</h3>
+<p><strong>Project configuration → Environment variables → Add a variable</strong></p>
+<table><thead><tr>
+<th>Key</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>MONGODB_URI</code></td>
+<td>MongoDB 完整连接串（无尖括号）</td>
+</tr>
+</tbody></table>
+<p>保存后：<strong>Deploys → Trigger deploy → Deploy site</strong>（必须 Redeploy 变量才生效）</p>
+<h3>5.4 站点名</h3>
+<p><strong>Domain management → Edit site name</strong> → 设为 <code>cyinc-twikoo</code></p>
+<p>站点首页：https://cyinc-twikoo.netlify.app  </p>
+<p>应显示：<strong>Twikoo 云函数运行正常</strong></p>
+<h3>5.5 envId（给博客用）</h3>
+<p>Netlify 的 envId <strong>不是</strong>站点首页，要带函数路径：</p>
+<pre><code class="language-javascript">
+https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
+</code></pre>
+<hr>
+<h2>六、博客端接入</h2>
+<h3>6.1 相关文件</h3>
+<table><thead><tr>
+<th>文件</th>
+<th>作用</th>
+</tr></thead><tbody>
+<tr>
+<td><code>src/views/Guestbook.vue</code></td>
+<td>留言板页面，加载 Twikoo JS 并 <code>init</code></td>
+</tr>
+<tr>
+<td><code>src/router/index.js</code></td>
+<td>路由 <code>/guestbook</code></td>
+</tr>
+<tr>
+<td><code>.env.local</code></td>
+<td>本地环境变量（<strong>不提交 Git</strong>）</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>模板，可提交</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td><code>npm run build</code> 产物，GitHub Pages 用</td>
+</tr>
+</tbody></table>
+<h3>6.2 环境变量</h3>
+<p>项目根目录 <code>.env.local</code>：</p>
+<pre><code class="language-env">
+VITE_TWIKOO_ENV_ID=https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
+</code></pre>
+<p>Vite 会把 <code>VITE_</code> 前缀的变量打进构建产物，所以 <strong>build 前必须有 <code>.env.local</code></strong>。</p>
+<h3>6.3 Guestbook.vue 逻辑简述</h3>
+<ol>
+<li>页面挂载时动态加载 <code>https://cdn.jsdelivr.net/npm/twikoo@1.6.32/dist/twikoo.all.min.js</code></li>
+<li>读取 <code>import.meta.env.VITE_TWIKOO_ENV_ID</code></li>
+<li>调用 <code>window.twikoo.init({ envId, el: '#tcomment', lang: 'zh-CN' })</code></li>
+<li><code>#tcomment</code> 容器内渲染评论框</li>
+<li>有 loading / error 提示（15 秒内未渲染出子元素则报 error）</li>
+</ol>
+<h3>6.4 构建与发布</h3>
+<pre><code class="language-bash">
+npm run build          # 输出到 docs/，base 为 /myweb/
+git add docs/
+git commit -m "Enable Twikoo guestbook"
+git push origin main
+</code></pre>
+<p>GitHub Pages 从 <code>main</code> 分支的 <code>docs/</code> 目录发布。</p>
+<h3>6.5 本地开发</h3>
+<pre><code class="language-bash">
+npm run dev
+# http://localhost:5173/myweb/guestbook
+</code></pre>
+<hr>
+<h2>七、管理员设置</h2>
+<ol>
+<li>打开留言板，等评论框出现</li>
+<li>点击评论框右下角 <strong>齿轮图标</strong></li>
+<li>首次会要求设置 <strong>管理员密码</strong> 和 <strong>暗号</strong></li>
+<li>之后可审核、回复、删除留言</li>
+</ol>
+<p>Netlify 版支持管理面板；HF 版邮件功能受限。</p>
+<hr>
+<h2>八、安全相关（同一天其它事项）</h2>
+<h3>8.1 GitHub Token</h3>
+<ul>
+<li>曾把 <code>ghp_</code> Token 写在 <code>git remote</code> URL 里 → <strong>已在 GitHub 撤销</strong></li>
+<li>remote 已改为：<code>https://github.com/kukukuyashi/myweb.git</code></li>
+<li><strong>以后</strong>：HTTPS + 凭据管理器，或 SSH，不要把 Token 写进 URL</li>
+</ul>
+<h3>8.2 密钥不要进 Git</h3>
+<ul>
+<li><code>.env.local</code> 已在 <code>.gitignore</code></li>
+<li><code>MONGODB_URI</code> 只放在 Netlify Environment variables，不要写进仓库</li>
+</ul>
+<hr>
+<h2>九、故障排查速查</h2>
+<table><thead><tr>
+<th>现象</th>
+<th>检查</th>
+</tr></thead><tbody>
+<tr>
+<td>留言板空白</td>
+<td><code>.env.local</code> 有无 envId；是否 <code>npm run build</code> 后 push</td>
+</tr>
+<tr>
+<td>「评论服务暂不可用」</td>
+<td>Netlify 是否 Published；打开 envId URL 是否「运行正常」</td>
+</tr>
+<tr>
+<td>发评论失败</td>
+<td>F12 Console / Network；MongoDB IP、MONGODB_URI</td>
+</tr>
+<tr>
+<td>线上还是旧版</td>
+<td>Ctrl+Shift+R；等 GitHub Pages 1～2 分钟</td>
+</tr>
+<tr>
+<td>HF Preparing / 503</td>
+<td>换 Netlify，别死磕 HF</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>十、架构图（最终）</h2>
+<pre><code class="language-javascript">
+┌─────────────────────────────────────────────────────────┐
+│  GitHub Pages (静态)                                     │
+│  kukukuyashi.github.io/myweb/guestbook                  │
+│  Guestbook.vue + twikoo.js (CDN)                        │
+└───────────────────────────┬─────────────────────────────┘
+                            │ envId
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│  Netlify Functions                                       │
+│  cyinc-twikoo.netlify.app/.netlify/functions/twikoo     │
+│  (fork: twikoo-netlify)                                  │
+└───────────────────────────┬─────────────────────────────┘
+                            │ MONGODB_URI
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│  MongoDB Atlas (M0 Free)                                 │
+│  Cluster0 + 用户 twikoo2                                 │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>十一、以后维护</h2>
+<h3>换 Twikoo 后端地址</h3>
+<ol>
+<li>改 <code>.env.local</code> 里的 <code>VITE_TWIKOO_ENV_ID</code></li>
+<li><code>npm run build</code> → push <code>docs/</code></li>
+</ol>
+<h3>换 MongoDB 密码</h3>
+<ol>
+<li>Atlas 改 Database User 密码</li>
+<li>Netlify 更新 <code>MONGODB_URI</code></li>
+<li>Trigger redeploy</li>
+</ol>
+<h3>备份留言</h3>
+<p>数据在 MongoDB Atlas → <strong>Database → Browse Collections</strong></p>
+<hr>
+<h2>十二、参考链接</h2>
+<ul>
+<li>Twikoo 文档：https://twikoo.js.org/</li>
+<li>Twikoo Netlify 部署：https://twikoo.js.org/backend.html#netlify-部署</li>
+<li>twikoo-netlify 仓库：https://github.com/twikoojs/twikoo-netlify</li>
+<li>MongoDB Atlas：https://cloud.mongodb.com/</li>
+<li>博客仓库：https://github.com/kukukuyashi/myweb</li>
+</ul>
+<hr>
+<h2>十三、一句话总结</h2>
+<blockquote>留言板 = 博客里的 Twikoo 前端 + Netlify 云函数 + MongoDB 存数据。  </blockquote>
+<blockquote>今天踩坑主要在 HF 不稳定和 MongoDB 连接串密码格式（<strong>尖括号不能留</strong>）。  </blockquote>
+<blockquote>最终 Netlify 一次部署成功，博客 build 后 push 即可上线。</blockquote>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

@@ -18,6 +18,7 @@ class AnimeWatchlist(Base):
     cover_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     air_weekday: Mapped[int | None] = mapped_column(Integer, nullable=True)
     air_time: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="plan", server_default="plan")
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 

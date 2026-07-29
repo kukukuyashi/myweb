@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Git 与 GitHub入门笔记 — 学习笔记。">
+  <meta property="og:title" content="Git 与 GitHub入门笔记 · Cyinc 的学习日志">
+  <meta property="og:description" content="Git 与 GitHub入门笔记 — 学习笔记。">
+  <meta property="og:url" content="https://kukukuyashi.github.io/myweb/content/29">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://kukukuyashi.github.io/myweb/img/关于/F0xVRaEakAAKgCw.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Git 与 GitHub入门笔记 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="Git 与 GitHub入门笔记 — 学习笔记。">
+  <meta name="twitter:image" content="https://kukukuyashi.github.io/myweb/img/关于/F0xVRaEakAAKgCw.jfif">
+  <link rel="canonical" href="https://kukukuyashi.github.io/myweb/content/29">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>Git 与 GitHub入门笔记 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Git 与 GitHub入门笔记","description":"Git 与 GitHub入门笔记 — 学习笔记。","datePublished":"2026-07-01","dateModified":"2026-07-01","author":{"@type":"Person","name":"Cyinc","url":"https://kukukuyashi.github.io/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kukukuyashi.github.io/myweb/content/29"},"url":"https://kukukuyashi.github.io/myweb/content/29","image":"https://kukukuyashi.github.io/myweb/img/关于/F0xVRaEakAAKgCw.jfif","keywords":"学习, git, github, 多人项目协助, 项目版本处理","articleSection":"部署","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dq7oS3m0.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>Git 与 GitHub入门笔记</h1>
+<p class="prerender-meta">2026-07-01 · 部署</p>
+<div class="prerender-article"><p class="article-intro">Git 与 GitHub入门笔记 — 学习笔记。</p>
+<h1>Git 与 GitHub 入门笔记</h1>
+<blockquote>面向初学者的版本控制学习笔记。专有名词首次出现时会简要解释。</blockquote>
+<hr>
+<h2>目录</h2>
+<ol>
+<li><a href="#1-git-与-github-是什么" target="_blank" rel="noopener">Git 与 GitHub 是什么</a></li>
+<li><a href="#2-commit-提交" target="_blank" rel="noopener">Commit 提交</a></li>
+<li><a href="#3-branch-分支" target="_blank" rel="noopener">Branch 分支</a></li>
+<li><a href="#4-worktree-与-merge-conflict" target="_blank" rel="noopener">Worktree 与 Merge Conflict</a></li>
+<li><a href="#5-git-分区四个区域" target="_blank" rel="noopener">Git 分区（四个区域）</a></li>
+<li><a href="#6-远端仓库实战以本项目为例" target="_blank" rel="noopener">远端仓库实战（以本项目为例）</a></li>
+<li><a href="#7-github-多人协作与进阶命令" target="_blank" rel="noopener">GitHub 多人协作与进阶命令</a></li>
+</ol>
+<hr>
+<h2>1. Git 与 GitHub 是什么</h2>
+<h3>Git</h3>
+<p><strong>Git</strong> 是一个<strong>分布式版本控制系统</strong>（Version Control System, VCS）。</p>
+<p>通俗理解：它像给代码做的「时光机 + 存档系统」——每次保存（提交）都会留下一个快照，你可以随时回到任意历史版本，对比差异，多人并行修改而不互相覆盖。</p>
+<table><thead><tr>
+<th>概念</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>版本控制</strong></td>
+<td>记录文件每次变更的历史，支持回退、对比、合并</td>
+</tr>
+<tr>
+<td><strong>分布式</strong></td>
+<td>每个开发者本地都有完整仓库副本，不依赖单一中央服务器也能工作</td>
+</tr>
+<tr>
+<td><strong>仓库（Repository / Repo）</strong></td>
+<td>存放项目代码及全部历史记录的目录，含隐藏的 <code>.git</code> 文件夹</td>
+</tr>
+</tbody></table>
+<h3>GitHub</h3>
+<p><strong>GitHub</strong> 是一个基于 Git 的<strong>代码托管平台</strong>（Remote Hosting Platform）。</p>
+<table><thead><tr>
+<th>对比</th>
+<th>Git</th>
+<th>GitHub</th>
+</tr></thead><tbody>
+<tr>
+<td>本质</td>
+<td>工具 / 软件</td>
+<td>网站 / 服务</td>
+</tr>
+<tr>
+<td>作用</td>
+<td>在本地管理版本</td>
+<td>在云端存储、分享、协作</td>
+</tr>
+<tr>
+<td>关系</td>
+<td>引擎</td>
+<td>停车场 + 协作平台</td>
+</tr>
+</tbody></table>
+<p>GitHub 还提供：Pull Request（代码审查）、Issues（任务跟踪）、Actions（CI/CD 自动化）、Pages（静态网站托管）等。</p>
+<hr>
+<h2>2. Commit 提交</h2>
+<h3>什么是 Commit</h3>
+<p><strong>Commit（提交）</strong> 是一次「快照」，把暂存区的改动永久写入本地仓库历史。</p>
+<p>每次提交包含：</p>
+<ul>
+<li><strong>Commit ID（哈希值 / SHA-1）</strong>：如 <code>a3f2c1d...</code>，40 位十六进制字符串，全局唯一标识该提交</li>
+<li><strong>作者、时间</strong></li>
+<li><strong>提交说明（Commit Message）</strong>：描述「为什么改」，而非仅「改了什么」</li>
+<li><strong>父提交指针</strong>：形成历史链</li>
+</ul>
+<pre><code class="language-bash">
+git log --oneline    # 查看简洁提交历史
+git show &lt;commit-id&gt; # 查看某次提交详情
+</code></pre>
+<h3>三种「撤销/回退」方式对比</h3>
+<p>这是初学者最容易混淆的部分：</p>
+<table><thead><tr>
+<th>操作</th>
+<th>命令示例</th>
+<th>影响范围</th>
+<th>是否改历史</th>
+<th>已 push 后是否安全</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Discard（丢弃）</strong></td>
+<td><code>git restore &lt;file&gt;</code> 或 <code>git checkout -- &lt;file&gt;</code></td>
+<td>仅<strong>工作区</strong>未暂存的修改</td>
+<td>否</td>
+<td>安全（仅本地未提交内容）</td>
+</tr>
+<tr>
+<td><strong>Reset（重置）</strong></td>
+<td><code>git reset --soft/mixed/hard &lt;commit&gt;</code></td>
+<td>移动 <strong>HEAD</strong> 指针，可选改工作区/暂存区</td>
+<td><strong>是</strong>（改写本地历史）</td>
+<td><strong>危险</strong>（若已 push，需 force push）</td>
+</tr>
+<tr>
+<td><strong>Revert（还原）</strong></td>
+<td><code>git revert &lt;commit&gt;</code></td>
+<td>新建一个<strong>反向提交</strong>来抵消某次提交</td>
+<td>否（追加新提交）</td>
+<td><strong>安全</strong>（适合已共享的历史）</td>
+</tr>
+</tbody></table>
+<h4>Discard — 丢弃未提交的本地修改</h4>
+<p><strong>行为</strong>：把文件从最后一次 commit 的状态恢复回来，<strong>未 commit 的改动会丢失</strong>。</p>
+<pre><code class="language-bash">
+git restore src/data/posts.js          # 丢弃工作区修改
+git restore --staged src/data/posts.js # 取消暂存（保留工作区修改）
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>改错了文件，还没 <code>git add</code>，想恢复原样</li>
+<li>误 <code>git add</code>，想从暂存区撤出</li>
+</ul>
+<h4>Reset — 重置到某个提交</h4>
+<p><strong>行为</strong>：把当前分支的 HEAD 移到指定 commit，之后的历史在本地「消失」（ reflog 可找回一段时间）。</p>
+<p>三种模式：</p>
+<table><thead><tr>
+<th>模式</th>
+<th>HEAD</th>
+<th>暂存区</th>
+<th>工作区</th>
+</tr></thead><tbody>
+<tr>
+<td><code>--soft</code></td>
+<td>移动</td>
+<td>保留</td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>--mixed</code>（默认）</td>
+<td>移动</td>
+<td>清空</td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>--hard</code></td>
+<td>移动</td>
+<td>清空</td>
+<td><strong>清空</strong></td>
+</tr>
+</tbody></table>
+<pre><code class="language-bash">
+git reset --hard HEAD~1   # 回退 1 个提交，工作区也清空（慎用！）
+git reset --soft HEAD~1   # 回退提交，改动保留在暂存区
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>本地刚 commit，发现 message 写错或漏文件 → <code>--soft</code> 后重新提交</li>
+<li>本地多个 commit 想合并成一个 → 交互式 rebase 或 soft reset</li>
+<li><strong>仅限本地、未 push 的历史整理</strong></li>
+</ul>
+<p>⚠️ <strong>不要</strong>对已经 push 到远端的 commit 做 <code>--hard</code> reset，除非团队明确同意并使用 force push。</p>
+<h4>Revert — 反向提交</h4>
+<p><strong>行为</strong>：<strong>不删除历史</strong>，而是创建一个新 commit，内容与指定 commit 相反（相当于「撤销那次提交的改动」）。</p>
+<pre><code class="language-bash">
+git revert abc1234
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>某次有问题的 commit <strong>已经 push</strong> 到 main</li>
+<li>生产环境需要撤销某功能，但保留完整审计历史</li>
+<li>开源项目 / 团队协作的标准做法</li>
+</ul>
+<h3>记忆口诀</h3>
+<pre><code class="language-javascript">
+Discard  →  还没 commit，扔掉本地改动
+Reset    →  改本地历史，像时光机倒带（未 push 用）
+Revert   →  不改历史，用新提交「对冲」旧提交（已 push 用）
+</code></pre>
+<hr>
+<h2>3. Branch 分支</h2>
+<h3>什么是 Branch</h3>
+<p><strong>Branch（分支）</strong> 是提交历史的一条独立线。默认主分支通常叫 <code>main</code>（旧项目可能是 <code>master</code>）。</p>
+<pre><code class="language-javascript">
+main:     A --- B --- C --- D
+                \
+feature:         E --- F
+</code></pre>
+<p>分支让多人/多功能并行开发，互不干扰，最后再通过 <strong>merge（合并）</strong> 汇合。</p>
+<h3>常用命令</h3>
+<pre><code class="language-bash">
+git branch              # 列出本地分支
+git branch feature-x    # 创建分支
+git checkout feature-x  # 切换分支
+git switch -c feature-x # 创建并切换（推荐）
+git merge feature-x     # 把 feature-x 合并进当前分支
+git branch -d feature-x # 删除已合并的分支
+</code></pre>
+<h3>分支策略（简单版）</h3>
+<table><thead><tr>
+<th>分支</th>
+<th>用途</th>
+</tr></thead><tbody>
+<tr>
+<td><code>main</code></td>
+<td>稳定、可部署的代码</td>
+</tr>
+<tr>
+<td><code>feature/xxx</code></td>
+<td>新功能开发</td>
+</tr>
+<tr>
+<td><code>fix/xxx</code></td>
+<td>Bug 修复</td>
+</tr>
+<tr>
+<td><code>gh-pages</code></td>
+<td>本项目 GitHub Pages 部署分支（由 Actions 自动维护）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. Worktree 与 Merge Conflict</h2>
+<h3>Worktree 是什么</h3>
+<p><strong>Worktree（工作树）</strong> 在 Git 里有两层含义，初学者先掌握第一层：</p>
+<ol>
+<li><strong>日常含义</strong>：你正在编辑的文件所在目录 = <strong>工作区</strong>（Working Directory），即项目文件夹里肉眼可见的文件</li>
+<li><strong>进阶命令 <code>git worktree</code></strong>：在同一仓库下，<strong>同时检出多个分支到不同目录</strong>，避免频繁 <code>checkout</code> 切换</li>
+</ol>
+<pre><code class="language-bash">
+# 进阶：在同一 repo 开第二个工作目录
+git worktree add ../gerenboke-hotfix hotfix-branch
+</code></pre>
+<p>适用场景：main 上在开发大功能，突然要修线上 bug，不想 stash 当前改动，可以另开一个目录处理 hotfix。</p>
+<h3>Merge Conflict（合并冲突）</h3>
+<p><strong>Merge Conflict（合并冲突）</strong> 发生在：两个分支修改了<strong>同一文件的同一区域</strong>，Git 无法自动决定保留哪边。</p>
+<p>冲突标记示例：</p>
+<pre><code class="language-javascript">
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+const title = '版本 A'
+=======
+const title = '版本 B'
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-x
+</code></pre>
+<h3>解决冲突步骤</h3>
+<ol>
+<li><code>git merge feature-x</code> 或 <code>git pull</code> 后提示冲突</li>
+<li>打开冲突文件，手动编辑，删除 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>、<code>=======</code>、<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> 标记</li>
+<li><code>git add &lt;已解决文件&gt;</code></li>
+<li><code>git commit</code> 完成合并提交</li>
+</ol>
+<h3>减少冲突的建议</h3>
+<ul>
+<li>小步提交、频繁 pull / rebase</li>
+<li>功能按模块分工，少改同一文件</li>
+<li>合并前先 <code>git fetch</code> + 本地测试</li>
+</ul>
+<hr>
+<h2>5. Git 分区（四个区域）</h2>
+<p>Git 的核心是理解<strong>数据在四个区域之间如何流动</strong>：</p>
+<pre><code class="language-javascript">
+┌─────────────┐    git add     ┌─────────────┐   git commit   ┌─────────────┐
+│  工作区      │  ──────────►  │  暂存区      │  ──────────►  │  本地仓库    │
+│ Working Dir │               │ Staging     │               │ Local Repo  │
+│ (可见文件)   │  ◄──────────  │ (Index)     │               │ (.git)      │
+└─────────────┘  git restore  └─────────────┘               └──────┬──────┘
+                                                                  │
+                                                     git push     │  git pull / fetch
+                                                                  ▼
+                                                           ┌─────────────┐
+                                                           │  远程仓库    │
+                                                           │ Remote Repo │
+                                                           │ (GitHub)    │
+                                                           └─────────────┘
+</code></pre>
+<table><thead><tr>
+<th>区域</th>
+<th>英文</th>
+<th>说明</th>
+<th>对应命令</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>工作区</strong></td>
+<td>Working Directory</td>
+<td>磁盘上正在编辑的文件</td>
+<td>直接改文件</td>
+</tr>
+<tr>
+<td><strong>暂存区</strong></td>
+<td>Staging Area / Index</td>
+<td>下次 commit 要包含的内容</td>
+<td><code>git add</code> / <code>git restore --staged</code></td>
+</tr>
+<tr>
+<td><strong>本地仓库</strong></td>
+<td>Local Repository</td>
+<td><code>.git</code> 内的完整历史</td>
+<td><code>git commit</code> / <code>git log</code></td>
+</tr>
+<tr>
+<td><strong>远程仓库</strong></td>
+<td>Remote Repository</td>
+<td>GitHub 上的副本</td>
+<td><code>git push</code> / <code>git pull</code> / <code>git fetch</code></td>
+</tr>
+</tbody></table>
+<h3>关键关系</h3>
+<ul>
+<li><strong><code>git status</code></strong>：查看工作区 vs 暂存区 vs 最后一次 commit 的差异</li>
+<li><strong><code>git add</code></strong>：工作区 → 暂存区（「打包待提交」）</li>
+<li><strong><code>git commit</code></strong>：暂存区 → 本地仓库（「正式存档」）</li>
+<li><strong><code>git push</code></strong>：本地仓库 → 远程仓库（「上传到 GitHub」）</li>
+<li><strong><code>git pull</code></strong> = <code>git fetch</code> + <code>git merge</code>：远程 → 本地（「拉取并合并」）</li>
+</ul>
+<h3>你终端里看到的状态（对照本项目）</h3>
+<pre><code class="language-javascript">
+Changes not staged for commit:   → 工作区有改动，还没 git add
+Changes to be committed:         → 已在暂存区，等待 git commit
+Untracked files:                 → 新文件，Git 尚未跟踪
+Your branch is up to date with 'origin/main'  → 本地 main 与远程同步
+</code></pre>
+<hr>
+<h2>6. 远端仓库实战（以本项目为例）</h2>
+<p>本项目 <strong>gerenboke</strong> 是 Vue 3 个人博客，远程仓库为 <code>kukukuyashi/myweb</code>，通过 GitHub Actions 推送到 <code>main</code> 后自动构建并部署到 GitHub Pages。</p>
+<p>在线地址：&lt;https://kukukuyashi.github.io/myweb/&gt;</p>
+<h3>6.1 从零新建类似项目</h3>
+<pre><code class="language-bash">
+# 1. 在 GitHub 网页创建空仓库 myweb（不要勾选 README 若本地已有项目）
+
+# 2. 本地初始化
+cd D:\phpstudy\phpstudy_pro\WWW\gerenboke
+git init
+git branch -M main
+
+# 3. 关联远程
+git remote add origin https://github.com/kukukuyashi/myweb.git
+
+# 4. 首次提交
+git add .
+git commit -m "init: Vue3 博客项目"
+git push -u origin main
+</code></pre>
+<table><thead><tr>
+<th>术语</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr>
+<td><code>origin</code></td>
+<td>远程仓库的默认别名</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td>建立 upstream，之后可直接 <code>git push</code> / <code>git pull</code></td>
+</tr>
+</tbody></table>
+<h3>6.2 克隆已有项目</h3>
+<pre><code class="language-bash">
+git clone https://github.com/kukukuyashi/myweb.git
+cd myweb
+npm install
+npm run dev
+</code></pre>
+<h3>6.3 日常修改与发布（博客发文章流程）</h3>
+<p>结合 README 与本项目结构：</p>
+<pre><code class="language-javascript">
+1. Content/           放入文章 HTML
+2. src/data/posts.js  注册文章元数据
+3. npm run build      生成 docs/ 静态产物
+4. git add + commit + push
+5. GitHub Actions 自动 build 并部署到 gh-pages
+</code></pre>
+<p>示例：</p>
+<pre><code class="language-bash">
+# 改完 posts.js 和 Content 后
+npm run build
+
+git status                              # 确认 docs/ 等变更
+git add Content/ src/data/posts.js docs/
+git commit -m "post: 新增 Agent Harness 体系笔记"
+git push
+</code></pre>
+<h3>6.4 本项目的 <code>.gitignore</code> 要点</h3>
+<p>以下内容<strong>不会</strong>被 Git 跟踪（不应 commit）：</p>
+<table><thead><tr>
+<th>路径</th>
+<th>原因</th>
+</tr></thead><tbody>
+<tr>
+<td><code>node_modules/</code></td>
+<td>依赖，用 <code>npm install</code> 恢复</td>
+</tr>
+<tr>
+<td><code>笔记/*</code></td>
+<td>本地 Markdown 原稿（除个别例外）</td>
+</tr>
+<tr>
+<td><code>Music/</code></td>
+<td>音乐源文件走 CDN，不进 Git</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>含密钥，绝不提交</td>
+</tr>
+</tbody></table>
+<p>你终端里 <code>笔记/Agent/Agent Harness 体系.md</code> 在本地，但 <code>.gitignore</code> 会忽略 <code>笔记/*</code>；发布到博客的是 <code>Content/</code> 下的 HTML 和 build 后的 <code>docs/</code>。</p>
+<h3>6.5 查看远程状态</h3>
+<pre><code class="language-bash">
+git remote -v           # 查看远程 URL
+git fetch origin        # 只下载远程更新，不合并
+git pull                # fetch + merge 到当前分支
+git log origin/main     # 看远程 main 的历史
+</code></pre>
+<h3>6.6 部署链路（本项目特有）</h3>
+<pre><code class="language-javascript">
+push main → .github/workflows/deploy.yml 触发
+         → npm install &amp;&amp; npm run build
+         → 产物写入 docs/
+         → peaceiris/actions-gh-pages 推到 gh-pages 分支
+         → GitHub Pages 对外提供静态站点
+</code></pre>
+<hr>
+<h2>7. GitHub 多人协作与进阶命令</h2>
+<h3>7.1 多人协作基本流程</h3>
+<pre><code class="language-javascript">
+1. Fork（可选）或直接 Clone 仓库
+2. git checkout -b feature/my-feature   # 从最新 main 拉功能分支
+3. 开发、commit（小步、message 清晰）
+4. git push -u origin feature/my-feature
+5. 在 GitHub 创建 Pull Request（PR）→ 目标分支 main
+6. Code Review → 修改 → 再次 push（PR 自动更新）
+7. Merge PR → 删除功能分支
+8. 其他人 git pull 同步 main
+</code></pre>
+<h3>7.2 协作注意事项</h3>
+<table><thead><tr>
+<th>事项</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>先 pull 再 push</strong></td>
+<td>减少冲突；<code>git pull --rebase</code> 可保持线性历史</td>
+</tr>
+<tr>
+<td><strong>不要 force push 到 main</strong></td>
+<td>会覆盖他人工作，破坏团队历史</td>
+</tr>
+<tr>
+<td><strong>小 PR、单一职责</strong></td>
+<td>一个 PR 只做一件事，便于审查</td>
+</tr>
+<tr>
+<td><strong>写清楚 PR 描述</strong></td>
+<td>改了什么、为什么、如何测试</td>
+</tr>
+<tr>
+<td><strong>敏感信息</strong></td>
+<td><code>.env</code>、密钥、Token 绝不 commit；已泄露需轮换密钥</td>
+</tr>
+<tr>
+<td><strong>保护 main 分支</strong></td>
+<td>在 GitHub Settings 开启「Require PR before merging」</td>
+</tr>
+<tr>
+<td><strong>沟通冲突</strong></td>
+<td>冲突时与改同一文件的同事对齐，不要静默覆盖</td>
+</tr>
+</tbody></table>
+<h3>7.3 Stash — 临时贮藏</h3>
+<p><strong>Stash</strong>：把<strong>工作区 + 暂存区</strong>的未提交改动暂时「藏起来」，工作区变干净，之后可再恢复。</p>
+<pre><code class="language-bash">
+git stash              # 贮藏当前改动
+git stash list         # 查看贮藏列表
+git stash pop          # 恢复最近一次并删除 stash
+git stash apply        # 恢复但不删除 stash
+git stash drop         # 删除某条 stash
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>功能写到一半，需要紧急切换分支修 bug</li>
+<li>想 <code>git pull</code> 但本地有未 commit 改动</li>
+</ul>
+<h3>7.4 Rebase — 变基</h3>
+<p><strong>Rebase</strong>：把当前分支的提交「挪到」目标分支最新提交之后，形成<strong>线性历史</strong>。</p>
+<pre><code class="language-javascript">
+# merge 方式（保留分叉）:
+main:    A - B - C - M
+              \     /
+feature:       D - E
+
+# rebase 方式（线性）:
+main:    A - B - C - D' - E'
+</code></pre>
+<pre><code class="language-bash">
+git checkout feature-x
+git rebase main        # 把 feature-x 的提交接到 main 最新之后
+git rebase -i HEAD~3   # 交互式： squash / 改 message / 删 commit
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>PR 合并前整理 commit（squash 多个 wip commit）</li>
+<li>保持 main 历史整洁</li>
+</ul>
+<p>⚠️ <strong>黄金法则</strong>：不要 rebase <strong>已经 push 且他人可能基于它开发</strong>的公共分支。</p>
+<h3>7.5 Cherry-pick — 拣选提交</h3>
+<p><strong>Cherry-pick</strong>：把<strong>某一个（或几个）指定 commit</strong> 复制到当前分支，而不是合并整分支。</p>
+<pre><code class="language-bash">
+git cherry-pick abc1234           # 拣选单个 commit
+git cherry-pick abc1234 def5678   # 拣选多个
+git cherry-pick -n abc1234        # 只应用改动，不自动 commit
+</code></pre>
+<p><strong>场景</strong>：</p>
+<ul>
+<li>main 上修了一个 bug，需要同步到 release 分支</li>
+<li>只想拿 feature 分支里的某一个 commit，不要全部</li>
+</ul>
+<p>与 merge 的区别：</p>
+<table><thead><tr>
+<th></th>
+<th>Merge</th>
+<th>Cherry-pick</th>
+</tr></thead><tbody>
+<tr>
+<td>范围</td>
+<td>整分支所有差异</td>
+<td>指定 commit</td>
+</tr>
+<tr>
+<td>历史</td>
+<td>产生 merge commit</td>
+<td>复制 commit（新 hash）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>附录：常用命令速查</h2>
+<pre><code class="language-bash">
+# 状态与历史
+git status
+git log --oneline --graph --all
+git diff                    # 工作区 vs 暂存区
+git diff --staged           # 暂存区 vs 最后一次 commit
+
+# 基本流程
+git add .
+git commit -m "message"
+git push
+git pull
+
+# 分支
+git switch -c feature-x
+git merge feature-x
+
+# 撤销
+git restore &lt;file&gt;
+git reset --soft HEAD~1
+git revert &lt;commit-id&gt;
+
+# 进阶
+git stash
+git rebase main
+git cherry-pick &lt;commit-id&gt;
+</code></pre>
+<hr>
+<h2>附录：术语表</h2>
+<table><thead><tr>
+<th>术语</th>
+<th>英文</th>
+<th>一句话解释</th>
+</tr></thead><tbody>
+<tr>
+<td>提交</td>
+<td>Commit</td>
+<td>一次版本快照</td>
+</tr>
+<tr>
+<td>哈希 / Commit ID</td>
+<td>SHA-1 Hash</td>
+<td>提交的唯一指纹</td>
+</tr>
+<tr>
+<td>分支</td>
+<td>Branch</td>
+<td>独立开发线</td>
+</tr>
+<tr>
+<td>合并</td>
+<td>Merge</td>
+<td>把两条线汇合</td>
+</tr>
+<tr>
+<td>冲突</td>
+<td>Conflict</td>
+<td>Git 无法自动合并时的手动介入点</td>
+</tr>
+<tr>
+<td>暂存</td>
+<td>Stage</td>
+<td>选中要纳入下次提交的文件</td>
+</tr>
+<tr>
+<td>远程</td>
+<td>Remote</td>
+<td>托管在 GitHub 上的仓库副本</td>
+</tr>
+<tr>
+<td>拉取</td>
+<td>Pull</td>
+<td>下载并合并远程更新</td>
+</tr>
+<tr>
+<td>推送</td>
+<td>Push</td>
+<td>上传本地提交到远程</td>
+</tr>
+<tr>
+<td>贮藏</td>
+<td>Stash</td>
+<td>临时保存未提交改动</td>
+</tr>
+<tr>
+<td>变基</td>
+<td>Rebase</td>
+<td>改写提交基底，整理历史</td>
+</tr>
+<tr>
+<td>拣选</td>
+<td>Cherry-pick</td>
+<td>单独复制某个提交</td>
+</tr>
+</tbody></table>
+<hr>
+<p>如需我把这份笔记保存到 <code>笔记/Git 与 GitHub 入门.md</code>，或根据你实际 workflow 再补充一节「发文章完整 checklist」，切换到 Agent 模式即可。</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

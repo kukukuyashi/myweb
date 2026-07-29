@@ -30,14 +30,12 @@
             <div class="anime-card-body">
               <h3>{{ displayName(item) }}</h3>
               <div class="anime-card-actions">
-                <a
-                  v-if="item.watch_url"
-                  :href="item.watch_url"
-                  class="platform-btn-ghost sm anime-watch-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >去追番</a>
-                <button type="button" class="platform-btn-ghost sm" @click="toggleWatch(item)">取消追番</button>
+                <AnimeWatchControl
+                  :status="watchStatus(item.bangumi_id)"
+                  :disabled="busyId === item.bangumi_id"
+                  @set="(s) => setWatch(item, s)"
+                  @clear="clearWatch(item)"
+                />
               </div>
             </div>
           </article>
@@ -49,21 +47,14 @@
             <li v-for="item in todayItems" :key="item.bangumi_id">
               <span>{{ displayName(item) }}</span>
               <div class="anime-list-actions">
-                <a
-                  v-if="item.watch_url"
-                  :href="item.watch_url"
-                  class="platform-btn-ghost sm anime-watch-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >去追番</a>
-                <button
+                <AnimeWatchControl
                   v-if="token"
-                  type="button"
-                  class="platform-btn-ghost sm"
-                  @click="toggleWatch(item)"
-                >
-                  {{ isWatching(item.bangumi_id) ? '已追' : '追番' }}
-                </button>
+                  compact
+                  :status="watchStatus(item.bangumi_id)"
+                  :disabled="busyId === item.bangumi_id"
+                  @set="(s) => setWatch(item, s)"
+                  @clear="clearWatch(item)"
+                />
               </div>
             </li>
           </ul>
@@ -86,22 +77,13 @@
                 <template v-else>放送日未定</template>
               </p>
               <div class="anime-card-actions">
-                <a
-                  v-if="item.watch_url"
-                  :href="item.watch_url"
-                  class="platform-btn-ghost sm anime-watch-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >去追番</a>
-                <button
+                <AnimeWatchControl
                   v-if="token"
-                  type="button"
-                  class="platform-btn-primary sm"
-                  :class="{ active: isWatching(item.bangumi_id) }"
-                  @click="toggleWatch(item)"
-                >
-                  {{ isWatching(item.bangumi_id) ? '★ 追番中' : '追番' }}
-                </button>
+                  :status="watchStatus(item.bangumi_id)"
+                  :disabled="busyId === item.bangumi_id"
+                  @set="(s) => setWatch(item, s)"
+                  @clear="clearWatch(item)"
+                />
                 <router-link v-else to="/app/login?redirect=/app/anime" class="platform-btn-ghost sm">登录追番</router-link>
               </div>
             </div>
@@ -145,6 +127,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { usePageMeta } from '../../composables/usePageMeta'
+import AnimeWatchControl from '../../components/platform/AnimeWatchControl.vue'
 import {
   addAnimeWatchlist,
   fetchAnimeSchedule,
@@ -172,6 +155,11 @@ const SEASON_PREVIEW = 12
 const fallbackNotice = ref('')
 
 const watchIds = computed(() => new Set(watchlist.value.map((w) => w.bangumi_id)))
+const watchStatusMap = computed(() => {
+  const map = {}
+  for (const w of watchlist.value) map[w.bangumi_id] = w.status || 'plan'
+  return map
+})
 
 const filteredSeason = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -200,6 +188,10 @@ function weekdayLabel(id) {
 
 function isWatching(id) {
   return watchIds.value.has(id)
+}
+
+function watchStatus(id) {
+  return watchStatusMap.value[id] || null
 }
 
 function sortedWeekItems(items) {
@@ -253,21 +245,33 @@ async function load() {
   }
 }
 
-async function toggleWatch(item) {
+async function setWatch(item, status) {
   if (!token.value || busyId.value) return
   busyId.value = item.bangumi_id
   try {
-    if (isWatching(item.bangumi_id)) {
-      await removeAnimeWatchlist(item.bangumi_id)
-    } else {
-      await addAnimeWatchlist({
-        bangumi_id: item.bangumi_id,
-        name: item.name,
-        name_cn: item.name_cn,
-        cover_url: item.cover_url,
-        air_weekday: item.air_weekday,
-      })
-    }
+    await addAnimeWatchlist({
+      bangumi_id: item.bangumi_id,
+      name: item.name,
+      name_cn: item.name_cn,
+      cover_url: item.cover_url,
+      air_weekday: item.air_weekday,
+      status,
+    })
+    await loadWatchlist()
+    const json = await fetchAnimeSchedule()
+    myToday.value = json.data?.my_updates || []
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    busyId.value = null
+  }
+}
+
+async function clearWatch(item) {
+  if (!token.value || busyId.value) return
+  busyId.value = item.bangumi_id
+  try {
+    await removeAnimeWatchlist(item.bangumi_id)
     await loadWatchlist()
     const json = await fetchAnimeSchedule()
     myToday.value = json.data?.my_updates || []
