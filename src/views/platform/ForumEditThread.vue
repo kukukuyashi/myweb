@@ -24,15 +24,15 @@
         <input v-model="form.title" required maxlength="200" />
       </label>
       <CoverImageField v-model="form.cover_url" scope="forum" />
-      <label>
-        内容
+      <div class="editor-field">
+        <span class="field-label">内容</span>
         <MarkdownEditor
           v-model="form.content"
           :rows="12"
           placeholder="正文内容 · 可点击「上传图片」，或直接拖拽 / 粘贴图片"
           enable-image-upload
         />
-      </label>
+      </div>
       <div class="actions">
         <button type="submit" class="btn-primary" :disabled="saving">保存</button>
         <button type="button" class="btn-danger" :disabled="saving" @click="remove">删除帖子</button>
@@ -163,6 +163,9 @@ label {
   font-family: var(--mono);
   font-size: 0.78rem;
 }
+
+.editor-field { display: grid; gap: 0.35rem; }
+.field-label { font-family: var(--mono); font-size: 0.78rem; }
 
 input, select, textarea {
   border: 1px solid var(--border);

@@ -40,8 +40,8 @@
           <option value="published">发布</option>
         </select>
       </label>
-      <label>
-        正文
+      <div class="editor-field">
+        <span class="field-label">正文</span>
         <MarkdownEditor
           v-model="form.content"
           :rows="18"
@@ -49,7 +49,7 @@
           enable-image-upload
           image-upload-scope="post"
         />
-      </label>
+      </div>
       <div class="actions">
         <button type="submit" class="btn-primary" :disabled="loading">
           {{ loading ? '保存中…' : '保存' }}
@@ -242,6 +242,9 @@ input, select, textarea {
 }
 
 textarea { resize: vertical; }
+
+.editor-field { display: grid; gap: 0.35rem; }
+.field-label { font-family: var(--mono); font-size: 0.78rem; }
 
 .actions {
   display: flex;
