@@ -456,6 +456,7 @@ const reflectionText = ref('')
 const savingReflection = ref(false)
 const pendingSession = ref(null)
 let tickId = null
+let deadline = 0
 
 const settings = ref(loadSettings())
 
@@ -630,6 +631,20 @@ async function requestNotifyPermission() {
   }
 }
 
+async function syncTimer() {
+  if (!running.value) return
+  const remaining = Math.round((deadline - Date.now()) / 1000)
+  if (remaining <= 0) {
+    clearTick()
+    running.value = false
+    const completedSec = totalSeconds.value
+    secondsLeft.value = 0
+    await onSessionComplete(completedSec)
+    return
+  }
+  secondsLeft.value = remaining
+}
+
 function toggleTimer() {
   if (running.value) {
     clearTick()
@@ -638,17 +653,13 @@ function toggleTimer() {
   }
   requestNotifyPermission()
   running.value = true
-  tickId = setInterval(async () => {
-    if (secondsLeft.value <= 1) {
-      clearTick()
-      running.value = false
-      const completedSec = totalSeconds.value
-      secondsLeft.value = 0
-      await onSessionComplete(completedSec)
-      return
-    }
-    secondsLeft.value -= 1
-  }, 1000)
+  // 以截止时间戳为准，后台标签被节流也能算准剩余时间
+  deadline = Date.now() + secondsLeft.value * 1000
+  tickId = setInterval(syncTimer, 1000)
+}
+
+function onVisibilityChange() {
+  if (!document.hidden) void syncTimer()
 }
 
 async function onSessionComplete(durationSec) {
@@ -788,6 +799,7 @@ onMounted(() => {
   applyModeDuration()
   loadData()
   document.addEventListener('fullscreenchange', onFullscreenChange)
+  document.addEventListener('visibilitychange', onVisibilityChange)
   lineTickId = setInterval(() => {
     if (running.value) lineTick.value += 1
   }, 12000)
@@ -798,6 +810,7 @@ onUnmounted(() => {
   clearTick()
   if (lineTickId) clearInterval(lineTickId)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
   if (studyRoomOpen.value || isFullscreen.value) document.body.style.overflow = ''
 })
 </script>
