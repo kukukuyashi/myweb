@@ -19,7 +19,8 @@ if ($items.Count -lt 1) {
 }
 
 Write-Host "==> tar.gz packing: $($items -join ', ')"
-& tar -czf $Archive @items
+# 音频只打包压缩后的 .m4a 与封面，排除无损母带以减小体积
+& tar --exclude='*.flac' --exclude='*.wav' -czf $Archive @items
 if ($LASTEXITCODE -ne 0) { throw "tar failed" }
 
 Write-Host "Done: $Archive ($([math]::Round((Get-Item $Archive).Length / 1MB, 1)) MB)"

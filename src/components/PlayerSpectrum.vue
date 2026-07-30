@@ -8,75 +8,18 @@
       v-for="i in barCount"
       :key="i"
       class="spectrum-bar"
-      :style="{ '--h': heights[i - 1] }"
+      :style="{ '--i': i }"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue'
-
 const props = defineProps({
   playing: { type: Boolean, default: false },
   collapsed: { type: Boolean, default: false },
 })
 
 const barCount = props.collapsed ? 8 : 14
-const heights = ref(Array.from({ length: barCount }, () => 0.12))
-
-let raf = 0
-let phase = 0
-
-function fakeBars() {
-  phase += 0.14
-  heights.value = heights.value.map((_, i) => {
-    const wave = Math.sin(phase + i * 0.55) * 0.5 + 0.5
-    const jitter = Math.random() * 0.25
-    return 0.1 + (wave * 0.55 + jitter) * 0.65
-  })
-}
-
-function tick() {
-  if (!props.playing) return
-
-  const spec = window.__musicSpectrum
-  if (spec) {
-    if (spec.ctx.state === 'suspended') spec.ctx.resume()
-    spec.analyser.getByteFrequencyData(spec.data)
-    const len = spec.data.length
-    heights.value = heights.value.map((_, i) => {
-      const idx = Math.min(len - 1, Math.floor((i / barCount) * len * 0.85))
-      return 0.08 + (spec.data[idx] / 255) * 0.92
-    })
-  } else {
-    fakeBars()
-  }
-
-  raf = requestAnimationFrame(tick)
-}
-
-function stopLoop() {
-  if (raf) cancelAnimationFrame(raf)
-  raf = 0
-  heights.value = heights.value.map(() => 0.12)
-}
-
-function startLoop() {
-  stopLoop()
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    heights.value = heights.value.map(() => props.playing ? 0.35 : 0.12)
-    return
-  }
-  if (props.playing) raf = requestAnimationFrame(tick)
-}
-
-watch(
-  () => props.playing,
-  playing => { playing ? startLoop() : stopLoop() },
-  { immediate: true }
-)
-
-onUnmounted(stopLoop)
 </script>
 
 <style scoped>
@@ -103,19 +46,38 @@ onUnmounted(stopLoop)
   display: block;
   width: 3px;
   min-height: 3px;
-  height: calc(3px + var(--h, 0.12) * 18px);
+  height: 5px;
+  transform-origin: bottom;
   background: linear-gradient(to top, rgba(232, 93, 4, 0.55), var(--orange));
-  transition: height 0.07s ease-out;
 }
 
 .player-spectrum--mini .spectrum-bar {
   width: 2px;
-  height: calc(2px + var(--h, 0.12) * 10px);
+}
+
+/* 仅播放时用纯 CSS 动画驱动，零每帧 JS、零重排 */
+.player-spectrum--live .spectrum-bar {
+  height: 21px;
+  animation: spectrum-bounce 1.1s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.13s);
+}
+
+.player-spectrum--mini.player-spectrum--live .spectrum-bar {
+  height: 13px;
+}
+
+@keyframes spectrum-bounce {
+  0%, 100% { transform: scaleY(0.18); }
+  20% { transform: scaleY(0.9); }
+  40% { transform: scaleY(0.35); }
+  60% { transform: scaleY(0.75); }
+  80% { transform: scaleY(0.45); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spectrum-bar {
-    transition: none;
+  .player-spectrum--live .spectrum-bar {
+    animation: none;
+    transform: scaleY(0.5);
   }
 }
 </style>

@@ -11,7 +11,7 @@ if (!fs.existsSync(musicRoot)) {
   process.exit(0)
 }
 
-const AUDIO_RE = /\.(flac|mp3)$/i
+const AUDIO_RE = /\.(m4a|flac|mp3)$/i
 const COVER_NAMES = ['folder.jpg', 'COVER.jpg', 'cover.jpg', 'Folder.jpg']
 
 function findCoverPath(dirFull, dirRel) {
@@ -67,6 +67,11 @@ function walkAudio(dir, rel = '') {
     if (entry.isDirectory()) {
       items.push(...walkAudio(full, relPath))
     } else if (AUDIO_RE.test(entry.name)) {
+      // 若同目录存在同名 .m4a，则跳过对应的 flac/mp3，只收录压缩版
+      if (/\.(flac|mp3)$/i.test(entry.name)) {
+        const m4a = path.join(dir, entry.name.replace(/\.(flac|mp3)$/i, '.m4a'))
+        if (fs.existsSync(m4a)) continue
+      }
       const dirRel = rel || '.'
       const dirFull = path.dirname(full)
       items.push({
