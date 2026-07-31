@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kukukuyashi.github.io/myweb/sitemap.xml
+Sitemap: https://cyinc.ink/myweb/sitemap.xml

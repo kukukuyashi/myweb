@@ -85,6 +85,7 @@ function buildHtml({ title, description, url, ogType = 'website', jsonLd, bodyHt
   const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME
   const desc = description || SITE_DESCRIPTION
   const ogImage = image || absoluteAssetUrl('img/xiaoqing.png')
+  const ogImageAbs = ogImage && /^https?:/i.test(ogImage) ? ogImage : siteUrl(ogImage.replace(/^https?:\/\/[^/]+\//, ''))
   const scriptTags = assets.scripts
     .map(src => `  <script type="module" crossorigin src="${escHtml(src)}"></script>`)
     .join('\n')
@@ -105,11 +106,12 @@ function buildHtml({ title, description, url, ogType = 'website', jsonLd, bodyHt
   <meta property="og:description" content="${escHtml(desc)}">
   <meta property="og:url" content="${escHtml(url)}">
   <meta property="og:type" content="${escHtml(ogType)}">
-  <meta property="og:image" content="${escHtml(ogImage)}">
+  <meta property="og:site_name" content="${escHtml(SITE_NAME)}">
+  <meta property="og:image" content="${escHtml(ogImageAbs)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escHtml(fullTitle)}">
   <meta name="twitter:description" content="${escHtml(desc)}">
-  <meta name="twitter:image" content="${escHtml(ogImage)}">
+  <meta name="twitter:image" content="${escHtml(ogImageAbs)}">
   <link rel="canonical" href="${escHtml(url)}">
   <link rel="icon" type="image/png" href="${base}img/xiaoqing.png">
   <link rel="alternate" type="application/rss+xml" title="${escHtml(SITE_NAME)} RSS" href="${base}feed.xml">
