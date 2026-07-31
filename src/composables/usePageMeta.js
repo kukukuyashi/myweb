@@ -1,9 +1,11 @@
 import { onMounted, onUnmounted, watch, isRef } from 'vue'
 import { useRoute } from 'vue-router'
 
-export const SITE_NAME = 'Cyinc 的学习日志'
-export const SITE_URL = 'https://kukukuyashi.github.io/myweb'
-export const SITE_DESCRIPTION = '前端、Agent 与 Java 学习笔记，踩坑记录与 Twikoo 留言板。'
+// 站点元信息以 src/data/posts.js 为单一来源（SPA 与 prerender 同步）
+import { SITE_NAME as _SITE_NAME, SITE_URL as _SITE_URL, SITE_DESCRIPTION as _SITE_DESCRIPTION } from '../data/posts.js'
+export const SITE_NAME = _SITE_NAME
+export const SITE_URL = _SITE_URL
+export const SITE_DESCRIPTION = _SITE_DESCRIPTION
 
 function setMeta(attr, key, content) {
   if (!content) return
