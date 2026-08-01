@@ -52,10 +52,52 @@
         </div>
       </div>
 
-      <figure class="pomo-study-room__character">
-        <img :src="companionImg" :alt="companion.name" />
-        <figcaption>{{ companionLine }}</figcaption>
-      </figure>
+      <section class="pomo-study-room__chat study-chat" aria-label="自习室聊天室">
+        <header class="study-chat__head">
+          <span class="study-chat__dot" :class="{ 'is-on': socketReady }"></span>
+          <span class="study-chat__title">在线 {{ onlineCount }} 人 · 全局自习室</span>
+          <span class="study-chat__status" v-if="chatError">{{ chatError }}</span>
+        </header>
+        <ul ref="listRef" class="study-chat__list" @scroll.passive="onListScroll">
+          <li v-if="messages.length === 0" class="study-chat__empty">还没有人发言,来聊一句吧 ☕</li>
+          <li
+            v-for="m in messages"
+            :key="m.id"
+            class="study-chat__item"
+            :class="{ 'is-mine': m.user_id === myUserId }"
+          >
+            <span class="study-chat__avatar" :style="avatarStyle(m)" :title="m.nickname || m.username">
+              {{ (m.nickname || m.username || '?').slice(0,1) }}
+            </span>
+            <div class="study-chat__body">
+              <div class="study-chat__meta">
+                <span class="study-chat__name">{{ m.nickname || m.username }}</span>
+                <time class="study-chat__time" :datetime="m.created_at">{{ formatTime(m.created_at) }}</time>
+              </div>
+              <p class="study-chat__text">{{ m.content }}</p>
+            </div>
+          </li>
+        </ul>
+        <form class="study-chat__form" @submit.prevent="onSend">
+          <input
+            ref="inputRef"
+            v-model="draft"
+            class="study-chat__input"
+            :class="{ 'is-shake': shake }"
+            type="text"
+            maxlength="500"
+            placeholder="说点什么…(Enter 发送,Shift+Enter 换行)"
+            :disabled="!canSend"
+            @keydown.enter.exact.prevent="onSend"
+          />
+          <button
+            type="submit"
+            class="study-chat__send"
+            :disabled="!canSend || !draft.trim()"
+          >发送</button>
+        </form>
+      </section>
+    
     </main>
 
     <aside class="pomo-study-room__side">
@@ -89,7 +131,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import {
+  fetchStudyRoomMessages,
+  fetchStudyRoomOnline,
+  fetchProfile,
+  getPlatformToken,
+  openStudyRoomSocket,
+  resolveMediaUrl,
+} from '../../api/platform.js'
 
 const props = defineProps({
   companion: { type: Object, required: true },
@@ -125,6 +175,23 @@ const wallClock = ref('--:--')
 const clockIso = ref('')
 let clockId = null
 
+const messages = ref([])
+const draft = ref('')
+const onlineCount = ref(0)
+const socketReady = ref(false)
+const chatError = ref('')
+const myUserId = ref(null)
+const shake = ref(false)
+const listRef = ref(null)
+const inputRef = ref(null)
+const loadingHistory = ref(false)
+const historyExhausted = ref(false)
+let socket = null
+let presenceTimer = null
+let profileTimer = null
+let profileRetry = 0
+let stickToBottom = true
+
 const roomStyle = computed(() => ({
   '--study-accent': props.companion.accent,
   '--study-bg': props.companion.sceneGradient || '#0a0a0c',
@@ -136,13 +203,206 @@ function tickClock() {
   clockIso.value = now.toISOString()
 }
 
+function relativeTime(iso) {
+  if (!iso) return ''
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return ''
+  const diff = Math.max(0, Date.now() - t)
+  if (diff < 45 * 1000) return '刚刚'
+  if (diff < 60 * 60 * 1000) return `${Math.floor(diff / 60000)} 分钟前`
+  if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / 3600000)} 小时前`
+  const d = new Date(iso)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getMonth() + 1}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+function formatTime(iso) { return relativeTime(iso) }
+
+function avatarStyle(m) {
+  const url = m && m.avatar
+  const full = url ? resolveMediaUrl(url) : ''
+  if (!full) return {}
+  return { backgroundImage: `url(${full})`, color: 'transparent' }
+}
+
+function scrollToBottom(force = false) {
+  const el = listRef.value
+  if (!el) return
+  if (force || stickToBottom) {
+    nextTick(() => { el.scrollTop = el.scrollHeight })
+  }
+}
+
+function onListScroll(ev) {
+  const el = ev.target
+  const dist = el.scrollHeight - el.scrollTop - el.clientHeight
+  stickToBottom = dist < 80
+}
+
+function pushIncoming(item) {
+  if (!item || item.id == null) return
+  // 已在就忽略
+  if (messages.value.some((m) => m.id === item.id)) return
+  messages.value.push(item)
+  scrollToBottom()
+}
+
+function applyHistory(items) {
+  if (!Array.isArray(items)) return
+  // items 已是 desc 顺序
+  for (const it of items) pushIncoming(it)
+  historyExhausted.value = items.length < 50
+  scrollToBottom(true)
+}
+
+async function loadMoreHistory() {
+  if (loadingHistory.value || historyExhausted.value) return
+  if (messages.value.length === 0) return
+  loadingHistory.value = true
+  try {
+    const oldestId = messages.value[0].id
+    const res = await fetchStudyRoomMessages({ before: oldestId, limit: 50 })
+    const items = (res && res.data && res.data.items) || []
+    const before = messages.value.length
+    for (const it of items) pushIncoming(it)
+    historyExhausted.value = items.length < 50 || messages.value.length === before
+  } catch (e) {
+    chatError.value = '加载历史失败'
+  } finally {
+    loadingHistory.value = false
+  }
+}
+
+async function refreshOnline() {
+  try {
+    const res = await fetchStudyRoomOnline()
+    const data = (res && res.data) || {}
+    onlineCount.value = Number(data.count) || 0
+  } catch (e) {
+    // ignore
+  }
+}
+
+function ensureProfile() {
+  if (profileTimer) return
+  profileTimer = setTimeout(async () => {
+    profileTimer = null
+    if (myUserId.value) return
+    const token = getPlatformToken()
+    if (!token) { profileRetry = Math.min(profileRetry + 1, 6); return }
+    try {
+      const res = await fetchProfile()
+      const u = (res && res.data) || {}
+      if (u && (u.id != null)) myUserId.value = u.id
+    } catch (e) {
+      profileRetry = Math.min(profileRetry + 1, 6)
+    }
+  }, 300)
+}
+
+function connectChat() {
+  if (socket) return
+  const token = getPlatformToken()
+  if (!token) {
+    chatError.value = '登录后即可发言'
+    socketReady.value = false
+    return
+  }
+  socket = openStudyRoomSocket({
+    token,
+    onOpen: () => {
+      socketReady.value = true
+      chatError.value = ''
+    },
+    onClose: () => {
+      socketReady.value = false
+    },
+    onError: () => {
+      socketReady.value = false
+    },
+    onMessage: (data) => {
+      if (data.type === 'history') {
+        messages.value = []
+        applyHistory(data.items || [])
+      } else if (data.type === 'msg') {
+        pushIncoming(data)
+      } else if (data.type === 'err') {
+        if (data.reason === 'rate') {
+          chatError.value = '发言太快,稍等再发'
+        } else if (data.reason === 'too_long') {
+          chatError.value = '消息过长(<=500 字)'
+        } else {
+          chatError.value = '发送失败'
+        }
+        shake.value = true
+        setTimeout(() => { shake.value = false }, 400)
+        setTimeout(() => { if (chatError.value && chatError.value.indexOf('太快') >= 0) chatError.value = '' }, 2500)
+      }
+    },
+    onPresence: () => {
+      // presence 事件触发一次在线刷新
+      refreshOnline()
+    },
+  })
+}
+
+function disconnectChat() {
+  if (socket) {
+    try { socket.close() } catch (e) {}
+    socket = null
+  }
+  socketReady.value = false
+}
+
+const canSend = computed(() => !!getPlatformToken() && socketReady.value)
+
+function onSend() {
+  const text = draft.value.trim()
+  if (!text) return
+  if (!canSend.value) {
+    if (!getPlatformToken()) chatError.value = '请先登录再发言'
+    else chatError.value = '正在连接…'
+    shake.value = true
+    setTimeout(() => { shake.value = false }, 400)
+    return
+  }
+  if (text.length > 500) {
+    chatError.value = '消息过长(<=500 字)'
+    shake.value = true
+    setTimeout(() => { shake.value = false }, 400)
+    return
+  }
+  const ok = socket && socket.send(text)
+  if (ok) {
+    draft.value = ''
+    chatError.value = ''
+  } else {
+    chatError.value = '发送失败,请重试'
+    shake.value = true
+    setTimeout(() => { shake.value = false }, 400)
+  }
+}
+
 onMounted(() => {
   tickClock()
   clockId = setInterval(tickClock, 1000)
+  // 初始拉历史 + 在线 + 试连 WS
+  refreshOnline()
+  presenceTimer = setInterval(refreshOnline, 10000)
+  // 拉一次历史(无需登录)
+  fetchStudyRoomMessages({ limit: 50 })
+    .then((res) => applyHistory((res && res.data && res.data.items) || []))
+    .catch(() => {})
+  // 拿 profile 识别"我"
+  ensureProfile()
+  // 连 WS(有 token 时)
+  connectChat()
 })
 
 onUnmounted(() => {
   if (clockId) clearInterval(clockId)
+  if (presenceTimer) clearInterval(presenceTimer)
+  if (profileTimer) clearTimeout(profileTimer)
+  disconnectChat()
 })
 
 defineExpose({ roomRef })
@@ -167,8 +427,8 @@ defineExpose({ roomRef })
   inset: -8%;
   background-size: cover;
   background-position: 70% bottom;
-  opacity: 0.14;
-  filter: saturate(0.85) blur(1px);
+  opacity: 0.18;
+  filter: saturate(0.7) blur(6px) brightness(0.55);
   pointer-events: none;
 }
 
@@ -253,7 +513,7 @@ defineExpose({ roomRef })
   z-index: 2;
   grid-column: 1;
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(200px, 42vw);
+  grid-template-columns: minmax(240px, 1fr) minmax(320px, 38vw);
   align-items: end;
   gap: clamp(0.5rem, 4vw, 2rem);
   padding: 0 clamp(1rem, 4vw, 3rem) clamp(1rem, 3vh, 2rem);
@@ -328,51 +588,241 @@ defineExpose({ roomRef })
   margin-top: 1.25rem;
 }
 
-.pomo-study-room__character {
-  margin: 0;
-  align-self: flex-end;
-  text-align: center;
-  max-height: min(72vh, 680px);
-}
-
-.pomo-study-room__character img {
-  display: block;
-  max-height: min(68vh, 640px);
-  width: auto;
-  max-width: 100%;
-  margin-inline: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 12px 48px rgba(0, 0, 0, 0.55));
-  animation: study-breathe 6s ease-in-out infinite;
-}
-
-.pomo-study-room--running .pomo-study-room__character img {
-  animation-duration: 4s;
-}
-
-@keyframes study-breathe {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.pomo-study-room__character figcaption {
-  margin-top: 0.65rem;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
-  max-width: 36ch;
-  margin-inline: auto;
-}
-
 .pomo-study-room__side {
   position: relative;
   z-index: 2;
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 3;
   align-self: end;
   padding: 0 1rem 5rem 0;
   max-width: 220px;
 }
+
+.pomo-study-room__chat {
+  position: relative;
+  z-index: 2;
+  grid-column: 2;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: min(72vh, 680px);
+  background: rgba(8, 10, 14, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.study-chat__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.study-chat__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.study-chat__dot.is-on {
+  background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
+  animation: study-chat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes study-chat-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.study-chat__title {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.study-chat__status {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: rgba(255, 180, 100, 0.85);
+}
+
+.study-chat__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.study-chat__list::-webkit-scrollbar { width: 6px; }
+.study-chat__list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+.study-chat__empty {
+  margin: auto;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.study-chat__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.25rem 0;
+  animation: study-chat-in 0.25s ease-out;
+}
+
+@keyframes study-chat-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.study-chat__item.is-mine { flex-direction: row-reverse; }
+.study-chat__item.is-mine .study-chat__body { align-items: flex-end; }
+.study-chat__item.is-mine .study-chat__text {
+  background: color-mix(in srgb, var(--study-accent) 28%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--study-accent) 35%, transparent);
+}
+
+.study-chat__avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #6b7280, #374151);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  user-select: none;
+}
+
+.study-chat__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  max-width: min(72%, 28rem);
+  min-width: 0;
+}
+
+.study-chat__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.study-chat__name { color: rgba(255, 255, 255, 0.78); }
+.study-chat__time { color: rgba(255, 255, 255, 0.35); font-variant-numeric: tabular-nums; }
+
+.study-chat__text {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.study-chat__form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.study-chat__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.study-chat__input:focus {
+  border-color: color-mix(in srgb, var(--study-accent) 55%, transparent);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.study-chat__input:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.study-chat__input.is-shake {
+  animation: study-chat-shake 0.35s ease-in-out;
+  border-color: #f87171;
+}
+
+@keyframes study-chat-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+.study-chat__send {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--study-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--study-accent) 35%, rgba(255, 255, 255, 0.05));
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.study-chat__send:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--study-accent) 50%, rgba(255, 255, 255, 0.1));
+}
+
+.study-chat__send:active:not(:disabled) { transform: scale(0.97); }
+.study-chat__send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  .study-chat__dot.is-on,
+  .study-chat__input.is-shake,
+  .study-chat__item { animation: none; }
+}
+
 
 .pomo-study-room__side-toggle {
   width: 100%;
@@ -508,12 +958,9 @@ defineExpose({ roomRef })
     justify-content: center;
   }
 
-  .pomo-study-room__character {
-    max-height: 38vh;
-  }
-
-  .pomo-study-room__character img {
-    max-height: 34vh;
+  .pomo-study-room__chat {
+    grid-column: 1;
+    max-height: 46vh;
   }
 
   .pomo-study-room__side {

@@ -446,3 +446,84 @@ export async function createQaMessage(payload) {
     body: payload,
   })
 }
+export async function fetchStudyRoomMessages({ before, limit = 50 } = {}) {
+  const qs = new URLSearchParams()
+  if (before != null) qs.set('before', String(before))
+  qs.set('limit', String(limit))
+  return platformFetch(`/study-room/messages?${qs.toString()}`)
+}
+
+export async function fetchStudyRoomOnline() {
+  return platformFetch('/study-room/online')
+}
+
+export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onClose, onError } = {}) {
+  const base = apiOrigin()
+  const scheme = base.startsWith('https') ? 'wss' : 'ws'
+  const url = `${scheme}://${base.replace(/^https?:\/\//, '')}/api/v1/study-room/ws?token=${encodeURIComponent(token || '')}`
+  let ws = null
+  let backoff = 1000
+  let closedByUser = false
+  let reconnectTimer = null
+
+  function connect() {
+    try {
+      ws = new WebSocket(url)
+    } catch (e) {
+      scheduleReconnect()
+      return
+    }
+    ws.onopen = () => {
+      backoff = 1000
+      if (typeof onOpen === 'function') onOpen()
+    }
+    ws.onmessage = (ev) => {
+      let data
+      try { data = JSON.parse(ev.data) } catch { return }
+      if (!data || typeof data !== 'object') return
+      if (data.type === 'msg' || data.type === 'history' || data.type === 'err') {
+        if (typeof onMessage === 'function') onMessage(data)
+      } else if (data.type === 'presence') {
+        if (typeof onPresence === 'function') onPresence(data)
+      }
+    }
+    ws.onerror = (e) => {
+      if (typeof onError === 'function') onError(e)
+    }
+    ws.onclose = () => {
+      if (typeof onClose === 'function') onClose()
+      if (!closedByUser) scheduleReconnect()
+    }
+  }
+
+  function scheduleReconnect() {
+    if (closedByUser) return
+    const delay = Math.min(backoff, 10000)
+    backoff = Math.min(backoff * 2, 10000)
+    reconnectTimer = setTimeout(connect, delay)
+  }
+
+  connect()
+
+  return {
+    send(content) {
+      if (!ws || ws.readyState !== 1) return false
+      try {
+        ws.send(JSON.stringify({ type: 'msg', content }))
+        return true
+      } catch { return false }
+    },
+    pong() {
+      if (!ws || ws.readyState !== 1) return false
+      try { ws.send(JSON.stringify({ type: 'pong' })); return true } catch { return false }
+    },
+    close() {
+      closedByUser = true
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
+      if (ws) {
+        try { ws.close() } catch {}
+        ws = null
+      }
+    },
+  }
+}
