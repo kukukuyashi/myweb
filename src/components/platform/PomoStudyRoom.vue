@@ -92,13 +92,14 @@
             @mousedown.stop
             @click="toggleHide"
           >{{ isChatHidden ? '▴' : '▾' }}</button>
-          <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop>
+          <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop @click.stop>
             <button
               v-for="st in chatStickers"
               :key="st.id"
               type="button"
               class="study-chat__emoji-item"
               :title="st.label"
+              @mousedown.stop
               @click="sendSticker(st)"
             >
               <img :src="stickerUrl(st)" :alt="st.label" loading="lazy" />

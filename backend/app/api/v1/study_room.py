@@ -171,7 +171,7 @@ def list_messages(
     q = db.query(StudyRoomMessage)
     if before is not None:
         q = q.filter(StudyRoomMessage.id < before)
-    rows = q.order_by(StudyRoomMessage.id.desc()).limit(limit).all()
+    rows = q.order_by(StudyRoomMessage.id.asc()).limit(limit).all()
     users_map = _load_users_map(db, {r.user_id for r in rows})
     items = [
         StudyRoomMessagePublic.model_validate(_to_public_dict(r, users_map.get(r.user_id))).model_dump()
@@ -274,7 +274,7 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
         try:
             rows = (
                 db.query(StudyRoomMessage)
-                .order_by(StudyRoomMessage.id.desc())
+                .order_by(StudyRoomMessage.id.asc())
                 .limit(HISTORY_LIMIT)
                 .all()
             )
