@@ -177,7 +177,10 @@ function bindListeners(audio) {
   })
 
   audio.addEventListener('error', () => {
-    console.error('[music] audio error', audio.error, audio.src)
+    // R2 失败时由 playCurrentTrack 的 catch 统一处理并降级,这里只对非 R2 真正失败打 log
+    const src = audio.src || ''
+    if (src.includes(R2_HOST)) return
+    console.error('[music] audio error', audio.error, src)
     musicStore.setPlaying(false)
   })
 }
