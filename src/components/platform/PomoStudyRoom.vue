@@ -54,6 +54,7 @@
       </div>
 
       <section
+        v-show="!isChatHidden"
         ref="chatSectionRef"
         class="pomo-study-room__chat study-chat"
         :class="{ 'is-dragging': isDragging, 'is-resizing': isResizing }"
@@ -84,19 +85,26 @@
             @mousedown.stop
             @click="resetChat"
           >↺</button>
-        </header>
-        <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop>
           <button
-            v-for="st in chatStickers"
-            :key="st.id"
             type="button"
-            class="study-chat__emoji-item"
-            :title="st.label"
-            @click="sendSticker(st)"
-          >
-            <img :src="stickerUrl(st)" :alt="st.label" loading="lazy" />
-          </button>
-        </div>
+            class="study-chat__hide-btn"
+            :title="isChatHidden ? '展开聊天' : '隐藏聊天'"
+            @mousedown.stop
+            @click="toggleHide"
+          >{{ isChatHidden ? '▴' : '▾' }}</button>
+          <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop>
+            <button
+              v-for="st in chatStickers"
+              :key="st.id"
+              type="button"
+              class="study-chat__emoji-item"
+              :title="st.label"
+              @click="sendSticker(st)"
+            >
+              <img :src="stickerUrl(st)" :alt="st.label" loading="lazy" />
+            </button>
+          </div>
+        </header>
         <ul ref="listRef" class="study-chat__list" @scroll.passive="onListScroll">
           <li v-if="messages.length === 0" class="study-chat__empty">还没有人发言,来聊一句吧 ☕</li>
           <li
@@ -143,17 +151,26 @@
             :disabled="!canSend || !draft.trim()"
           >发送</button>
         </form>
-        <!-- 8 方向 resize -->
-        <div class="study-chat__handle study-chat__handle--n"  @mousedown.prevent.stop="startResize($event, 'n')"></div>
-        <div class="study-chat__handle study-chat__handle--s"  @mousedown.prevent.stop="startResize($event, 's')"></div>
-        <div class="study-chat__handle study-chat__handle--e"  @mousedown.prevent.stop="startResize($event, 'e')"></div>
-        <div class="study-chat__handle study-chat__handle--w"  @mousedown.prevent.stop="startResize($event, 'w')"></div>
+        <!-- 4 角 resize -->
         <div class="study-chat__handle study-chat__handle--nw" @mousedown.prevent.stop="startResize($event, 'nw')"></div>
         <div class="study-chat__handle study-chat__handle--ne" @mousedown.prevent.stop="startResize($event, 'ne')"></div>
         <div class="study-chat__handle study-chat__handle--sw" @mousedown.prevent.stop="startResize($event, 'sw')"></div>
         <div class="study-chat__handle study-chat__handle--se" @mousedown.prevent.stop="startResize($event, 'se')"></div>
         <div v-if="isResizing" class="study-chat__size-badge">{{ resizeBadge }}</div>
       </section>
+      
+      <!-- 隐藏后的浮气泡 -->
+      <button
+        v-show="isChatHidden"
+        type="button"
+        class="chat-bubble"
+        title="展开聊天"
+        @click="toggleHide"
+      >
+        <span class="chat-bubble__icon">💬</span>
+        <span class="chat-bubble__count">在线 {{ onlineCount }}</span>
+        <span v-if="unreadCount" class="chat-bubble__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+      </button>
     
     </main>
 
@@ -244,6 +261,8 @@ const isDragging = ref(false)
 const isResizing = ref(false)
 const resizeBadge = ref('')
 const showCountFlash = ref(false)
+const isChatHidden = ref(false)
+const unreadCount = ref(0)
 let countFlashTimer = 0
 const emojiOpen = ref(false)
 let chatPersistTimer = 0
@@ -315,6 +334,8 @@ function onListScroll(ev) {
   const el = ev.target
   const dist = el.scrollHeight - el.scrollTop - el.clientHeight
   stickToBottom = dist < 80
+  // 用户主动滚到底 → 视为已读
+  if (stickToBottom) unreadCount.value = 0
 }
 
 function pushIncoming(item) {
@@ -322,6 +343,10 @@ function pushIncoming(item) {
   // 已在就忽略
   if (messages.value.some((m) => m.id === item.id)) return
   messages.value.push(item)
+  // chat 隐藏 或 用户滚离底部 → 累加未读
+  if (isChatHidden.value || !stickToBottom) {
+    unreadCount.value++
+  }
   scrollToBottom()
 }
 
@@ -568,6 +593,15 @@ function resetChat() {
 function centerChat() {
   chatPos.value = { x: 0, y: 0 }
   persistChatPos()
+}
+
+function toggleHide() {
+  isChatHidden.value = !isChatHidden.value
+  if (!isChatHidden.value) {
+    // 展开:清未读 + 滚到底
+    unreadCount.value = 0
+    nextTick(() => scrollToBottom(true))
+  }
 }
 
 function loadChatPos() {
@@ -902,6 +936,7 @@ defineExpose({ roomRef })
 }
 
 .study-chat__head {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -914,7 +949,7 @@ defineExpose({ roomRef })
   user-select: none;
 }
 
-/* 8 方向 resize 把手 */
+/* 4 角 resize 把手 */
 .study-chat__handle {
   position: absolute;
   z-index: 3;
@@ -922,14 +957,10 @@ defineExpose({ roomRef })
   touch-action: none;
   transition: background 0.15s;
 }
-.study-chat__handle--n  { top: 0; left: 12px; right: 12px; height: 6px; cursor: ns-resize; }
-.study-chat__handle--s  { bottom: 0; left: 12px; right: 12px; height: 6px; cursor: ns-resize; }
-.study-chat__handle--e  { top: 12px; bottom: 12px; right: 0; width: 6px; cursor: ew-resize; }
-.study-chat__handle--w  { top: 12px; bottom: 12px; left: 0; width: 6px; cursor: ew-resize; }
-.study-chat__handle--nw { top: 0; left: 0; width: 14px; height: 14px; cursor: nwse-resize; }
-.study-chat__handle--ne { top: 0; right: 0; width: 14px; height: 14px; cursor: nesw-resize; }
-.study-chat__handle--sw { bottom: 0; left: 0; width: 14px; height: 14px; cursor: nesw-resize; }
-.study-chat__handle--se { bottom: 0; right: 0; width: 14px; height: 14px; cursor: nwse-resize; }
+.study-chat__handle--nw { top: 0; left: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+.study-chat__handle--ne { top: 0; right: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+.study-chat__handle--sw { bottom: 0; left: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+.study-chat__handle--se { bottom: 0; right: 0; width: 12px; height: 12px; cursor: nwse-resize; }
 .study-chat__handle:hover {
   background: rgba(255, 122, 69, 0.18);
 }
@@ -975,6 +1006,111 @@ defineExpose({ roomRef })
   border-color: var(--orange, #ff7a45);
 }
 
+.study-chat__hide-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.study-chat__hide-btn:hover {
+  background: var(--orange, #ff7a45);
+  color: #fff;
+  border-color: var(--orange, #ff7a45);
+}
+
+/* 浮气泡(隐藏 chat 后显示在右下角) */
+.chat-bubble {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: linear-gradient(135deg, var(--orange, #ff7a45), #d65a25);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 6px 20px rgba(255, 122, 69, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 20;
+  font-family: var(--mono, monospace);
+  animation: bubble-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.15s;
+}
+.chat-bubble:hover {
+  transform: scale(1.05);
+}
+.chat-bubble:active {
+  transform: scale(0.95);
+}
+.chat-bubble__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.chat-bubble__count {
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+  opacity: 0.95;
+  line-height: 1;
+}
+.chat-bubble__badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: #e0253a;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--study-bg, #0a0a0c);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  animation: badge-pop 0.3s ease;
+}
+@keyframes bubble-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes badge-pop {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+  .chat-bubble {
+    right: 0.85rem;
+    bottom: 0.85rem;
+    width: 44px;
+    height: 44px;
+  }
+  .chat-bubble__icon { font-size: 0.95rem; }
+  .chat-bubble__count { font-size: 0.5rem; }
+  .study-chat__handle--nw, .study-chat__handle--ne,
+  .study-chat__handle--sw, .study-chat__handle--se {
+    width: 14px;
+    height: 14px;
+  }
+}
+
 .study-chat__title.is-flash,
 .study-chat__dot.is-flash {
   animation: count-flash 0.6s ease;
@@ -1008,9 +1144,8 @@ defineExpose({ roomRef })
 
 .study-chat__emoji-panel {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.4rem);
   right: 0.5rem;
-  margin-top: 0.4rem;
   z-index: 12;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1023,6 +1158,11 @@ defineExpose({ roomRef })
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   max-width: 320px;
+  animation: emoji-pop 0.18s ease;
+}
+@keyframes emoji-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .study-chat__emoji-item {
