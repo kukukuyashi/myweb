@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""自习室实时聊天消息模�?""
+"""Study-room realtime chat message model."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
