@@ -133,6 +133,11 @@
             :disabled="!canSend || !draft.trim()"
           >发送</button>
         </form>
+        <div
+          class="study-chat__resize"
+          aria-hidden="true"
+          @mousedown.prevent.stop="startResize"
+        ></div>
       </section>
     
     </main>
@@ -216,12 +221,17 @@ let clockId = null
 /* chat 位置(localStorage 记忆) */
 const CHAT_POS_KEY = 'pomo:chat-pos'
 const chatPos = ref({ x: 0, y: 0 })
+const CHAT_DEFAULT_W = 360
+const CHAT_DEFAULT_H = 480
+const chatSize = ref({ width: CHAT_DEFAULT_W, height: CHAT_DEFAULT_H })
 const dragState = ref(null)
 const emojiOpen = ref(false)
 let chatPersistTimer = 0
 
 const chatStyle = computed(() => ({
   transform: `translate(${chatPos.value.x}px, ${chatPos.value.y}px)`,
+  width: chatSize.value.width + 'px',
+  height: chatSize.value.height + 'px',
 }))
 
 const messages = ref([])
@@ -410,6 +420,45 @@ function clampChatPos(x, y) {
   }
 }
 
+function clampChatSize(w, h) {
+  const stage = document.querySelector('.pomo-study-room')
+  const MIN_W = 240
+  const MIN_H = 280
+  if (!stage) return { width: Math.max(MIN_W, w), height: Math.max(MIN_H, h) }
+  const sr = stage.getBoundingClientRect()
+  const maxW = Math.max(MIN_W, sr.width - 48)
+  const maxH = Math.max(MIN_H, sr.height - 120)
+  return {
+    width: Math.max(MIN_W, Math.min(maxW, w)),
+    height: Math.max(MIN_H, Math.min(maxH, h)),
+  }
+}
+
+function startResize(ev) {
+  if (ev.button !== 0) return
+  ev.stopPropagation()
+  const el = chatSectionRef.value
+  if (!el) return
+  const startW = el.offsetWidth
+  const startH = el.offsetHeight
+  const startX = ev.clientX
+  const startY = ev.clientY
+  const onMove = (e) => {
+    const dw = e.clientX - startX
+    const dh = e.clientY - startY
+    const next = clampChatSize(startW + dw, startH + dh)
+    chatSize.value = next
+  }
+  const onUp = () => {
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    chatPos.value = clampChatPos(chatPos.value.x, chatPos.value.y)
+    persistChatPos()
+  }
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
+}
+
 function startDrag(ev) {
   if (ev.button !== 0) return
   const el = chatSectionRef.value
@@ -440,7 +489,9 @@ function persistChatPos() {
   if (chatPersistTimer) return
   chatPersistTimer = window.setTimeout(() => {
     chatPersistTimer = 0
-    try { localStorage.setItem(CHAT_POS_KEY, JSON.stringify(chatPos.value)) } catch (e) {}
+    try {
+      localStorage.setItem(CHAT_POS_KEY, JSON.stringify({ ...chatPos.value, ...chatSize.value }))
+    } catch (e) {}
   }, 400)
 }
 
@@ -451,6 +502,9 @@ function loadChatPos() {
     const data = JSON.parse(raw)
     if (data && typeof data.x === 'number' && typeof data.y === 'number') {
       chatPos.value = { x: data.x, y: data.y }
+    }
+    if (data && typeof data.width === 'number' && typeof data.height === 'number') {
+      chatSize.value = { width: data.width, height: data.height }
     }
   } catch (e) {}
 }
@@ -538,7 +592,7 @@ onUnmounted(() => {
     const fn = chatSectionRef.value && chatSectionRef.value.__onDocClick
     if (fn) document.removeEventListener('mousedown', fn)
   } catch (e) {}
-  try { localStorage.setItem(CHAT_POS_KEY, JSON.stringify(chatPos.value)) } catch (e) {}
+  try { localStorage.setItem(CHAT_POS_KEY, JSON.stringify({ ...chatPos.value, ...chatSize.value })) } catch (e) {}
   if (presenceTimer) clearInterval(presenceTimer)
   if (profileTimer) clearTimeout(profileTimer)
   disconnectChat()
@@ -751,12 +805,11 @@ defineExpose({ roomRef })
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  width: clamp(300px, 32vw, 420px);
-  max-width: calc(100vw - 3rem);
+  width: 360px;
+  height: 480px;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  max-height: min(72vh, 680px);
   background: rgba(8, 10, 14, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
@@ -777,6 +830,26 @@ defineExpose({ roomRef })
   background: rgba(0, 0, 0, 0.25);
   cursor: move;
   user-select: none;
+}
+
+.study-chat__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  z-index: 2;
+  background:
+    linear-gradient(currentColor, currentColor) right 3px bottom 3px / 9px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) right 3px bottom 7px / 5px 1.5px no-repeat;
+  color: rgba(255, 255, 255, 0.45);
+  user-select: none;
+  touch-action: none;
+  transition: color 0.15s;
+}
+.study-chat__resize:hover {
+  color: var(--orange, #ff7a45);
 }
 
 .study-chat__emoji-btn {
