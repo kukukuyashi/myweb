@@ -56,15 +56,18 @@
       <section
         ref="chatSectionRef"
         class="pomo-study-room__chat study-chat"
+        :class="{ 'is-dragging': isDragging, 'is-resizing': isResizing }"
         :style="chatStyle"
         aria-label="自习室聊天室"
       >
         <header
           class="study-chat__head study-chat__head--draggable"
           @mousedown.prevent="startDrag"
+          @dblclick.prevent="resetChat"
+          title="拖动改位置 · 双击重置"
         >
-          <span class="study-chat__dot" :class="{ 'is-on': socketReady }"></span>
-          <span class="study-chat__title">在线 {{ onlineCount }} 人 · 全局自习室</span>
+          <span class="study-chat__dot" :class="{ 'is-on': socketReady, 'is-flash': showCountFlash }"></span>
+          <span class="study-chat__title" :class="{ 'is-flash': showCountFlash }">在线 {{ onlineCount }} 人 · 全局自习室</span>
           <span class="study-chat__status" v-if="chatError">{{ chatError }}</span>
           <button
             type="button"
@@ -74,6 +77,13 @@
             @mousedown.stop
             @click="emojiOpen = !emojiOpen"
           >😀</button>
+          <button
+            type="button"
+            class="study-chat__reset-btn"
+            title="重置位置/大小"
+            @mousedown.stop
+            @click="resetChat"
+          >↺</button>
         </header>
         <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop>
           <button
@@ -133,11 +143,16 @@
             :disabled="!canSend || !draft.trim()"
           >发送</button>
         </form>
-        <div
-          class="study-chat__resize"
-          aria-hidden="true"
-          @mousedown.prevent.stop="startResize"
-        ></div>
+        <!-- 8 方向 resize -->
+        <div class="study-chat__handle study-chat__handle--n"  @mousedown.prevent.stop="startResize($event, 'n')"></div>
+        <div class="study-chat__handle study-chat__handle--s"  @mousedown.prevent.stop="startResize($event, 's')"></div>
+        <div class="study-chat__handle study-chat__handle--e"  @mousedown.prevent.stop="startResize($event, 'e')"></div>
+        <div class="study-chat__handle study-chat__handle--w"  @mousedown.prevent.stop="startResize($event, 'w')"></div>
+        <div class="study-chat__handle study-chat__handle--nw" @mousedown.prevent.stop="startResize($event, 'nw')"></div>
+        <div class="study-chat__handle study-chat__handle--ne" @mousedown.prevent.stop="startResize($event, 'ne')"></div>
+        <div class="study-chat__handle study-chat__handle--sw" @mousedown.prevent.stop="startResize($event, 'sw')"></div>
+        <div class="study-chat__handle study-chat__handle--se" @mousedown.prevent.stop="startResize($event, 'se')"></div>
+        <div v-if="isResizing" class="study-chat__size-badge">{{ resizeBadge }}</div>
       </section>
     
     </main>
@@ -225,6 +240,11 @@ const CHAT_DEFAULT_W = 360
 const CHAT_DEFAULT_H = 480
 const chatSize = ref({ width: CHAT_DEFAULT_W, height: CHAT_DEFAULT_H })
 const dragState = ref(null)
+const isDragging = ref(false)
+const isResizing = ref(false)
+const resizeBadge = ref('')
+const showCountFlash = ref(false)
+let countFlashTimer = 0
 const emojiOpen = ref(false)
 let chatPersistTimer = 0
 
@@ -358,6 +378,14 @@ function ensureProfile() {
   }, 300)
 }
 
+watch(onlineCount, (n, old) => {
+  if (old != null && n !== old) {
+    showCountFlash.value = true
+    if (countFlashTimer) clearTimeout(countFlashTimer)
+    countFlashTimer = window.setTimeout(() => { showCountFlash.value = false }, 600)
+  }
+})
+
 function connectChat() {
   if (socket) return
   const token = getPlatformToken()
@@ -397,9 +425,14 @@ function connectChat() {
         setTimeout(() => { if (chatError.value && chatError.value.indexOf('太快') >= 0) chatError.value = '' }, 2500)
       }
     },
-    onPresence: () => {
-      // presence 事件触发一次在线刷新
-      refreshOnline()
+    onPresence: (data) => {
+      // presence 事件直接带 count,实时更新(不靠 10s 轮询)
+      const c = data && typeof data.count === 'number' ? data.count : null
+      if (c != null) {
+        onlineCount.value = c
+      } else {
+        refreshOnline()
+      }
     },
   })
 }
@@ -434,11 +467,13 @@ function clampChatSize(w, h) {
   }
 }
 
-function startResize(ev) {
+function startResize(ev, dir = 'br') {
   if (ev.button !== 0) return
   ev.stopPropagation()
+  ev.preventDefault()
   const el = chatSectionRef.value
   if (!el) return
+  isResizing.value = true
   const startW = el.offsetWidth
   const startH = el.offsetHeight
   const startX = ev.clientX
@@ -446,12 +481,27 @@ function startResize(ev) {
   const onMove = (e) => {
     const dw = e.clientX - startX
     const dh = e.clientY - startY
-    const next = clampChatSize(startW + dw, startH + dh)
-    chatSize.value = next
+    let nw = startW
+    let nh = startH
+    let nx = chatPos.value.x
+    let ny = chatPos.value.y
+    if (dir.includes('e')) nw = startW + dw
+    if (dir.includes('s')) nh = startH + dh
+    if (dir.includes('w')) { nw = startW - dw; nx = chatPos.value.x + (startW - nw) }
+    if (dir.includes('n')) { nh = startH - dh; ny = chatPos.value.y + (startH - nh) }
+    const clamped = clampChatSize(nw, nh)
+    // 如果被夹住,补偿位置避免视觉跳
+    if (clamped.width !== nw && dir.includes('w')) nx += (nw - clamped.width)
+    if (clamped.height !== nh && dir.includes('n')) ny += (nh - clamped.height)
+    chatSize.value = clamped
+    chatPos.value = clampChatPos(nx, ny)
+    resizeBadge.value = `${clamped.width} × ${clamped.height}`
   }
   const onUp = () => {
     document.removeEventListener('mousemove', onMove)
     document.removeEventListener('mouseup', onUp)
+    isResizing.value = false
+    resizeBadge.value = ''
     chatPos.value = clampChatPos(chatPos.value.x, chatPos.value.y)
     persistChatPos()
   }
@@ -463,6 +513,7 @@ function startDrag(ev) {
   if (ev.button !== 0) return
   const el = chatSectionRef.value
   if (!el) return
+  isDragging.value = true
   dragState.value = {
     startX: ev.clientX,
     startY: ev.clientY,
@@ -473,10 +524,23 @@ function startDrag(ev) {
     if (!dragState.value) return
     const dx = e.clientX - dragState.value.startX
     const dy = e.clientY - dragState.value.startY
-    chatPos.value = clampChatPos(dragState.value.baseX + dx, dragState.value.baseY + dy)
+    let nx = dragState.value.baseX + dx
+    let ny = dragState.value.baseY + dy
+    // 边缘吸附:离边 18px 内时夹到 12px
+    const stage = document.querySelector('.pomo-study-room')
+    if (stage && el) {
+      const sr = stage.getBoundingClientRect()
+      const er = el.getBoundingClientRect()
+      if (er.left - sr.left < 18) nx = 24 - (er.left - sr.left)
+      if (sr.right - er.right < 18) nx = (sr.right - er.right) - 24
+      if (er.top - sr.top < 18) ny = 60 - (er.top - sr.top)
+      if (sr.bottom - er.bottom < 18) ny = (sr.bottom - er.bottom) - 24
+    }
+    chatPos.value = clampChatPos(nx, ny)
   }
   const onUp = () => {
     dragState.value = null
+    isDragging.value = false
     document.removeEventListener('mousemove', onMove)
     document.removeEventListener('mouseup', onUp)
     persistChatPos()
@@ -493,6 +557,17 @@ function persistChatPos() {
       localStorage.setItem(CHAT_POS_KEY, JSON.stringify({ ...chatPos.value, ...chatSize.value }))
     } catch (e) {}
   }, 400)
+}
+
+function resetChat() {
+  chatPos.value = { x: 0, y: 0 }
+  chatSize.value = { width: CHAT_DEFAULT_W, height: CHAT_DEFAULT_H }
+  persistChatPos()
+}
+
+function centerChat() {
+  chatPos.value = { x: 0, y: 0 }
+  persistChatPos()
 }
 
 function loadChatPos() {
@@ -574,7 +649,7 @@ onMounted(() => {
   if (chatSectionRef.value) chatSectionRef.value.__onDocClick = onDocClick
   // 初始拉历史 + 在线 + 试连 WS
   refreshOnline()
-  presenceTimer = setInterval(refreshOnline, 10000)
+  presenceTimer = setInterval(refreshOnline, 5000)
   // 拉一次历史(无需登录)
   fetchStudyRoomMessages({ limit: 50 })
     .then((res) => applyHistory((res && res.data && res.data.items) || []))
@@ -813,10 +888,17 @@ defineExpose({ roomRef })
   background: rgba(8, 10, 14, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pomo-study-room__chat.is-dragging,
+.pomo-study-room__chat.is-resizing {
+  border-color: var(--orange, #ff7a45);
+  box-shadow: 0 0 0 2px rgba(255, 122, 69, 0.18), 0 12px 32px rgba(0, 0, 0, 0.55);
+  user-select: none;
 }
 
 .study-chat__head {
@@ -832,24 +914,74 @@ defineExpose({ roomRef })
   user-select: none;
 }
 
-.study-chat__resize {
+/* 8 方向 resize 把手 */
+.study-chat__handle {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 16px;
-  height: 16px;
-  cursor: nwse-resize;
-  z-index: 2;
-  background:
-    linear-gradient(currentColor, currentColor) right 3px bottom 3px / 9px 1.5px no-repeat,
-    linear-gradient(currentColor, currentColor) right 3px bottom 7px / 5px 1.5px no-repeat;
-  color: rgba(255, 255, 255, 0.45);
+  z-index: 3;
   user-select: none;
   touch-action: none;
-  transition: color 0.15s;
+  transition: background 0.15s;
 }
-.study-chat__resize:hover {
-  color: var(--orange, #ff7a45);
+.study-chat__handle--n  { top: 0; left: 12px; right: 12px; height: 6px; cursor: ns-resize; }
+.study-chat__handle--s  { bottom: 0; left: 12px; right: 12px; height: 6px; cursor: ns-resize; }
+.study-chat__handle--e  { top: 12px; bottom: 12px; right: 0; width: 6px; cursor: ew-resize; }
+.study-chat__handle--w  { top: 12px; bottom: 12px; left: 0; width: 6px; cursor: ew-resize; }
+.study-chat__handle--nw { top: 0; left: 0; width: 14px; height: 14px; cursor: nwse-resize; }
+.study-chat__handle--ne { top: 0; right: 0; width: 14px; height: 14px; cursor: nesw-resize; }
+.study-chat__handle--sw { bottom: 0; left: 0; width: 14px; height: 14px; cursor: nesw-resize; }
+.study-chat__handle--se { bottom: 0; right: 0; width: 14px; height: 14px; cursor: nwse-resize; }
+.study-chat__handle:hover {
+  background: rgba(255, 122, 69, 0.18);
+}
+.study-chat__handle--nw:hover, .study-chat__handle--se:hover {
+  background: linear-gradient(135deg, transparent 45%, rgba(255, 122, 69, 0.25) 50%, transparent 55%);
+}
+.study-chat__handle--ne:hover, .study-chat__handle--sw:hover {
+  background: linear-gradient(225deg, transparent 45%, rgba(255, 122, 69, 0.25) 50%, transparent 55%);
+}
+
+.study-chat__size-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 24px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--orange, #ff7a45);
+  color: #fff;
+  font-size: 0.7rem;
+  font-family: var(--mono, monospace);
+  border-radius: 4px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.study-chat__reset-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.study-chat__reset-btn:hover {
+  background: var(--orange, #ff7a45);
+  color: #fff;
+  border-color: var(--orange, #ff7a45);
+}
+
+.study-chat__title.is-flash,
+.study-chat__dot.is-flash {
+  animation: count-flash 0.6s ease;
+}
+@keyframes count-flash {
+  0%   { color: var(--orange, #ff7a45); transform: scale(1.15); }
+  100% { color: inherit; transform: scale(1); }
 }
 
 .study-chat__emoji-btn {

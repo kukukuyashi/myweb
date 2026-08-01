@@ -129,6 +129,10 @@ def _collect_online_user_ids() -> list[int]:
     except Exception:
         return list(_local_conns.keys())
 
+def _get_online_count() -> int:
+    """实时在线人数(供 presence 事件用)"""
+    return len(_collect_online_user_ids())
+
 
 def _rate_limit_check(user_id: int) -> bool:
     cli = _client()
@@ -253,6 +257,16 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
     await websocket.accept()
     _set_online(user.id)
     _local_conns[user.id].add(websocket)
+    # 广播 join(带 count,前端不需 HTTP /online)
+    try:
+        await _broadcast_local({
+            "type": "presence",
+            "event": "join",
+            "user_id": user.id,
+            "count": _get_online_count(),
+        })
+    except Exception:
+        pass
 
     # 推最近历史
     try:
@@ -405,6 +419,11 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
             del _local_conns[user.id]
         _clear_online(user.id)
         try:
-            await _broadcast_local({"type": "presence", "event": "leave", "user_id": user.id})
+            await _broadcast_local({
+                "type": "presence",
+                "event": "leave",
+                "user_id": user.id,
+                "count": _get_online_count(),
+            })
         except Exception:
             pass
