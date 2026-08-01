@@ -158,21 +158,21 @@
         <div class="study-chat__handle study-chat__handle--se" @mousedown.prevent.stop="startResize($event, 'se')"></div>
         <div v-if="isResizing" class="study-chat__size-badge">{{ resizeBadge }}</div>
       </section>
-      
-      <!-- 隐藏后的浮气泡 -->
-      <button
-        v-show="isChatHidden"
-        type="button"
-        class="chat-bubble"
-        title="展开聊天"
-        @click="toggleHide"
-      >
-        <span class="chat-bubble__icon">💬</span>
-        <span class="chat-bubble__count">在线 {{ onlineCount }}</span>
-        <span v-if="unreadCount" class="chat-bubble__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
-      </button>
-    
     </main>
+
+    <!-- 隐藏后的浮气泡:放在 .pomo-study-room 直接子级,避免被 footer/main 遮挡 -->
+    <button
+      v-show="isChatHidden"
+      type="button"
+      class="chat-bubble"
+      title="展开聊天"
+      @mousedown.stop
+      @click.stop="toggleHide"
+    >
+      <span class="chat-bubble__icon">💬</span>
+      <span class="chat-bubble__count">在线 {{ onlineCount }}</span>
+      <span v-if="unreadCount" class="chat-bubble__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    </button>
 
     <aside class="pomo-study-room__side">
       <button
@@ -641,7 +641,8 @@ function loadChatPos() {
 function sendSticker(s) {
   if (!canSend.value) return
   const url = stickerUrl(s)
-  const ok = socket && socket.send(JSON.stringify({ type: 'msg', content: null, sticker_url: url }))
+  // 直接传对象,send() 内部 JSON.stringify;不要在外层再 stringify,否则 content 会被双层包成字符串
+  const ok = socket && socket.send({ type: 'msg', content: null, sticker_url: url })
   if (ok) emojiOpen.value = false
 }
 
@@ -1046,13 +1047,13 @@ defineExpose({ roomRef })
   border-color: var(--orange, #ff7a45);
 }
 
-/* 浮气泡(隐藏 chat 后显示在右下角) */
+/* 浮气泡(隐藏 chat 后显示在右下角) — 挂在 .pomo-study-room 直接子级,确保最顶层 */
 .chat-bubble {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1064,7 +1065,8 @@ defineExpose({ roomRef })
   border-radius: 50%;
   box-shadow: 0 6px 20px rgba(255, 122, 69, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  z-index: 20;
+  z-index: 100;
+  pointer-events: auto;
   font-family: var(--mono, monospace);
   animation: bubble-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: transform 0.15s;
