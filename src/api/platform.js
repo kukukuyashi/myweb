@@ -508,10 +508,17 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
   connect()
 
   return {
-    send(content) {
+    send(payload) {
       if (!ws || ws.readyState !== 1) return false
       try {
-        ws.send(JSON.stringify({ type: 'msg', content }))
+        // 兼容两种调用:
+        //  send({ type: 'msg', content: text })  文本
+        //  send({ type: 'msg', content: null, sticker_url: url })  表情
+        //  send('纯文本')  旧 API(自动包成 {type,content})
+        const body = (typeof payload === 'string')
+          ? { type: 'msg', content: payload }
+          : payload
+        ws.send(JSON.stringify(body))
         return true
       } catch { return false }
     },

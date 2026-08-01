@@ -194,12 +194,27 @@
       </div>
     </aside>
 
-    <footer class="pomo-study-room__bar">
+    <footer v-show="!isFooterHidden" class="pomo-study-room__bar">
       <button type="button" class="pomo-study-room__music" @click="$emit('toggle-ambient')">
         <span class="pomo-study-room__music-icon">{{ ambientPlaying ? '❚❚' : '♫' }}</span>
         <span class="pomo-study-room__music-text">{{ ambientLabel }}</span>
       </button>
+      <button
+        type="button"
+        class="pomo-study-room__hide-bar"
+        title="隐藏底部栏"
+        @click="toggleFooter"
+      >▴</button>
     </footer>
+
+    <!-- footer 隐藏后,底部留一条 toggle 条 -->
+    <button
+      v-show="isFooterHidden"
+      type="button"
+      class="pomo-study-room__bar-toggle"
+      title="展开底部栏"
+      @click="toggleFooter"
+    >▾ 底部</button>
   </div>
 </template>
 
@@ -263,6 +278,7 @@ const resizeBadge = ref('')
 const showCountFlash = ref(false)
 const isChatHidden = ref(false)
 const unreadCount = ref(0)
+const isFooterHidden = ref(false)
 let countFlashTimer = 0
 const emojiOpen = ref(false)
 let chatPersistTimer = 0
@@ -602,6 +618,10 @@ function toggleHide() {
     unreadCount.value = 0
     nextTick(() => scrollToBottom(true))
   }
+}
+
+function toggleFooter() {
+  isFooterHidden.value = !isFooterHidden.value
 }
 
 function loadChatPos() {
@@ -1453,6 +1473,61 @@ defineExpose({ roomRef })
   padding: 0.65rem clamp(1rem, 3vw, 2rem) 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.35);
+}
+
+.pomo-study-room__hide-bar {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.pomo-study-room__hide-bar:hover {
+  background: var(--orange, #ff7a45);
+  color: #fff;
+  border-color: var(--orange, #ff7a45);
+}
+
+/* footer 隐藏后,底部一条 24px 高的薄条 */
+.pomo-study-room__bar-toggle {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 18;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 24px;
+  padding: 0 0.85rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  font-family: var(--mono, monospace);
+  transition: all 0.15s;
+  animation: bar-rise 0.25s ease;
+}
+.pomo-study-room__bar-toggle:hover {
+  background: var(--orange, #ff7a45);
+  color: #fff;
+  border-color: var(--orange, #ff7a45);
+}
+@keyframes bar-rise {
+  from { transform: translate(-50%, 100%); opacity: 0; }
+  to   { transform: translate(-50%, 0);    opacity: 1; }
 }
 
 .pomo-study-room__music {
