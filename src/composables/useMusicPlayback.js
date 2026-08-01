@@ -6,6 +6,7 @@ import { getGlobalAudio } from '../utils/musicAudio.js'
 
 let engineStarted = false
 let engineInitialized = false
+const R2_HOST = 'pub-17cd91d3e6a44ab4b50085daaf02beda.r2.dev' 
 
 function resolveSrc(src) {
   try {
@@ -57,6 +58,7 @@ export async function playCurrentTrack() {
   }
 
   const resolved = resolveSrc(song.src)
+  let playRetried = false
   musicStore.setPlaying(true)
 
   try {
@@ -75,6 +77,24 @@ export async function playCurrentTrack() {
     }
     return true
   } catch (err) {
+    // R2 不稳定时降级到本地(同源,走 nginx)
+    if (resolved.includes(R2_HOST) && !playRetried) {
+      playRetried = true
+      const localUrl = resolved.replace('https://' + R2_HOST, window.location.origin + '/myweb')
+      console.warn('[music] R2 失败,降级到本地', localUrl)
+      try {
+        audio.pause()
+        audio.src = localUrl
+        audio.load()
+        await waitCanPlay(audio)
+        audio.volume = Math.max(0, Math.min(1, Number.isFinite(musicStore.volume) ? musicStore.volume : 0.8))
+        await audio.play()
+        if (audio.duration && Number.isFinite(audio.duration)) musicStore.setDuration(audio.duration)
+        return true
+      } catch (err2) {
+        console.error('[music] 本地也失败', err2, { src: localUrl, readyState: audio.readyState })
+      }
+    }
     console.error('[music] 播放失败', err, { src: resolved, readyState: audio.readyState })
     musicStore.setPlaying(false)
     return false
@@ -156,20 +176,8 @@ function bindListeners(audio) {
     if (audio.duration) musicStore.setDuration(audio.duration)
   })
 
-  const R2_HOST = 'pub-17cd91d3e6a44ab4b50085daaf02beda.r2.dev'
-  const retried = new WeakSet()
   audio.addEventListener('error', () => {
     console.error('[music] audio error', audio.error, audio.src)
-    const src = audio.src || ''
-    if (src.includes(R2_HOST) && !retried.has(audio)) {
-      retried.add(audio)
-      const localUrl = src.replace('https://' + R2_HOST, window.location.origin + '/myweb')
-      console.warn('[music] R2 失败,降级到本地', localUrl)
-      audio.src = localUrl
-      audio.load()
-      if (musicStore.isPlaying) void audio.play().catch(() => {})
-      return
-    }
     musicStore.setPlaying(false)
   })
 }
