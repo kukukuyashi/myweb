@@ -207,6 +207,7 @@ defineEmits([
 ])
 
 const roomRef = ref(null)
+const chatSectionRef = ref(null)
 const memoOpen = ref(false)
 const wallClock = ref('--:--')
 const clockIso = ref('')

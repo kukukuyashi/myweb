@@ -156,8 +156,20 @@ function bindListeners(audio) {
     if (audio.duration) musicStore.setDuration(audio.duration)
   })
 
+  const R2_HOST = 'pub-17cd91d3e6a44ab4b50085daaf02beda.r2.dev'
+  const retried = new WeakSet()
   audio.addEventListener('error', () => {
     console.error('[music] audio error', audio.error, audio.src)
+    const src = audio.src || ''
+    if (src.includes(R2_HOST) && !retried.has(audio)) {
+      retried.add(audio)
+      const localUrl = src.replace('https://' + R2_HOST, window.location.origin + '/myweb')
+      console.warn('[music] R2 失败,降级到本地', localUrl)
+      audio.src = localUrl
+      audio.load()
+      if (musicStore.isPlaying) void audio.play().catch(() => {})
+      return
+    }
     musicStore.setPlaying(false)
   })
 }
