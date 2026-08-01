@@ -640,10 +640,15 @@ function loadChatPos() {
 }
 
 function sendSticker(s) {
-  if (!canSend.value) return
   const url = stickerUrl(s)
-  // 直接传对象,send() 内部 JSON.stringify;不要在外层再 stringify,否则 content 会被双层包成字符串
+  const dbg = { id: s && s.id, url, canSend: canSend.value, hasSocket: !!socket, readyState: socket && socket.readyState };
+  console.log('[sticker] send', dbg)
+  if (!canSend.value) {
+    console.warn('[sticker] blocked: canSend=false (token/socket not ready)')
+    return
+  }
   const ok = socket && socket.send({ type: 'msg', content: null, sticker_url: url })
+  console.log('[sticker] sent=', ok)
   if (ok) emojiOpen.value = false
 }
 
