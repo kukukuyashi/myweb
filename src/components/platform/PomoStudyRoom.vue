@@ -53,12 +53,40 @@
         </div>
       </div>
 
-      <section class="pomo-study-room__chat study-chat" aria-label="自习室聊天室">
-        <header class="study-chat__head">
+      <section
+        ref="chatSectionRef"
+        class="pomo-study-room__chat study-chat"
+        :style="chatStyle"
+        aria-label="自习室聊天室"
+      >
+        <header
+          class="study-chat__head study-chat__head--draggable"
+          @mousedown.prevent="startDrag"
+        >
           <span class="study-chat__dot" :class="{ 'is-on': socketReady }"></span>
           <span class="study-chat__title">在线 {{ onlineCount }} 人 · 全局自习室</span>
           <span class="study-chat__status" v-if="chatError">{{ chatError }}</span>
+          <button
+            type="button"
+            class="study-chat__emoji-btn"
+            :aria-expanded="emojiOpen"
+            title="表情包"
+            @mousedown.stop
+            @click="emojiOpen = !emojiOpen"
+          >😀</button>
         </header>
+        <div v-if="emojiOpen" class="study-chat__emoji-panel" @mousedown.stop>
+          <button
+            v-for="st in chatStickers"
+            :key="st.id"
+            type="button"
+            class="study-chat__emoji-item"
+            :title="st.label"
+            @click="sendSticker(st)"
+          >
+            <img :src="stickerUrl(st)" :alt="st.label" loading="lazy" />
+          </button>
+        </div>
         <ul ref="listRef" class="study-chat__list" @scroll.passive="onListScroll">
           <li v-if="messages.length === 0" class="study-chat__empty">还没有人发言,来聊一句吧 ☕</li>
           <li
@@ -75,7 +103,15 @@
                 <span class="study-chat__name">{{ m.nickname || m.username }}</span>
                 <time class="study-chat__time" :datetime="m.created_at">{{ formatTime(m.created_at) }}</time>
               </div>
-              <p class="study-chat__text">{{ m.content }}</p>
+              <img
+            v-if="m.message_type === 'sticker' && m.sticker_url"
+            class="study-chat__sticker"
+            :src="resolveMediaUrl(m.sticker_url)"
+            :alt="m.content || 'sticker'"
+            loading="lazy"
+            @error="onStickerError($event)"
+          />
+          <p v-else class="study-chat__text">{{ m.content }}</p>
             </div>
           </li>
         </ul>
@@ -126,7 +162,6 @@
         <span class="pomo-study-room__music-icon">{{ ambientPlaying ? '❚❚' : '♫' }}</span>
         <span class="pomo-study-room__music-text">{{ ambientLabel }}</span>
       </button>
-      <p class="pomo-study-room__credit">参考 Study with Miku 自习室体验 · CYINC 版</p>
     </footer>
   </div>
 </template>
@@ -141,6 +176,7 @@ import {
   openStudyRoomSocket,
   resolveMediaUrl,
 } from '../../api/platform.js'
+import { chatStickers, stickerUrl } from '../../data/chatStickers.js'
 
 const props = defineProps({
   companion: { type: Object, required: true },
@@ -175,6 +211,17 @@ const memoOpen = ref(false)
 const wallClock = ref('--:--')
 const clockIso = ref('')
 let clockId = null
+
+/* chat 位置(localStorage 记忆) */
+const CHAT_POS_KEY = 'pomo:chat-pos'
+const chatPos = ref({ x: 0, y: 0 })
+const dragState = ref(null)
+const emojiOpen = ref(false)
+let chatPersistTimer = 0
+
+const chatStyle = computed(() => ({
+  transform: `translate(${chatPos.value.x}px, ${chatPos.value.y}px)`,
+}))
 
 const messages = ref([])
 const draft = ref('')
@@ -346,6 +393,81 @@ function connectChat() {
   })
 }
 
+function clampChatPos(x, y) {
+  const stage = document.querySelector('.pomo-study-room')
+  const el = chatSectionRef.value
+  if (!stage || !el) return { x, y }
+  const sr = stage.getBoundingClientRect()
+  const er = el.getBoundingClientRect()
+  const minX = 24 - er.left + sr.left
+  const maxX = sr.right - er.right - 24
+  const minY = 60 - er.top + sr.top
+  const maxY = sr.bottom - er.bottom - 24
+  return {
+    x: Math.max(minX, Math.min(maxX, x)),
+    y: Math.max(minY, Math.min(maxY, y)),
+  }
+}
+
+function startDrag(ev) {
+  if (ev.button !== 0) return
+  const el = chatSectionRef.value
+  if (!el) return
+  dragState.value = {
+    startX: ev.clientX,
+    startY: ev.clientY,
+    baseX: chatPos.value.x,
+    baseY: chatPos.value.y,
+  }
+  const onMove = (e) => {
+    if (!dragState.value) return
+    const dx = e.clientX - dragState.value.startX
+    const dy = e.clientY - dragState.value.startY
+    chatPos.value = clampChatPos(dragState.value.baseX + dx, dragState.value.baseY + dy)
+  }
+  const onUp = () => {
+    dragState.value = null
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    persistChatPos()
+  }
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
+}
+
+function persistChatPos() {
+  if (chatPersistTimer) return
+  chatPersistTimer = window.setTimeout(() => {
+    chatPersistTimer = 0
+    try { localStorage.setItem(CHAT_POS_KEY, JSON.stringify(chatPos.value)) } catch (e) {}
+  }, 400)
+}
+
+function loadChatPos() {
+  try {
+    const raw = localStorage.getItem(CHAT_POS_KEY)
+    if (!raw) return
+    const data = JSON.parse(raw)
+    if (data && typeof data.x === 'number' && typeof data.y === 'number') {
+      chatPos.value = { x: data.x, y: data.y }
+    }
+  } catch (e) {}
+}
+
+function sendSticker(s) {
+  if (!canSend.value) return
+  const url = stickerUrl(s)
+  const ok = socket && socket.send(JSON.stringify({ type: 'msg', content: null, sticker_url: url }))
+  if (ok) emojiOpen.value = false
+}
+
+function onStickerError(ev) {
+  const el = ev && ev.target
+  if (!el) return
+  el.classList.add('is-broken')
+  el.alt = '[图片加载失败]'
+}
+
 function disconnectChat() {
   if (socket) {
     try { socket.close() } catch (e) {}
@@ -386,6 +508,15 @@ function onSend() {
 onMounted(() => {
   tickClock()
   clockId = setInterval(tickClock, 1000)
+  loadChatPos()
+  // 点击 chat 区域外关闭 emoji 面板
+  const onDocClick = (e) => {
+    const root = chatSectionRef.value
+    if (!root) return
+    if (!root.contains(e.target)) emojiOpen.value = false
+  }
+  document.addEventListener('mousedown', onDocClick)
+  if (chatSectionRef.value) chatSectionRef.value.__onDocClick = onDocClick
   // 初始拉历史 + 在线 + 试连 WS
   refreshOnline()
   presenceTimer = setInterval(refreshOnline, 10000)
@@ -401,6 +532,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (clockId) clearInterval(clockId)
+  if (chatPersistTimer) { clearTimeout(chatPersistTimer); chatPersistTimer = 0 }
+  try {
+    const fn = chatSectionRef.value && chatSectionRef.value.__onDocClick
+    if (fn) document.removeEventListener('mousedown', fn)
+  } catch (e) {}
+  try { localStorage.setItem(CHAT_POS_KEY, JSON.stringify(chatPos.value)) } catch (e) {}
   if (presenceTimer) clearInterval(presenceTimer)
   if (profileTimer) clearTimeout(profileTimer)
   disconnectChat()
@@ -608,10 +745,13 @@ defineExpose({ roomRef })
 }
 
 .pomo-study-room__chat {
-  position: relative;
-  z-index: 2;
-  grid-column: 2;
-  align-self: stretch;
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: clamp(300px, 32vw, 420px);
+  max-width: calc(100vw - 3rem);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -634,6 +774,76 @@ defineExpose({ roomRef })
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.78);
   background: rgba(0, 0, 0, 0.25);
+  cursor: move;
+  user-select: none;
+}
+
+.study-chat__emoji-btn {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.study-chat__emoji-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: color-mix(in srgb, var(--study-accent) 50%, transparent);
+}
+
+.study-chat__emoji-panel {
+  position: absolute;
+  top: 100%;
+  right: 0.5rem;
+  margin-top: 0.4rem;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  padding: 0.5rem;
+  background: rgba(10, 14, 22, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  max-width: 320px;
+}
+
+.study-chat__emoji-item {
+  width: 52px;
+  height: 52px;
+  padding: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
+}
+
+.study-chat__emoji-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: color-mix(in srgb, var(--study-accent) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+.study-chat__emoji-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .study-chat__dot {
@@ -762,6 +972,28 @@ defineExpose({ roomRef })
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.study-chat__sticker {
+  display: block;
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px;
+  object-fit: contain;
+}
+
+.study-chat__sticker.is-broken {
+  outline: 1px dashed rgba(255, 100, 100, 0.6);
+  background: rgba(255, 100, 100, 0.08);
+  min-width: 80px;
+  min-height: 60px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 100, 100, 0.7);
+  font-size: 0.7rem;
 }
 
 .study-chat__form {

@@ -62,6 +62,8 @@ def _to_public_dict(msg: StudyRoomMessage, user: User | None) -> dict:
             "nickname": None,
             "avatar": None,
             "content": msg.content,
+            "message_type": msg.message_type or "text",
+            "sticker_url": msg.sticker_url,
             "created_at": created_iso,
         }
     return {
@@ -71,6 +73,8 @@ def _to_public_dict(msg: StudyRoomMessage, user: User | None) -> dict:
         "nickname": user.nickname,
         "avatar": user.avatar,
         "content": msg.content,
+        "message_type": msg.message_type or "text",
+        "sticker_url": msg.sticker_url,
         "created_at": created_iso,
     }
 
@@ -337,15 +341,28 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
             if t == "pong":
                 continue
             if t == "msg":
-                content = (data.get("content") or "")
-                if not isinstance(content, str):
+                raw_content = data.get("content")
+                raw_sticker = data.get("sticker_url")
+                content = raw_content.strip() if isinstance(raw_content, str) else ""
+                sticker = raw_sticker.strip() if isinstance(raw_sticker, str) else ""
+                if not content and not sticker:
                     continue
-                content = content.strip()
-                if not content:
-                    continue
-                if len(content) > 500:
+                if content and len(content) > 500:
                     await _send_text(websocket, {"type": "err", "reason": "too_long"})
                     continue
+                if sticker and len(sticker) > 512:
+                    await _send_text(websocket, {"type": "err", "reason": "too_long"})
+                    continue
+                # sticker URL 白名单:防滥用(仅允许同源静态 + 后端 uploads)
+                if sticker:
+                    allowed = (
+                        sticker.startswith("https://")
+                        or sticker.startswith("/myweb/img/bqb/")
+                        or sticker.startswith("/uploads/")
+                    )
+                    if not allowed:
+                        await _send_text(websocket, {"type": "err", "reason": "bad_sticker"})
+                        continue
                 if not _rate_limit_check(user.id):
                     await _send_text(websocket, {"type": "err", "reason": "rate"})
                     continue
@@ -353,7 +370,12 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
                 try:
                     db = SessionLocal()
                     try:
-                        row = StudyRoomMessage(user_id=user.id, content=content)
+                        row = StudyRoomMessage(
+                            user_id=user.id,
+                            content=content or None,
+                            message_type="sticker" if sticker else "text",
+                            sticker_url=sticker or None,
+                        )
                         db.add(row)
                         db.commit()
                         db.refresh(row)

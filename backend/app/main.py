@@ -87,6 +87,14 @@ def _ensure_schema_patches() -> None:
         if "status" not in cols:
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE anime_watchlist ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT 'plan'"))
+    if insp.has_table("study_room_messages"):
+        cols = {c["name"] for c in insp.get_columns("study_room_messages")}
+        with engine.begin() as conn:
+            if "message_type" not in cols:
+                conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN message_type VARCHAR(20) NOT NULL DEFAULT 'text'"))
+                conn.execute(text("CREATE INDEX ix_study_room_messages_message_type ON study_room_messages (message_type)"))
+            if "sticker_url" not in cols:
+                conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN sticker_url VARCHAR(512) NULL"))
     _ensure_cascade_fks(insp)
     _cleanup_discarded_submissions(insp)
 
