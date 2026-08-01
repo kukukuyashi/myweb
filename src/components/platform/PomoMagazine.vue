@@ -1,81 +1,159 @@
 <template>
   <div
-    class="pomo-mag"
+    class="pomo-clock"
     :class="{
-      'pomo-mag--running': running,
-      'pomo-mag--low': remainingRatio < 0.15,
-      'pomo-mag--break': mode === 'break',
+      'pomo-clock--focus': mode === 'focus',
+      'pomo-clock--break': mode === 'break',
+      'pomo-clock--running': running,
+      'pomo-clock--low': remainingRatio < 0.15 && mode === 'focus',
     }"
-    :style="{ '--mag-accent': accent }"
+    :style="cssVars"
+    role="timer"
+    :aria-label="ariaLabel"
   >
-    <div class="pomo-mag__cockpit">
-      <div class="pomo-mag__display">
-        <div class="pomo-mag__time">{{ displayTime }}</div>
-        <p class="pomo-mag__hud">{{ hudLine }}</p>
-      </div>
+    <p class="pomo-clock__hud">{{ hudLine }}</p>
 
-      <aside class="pomo-mag__gear" :aria-label="gearLabel">
-        <!-- 专注：弹匣 -->
-        <div v-if="mode === 'focus'" class="pomo-mag__magazine">
-          <p class="pomo-mag__tag">AMMO · MAG</p>
-          <div class="pomo-mag__slots" :style="slotGridStyle">
-            <div
-              v-for="i in segments.visualCount"
-              :key="`round-${i}`"
-              class="pomo-mag__round"
-              :class="{
-                'is-spent': roundSpent(i),
-                'is-next': roundNext(i),
-              }"
-            >
-              <span
-                v-if="!roundSpent(i)"
-                class="pomo-mag__round-fill"
-                :style="{ width: `${roundFill(i) * 100}%` }"
-              />
-            </div>
-          </div>
-          <p v-if="segmentHintText" class="pomo-mag__segment-hint">{{ segmentHintText }}</p>
-          <p class="pomo-mag__count">{{ remainingRounds }}/{{ totalMinutes }}</p>
-        </div>
+    <div class="pomo-clock__stage">
+      <div class="pomo-clock__aura" aria-hidden="true" />
+      <div class="pomo-clock__ripple" aria-hidden="true" />
 
-        <!-- 休息：医疗包 RELOAD -->
-        <div v-else class="pomo-mag__medkit">
-          <p class="pomo-mag__tag">RELOAD · MED</p>
-          <div class="pomo-mag__med-body">
-            <span class="pomo-mag__cross" aria-hidden="true">+</span>
-            <div class="pomo-mag__med-slots" :style="slotGridStyle">
-              <div
-                v-for="i in segments.visualCount"
-                :key="`med-${i}`"
-                class="pomo-mag__med-cell"
-                :class="{ 'is-next': medNext(i) }"
-              >
-                <span class="pomo-mag__med-fill" :style="{ width: `${medFill(i) * 100}%` }" />
-              </div>
-            </div>
-          </div>
-          <p v-if="segmentHintText" class="pomo-mag__segment-hint">{{ segmentHintText }}</p>
-          <p class="pomo-mag__count">{{ reloadProgress }}/{{ totalMinutes }}</p>
-        </div>
+      <svg
+        class="pomo-clock__disc"
+        viewBox="0 0 200 200"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="ink-wobble" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="t" />
+            <feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" />
+          </filter>
+          <filter id="ink-tip" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="7" result="t" />
+            <feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" />
+          </filter>
+          <radialGradient id="ink-face" cx="50%" cy="42%" r="62%">
+            <stop offset="0%" :stop-color="paperHi" />
+            <stop offset="65%" :stop-color="paperMid" />
+            <stop offset="100%" :stop-color="paperLo" />
+          </radialGradient>
+        </defs>
 
-        <canvas ref="canvasRef" class="pomo-mag__fx" aria-hidden="true" />
-      </aside>
+        <!-- 充墨圆环(仅休息) -->
+        <g v-if="mode === 'break'" class="pomo-clock__charge">
+          <circle
+            class="pomo-clock__charge-ring"
+            cx="100" cy="100" r="84"
+            fill="none"
+            :stroke="inkColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            :stroke-dasharray="chargeLen"
+            :stroke-dashoffset="chargeOffset"
+          />
+        </g>
+
+        <!-- 60 细刻度 -->
+        <g class="pomo-clock__ticks">
+          <line
+            v-for="t in minorTicks"
+            :key="`mi-${t.idx}`"
+            :x1="t.x1" :y1="t.y1" :x2="t.x2" :y2="t.y2"
+            :stroke="inkColor"
+            stroke-width="0.4"
+            stroke-linecap="round"
+            opacity="0.3"
+          />
+        </g>
+
+        <!-- 5 主刻度 + 数字标签 -->
+        <g class="pomo-clock__majors">
+          <template v-for="m in majorTicks" :key="`ma-${m.idx}`">
+            <line
+              :x1="m.x1" :y1="m.y1" :x2="m.x2" :y2="m.y2"
+              :stroke="inkColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              opacity="0.78"
+            />
+            <text
+              :x="m.lx" :y="m.ly"
+              :fill="inkColor"
+              font-size="7"
+              font-family="Kaiti SC, STKaiti, KaiTi, STZhongsong, FangSong, serif"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              opacity="0.6"
+            >{{ m.label }}</text>
+          </template>
+        </g>
+
+        <!-- 底盘:墨纸 -->
+        <circle cx="100" cy="100" r="92" fill="url(#ink-face)" />
+
+        <!-- 外圈 3 条墨线(粗细不等,模拟笔触) -->
+        <g class="pomo-clock__rings" filter="url(#ink-wobble)">
+          <circle cx="100" cy="100" r="88" fill="none" :stroke="inkColor" stroke-width="2.4" opacity="0.85" />
+          <circle cx="101.5" cy="98.5" r="86" fill="none" :stroke="inkColor" stroke-width="1.6" opacity="0.6" />
+          <circle cx="98.5" cy="101.5" r="84" fill="none" :stroke="inkColor" stroke-width="0.8" opacity="0.4" />
+        </g>
+
+        <!-- 指针 -->
+        <g
+          class="pomo-clock__pointer"
+          :style="pointerStyle"
+          filter="url(#ink-tip)"
+        >
+          <path
+            d="M 100 100 Q 100 60 100 18"
+            fill="none"
+            :stroke="inkColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            opacity="0.92"
+          />
+          <circle cx="100" cy="100" r="3.4" :fill="inkColor" opacity="0.92" />
+          <circle cx="100" cy="100" r="1.4" :fill="paperHi" opacity="0.85" />
+        </g>
+
+        <!-- 中心数字 + 副文字 -->
+        <text
+          class="pomo-clock__time"
+          x="100" y="92"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          :fill="inkColor"
+        >{{ displayTime }}</text>
+        <text
+          class="pomo-clock__sub"
+          x="100" y="122"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          :fill="inkColor"
+          opacity="0.5"
+        >{{ minutesLeft }} / {{ totalMinutes }}</text>
+
+        <!-- 墨滴(仅 focus + running) -->
+        <g v-if="mode === 'focus' && running" class="pomo-clock__splatter" aria-hidden="true">
+          <circle
+            v-for="d in drops"
+            :key="`d-${d.idx}`"
+            :cx="100 + d.dx"
+            :cy="100 + d.dy"
+            :r="d.r"
+            :fill="inkColor"
+            :style="{ animationDelay: `${d.delay}s` }"
+          />
+        </g>
+      </svg>
     </div>
 
-    <p v-if="subText" class="pomo-mag__sub">{{ subText }}</p>
+    <p v-if="subText" class="pomo-clock__subtext">{{ subText }}</p>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import {
-  chargedSegmentCount,
-  getTimerSegments,
-  segmentFillRatio,
-  segmentHint,
-  spentSegmentCount,
-} from '../../utils/pomoTimerSegments.js'
+import { computed } from 'vue'
 
 const props = defineProps({
   displayTime: { type: String, required: true },
@@ -88,426 +166,275 @@ const props = defineProps({
   subText: { type: String, default: '' },
 })
 
-const canvasRef = ref(null)
-
-const minutesElapsed = computed(() => {
-  const total = Math.max(0, props.totalMinutes)
-  const elapsed = Math.max(0, props.elapsedSeconds)
-  return Math.min(total, Math.floor(elapsed / 60))
+const inkColor = computed(() => {
+  if (props.mode === 'break') return 'color-mix(in srgb, #5a8aaa 80%, #0a1820)'
+  return 'color-mix(in srgb, #c14a2a 80%, #2a1a14)'
 })
 
-const remainingRounds = computed(() => Math.max(0, props.totalMinutes - minutesElapsed.value))
-const reloadProgress = computed(() => minutesElapsed.value)
+const paperHi = computed(() => props.mode === 'break' ? 'rgba(238, 245, 252, 0.95)' : 'rgba(252, 246, 238, 0.95)')
+const paperMid = computed(() => props.mode === 'break' ? 'rgba(220, 232, 244, 0.82)' : 'rgba(244, 232, 220, 0.82)')
+const paperLo = computed(() => props.mode === 'break' ? 'rgba(190, 210, 230, 0.7)' : 'rgba(220, 200, 180, 0.7)')
 
-const segments = computed(() => getTimerSegments(props.totalMinutes))
-const slotGridStyle = computed(() => ({ '--mag-cols': segments.value.cols }))
-const segmentHintText = computed(() => segmentHint(segments.value.minutesPerSlot, segments.value.visualCount))
+// 指针顺时针:从 12 点扫到 remainingRatio=0 时回到 12 点
+// elapsed = (1 - remainingRatio) * 360
+const pointerAngle = computed(() => (1 - Math.max(0, Math.min(1, props.remainingRatio))) * 360)
 
-function roundSpent(i) {
-  const { minutesPerSlot, visualCount } = segments.value
-  return i <= spentSegmentCount(minutesElapsed.value, minutesPerSlot, visualCount)
-}
+const pointerStyle = computed(() => ({
+  transform: `rotate(${pointerAngle.value}deg)`,
+  transformOrigin: '100px 100px',
+  transformBox: 'fill-box',
+}))
 
-function roundFill(i) {
-  return segmentFillRatio(i - 1, minutesElapsed.value, segments.value.minutesPerSlot, 'focus')
-}
+const minorTicks = computed(() => {
+  const out = []
+  for (let i = 0; i < 60; i++) {
+    if (i % 15 === 0) continue
+    const a = (i * 6 - 90) * Math.PI / 180
+    out.push({
+      idx: i,
+      x1: 100 + 78 * Math.cos(a), y1: 100 + 78 * Math.sin(a),
+      x2: 100 + 81 * Math.cos(a), y2: 100 + 81 * Math.sin(a),
+    })
+  }
+  return out
+})
 
-function roundNext(i) {
-  if (!props.running || props.mode !== 'focus' || remainingRounds.value <= 0) return false
-  const spent = spentSegmentCount(minutesElapsed.value, segments.value.minutesPerSlot, segments.value.visualCount)
-  return i === spent + 1
-}
+const majorTicks = computed(() => {
+  const labels = ['0', '15', '30', '45', '60']
+  const out = []
+  for (let i = 0; i < 5; i++) {
+    const a = (i * 90 - 90) * Math.PI / 180
+    out.push({
+      idx: i,
+      label: labels[i],
+      x1: 100 + 76 * Math.cos(a), y1: 100 + 76 * Math.sin(a),
+      x2: 100 + 84 * Math.cos(a), y2: 100 + 84 * Math.sin(a),
+      lx: 100 + 66 * Math.cos(a), ly: 100 + 66 * Math.sin(a),
+    })
+  }
+  return out
+})
 
-function medFill(i) {
-  return segmentFillRatio(i - 1, minutesElapsed.value, segments.value.minutesPerSlot, 'break')
-}
+const minutesLeft = computed(() => Math.max(0, Math.ceil(props.remainingRatio * props.totalMinutes - 0.001)))
 
-function medNext(i) {
-  if (!props.running || props.mode !== 'break') return false
-  const charged = chargedSegmentCount(minutesElapsed.value, segments.value.minutesPerSlot, segments.value.visualCount)
-  return i === charged + 1
-}
+const chargeLen = 2 * Math.PI * 84
+const chargeOffset = computed(() => chargeLen * (1 - Math.max(0, Math.min(1, props.remainingRatio))))
 
-const gearLabel = computed(() => (
-  props.mode === 'focus'
-    ? `弹匣剩余 ${remainingRounds.value} 发`
-    : `医疗包充能 ${reloadProgress.value}/${props.totalMinutes}`
-))
+const drops = computed(() => {
+  const out = []
+  for (let i = 0; i < 12; i++) {
+    const a = (i * 30 - 90) * Math.PI / 180
+    out.push({
+      idx: i,
+      dx: 95 * Math.cos(a),
+      dy: 95 * Math.sin(a),
+      r: 0.9 + (i % 3) * 0.45,
+      delay: i * 0.22,
+    })
+  }
+  return out
+})
 
 const hudLine = computed(() => {
-  if (props.mode === 'break') return `STAND DOWN · RELOAD ${reloadProgress.value}/${props.totalMinutes}`
-  return `FOCUS FIRE · AMMO ${remainingRounds.value}/${props.totalMinutes}`
-})
-
-const cssAccent = computed(() => {
-  if (!props.accent || props.accent.startsWith('var(')) return '#e85d04'
-  return props.accent
-})
-
-let shells = []
-let rafId = 0
-let lastFiredMinute = 0
-
-function spawnShell(canvas) {
-  const rect = canvas.getBoundingClientRect()
-  const w = rect.width
-  const h = rect.height
-  shells.push({
-    x: w * 0.5 + (Math.random() - 0.5) * 24,
-    y: h * 0.22,
-    vx: (Math.random() - 0.5) * 2.4,
-    vy: 1.2 + Math.random() * 1.5,
-    rot: Math.random() * Math.PI,
-    vr: (Math.random() - 0.5) * 0.22,
-    life: 1,
-    w: 5 + Math.random() * 3,
-    h: 9 + Math.random() * 4,
-  })
-}
-
-function tick() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  const dpr = window.devicePixelRatio || 1
-  const w = canvas.clientWidth
-  const h = canvas.clientHeight
-  if (!w || !h) return
-
-  if (props.mode === 'focus' && props.running) {
-    while (lastFiredMinute < minutesElapsed.value) {
-      spawnShell(canvas)
-      lastFiredMinute += 1
-    }
+  if (props.mode === 'break') {
+    return `屏息 · 充墨 ${Math.min(props.totalMinutes, Math.floor((1 - props.remainingRatio) * props.totalMinutes))} / ${props.totalMinutes}`
   }
-
-  ctx.clearRect(0, 0, w, h)
-
-  const accent = cssAccent.value
-  shells = shells.filter((s) => {
-    s.vy += 0.18
-    s.x += s.vx
-    s.y += s.vy
-    s.rot += s.vr
-    s.life -= 0.012
-
-    if (s.life <= 0 || s.y > h + 20) return false
-
-    ctx.save()
-    ctx.translate(s.x, s.y)
-    ctx.rotate(s.rot)
-    ctx.globalAlpha = Math.min(0.9, s.life)
-    ctx.fillStyle = '#c9a227'
-    ctx.fillRect(-s.w / 2, -s.h / 2, s.w, s.h)
-    ctx.fillStyle = accent
-    ctx.fillRect(-s.w / 2 + 1, -s.h / 2 + 1, s.w - 2, 2)
-    ctx.restore()
-    return true
-  })
-
-  const animating = shells.length > 0
-    || (props.running && props.mode === 'focus')
-    || lastFiredMinute !== minutesElapsed.value
-
-  if (animating) {
-    rafId = requestAnimationFrame(tick)
-  } else {
-    rafId = 0
-  }
-}
-
-function resizeCanvas() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-  const rect = canvas.getBoundingClientRect()
-  const dpr = window.devicePixelRatio || 1
-  canvas.width = Math.floor(rect.width * dpr)
-  canvas.height = Math.floor(rect.height * dpr)
-  const ctx = canvas.getContext('2d')
-  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-}
-
-function startLoop() {
-  if (rafId) return
-  rafId = requestAnimationFrame(tick)
-}
-
-function stopLoop() {
-  if (rafId) {
-    cancelAnimationFrame(rafId)
-    rafId = 0
-  }
-}
-
-function resetFx() {
-  shells = []
-  lastFiredMinute = minutesElapsed.value
-  startLoop()
-}
-
-watch(() => props.elapsedSeconds, (cur, prev) => {
-  if (cur < prev - 20) resetFx()
-  else startLoop()
+  return `墨韵 · 剩余 ${minutesLeft.value} · ${props.totalMinutes}`
 })
 
-watch(() => props.totalMinutes, resetFx)
-watch(() => props.mode, resetFx)
-watch(() => props.running, () => startLoop())
-
-function onResize() {
-  resizeCanvas()
-  startLoop()
-}
-
-onMounted(() => {
-  lastFiredMinute = minutesElapsed.value
-  resizeCanvas()
-  window.addEventListener('resize', onResize)
-  startLoop()
+const ariaLabel = computed(() => {
+  const tag = props.mode === 'focus' ? '专注' : '休息'
+  return `${tag} 剩余 ${props.displayTime}`
 })
 
-onUnmounted(() => {
-  stopLoop()
-  window.removeEventListener('resize', onResize)
-})
+const cssVars = computed(() => ({
+  '--clock-ink': inkColor.value,
+  '--clock-paper': paperMid.value,
+}))
 </script>
 
 <style scoped>
-.pomo-mag {
-  --mag-accent: var(--orange);
+.pomo-clock {
   position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: min(420px, 94vw);
-  margin: 0.65rem auto 0.25rem;
-}
-
-.pomo-mag__cockpit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem 0.5rem;
+  isolation: isolate;
+  font-family: var(--mono, ui-monospace, monospace);
 }
 
-.pomo-mag__gear {
+.pomo-clock__hud {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--clock-ink, rgba(193, 74, 42, 0.78));
+  opacity: 0.85;
+}
+
+.pomo-clock__stage {
   position: relative;
-  width: 100%;
-  max-width: min(280px, 88vw);
-  min-height: 0;
+  width: clamp(180px, 32vw, 280px);
+  height: clamp(180px, 32vw, 280px);
+  display: grid;
+  place-items: center;
 }
 
-.pomo-mag__fx {
+.pomo-clock__aura {
   position: absolute;
-  inset: 0;
+  inset: -10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%,
+    color-mix(in srgb, var(--clock-ink, #c14a2a) 24%, transparent) 0%,
+    color-mix(in srgb, var(--clock-ink, #c14a2a) 8%, transparent) 38%,
+    transparent 68%);
+  pointer-events: none;
+  filter: blur(10px);
+  z-index: 0;
+  animation: ink-breathe 9s ease-in-out infinite;
+}
+
+.pomo-clock--break .pomo-clock__aura {
+  animation-direction: reverse;
+  animation-duration: 11s;
+}
+
+.pomo-clock--running .pomo-clock__aura {
+  animation-duration: 6s;
+  opacity: 1;
+}
+
+.pomo-clock__disc {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: 2;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--clock-ink, #c14a2a) 28%, transparent));
+  animation: ink-disc-pulse 4s ease-in-out infinite;
 }
 
-.pomo-mag__tag {
-  margin: 0 0 0.35rem;
-  font-family: var(--mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.12em;
-  color: color-mix(in srgb, var(--mag-accent) 80%, var(--text-muted));
-  text-align: center;
+.pomo-clock--break .pomo-clock__disc {
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--clock-ink, #5a8aaa) 28%, transparent));
 }
 
-.pomo-mag__magazine,
-.pomo-mag__medkit {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  padding: 0.55rem 0.65rem 0.45rem;
-  border: 2px solid color-mix(in srgb, var(--mag-accent) 45%, var(--border));
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--bg-paper) 88%, var(--mag-accent)) 0%,
-    color-mix(in srgb, var(--bg) 95%, #000) 100%
-  );
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+.pomo-clock--low .pomo-clock__disc {
+  filter: drop-shadow(0 0 24px rgba(217, 71, 43, 0.4));
+  animation-duration: 1.8s;
 }
 
-.pomo-mag__medkit {
-  border-color: color-mix(in srgb, #5a9fd4 50%, var(--border));
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--bg-paper) 90%, #5a9fd4) 0%,
-    color-mix(in srgb, var(--bg) 95%, #0a1520) 100%
-  );
-}
-
-.pomo-mag__med-body {
-  position: relative;
-  padding-top: 0.15rem;
-}
-
-.pomo-mag__cross {
+.pomo-clock__ripple {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -58%);
-  font-size: 1.75rem;
-  font-weight: 300;
-  line-height: 1;
-  color: color-mix(in srgb, #5a9fd4 35%, transparent);
+  inset: -4%;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--clock-ink, #c14a2a) 65%, transparent);
   pointer-events: none;
   z-index: 0;
+  opacity: 0;
 }
 
-.pomo-mag__slots,
-.pomo-mag__med-slots {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(var(--mag-cols, 5), 1fr);
-  gap: 0.22rem;
+:global(.pomo-core--celebrate) .pomo-clock__ripple {
+  animation: ink-ripple 0.8s ease-out;
+}
+:global(.pomo-core--celebrate) .pomo-clock__disc {
+  animation: ink-disc-celebrate 0.8s ease-out;
 }
 
-.pomo-mag__round {
-  position: relative;
-  height: 16px;
-  border-radius: 2px 2px 1px 1px;
-  background: color-mix(in srgb, var(--border) 80%, var(--bg));
-  overflow: hidden;
-  transition: transform 0.2s ease;
-}
-
-.pomo-mag__round-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--mag-accent) 75%, #fff) 0%,
-    color-mix(in srgb, var(--mag-accent) 90%, #000) 100%
-  );
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
-  transition: width 0.45s ease;
-}
-
-.pomo-mag__round.is-spent {
-  opacity: 0.35;
-  transform: scaleY(0.72);
-}
-
-.pomo-mag__round.is-spent .pomo-mag__round-fill {
-  width: 0 !important;
-}
-
-.pomo-mag__round.is-next {
-  animation: mag-round-pulse 0.9s ease-in-out infinite;
-}
-
-.pomo-mag__med-cell {
-  position: relative;
-  height: 14px;
-  border: 1px solid color-mix(in srgb, #5a9fd4 30%, var(--border));
-  background: color-mix(in srgb, var(--bg) 90%, var(--text-muted));
-  overflow: hidden;
-}
-
-.pomo-mag__med-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  background: color-mix(in srgb, #5a9fd4 65%, #2d6a4f);
-  box-shadow: 0 0 8px color-mix(in srgb, #5a9fd4 40%, transparent);
-  transition: width 0.45s ease;
-}
-
-.pomo-mag__med-cell.is-charged {
-  background: transparent;
-}
-
-.pomo-mag__med-cell.is-next {
-  animation: mag-med-pulse 1.1s ease-in-out infinite;
-}
-
-.pomo-mag__count {
-  margin: 0.35rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.pomo-mag__segment-hint {
-  margin: 0.28rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.52rem;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--text-muted) 85%, var(--mag-accent));
-  text-align: center;
-}
-
-.pomo-mag__display {
-  width: 100%;
-  text-align: center;
-}
-
-.pomo-mag__time {
-  font-family: var(--mono);
-  font-size: clamp(1.75rem, 6.5vw, 2.55rem);
+.pomo-clock__time {
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', 'STZhongsong', 'FangSong', serif;
+  font-size: clamp(1.7rem, 5.5vw, 2.7rem);
   font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--mag-accent);
-  text-shadow:
-    0 0 28px color-mix(in srgb, var(--mag-accent) 38%, transparent),
-    0 2px 8px rgba(0, 0, 0, 0.45);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  paint-order: stroke fill;
 }
 
-.pomo-mag--break .pomo-mag__time {
-  color: color-mix(in srgb, #5a9fd4 85%, var(--mag-accent));
-}
-
-.pomo-mag__hud {
-  margin: 0.4rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-}
-
-.pomo-mag__sub {
-  margin: 0.45rem 0 0.75rem;
-  font-family: var(--mono);
+.pomo-clock__sub {
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', serif;
   font-size: 0.62rem;
+  letter-spacing: 0.2em;
+}
+
+.pomo-clock__pointer {
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pomo-clock__charge-ring {
+  transition: stroke-dashoffset 1.2s ease-out;
+  transform-origin: 100px 100px;
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--clock-ink, #5a8aaa) 45%, transparent));
+}
+
+.pomo-clock__splatter circle {
+  opacity: 0;
+  transform-origin: center;
+  animation: ink-drop 2.6s ease-out infinite;
+  filter: blur(0.3px);
+}
+
+@keyframes ink-breathe {
+  0%, 100% { transform: scale(0.96); opacity: 0.55; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes ink-disc-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.014); }
+}
+
+@keyframes ink-ripple {
+  0% { transform: scale(0.96); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: scale(1.22); opacity: 0; }
+}
+
+@keyframes ink-disc-celebrate {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ink-drop {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  12% { opacity: 0.9; transform: translate(calc(var(--tx, 8px) * 0.2), calc(var(--ty, 12px) * 0.2)) scale(1); }
+  60% { opacity: 0.5; transform: translate(var(--tx, 8px), var(--ty, 12px)) scale(1.1); }
+  100% { opacity: 0; transform: translate(calc(var(--tx, 8px) * 1.5), calc(var(--ty, 12px) * 1.7)) scale(0.55); }
+}
+
+.pomo-clock__splatter circle:nth-child(6n+1) { --tx: 12px; --ty: 6px; }
+.pomo-clock__splatter circle:nth-child(6n+2) { --tx: -10px; --ty: 4px; }
+.pomo-clock__splatter circle:nth-child(6n+3) { --tx: 6px; --ty: 12px; }
+.pomo-clock__splatter circle:nth-child(6n+4) { --tx: -4px; --ty: -10px; }
+.pomo-clock__splatter circle:nth-child(6n+5) { --tx: 14px; --ty: -6px; }
+.pomo-clock__splatter circle:nth-child(6n+6) { --tx: -14px; --ty: -2px; }
+.pomo-clock__splatter circle:nth-child(12n+7) { --tx: 8px; --ty: 14px; }
+.pomo-clock__splatter circle:nth-child(12n+8) { --tx: -12px; --ty: 8px; }
+.pomo-clock__splatter circle:nth-child(12n+9) { --tx: 2px; --ty: -14px; }
+.pomo-clock__splatter circle:nth-child(12n+10) { --tx: -6px; --ty: -12px; }
+.pomo-clock__splatter circle:nth-child(12n+11) { --tx: 16px; --ty: 0; }
+.pomo-clock__splatter circle:nth-child(12n+12) { --tx: -16px; --ty: 0; }
+
+.pomo-clock__subtext {
+  margin: 0.45rem 0 0.25rem;
+  font-size: 0.65rem;
   letter-spacing: 0.12em;
-  color: var(--text-muted);
+  color: var(--clock-ink, rgba(193, 74, 42, 0.55));
+  opacity: 0.7;
   text-align: center;
 }
 
-.pomo-mag--running.pomo-mag:not(.pomo-mag--break) .pomo-mag__magazine {
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 16px color-mix(in srgb, var(--mag-accent) 22%, transparent);
-}
-
-.pomo-mag--low .pomo-mag__time {
-  animation: mag-time-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes mag-round-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.06); opacity: 0.85; }
-}
-
-@keyframes mag-med-pulse {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 1; }
-}
-
-@keyframes mag-time-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.78; }
+@media (prefers-reduced-motion: reduce) {
+  .pomo-clock__aura,
+  .pomo-clock__disc,
+  .pomo-clock__pointer,
+  .pomo-clock__splatter circle,
+  :global(.pomo-core--celebrate) .pomo-clock__ripple,
+  :global(.pomo-core--celebrate) .pomo-clock__disc {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pomo-clock__splatter circle { opacity: 0; }
+  .pomo-clock__aura { opacity: 0.7; }
 }
 </style>
