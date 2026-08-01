@@ -10,6 +10,7 @@
     :style="roomStyle"
   >
     <div class="pomo-study-room__bg" :style="{ backgroundImage: `url(${companionImg})` }" aria-hidden="true" />
+    <div class="pomo-study-room__dim" aria-hidden="true" />
     <div class="pomo-study-room__embers" aria-hidden="true" />
     <div class="pomo-study-room__vignette" aria-hidden="true" />
 
@@ -427,9 +428,17 @@ defineExpose({ roomRef })
   inset: -8%;
   background-size: cover;
   background-position: 70% bottom;
-  opacity: 0.18;
-  filter: saturate(0.7) blur(6px) brightness(0.55);
+  opacity: 1;
+  filter: none;
   pointer-events: none;
+}
+
+.pomo-study-room__dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .pomo-study-room__embers {
