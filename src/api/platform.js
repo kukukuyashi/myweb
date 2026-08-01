@@ -458,9 +458,11 @@ export async function fetchStudyRoomOnline() {
 }
 
 export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onClose, onError } = {}) {
-  const base = apiOrigin()
-  const scheme = base.startsWith('https') ? 'wss' : 'ws'
-  const url = `${scheme}://${base.replace(/^https?:\/\//, '')}/api/v1/study-room/ws?token=${encodeURIComponent(token || '')}`
+  // WS 协议必须跟当前页面一致(HTTPS 页用 wss,否则浏览器当 mixed content 拦)
+  // 用 window.location 拼绝对 URL,不再用 apiOrigin()(它返回相对路径,无法判定协议)
+  const proto = (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') ? 'wss:' : 'ws:'
+  const host = (typeof window !== 'undefined' && window.location && window.location.host) || (apiOrigin().replace(/^https?:\/\//, ''))
+  const url = `${proto}//${host}/api/v1/study-room/ws?token=${encodeURIComponent(token || '')}`
   let ws = null
   let backoff = 1000
   let closedByUser = false
