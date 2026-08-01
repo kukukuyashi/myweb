@@ -172,7 +172,7 @@ def list_messages(
     return ok({"items": items})
 
 
-@router.get("/online", summary="在线用户", response_model=StudyRoomOnlineResponse)
+@router.get("/online", summary="在线用户")
 def list_online(db: Annotated[Session, Depends(get_db)]):
     ids = _collect_online_user_ids()
     # 去重保序
