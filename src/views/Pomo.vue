@@ -43,6 +43,9 @@
         </template>
         <div class="cockpit-grid" aria-hidden="true" />
 
+        <transition name="pomo-tip-fade">
+          <p v-if="celebrateTip" class="pomo-celebrate-tip">{{ celebrateTip }}</p>
+        </transition>
         <div class="pomo-stage" :class="{ 'pomo-stage--solo': minimalMode }">
           <aside v-if="!minimalMode && !isFullscreen" class="pomo-companion">
             <div class="acg-frame acg-frame--profile pomo-portrait">
@@ -181,6 +184,18 @@
         <button type="button" class="platform-btn-ghost" @click="saveSettings">保存设置</button>
       </section>
 
+      <PomoTaskList
+        v-if="token && !isFullscreen"
+        :tasks="tasks"
+        :selected-id="selectedTaskId"
+        :daily-goal="dailyGoal"
+        :today-done="stats?.today_sessions || 0"
+        @add="addTask"
+        @toggle="toggleTask"
+        @remove="removeTask"
+        @select="selectTask"
+        @change-goal="setDailyGoal"
+      />
       <section v-if="token && stats && !isFullscreen" class="platform-panel ink-panel pomo-stats reveal-item" data-reveal>
         <header class="panel-head">
           <h2>统计</h2>
@@ -194,6 +209,7 @@
         </div>
       </section>
 
+      <PomoHeatmap v-if="token && !isFullscreen" />
       <section v-if="token && !isFullscreen" class="platform-panel ink-panel week-chart reveal-item" data-reveal>
         <header class="panel-head">
           <h2>本周专注</h2>
@@ -283,6 +299,8 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlatformPageShell from '../components/platform/PlatformPageShell.vue'
+import PomoTaskList from '../components/PomoTaskList.vue'
+import PomoHeatmap from '../components/PomoHeatmap.vue'
 import PomoEnergyGrid from '../components/platform/PomoEnergyGrid.vue'
 import PomoMagazine from '../components/platform/PomoMagazine.vue'
 import PomoStudyRoom from '../components/platform/PomoStudyRoom.vue'
@@ -310,6 +328,7 @@ import {
   createPomodoroSession,
   fetchPomodoroSessions,
   fetchPomodoroStats,
+  fetchPomodoroTimeline,
   getPlatformToken,
 } from '../api/platform.js'
 
@@ -443,6 +462,64 @@ const totalSeconds = ref(25 * 60)
 const secondsLeft = ref(25 * 60)
 const running = ref(false)
 const taskLabel = ref('')
+
+// 今日任务 / 日目标 (localStorage)
+const GOAL_KEY = 'pomo:daily-goal'
+const taskKey = (d=new Date()) => {
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0')
+  return `pomo:tasks:${y}-${m}-${dd}`
+}
+const dailyGoal = ref(Number(localStorage.getItem(GOAL_KEY)) || 4)
+const tasks = ref([])
+const selectedTaskId = ref(null)
+
+function loadTodayTasks(){
+  try { tasks.value = JSON.parse(localStorage.getItem(taskKey())||'[]') || [] } catch { tasks.value = [] }
+}
+loadTodayTasks()
+
+function saveTodayTasks(){
+  try { localStorage.setItem(taskKey(), JSON.stringify(tasks.value)) } catch {}
+}
+
+function addTask(text){
+  tasks.value.push({ id: Date.now()+Math.random(), text, done: false, pomodoros: 0 })
+  saveTodayTasks()
+}
+function toggleTask(id){
+  const t = tasks.value.find(x=>x.id===id); if(!t) return
+  t.done = !t.done
+  saveTodayTasks()
+}
+function removeTask(id){
+  tasks.value = tasks.value.filter(x=>x.id!==id)
+  if(selectedTaskId.value===id) selectedTaskId.value = null
+  saveTodayTasks()
+}
+function selectTask(id){
+  selectedTaskId.value = id
+}
+function setDailyGoal(n){
+  dailyGoal.value = n
+  try { localStorage.setItem(GOAL_KEY, String(n)) } catch {}
+}
+
+// 跨日期自检 (用户开着页面过零点时刷新)
+setInterval(()=>{
+  const cur = taskKey()
+  const saved = localStorage.getItem('pomo:last-task-key')
+  if(saved && saved!==cur){ loadTodayTasks(); selectedTaskId.value=null }
+  try { localStorage.setItem('pomo:last-task-key', cur) } catch {}
+}, 60000)
+
+// 当前 session 标签(选了任务时, task_label 用任务文本; 否则用 taskLabel 输入框)
+const effectiveTaskLabel = () => {
+  if(selectedTaskId.value){
+    const t = tasks.value.find(x=>x.id===selectedTaskId.value)
+    if(t) return t.text
+  }
+  return taskLabel.value
+}
 const stats = ref(null)
 const sessions = ref([])
 const error = ref('')
@@ -631,6 +708,14 @@ async function requestNotifyPermission() {
   }
 }
 
+const celebrateTip = ref('')
+let celebrateTimer = 0
+function pulseCelebrate(text){
+  celebrateTip.value = text
+  if(celebrateTimer) clearTimeout(celebrateTimer)
+  celebrateTimer = window.setTimeout(() => { celebrateTip.value = '' }, 1600)
+}
+
 async function syncTimer() {
   if (!running.value) return
   const remaining = Math.round((deadline - Date.now()) / 1000)
@@ -639,6 +724,7 @@ async function syncTimer() {
     running.value = false
     const completedSec = totalSeconds.value
     secondsLeft.value = 0
+    pulseCelebrate(`🎯 第 ${focusCount.value + 1} 颗番茄`)
     await onSessionComplete(completedSec)
     return
   }
@@ -669,7 +755,7 @@ async function onSessionComplete(durationSec) {
     if (token.value) {
       pendingSession.value = {
         duration_sec: durationSec,
-        task_label: taskLabel.value.trim() || null,
+        task_label: effectiveTaskLabel().trim() || null,
         session_type: 'focus',
       }
       reflectionText.value = ''
@@ -677,6 +763,10 @@ async function onSessionComplete(durationSec) {
     } else {
       message.value = '专注完成！'
       enterBreak()
+    }
+    if(selectedTaskId.value){
+      const t = tasks.value.find(x=>x.id===selectedTaskId.value)
+      if(t){ t.pomodoros = (t.pomodoros||0)+1; saveTodayTasks() }
     }
   } else {
     maybeNotify('休息结束', '准备好开始下一段专注了吗？')
@@ -1472,5 +1562,100 @@ onUnmounted(() => {
 @media (max-width: 560px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .settings-grid { grid-template-columns: 1fr; }
+}
+
+/* ============ v2 视觉/氛围强化 ============ */
+.pomo-core {
+  --pomo-mode-color: var(--orange, #e85d04);
+  --pomo-mode-bg: radial-gradient(ellipse at center, rgba(232, 93, 4, 0.10) 0%, transparent 60%);
+  position: relative;
+  overflow: hidden;
+}
+.pomo-core--break {
+  --pomo-mode-color: #2a9d8f;
+  --pomo-mode-bg: radial-gradient(ellipse at center, rgba(42, 157, 143, 0.10) 0%, transparent 60%);
+}
+.pomo-core::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--pomo-mode-bg);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.6s ease;
+}
+.pomo-core--running::before {
+  animation: pomo-breathe 10s ease-in-out infinite;
+}
+@keyframes pomo-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+.pomo-core--break.pomo-core--running::before {
+  animation: pomo-breathe-reverse 10s ease-in-out infinite;
+}
+@keyframes pomo-breathe-reverse {
+  0%, 100% { transform: scale(1.04); opacity: 1; }
+  50% { transform: scale(1); opacity: 0.85; }
+}
+
+/* 主时钟大字号 (覆盖 PomoMagazine/EnergyGrid 内部) */
+.pomo-core :deep(.pomo-clock-time),
+.pomo-core :deep(.energy-grid-time),
+.pomo-core :deep(.magazine-time) {
+  font-size: clamp(5rem, 14vw, 9rem) !important;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--pomo-mode-color);
+  transition: color 0.4s ease;
+}
+
+/* 完成番茄涟漪 */
+.pomo-core--celebrate {
+  animation: pomo-celebrate 0.8s ease-out;
+}
+@keyframes pomo-celebrate {
+  0% { box-shadow: 0 0 0 0 var(--pomo-mode-color); }
+  100% { box-shadow: 0 0 0 24px transparent; }
+}
+
+/* 完成提示文字 */
+.pomo-celebrate-tip {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-family: var(--mono);
+  color: var(--pomo-mode-color);
+  pointer-events: none;
+  z-index: 5;
+  animation: pomo-tip-fade 1.6s ease forwards;
+}
+@keyframes pomo-tip-fade {
+  0% { opacity: 0; transform: translate(-50%, -30%); }
+  20% { opacity: 1; transform: translate(-50%, -50%); }
+  80% { opacity: 1; transform: translate(-50%, -60%); }
+  100% { opacity: 0; transform: translate(-50%, -80%); }
+}
+
+/* 按钮点击反馈 */
+.timer-actions .platform-btn-primary {
+  transition: transform 0.15s ease, background 0.2s;
+}
+.timer-actions .platform-btn-primary:active {
+  transform: scale(0.96);
+}
+
+/* 在 prefers-reduced-motion 下关闭所有动画 */
+@media (prefers-reduced-motion: reduce) {
+  .pomo-core--running::before,
+  .pomo-core--break.pomo-core--running::before,
+  .pomo-core--celebrate,
+  .pomo-celebrate-tip {
+    animation: none !important;
+  }
+  .timer-actions .platform-btn-primary:active {
+    transform: none;
+  }
 }
 </style>
