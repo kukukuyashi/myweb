@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""自习室实时聊天消息模型"""
+"""自习室实时聊天消息模�?""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -21,7 +21,7 @@ class StudyRoomMessage(Base):
     message_type: Mapped[str] = mapped_column(String(20), default="text", nullable=False, index=True)
     sticker_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, server_default=func.utc_timestamp(), nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     user = relationship("User")
