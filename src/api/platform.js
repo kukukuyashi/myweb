@@ -479,17 +479,37 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
       backoff = 1000
       if (typeof onOpen === 'function') onOpen()
     }
+    let lastPongAt = Date.now()
     ws.onmessage = (ev) => {
       let data
       try { data = JSON.parse(ev.data) } catch { return }
       if (!data || typeof data !== 'object') return
+      if (data.type === 'pong') {
+        lastPongAt = Date.now()
+        return
+      }
+      if (data.type === 'ping') {
+        try { ws.send(JSON.stringify({ type: 'pong' })) } catch {}
+        return
+      }
       if (data.type === 'msg' || data.type === 'history' || data.type === 'err') {
         if (typeof onMessage === 'function') onMessage(data)
       } else if (data.type === 'presence') {
         if (typeof onPresence === 'function') onPresence(data)
       }
-if (data.type === 'ping') { try { ws.send(JSON.stringify({ type: 'pong' })) } catch {} ; return }
     }
+    // 瀹氭椂 ping: 姣? 5s 鍙?type:ping, server 鍥炵瓑 pong 鏇存柊 lastPongAt
+    // 濡傛灉 8s 鍐呮湭鏀跺埌 pong -> 璇?ws 宸叉, 寮哄埗 close 瑙﹀彂 onclose
+    const pingTimer = setInterval(() => {
+      if (!ws || ws.readyState !== 1) return
+      try { ws.send(JSON.stringify({ type: 'ping' })) } catch {}
+      if (Date.now() - lastPongAt > 8000) {
+        console.warn('[ws] no pong for 8s, force close')
+        try { ws.close() } catch {}
+        clearInterval(pingTimer)
+      }
+    }, 5000)
+    ws.addEventListener('close', () => clearInterval(pingTimer))
     ws.onerror = (e) => {
       if (typeof onError === 'function') onError(e)
     }

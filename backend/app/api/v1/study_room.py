@@ -354,6 +354,9 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
             t = data.get("type")
             if t == "pong":
                 continue
+            if t == "ping":
+                await _send_text(websocket, {"type": "pong"})
+                continue
             if t == "msg":
                 raw_content = data.get("content")
                 raw_sticker = data.get("sticker_url")
