@@ -645,7 +645,8 @@ function sendSticker(s) {
   // Stale-socket bypass: POST to /messages via HTTP (100% reliable, 1-2s latency)
   ;(async () => {
     try {
-      const r = await fetch('/api/v1/study-room/messages', {
+      const tk = getPlatformToken()
+      const r = await fetch('/api/v1/study-room/messages' + (tk ? ('?token=' + encodeURIComponent(tk)) : ''), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: null, sticker_url: url })

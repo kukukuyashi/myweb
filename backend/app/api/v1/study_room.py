@@ -166,8 +166,12 @@ def _load_users_map(db: Session, user_ids: set[int]) -> dict[int, User]:
 def post_message(
     payload: StudyRoomMessageCreate,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)],
+    token: str | None = Query(None, description='user JWT, from query string'),
 ):
+    current_user = _auth_user_from_token(token) if token else None
+    if not current_user:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="login required")
     content = (payload.content or "").strip() if isinstance(payload.content, str) else ""
     sticker = (payload.sticker_url or "").strip() if isinstance(payload.sticker_url, str) else ""
     if not content and not sticker:
