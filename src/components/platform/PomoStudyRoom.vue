@@ -271,6 +271,7 @@ const CHAT_POS_KEY = 'pomo:chat-pos'
 const chatPos = ref({ x: 0, y: 0 })
 const CHAT_DEFAULT_W = 360
 const CHAT_DEFAULT_H = 480
+const HANDLE_KEEP_PX = 44
 const chatSize = ref({ width: CHAT_DEFAULT_W, height: CHAT_DEFAULT_H })
 const dragState = ref(null)
 const isDragging = ref(false)
@@ -479,19 +480,25 @@ function connectChat() {
   })
 }
 
-function clampChatPos(x, y) {
-  const stage = document.querySelector('.pomo-study-room')
-  const el = chatSectionRef.value
-  if (!stage || !el) return { x, y }
-  const sr = stage.getBoundingClientRect()
-  const er = el.getBoundingClientRect()
-  const minX = 24 - er.left + sr.left
-  const maxX = sr.right - er.right - 24
-  const minY = 60 - er.top + sr.top
-  const maxY = sr.bottom - er.bottom - 24
+function clampChatToKeepHandleVisible(nx, ny, baseX, baseY, er) {
+  if (!er) return { x: nx, y: ny }
+  const W = window.innerWidth
+  const H = window.innerHeight
+  const w = er.width
+  const h = er.height
+  const startLeft = er.left
+  const startTop = er.top
+  const left = startLeft + (nx - baseX)
+  const top = startTop + (ny - baseY)
+  const minLeft = HANDLE_KEEP_PX - w
+  const maxLeft = W - HANDLE_KEEP_PX
+  const minTop = 0
+  const maxTop = H - HANDLE_KEEP_PX
+  const newLeft = Math.max(minLeft, Math.min(maxLeft, left))
+  const newTop = Math.max(minTop, Math.min(maxTop, top))
   return {
-    x: Math.max(minX, Math.min(maxX, x)),
-    y: Math.max(minY, Math.min(maxY, y)),
+    x: baseX + (newLeft - startLeft),
+    y: baseY + (newTop - startTop),
   }
 }
 
@@ -520,6 +527,9 @@ function startResize(ev, dir = 'br') {
   const startH = el.offsetHeight
   const startX = ev.clientX
   const startY = ev.clientY
+  const baseX = chatPos.value.x
+  const baseY = chatPos.value.y
+  const resizeEr = el.getBoundingClientRect()
   const onMove = (e) => {
     const dw = e.clientX - startX
     const dh = e.clientY - startY
@@ -532,11 +542,10 @@ function startResize(ev, dir = 'br') {
     if (dir.includes('w')) { nw = startW - dw; nx = chatPos.value.x + (startW - nw) }
     if (dir.includes('n')) { nh = startH - dh; ny = chatPos.value.y + (startH - nh) }
     const clamped = clampChatSize(nw, nh)
-    // 如果被夹住,补偿位置避免视觉跳
     if (clamped.width !== nw && dir.includes('w')) nx += (nw - clamped.width)
     if (clamped.height !== nh && dir.includes('n')) ny += (nh - clamped.height)
     chatSize.value = clamped
-    chatPos.value = clampChatPos(nx, ny)
+    chatPos.value = clampChatToKeepHandleVisible(nx, ny, baseX, baseY, resizeEr)
     resizeBadge.value = `${clamped.width} × ${clamped.height}`
   }
   const onUp = () => {
@@ -544,7 +553,6 @@ function startResize(ev, dir = 'br') {
     document.removeEventListener('mouseup', onUp)
     isResizing.value = false
     resizeBadge.value = ''
-    chatPos.value = clampChatPos(chatPos.value.x, chatPos.value.y)
     persistChatPos()
   }
   document.addEventListener('mousemove', onMove)
@@ -556,29 +564,21 @@ function startDrag(ev) {
   const el = chatSectionRef.value
   if (!el) return
   isDragging.value = true
+  const er = el.getBoundingClientRect()
   dragState.value = {
     startX: ev.clientX,
     startY: ev.clientY,
     baseX: chatPos.value.x,
     baseY: chatPos.value.y,
+    er,
   }
   const onMove = (e) => {
     if (!dragState.value) return
     const dx = e.clientX - dragState.value.startX
     const dy = e.clientY - dragState.value.startY
-    let nx = dragState.value.baseX + dx
-    let ny = dragState.value.baseY + dy
-    // 边缘吸附:离边 18px 内时夹到 12px
-    const stage = document.querySelector('.pomo-study-room')
-    if (stage && el) {
-      const sr = stage.getBoundingClientRect()
-      const er = el.getBoundingClientRect()
-      if (er.left - sr.left < 18) nx = 24 - (er.left - sr.left)
-      if (sr.right - er.right < 18) nx = (sr.right - er.right) - 24
-      if (er.top - sr.top < 18) ny = 60 - (er.top - sr.top)
-      if (sr.bottom - er.bottom < 18) ny = (sr.bottom - er.bottom) - 24
-    }
-    chatPos.value = clampChatPos(nx, ny)
+    const nx = dragState.value.baseX + dx
+    const ny = dragState.value.baseY + dy
+    chatPos.value = clampChatToKeepHandleVisible(nx, ny, dragState.value.baseX, dragState.value.baseY, dragState.value.er)
   }
   const onUp = () => {
     dragState.value = null
