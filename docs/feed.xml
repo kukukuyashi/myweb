@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Cyinc 的学习日志</title>
+    <link>https://cyinc.ink/myweb/</link>
+    <description>Cyinc 的个人全栈站：前端/后端学习笔记、论坛、OST 音乐室、追番表、番茄钟。Vue + FastAPI + MySQL + Redis，欢迎留言交流。</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 02 Aug 2026 15:16:58 GMT</lastBuildDate>
+  <item>
+    <title>Git 与 GitHub入门笔记</title>
+    <link>https://cyinc.ink/myweb/content/29</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/29</guid>
+    <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+    <description>Git 与 GitHub入门笔记 — 学习笔记。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>Agent Harness 体系</title>
+    <link>https://cyinc.ink/myweb/content/28</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/28</guid>
+    <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+    <description>学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。</description>
+    <category>学习</category>
+  </item>
+  <item>
+    <title>鼠标动画光标：从 PNG 序列到 Chrome 兼容</title>
+    <link>https://cyinc.ink/myweb/content/27</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/27</guid>
+    <pubDate>Mon, 29 Jun 2026 00:00:00 GMT</pubDate>
+    <description>PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>自定义鼠标样式与点击涟漪效果</title>
+    <link>https://cyinc.ink/myweb/content/26</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/26</guid>
+    <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
+    <description>用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>首页墨染晕染：鼠标 hover 显现线稿</title>
+    <link>https://cyinc.ink/myweb/content/24</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/24</guid>
+    <pubDate>Tue, 16 Jun 2026 00:00:00 GMT</pubDate>
+    <description>首页 Hero、音乐室、关于页顶栏都有「鼠标划过去，线稿从纸面晕开」的效果。这篇拆开 DOM 结构、Canvas 遮罩原理和 Vue 组件怎么接，方便以后换图或复用到别的面板。</description>
+    <category>前端</category>
+  </item>
+  <item>
+    <title>陈皮有多陈：Flask + AI 鉴陈项目笔记</title>
+    <link>https://cyinc.ink/myweb/content/25</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/25</guid>
+    <pubDate>Mon, 15 Jun 2026 00:00:00 GMT</pubDate>
+    <description>第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。</description>
+    <category>项目</category>
+  </item>
+  <item>
+    <title>帕朵root开发笔记</title>
+    <link>https://cyinc.ink/myweb/content/20</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/20</guid>
+    <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
+    <description>帕朵root开发笔记 — 学习笔记。</description>
+    <category>项目</category>
+  </item>
+  <item>
+    <title>博客音乐室：GitHub Pages 上播 FLAC</title>
+    <link>https://cyinc.ink/myweb/content/22</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/22</guid>
+    <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
+    <description>静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>GitHub Actions 自动部署 Vue 博客</title>
+    <link>https://cyinc.ink/myweb/content/23</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/23</guid>
+    <pubDate>Sat, 13 Jun 2026 00:00:00 GMT</pubDate>
+    <description>push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>个人博客重构记：Vue3 静态站上线</title>
+    <link>https://cyinc.ink/myweb/content/21</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/21</guid>
+    <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+    <description>记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。</description>
+    <category>部署</category>
+  </item>
+  <item>
+    <title>留言板 Twikoo 部署笔记</title>
+    <link>https://cyinc.ink/myweb/content/19</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/19</guid>
+    <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+    <description>Twikoo 留言板完整部署：MongoDB Atlas、Netlify 云函数、博客接入与踩坑记录。</description>
+    <category>学习</category>
+  </item>
+  <item>
+    <title>从 LLM 到 Agent Skill 笔记</title>
+    <link>https://cyinc.ink/myweb/content/18</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/18</guid>
+    <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
+    <description>LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。</description>
+    <category>Agent</category>
+  </item>
+  <item>
+    <title>JAVA笔记一(基本语法)</title>
+    <link>https://cyinc.ink/myweb/content/12</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/12</guid>
+    <pubDate>Fri, 03 Apr 2026 00:00:00 GMT</pubDate>
+    <description>Java 基本语法学习笔记。</description>
+    <category>Java</category>
+  </item>
+  <item>
+    <title>JAVA笔记二(流程控制语句)</title>
+    <link>https://cyinc.ink/myweb/content/13</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/13</guid>
+    <pubDate>Fri, 03 Apr 2026 00:00:00 GMT</pubDate>
+    <description>Java 流程控制语句学习笔记。</description>
+    <category>Java</category>
+  </item>
+  <item>
+    <title>JAVA笔记三(数组)</title>
+    <link>https://cyinc.ink/myweb/content/14</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/14</guid>
+    <pubDate>Fri, 03 Apr 2026 00:00:00 GMT</pubDate>
+    <description>Java 数组学习笔记。</description>
+    <category>Java</category>
+  </item>
+  <item>
+    <title>JAVA笔记四（方法）</title>
+    <link>https://cyinc.ink/myweb/content/15</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/15</guid>
+    <pubDate>Fri, 03 Apr 2026 00:00:00 GMT</pubDate>
+    <description>Java 方法学习笔记。</description>
+    <category>Java</category>
+  </item>
+  <item>
+    <title>Java的运行原理</title>
+    <link>https://cyinc.ink/myweb/content/17</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/17</guid>
+    <pubDate>Fri, 03 Apr 2026 00:00:00 GMT</pubDate>
+    <description>Java 运行原理，JVM、内存结构、垃圾回收等。</description>
+    <category>Java</category>
+  </item>
+  <item>
+    <title>前端核心学习表</title>
+    <link>https://cyinc.ink/myweb/content/1</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/1</guid>
+    <pubDate>Fri, 30 Jan 2026 00:00:00 GMT</pubDate>
+    <description>HTML、CSS、JavaScript 核心知识点梳理，适合随时查阅的速查表。</description>
+    <category>学习</category>
+  </item>
+  <item>
+    <title>Vue.js,Three.js和Node.js的区别</title>
+    <link>https://cyinc.ink/myweb/content/2</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/2</guid>
+    <pubDate>Sun, 21 Dec 2025 00:00:00 GMT</pubDate>
+    <description>详细介绍 Vue.js、Three.js 和 Node.js 的区别和应用场景。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>RhinoWeb的常见问题</title>
+    <link>https://cyinc.ink/myweb/content/3</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/3</guid>
+    <pubDate>Sun, 21 Dec 2025 00:00:00 GMT</pubDate>
+    <description>RhinoWeb 使用过程中常见问题的解决方案。</description>
+    <category>小知识</category>
+  </item>
+  <item>
+    <title>Web API笔记（四）</title>
+    <link>https://cyinc.ink/myweb/content/10</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/10</guid>
+    <pubDate>Thu, 18 Dec 2025 00:00:00 GMT</pubDate>
+    <description>Web API 综合案例与实战练习。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>JS进阶笔记（一）</title>
+    <link>https://cyinc.ink/myweb/content/5</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/5</guid>
+    <pubDate>Wed, 17 Dec 2025 00:00:00 GMT</pubDate>
+    <description>JavaScript 进阶知识点，包含闭包、原型链等内容。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>JS进阶笔记（二）</title>
+    <link>https://cyinc.ink/myweb/content/6</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/6</guid>
+    <pubDate>Wed, 17 Dec 2025 00:00:00 GMT</pubDate>
+    <description>JavaScript 进阶知识点，包含异步编程、Promise 等内容。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>Web API笔记（三）</title>
+    <link>https://cyinc.ink/myweb/content/9</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/9</guid>
+    <pubDate>Wed, 17 Dec 2025 00:00:00 GMT</pubDate>
+    <description>Web API 进阶，包含 BOM 操作、本地存储等内容。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>Web API笔记（二）</title>
+    <link>https://cyinc.ink/myweb/content/8</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/8</guid>
+    <pubDate>Tue, 16 Dec 2025 00:00:00 GMT</pubDate>
+    <description>Web API 进阶，包含事件流、事件委托等内容。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>Web API学习笔记</title>
+    <link>https://cyinc.ink/myweb/content/7</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/7</guid>
+    <pubDate>Mon, 15 Dec 2025 00:00:00 GMT</pubDate>
+    <description>Web API 核心知识点，包含 DOM 操作、事件监听等内容。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>JS基础笔记</title>
+    <link>https://cyinc.ink/myweb/content/11</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/11</guid>
+    <pubDate>Wed, 10 Dec 2025 00:00:00 GMT</pubDate>
+    <description>JavaScript 基础知识点，变量、数据类型、流程控制等。</description>
+    <category>技术</category>
+  </item>
+  <item>
+    <title>Vue3学习笔记</title>
+    <link>https://cyinc.ink/myweb/content/4</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/4</guid>
+    <pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate>
+    <description>Vue3 核心知识点学习笔记，包含 Composition API 等新特性。</description>
+    <category>技术</category>
+  </item>
+  </channel>
+</rss>

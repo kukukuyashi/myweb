@@ -558,3 +558,30 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
     },
   }
 }
+
+
+// ============== Admin (study-room) ==============
+export async function adminListStudyRoomMessages({ before, limit = 50, includeDeleted = 1 } = {}) {
+  const qs = new URLSearchParams()
+  if (before) qs.set('before', String(before))
+  qs.set('limit', String(limit))
+  qs.set('include_deleted', String(includeDeleted))
+  return platformFetch(`/study-room/admin/messages?${qs.toString()}`, { auth: true })
+}
+
+export async function adminDeleteStudyRoomMessage(id) {
+  return platformFetch(`/study-room/admin/messages/${id}`, { method: 'DELETE', auth: true })
+}
+
+export async function adminRestoreStudyRoomMessage(id) {
+  return platformFetch(`/study-room/admin/messages/${id}/restore`, { method: 'POST', auth: true })
+}
+
+export async function adminListStudyRoomOnlineUsers() {
+  return platformFetch('/study-room/admin/users', { auth: true })
+}
+
+export async function adminKickUser(userId, reason) {
+  const q = reason ? '?reason=' + encodeURIComponent(reason) : ''
+  return platformFetch(`/study-room/admin/kick/${userId}${q}`, { method: 'POST', auth: true })
+}

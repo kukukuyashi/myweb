@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。">
+  <meta property="og:title" content="陈皮有多陈：Flask + AI 鉴陈项目笔记 · Cyinc 的学习日志">
+  <meta property="og:description" content="第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/25">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="陈皮有多陈：Flask + AI 鉴陈项目笔记 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/25">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>陈皮有多陈：Flask + AI 鉴陈项目笔记 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"陈皮有多陈：Flask + AI 鉴陈项目笔记","description":"第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。","datePublished":"2026-06-15","dateModified":"2026-06-15","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/25"},"url":"https://cyinc.ink/myweb/content/25","image":"https://cyinc.ink/myweb/img/xiaoqing.png","keywords":"Flask, Python, AI, 项目, Qwen","articleSection":"项目","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-C1LzVrRu.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>陈皮有多陈：Flask + AI 鉴陈项目笔记</h1>
+<p class="prerender-meta">2026-06-15 · 项目</p>
+<div class="prerender-article"><p class="article-intro">第八届传智杯比赛项目「陈皮有多陈」复盘：Flask 单体应用 + 通义千问视觉模型 + 传统页面，用通俗语言讲清楚怎么搭起来的。</p>
+<h1>陈皮有多陈：Flask + AI 鉴陈项目笔记</h1>
+<blockquote>日期：2026-06-15</blockquote>
+<blockquote>项目路径：本地 <code>gjiabisai/Web(Release)</code></blockquote>
+<blockquote>技术栈：Python Flask · Qwen3-VL-Plus · Jinja2 模板</blockquote>
+<hr>
+
+<h2>这是个什么项目？</h2>
+<p><strong>「陈皮有多陈」</strong>是一个围绕<strong>新会陈皮</strong>做的展示 + AI 鉴定小站，参加第八届传智杯。核心卖点：拍一张陈皮照片，AI 帮你估产地、年份、等级、参考价；另外还有溯源查询、市场指数、百科、地图找产区、养生搭配等页面。</p>
+<p>和本博客（Vue 静态站）完全不同 — 这是<strong>传统多页 Web + Python 后端</strong>，需要本地跑 Flask 服务。</p>
+
+<h2>和 Vue 博客的对比（帮助选型）</h2>
+<table>
+  <thead><tr><th></th><th>本博客 myweb</th><th>陈皮有多陈</th></tr></thead>
+  <tbody>
+    <tr><td>前端</td><td>Vue3 SPA</td><td>Jinja2 HTML 模板 + 页内 JS</td></tr>
+    <tr><td>后端</td><td>无（Twikoo 云函数）</td><td>Flask 提供 API + 渲染页面</td></tr>
+    <tr><td>AI</td><td>无</td><td>通义千问视觉模型 qwen3-vl-plus</td></tr>
+    <tr><td>部署</td><td>GitHub Pages 免费</td><td>需 Python 环境，<code>python app.py</code> 端口 5000</td></tr>
+    <tr><td>适合</td><td>个人笔记、展示</td><td>比赛 demo、需要上传图片调 AI</td></tr>
+  </tbody>
+</table>
+
+<h2>页面一览</h2>
+<table>
+  <thead><tr><th>路由</th><th>功能</th></tr></thead>
+  <tbody>
+    <tr><td><code>/</code></td><td>首页：陈皮文化介绍、快速入口</td></tr>
+    <tr><td><code>/ai-center</code></td><td><strong>AI 鉴定</strong>：上传或摄像头拍照 → 分析报告</td></tr>
+    <tr><td><code>/traceability</code></td><td>溯源：输入编号查批次（演示数据）</td></tr>
+    <tr><td><code>/search</code></td><td>地图：Leaflet 标注新会地标</td></tr>
+    <tr><td><code>/baike</code></td><td>百科：静态知识卡片</td></tr>
+    <tr><td><code>/market</code></td><td>市场指数：价格表 + 趋势</td></tr>
+    <tr><td><code>/culture</code></td><td>文化科普</td></tr>
+    <tr><td><code>/health</code></td><td>健康应用：搭配建议、用量计算</td></tr>
+  </tbody>
+</table>
+
+<h2>后端：一个 app.py 走天下</h2>
+<p>没有拆微服务，<strong>所有路由、AI 逻辑、模拟数据都在 <code>app.py</code></strong>（约 900+ 行）。比赛周期短这样最快，但长期维护会累 — 以后可以拆 Blueprint 或 service 层。</p>
+<p>主要 API：</p>
+<ul>
+  <li><code>POST /api/analyze</code> — 上传图片，返回鉴定 JSON</li>
+  <li><code>POST /api/traceability/query</code> — 查溯源码</li>
+  <li><code>GET /api/market/index</code> — 市场数据</li>
+  <li><code>POST /api/health/recipe</code> — 养生搭配</li>
+</ul>
+
+<h2>AI 鉴定流程（通俗版）</h2>
+<pre><code class="language-text">用户选图 / 拍照
+    ↓
+前端 FormData POST 到 /api/analyze
+    ↓
+后端 Pillow 缩图（最大 1024px、转 JPEG）
+    ↓
+转 base64 塞进多模态 prompt
+    ↓
+OpenAI SDK → 阿里云 DashScope 兼容接口 → qwen3-vl-plus
+    ↓
+从回复里正则抠 JSON → 填默认值 → 返回前端渲染报告
+    ↓
+（失败则降级到本地模拟规则，保证 demo 不挂）</code></pre>
+<blockquote>💡 用 OpenAI 官方 SDK 连 DashScope「兼容模式」URL，代码写法和其他 vision API 几乎一样，换模型成本低。</blockquote>
+
+<h2>降级策略（比赛现场很重要）</h2>
+<p>免费 API 可能超时、限流、断网。项目做了<strong>四层兜底</strong>：</p>
+<ol>
+  <li>OpenAI SDK 调 Qwen（重试 3 次）</li>
+  <li>失败则 raw <code>requests</code> 再试</li>
+  <li>再失败走 <code>_analyze_simulation()</code> — 按产区、香气关键词随机但「像真的」</li>
+  <li>JSON 解析失败也回模拟数据</li>
+</ol>
+<p>答辩时网络抽风不至于白屏 — 这是 demo 项目和生产系统的差别。</p>
+
+<h2>前端：没有 Vue，但页面不简陋</h2>
+<p>每页一个 HTML 模板，公共头尾用 Jinja <code>{% include 'partials/header.html' %}</code>。样式在 <code>static/css/yaopu-theme.css</code> — 「广府药铺」风：纸色背景、 serif 字体、陈皮配色。</p>
+<p><code>ai-center.html</code> 最大：内联了摄像头 <code>getUserMedia</code>、进度条、结果卡片渲染。地图页 <code>search.html</code> 把 Leaflet + 地标 JSON 写在一文件里，像一个小型 SPA。</p>
+
+<h2>本地怎么跑？</h2>
+<pre><code class="language-bash">cd Web(Release)
+# Windows 可直接双击 start.bat
+pip install -r requirements.txt
+python app.py
+# 浏览器打开 http://127.0.0.1:5000</code></pre>
+<p><code>requirements.txt</code> 核心：Flask、Flask-CORS、Pillow、openai、requests。</p>
+
+<h2>安全提醒（写进笔记给自己看）</h2>
+<p>演示版曾在代码里<strong>硬编码 API Key</strong> — 本地比赛可以，上传 GitHub 必须改成环境变量 <code>os.environ['QWEN_API_KEY']</code>，否则 key 泄露会被刷额度。</p>
+<p>溯源、市场数据是<strong>预设模拟</strong>，页面应标明「演示数据」，别让用户当成真实交易依据。</p>
+
+<h2>如果重做，我会改什么？</h2>
+<ul>
+  <li>API Key 进 <code>.env</code>，<code>python-dotenv</code> 读取</li>
+  <li><code>app.py</code> 拆成 <code>routes/</code> + <code>services/analyzer.py</code></li>
+  <li>前端公共 JS 抽成 <code>static/js/common.js</code>，别每页复制粘贴</li>
+  <li>真溯源再接数据库，别写死在 dict 里</li>
+</ul>
+
+<h2>小结</h2>
+<p>陈皮项目证明：<strong>不一定非要 Vue/React 才能做完整 Web</strong>。Flask + 模板 + 一个 vision API，几天能搓出能演示的 AI 应用。和博客项目互补 — 一个练前端工程化，一个练后端 + AI 接入。</p>
+<p>两个项目都留在硬盘里，正好对应「静态展示站」和「动态 AI 小站」两种路线，以后选题心里也有数。</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

@@ -38,7 +38,7 @@
         :style="minimalMode ? undefined : coreAccentStyle"
       >
         <template v-if="!minimalMode">
-          <div class="pomo-deco-bg" :style="{ backgroundImage: `url('${thumbUrl(activeCompanion.img)}')` }" aria-hidden="true" />
+          <div class="pomo-deco-bg" :style="{ backgroundImage: `url('${imgUrl(activeCompanion.img)}')` }" aria-hidden="true" />
           <div class="pomo-petals" aria-hidden="true" />
         </template>
         <div class="cockpit-grid" aria-hidden="true" />
@@ -271,7 +271,7 @@
         v-if="studyRoomOpen && !minimalMode"
         ref="studyRoomRef"
         :companion="activeCompanion"
-        :companion-img="thumbUrl(activeCompanion.img)"
+        :companion-img="imgUrl(activeCompanion.img)"
         :companion-line="companionLine"
         :display-time="displayTime"
         :mode="mode"
@@ -311,6 +311,7 @@ import { musicTracks } from '../data/musicTracks.js'
 import { buildTrackList } from '../utils/music.js'
 import { useMusicStore } from '../store'
 import { PLATFORM_POMO_INK_IMAGE, PLATFORM_POMO_INK_POSITION } from '../data/inkTheme.js'
+import { imgUrl } from '../data/profile.js'
 import { thumbUrl, onThumbError } from '../utils/thumbs.js'
 import {
   getDefaultCompanionId,

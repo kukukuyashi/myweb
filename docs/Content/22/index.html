@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。">
+  <meta property="og:title" content="博客音乐室：GitHub Pages 上播 FLAC · Cyinc 的学习日志">
+  <meta property="og:description" content="静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/22">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="博客音乐室：GitHub Pages 上播 FLAC · Cyinc 的学习日志">
+  <meta name="twitter:description" content="静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/22">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>博客音乐室：GitHub Pages 上播 FLAC · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"博客音乐室：GitHub Pages 上播 FLAC","description":"静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。","datePublished":"2026-06-14","dateModified":"2026-06-14","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/22"},"url":"https://cyinc.ink/myweb/content/22","image":"https://cyinc.ink/myweb/img/bkm/5.jfif","keywords":"Vue, FLAC, GitHub Pages, 部署, 音乐","articleSection":"部署","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-C1LzVrRu.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>博客音乐室：GitHub Pages 上播 FLAC</h1>
+<p class="prerender-meta">2026-06-14 · 部署</p>
+<div class="prerender-article"><p class="article-intro">静态博客也能当播放器用 — 这篇讲音乐室怎么实现、FLAC 怎么部署到 GitHub Pages、以及路由切换时音乐为什么会重播（以及怎么修）。</p>
+<h1>博客音乐室：GitHub Pages 上播 FLAC</h1>
+<blockquote>日期：2026-06-14</blockquote>
+<blockquote>音乐室：<a href="https://kukukuyashi.github.io/myweb/music" target="_blank" rel="noopener">/music</a></blockquote>
+<hr>
+
+<h2>想实现什么？</h2>
+<p>博客除了看文章，还想<strong>挂一个自己的歌单</strong>：葬送のフリーレン OST、SANABI、动漫 ED 之类。要求：</p>
+<ul>
+  <li>在音乐室点歌，底部栏持续播放</li>
+  <li>切到首页、关于页，<strong>音乐不要停、不要重头播</strong></li>
+  <li>GitHub Pages 纯静态，不能走后端流媒体</li>
+</ul>
+
+<h2>架构：三件套</h2>
+<table>
+  <thead><tr><th>模块</th><th>作用</th></tr></thead>
+  <tbody>
+    <tr><td><code>Music.vue</code></td><td>音乐室页面：曲目表格、选中播放</td></tr>
+    <tr><td><code>MusicPlayer.vue</code></td><td>底部固定播放器：进度条、音量、暂停</td></tr>
+    <tr><td>Pinia <code>music</code> store</td><td>跨页面保存当前歌曲、播放状态、进度</td></tr>
+  </tbody>
+</table>
+<p>音频文件放在项目根目录 <code>Music/</code>，构建时整夹复制到 <code>docs/Music/</code>，和文章 HTML 一样当静态资源发出去。</p>
+
+<h2>曲目列表怎么维护？</h2>
+<p>手写 38 行路径太容易错（日文文件夹名、空格、FLAC 后缀）。现在用脚本自动扫盘：</p>
+<pre><code class="language-bash">node scripts/generate-music-tracks.mjs</code></pre>
+<p>输出 <code>src/data/musicTracks.js</code>，Music.vue 直接 import。往 <code>Music/</code> 加专辑后 rebuild 即可。</p>
+<p>开发环境 Vite 还挂了一个中间件，<code>npm run dev</code> 时直接读本地 <code>Music/</code>，不用每次 build 复制几百 MB。</p>
+
+<h2>FLAC 在浏览器里能播吗？</h2>
+<p>现代 Chrome / Edge / Firefox 大多支持 FLAC；Safari 部分版本不支持。个人博客场景够用了，真要在 iPhone 上完美兼容可以额外备一份 MP3。</p>
+<p>路径里有中文、日文、空格时，前端 URL 必须 <code>encodeURI</code>，否则 404：</p>
+<pre><code class="language-js">function musicUrl(relativePath) {
+  const base = import.meta.env.BASE_URL || '/'
+  return base + encodeURI(relativePath.replace(/^\//, ''))
+}</code></pre>
+
+<h2>踩坑 1：进度条拖不动</h2>
+<p>一开始用 <code>v-model</code> 绑进度条，和 <code>timeupdate</code> 事件打架，一拖就弹回去。改法：</p>
+<ul>
+  <li>拖动时用 <code>isDragging</code> 标记，暂停同步 store</li>
+  <li><code>pointerup</code> 时再写 <code>audio.currentTime</code></li>
+  <li>等 <code>canplay</code> 事件后再 seek，避免 metadata 没加载完</li>
+</ul>
+
+<h2>踩坑 2：换页面音乐重头播</h2>
+<p>原因：<strong>每个页面都写了一个 <code>&lt;MusicPlayer /&gt;</code></strong>。Vue Router 切页时旧组件销毁、新组件重建，<code>onMounted</code> 里又 <code>loadSong()</code>，等于重新加载音频。</p>
+<p>修法：</p>
+<ol>
+  <li>把 <code>MusicPlayer</code> 挪到 <code>App.vue</code>，全站只挂载一次</li>
+  <li>用 <code>window.globalAudio</code> 共享同一个 <code>Audio</code> 实例</li>
+  <li>换歌时才改 <code>src</code>；同歌切页只同步 UI，不 reload</li>
+</ol>
+<blockquote>💡 全局播放器是 SPA 的常见模式 — 网易云网页版也是一套 player 走天下。</blockquote>
+
+<h2>踩坑 3：仓库体积</h2>
+<p>一张 FLAC 专辑就一百多 MB，git 仓库会胖。权衡之后：</p>
+<ul>
+  <li>个人站可以接受（GitHub 单文件建议 &lt; 100MB，整 repo 免费额度够用）</li>
+  <li>若以后太大，可把 <code>Music/</code> 放 CDN，用 <code>VITE_MUSIC_BASE_URL</code> 指过去</li>
+</ul>
+
+<h2>播放状态怎么记住？</h2>
+<p>Pinia + <code>sessionStorage</code>：刷新页面可以恢复当前歌和进度；关浏览器 tab 后清掉，避免下次打开突然外放。</p>
+
+<h2>小结</h2>
+<p>音乐室不神秘：<strong>静态 MP3/FLAC + HTML5 Audio + 全局状态</strong>。难点在细节 — URL 编码、seek 时机、组件生命周期。修完换页重播之后，终于可以在写 Agent 笔记时后台循环芙莉莲 OST 了。</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

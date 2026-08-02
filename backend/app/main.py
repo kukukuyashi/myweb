@@ -95,6 +95,13 @@ def _ensure_schema_patches() -> None:
                 conn.execute(text("CREATE INDEX ix_study_room_messages_message_type ON study_room_messages (message_type)"))
             if "sticker_url" not in cols:
                 conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN sticker_url VARCHAR(512) NULL"))
+            if "is_deleted" not in cols:
+                conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN is_deleted TINYINT(1) NOT NULL DEFAULT 0"))
+                conn.execute(text("CREATE INDEX ix_study_room_messages_is_deleted ON study_room_messages (is_deleted)"))
+            if "deleted_by" not in cols:
+                conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN deleted_by INT NULL"))
+            if "deleted_at" not in cols:
+                conn.execute(text("ALTER TABLE study_room_messages ADD COLUMN deleted_at DATETIME NULL"))
     _ensure_cascade_fks(insp)
     _cleanup_discarded_submissions(insp)
 

@@ -239,6 +239,12 @@ const routes = [
         component: () => import('../views/admin/DataAdmin.vue'),
         meta: { title: '数据管理' },
       },
+      {
+        path: 'study-room',
+        name: 'StudyRoomAdmin',
+        component: () => import('../views/admin/StudyRoomAdmin.vue'),
+        meta: { title: '聊天室管理' },
+      },
     ],
   },
   {

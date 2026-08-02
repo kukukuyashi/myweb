@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。">
+  <meta property="og:title" content="Agent Harness 体系 · Cyinc 的学习日志">
+  <meta property="og:description" content="学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/28">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Agent Harness 体系 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/28">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>Agent Harness 体系 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Agent Harness 体系","description":"学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。","datePublished":"2026-07-01","dateModified":"2026-07-01","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/28"},"url":"https://cyinc.ink/myweb/content/28","image":"https://cyinc.ink/myweb/img/xiaoqing.png","keywords":"学习","articleSection":"学习","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-C1LzVrRu.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>Agent Harness 体系</h1>
+<p class="prerender-meta">2026-07-01 · 学习</p>
+<div class="prerender-article"><p class="article-intro">学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。</p>
+<h1>1 Agent Harness 测试与部署体系</h1>
+<blockquote>学习如何对 AI Agent（如 Claude Code）进行质量保障，掌握从单元测试、集成模拟（Mock）到模型评估（Eval）和自动化部署的全链路 Harness 方法。</blockquote>
+<ul>
+<li>理解 Harness 体系的组成与价值</li>
+<li>掌握 Agent 测试的“三层金字塔”结构</li>
+<li>能够通过 ==Mock（模拟）== 技术隔离外部依赖进行测试</li>
+<li>了解 ==Evaluation（评估）== 的基本方法与常用指标</li>
+<li>熟悉 Agent 项目的持续集成（CI）与版本管理</li>
+</ul>
+<hr>
+<h2>1.1 Harness 概述</h2>
+<h3>什么是 Harness？</h3>
+<p><code>Harness</code> 直译为“马具”或“背带”，在软件工程中，<strong>它指的是支撑程序开发、测试、部署和监控的一整套工具、脚本和基础设施</strong>。</p>
+<p>针对 AI Agent 开发，Harness 体系可以通俗地理解为 <strong>“Agent 的体检与上岗流水线”</strong>，它覆盖了从你写完代码到 Agent 正式上线服务的全过程，确保 Agent 在任何环境下都能稳定工作。</p>
+<h3>为什么要引入 Harness 体系？</h3>
+<p>AI Agent 与普通后端代码最大的不同在于：</p>
+<ol>
+<li> <strong>依赖大模型（LLM）</strong> ：大模型的返回具有随机性，同样的输入两次结果可能不同。</li>
+<li> <strong>依赖外部工具</strong>：Agent 需要频繁调用第三方 API（天气、数据库、搜索引擎），这些外部服务随时可能宕机。</li>
+<li> <strong>输入不可控</strong>：用户可能会输入稀奇古怪、带有攻击性或格式错误的内容。</li>
+</ol>
+<p><strong>Harness 的核心目标就是提升 Agent 的 ==鲁棒性==</strong>。</p>
+<blockquote>==鲁棒性==（Robustness）：指系统在面对异常输入、外部故障或意外压力时，依然能够正常运行或优雅降级，不会轻易崩溃的能力。好比一根钢筋，用力掰只会弯曲而不会折断。</blockquote>
+<p>Harness 体系通常由以下几大支柱构成：</p>
+<ol>
+<li> <strong>测试运行器</strong>：执行代码并报告哪些测试通过了，哪些失败了。</li>
+<li> <strong>断言库</strong>：用来判断实际运行结果是否“等于”或“包含”预期结果。</li>
+<li> <strong>模拟器</strong>：用来替代真实的外部依赖（如假装调用了一次天气 API）。</li>
+<li> <strong>评估数据集</strong>：用来衡量 Agent“回答得好不好”的标准题库。</li>
+<li> <strong>CI/CD 流水线</strong>：自动化运行上述所有步骤的服务器脚本。</li>
+</ol>
+<hr>
+<h2>1.2 核心专有名词解释（必读）</h2>
+<p>在学习具体内容前，我们先扫清术语障碍：</p>
+<table><thead><tr>
+<th>专有名词</th>
+<th>英文全称</th>
+<th>通俗解释（大白话）</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Harness</strong></td>
+<td>Test Harness</td>
+<td>测试“脚手架”，包含了运行测试所需的一切环境、数据和配置。</td>
+</tr>
+<tr>
+<td><strong>鲁棒性</strong></td>
+<td>Robustness</td>
+<td>系统面对“搞破坏”或“乱输入”时，不崩溃、能兜底的顽强程度。</td>
+</tr>
+<tr>
+<td><strong>Mock</strong></td>
+<td>Mocking</td>
+<td><strong>“替身”</strong>。不调用真接口（如真实的 GPT-4），用假代码返回固定的测试数据，省电省心。</td>
+</tr>
+<tr>
+<td><strong>单元测试</strong></td>
+<td>Unit Testing</td>
+<td>拆开 Agent 的最小零件（如一个加法工具函数）单独检测，不管周围环境。</td>
+</tr>
+<tr>
+<td><strong>集成测试</strong></td>
+<td>Integration Testing</td>
+<td>把零件拼起来测试，看 Agent 能不能真的连上数据库或外部 API。</td>
+</tr>
+<tr>
+<td><strong>E2E 测试</strong></td>
+<td>End-to-End Testing</td>
+<td>端到端，模拟真实用户从头到尾说一句话，看 Agent 最终反应如何。</td>
+</tr>
+<tr>
+<td><strong>Evaluation</strong></td>
+<td>Eval</td>
+<td><strong>“打分”</strong>。不仅测“对不对”，还测“好不好”，用于衡量回答质量、准确率。</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>持续集成/持续部署</td>
+<td>代码一提交（git push），服务器自动帮你跑测试、打包、上线的自动化流程。</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>1.3 Agent 测试的“三层金字塔”</h2>
+<p>在 Harness 体系中，我们建议按照金字塔比例分配测试精力：<strong>底层多写（快），顶层少写（慢）</strong>。</p>
+<h3>1.3.1 第一层：单元测试（Unit Testing）</h3>
+<ul>
+<li><strong>测什么</strong>：测 <code>JSON</code> 解析函数、提示词模板拼接逻辑、异常捕获（try...catch）是否生效。</li>
+<li><strong>特点</strong>：运行极快（毫秒级），不需要联网。</li>
+<li><strong>专有名词：==断言==</strong>（Assertion）：指在测试中判断“实际结果”是否符合“预期结果”的代码行，如 <code>expect(1+1).toBe(2)</code>。</li>
+</ul>
+<pre><code class="language-javascript">
+// 测试 Agent 的提示词构建函数
+function buildSystemPrompt(tools) {
+  return `你可以使用以下工具：${tools.join(', ')}`;
+}
+
+// 单元测试示例（Jest 风格）
+test('buildSystemPrompt 应该正确拼接工具名称', () =&gt; {
+  const result = buildSystemPrompt(['计算器', '日历']);
+  // 这里的 expect(...).toBe(...) 就是“断言”
+  expect(result).toBe('你可以使用以下工具：计算器, 日历');
+});
+</code></pre>
+<h3>1.3.2 第二层：集成测试（Integration Testing）</h3>
+<ul>
+<li><strong>测什么</strong>：测 Agent 调用真实 API 时，参数格式是否正确；收到返回后，解析是否报错。</li>
+<li><strong>特点</strong>：需要配置测试环境（如测试用的 API Key），速度较慢。</li>
+<li><strong>关键手段：==Mock（模拟）==</strong>：为了不让测试消耗真实 LLM 的 Token（计费）或被限流，我们常用 Mock 技术拦截网络请求。</li>
+</ul>
+<pre><code class="language-javascript">
+// 集成测试中，使用 Mock 代替真实网络请求
+const nock = require('nock'); // nock 是 Node.js 中专门用来拦截 HTTP 请求的库
+
+test('Agent 调用天气 API 应返回格式化温度', async () =&gt; {
+  // 1. 拦截真实请求，返回伪造的“假数据”
+  nock('https://api.weather.com')
+    .get('/city/beijing')
+    .reply(200, { temp: 25, condition: 'Sunny' });
+
+  // 2. 执行 Agent 逻辑
+  const agent = new WeatherAgent();
+  const result = await agent.getWeather('beijing');
+
+  // 3. 断言结果
+  expect(result).toContain('25');
+});
+</code></pre>
+<h3>1.3.3 第三层：端到端测试（E2E Testing）</h3>
+<ul>
+<li><strong>测什么</strong>：模拟用户完整对话“你好，帮我查下北京天气然后告诉我穿什么”。</li>
+<li><strong>特点</strong>：通常需要使用真实的 LLM（如 Claude 或 GPT），但会设置较低温度参数保证稳定性。速度最慢，数量最少。</li>
+</ul>
+<hr>
+<h2>1.4 模拟（Mock）策略与隔离</h2>
+<h3>为什么要做 Mock？（重点理解）</h3>
+<ul>
+<li><strong>省钱</strong>：每次单元测试都调用 GPT-4，一次 CI/CD 运行几百次，账单会很“感人”。</li>
+<li><strong>省时</strong>：真调用需要等待网络延迟（2~5秒），Mock 是内存级的（微秒级）。</li>
+<li><strong>造“极端场景”</strong>：真实 API 很难出现“超时”或“返回乱码”，但 Mock 可以轻易制造这些场景，用来测试 Agent 的 ==鲁棒性==。</li>
+</ul>
+<h3>常用 Mock 维度</h3>
+<ol>
+<li> <strong>LLM 响应 Mock</strong>：直接模拟 <code>claude.messages.create</code> 返回固定字符串。</li>
+<li> <strong>工具返回 Mock</strong>：模拟 <code>search_engine.search</code> 返回特定网页片段。</li>
+<li> <strong>异常 Mock</strong>：模拟抛出 <code>TimeoutError</code>（超时错误），观察 Agent 是否会重试。</li>
+</ol>
+<hr>
+<h2>1.5 评估体系（Evaluation / Eval）</h2>
+<p>对于 AI Agent，很多问题是“没有标准答案”的。比如“写一首诗”，传统断言 <code>expect(...).toBe(...)</code> 完全无法工作。</p>
+<h3>什么是 Eval？</h3>
+<p><code>Eval</code>（Evaluation）指使用<strong>预先标注好的测试集</strong>（黄金数据集）对 Agent 进行<strong>批量自动化评分</strong>，衡量“回答质量”。</p>
+<h3>常用评估指标（专有名词解释）</h3>
+<table><thead><tr>
+<th>指标名称</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>准确率</strong></td>
+<td>回答中正确事实的比例（如检索到的文档是否相关）。</td>
+</tr>
+<tr>
+<td><strong>相关性</strong></td>
+<td>回答与用户问题的匹配程度，通常由另一个大模型（如 GPT-4）打分。</td>
+</tr>
+<tr>
+<td><strong>幻觉率</strong></td>
+<td>衡量 Agent 是否编造了不存在的事实（越低越好）。</td>
+</tr>
+<tr>
+<td><strong>任务完成率</strong></td>
+<td>Agent 是否成功调用了正确的工具链并返回了结果。</td>
+</tr>
+</tbody></table>
+<pre><code class="language-javascript">
+// 简单的 Eval 数据集结构（JSON）
+const testDataset = [
+  {
+    input: '推荐一本关于中国历史的书',
+    // 期望检查点（不要求逐字相同）
+    required_keywords: ['史记', '资治通鉴', '明朝']
+  }
+];
+
+// 运行评估：只看 Agent 回答是否包含关键词
+testDataset.forEach(item =&gt; {
+  const answer = await agent.chat(item.input);
+  const pass = item.required_keywords.some(kw =&gt; answer.includes(kw));
+  console.log(`测试项通过: ${pass}`);
+});
+</code></pre>
+<hr>
+<h2>1.6 Harness 实践：项目目录结构</h2>
+<p>下面是一个标准的 <code>Claude Code</code> 风格 Agent 工程目录，包含了 Harness 体系的所有要素：</p>
+<pre><code class="language-javascript">
+my-awesome-agent/
+├── src/                     # 源代码
+│   ├── agent.ts             # 核心编排（Orchestration）逻辑
+│   ├── tools/               # 工具函数（计算器、搜索等）
+│   └── prompts/             # 提示词模板
+├── tests/                   # 测试目录
+│   ├── unit/                # 单元测试
+│   ├── integration/         # 集成测试（带 Mock）
+│   └── e2e/                 # 端到端测试（用真实模型）
+├── eval/                    # 评估目录
+│   ├── datasets/            # 黄金测试集（JSON/CSV）
+│   └── evaluator.ts         # 打分脚本
+├── jest.config.js           # 测试运行器配置
+└── package.json
+</code></pre>
+<hr>
+<h2>1.7 持续集成（CI）与自动化</h2>
+<p>在多人协作时，我们不能手动跑测试。需要引入 <strong>CI/CD</strong> 工具（如 GitHub Actions）。</p>
+<pre><code class="language-yaml">
+# .github/workflows/harness.yml
+name: Agent 质量流水线
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run test:unit        # 跑单测（必须全绿）
+      - run: npm run test:integration # 跑集成测试
+      - run: npm run eval:quick       # 跑轻量评估（防止模型退化）
+</code></pre>
+<hr>
+<h2>1.8 综合练习：为“数学助教 Agent”编写 Harness</h2>
+<p><strong>需求</strong>：</p>
+<p>你开发了一个简单的数学 Agent，它只有一个加法工具 <code>add(a, b)</code>。请根据 Harness 思想，完成以下任务。</p>
+<ol>
+<li> <strong>单元测试</strong>：测试 <code>add</code> 函数能否正确处理正数、负数。</li>
+<li> <strong>异常测试</strong>：测试当输入非数字（如 <code>add('a',1)</code>）时，是否抛出了友好的错误提示。</li>
+<li> <strong>Mock 测试</strong>：模拟 LLM 告诉 Agent“请计算 1+1”，验证 Agent 是否调用了 <code>add</code> 工具。</li>
+</ol>
+<p><strong>答案（代码实现）</strong> ：</p>
+<pre><code class="language-javascript">
+// src/tools/calc.js
+function add(a, b) {
+  if (typeof a !== 'number' || typeof b !== 'number') {
+    throw new Error('参数必须是数字，请检查输入');
+  }
+  return a + b;
+}
+module.exports = { add };
+
+// tests/unit/calc.test.js
+const { add } = require('../../src/tools/calc');
+
+describe('数学工具单元测试', () =&gt; {
+  // 1. 正常场景测试
+  test('正数相加正确', () =&gt; {
+    expect(add(1, 2)).toBe(3);
+  });
+  test('负数相加正确', () =&gt; {
+    expect(add(-1, -2)).toBe(-3);
+  });
+
+  // 2. 异常鲁棒性测试
+  test('传入字符串应抛出友好错误', () =&gt; {
+    // 为了测试“是否抛错”，需要用 toThrow 包裹
+    expect(() =&gt; add('a', 1)).toThrow('参数必须是数字');
+  });
+});
+
+// tests/integration/agent-flow.test.js
+// 3. Mock 集成测试：验证 Agent 调用了工具
+const { Agent } = require('../../src/agent');
+const { add } = require('../../src/tools/calc');
+
+// 模拟 LLM 的响应：假装模型告诉我们需要调用 add
+jest.mock('../../src/agent', () =&gt; {
+  return {
+    Agent: jest.fn().mockImplementation(() =&gt; ({
+      ask: jest.fn().mockResolvedValue('结果是 3')
+    }))
+  };
+});
+
+test('Agent 应能根据提示调用加法工具', async () =&gt; {
+  const agent = new Agent();
+  // 伪造一个调用场景：传入用户问题，Agent 内部应识别 "1+1"
+  const response = await agent.ask('1+1等于几？');
+  expect(response).toContain('3');
+});
+</code></pre>
+<hr>
+<h2>1.9 本章总结</h2>
+<table><thead><tr>
+<th>概念</th>
+<th>一句话总结</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Harness</strong></td>
+<td>包含测试、模拟、评估在内的全套“保姆级”质量保障流水线。</td>
+</tr>
+<tr>
+<td><strong>鲁棒性</strong></td>
+<td>系统在恶劣输入或外部故障下的“抗揍”生存能力。</td>
+</tr>
+<tr>
+<td><strong>Mock（模拟）</strong></td>
+<td>用“假接口”代替“真接口”进行测试，为了省钱、提速、造极端场景。</td>
+</tr>
+<tr>
+<td><strong>单元 vs 集成 vs E2E</strong></td>
+<td>跑得快的多写（单元），跑得慢的少写（E2E），形成金字塔。</td>
+</tr>
+<tr>
+<td><strong>Evaluation（评估）</strong></td>
+<td>用题库给 Agent 打分，主要衡量幻觉率和任务完成率。</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>代码合并前自动触发的机器人测试员，卡住低质量代码上线。</td>
+</tr>
+</tbody></table>
+<p>在这里写正文…</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

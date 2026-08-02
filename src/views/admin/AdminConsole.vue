@@ -119,7 +119,10 @@ const navGroups = [
   },
   {
     title: '系统',
-    items: [{ label: '数据管理', icon: '▤', to: '/admin/data' }],
+    items: [
+      { label: '数据管理', icon: '▤', to: '/admin/data' },
+      { label: '聊天室管理', icon: '◉', to: '/admin/study-room' },
+    ],
   },
 ]
 

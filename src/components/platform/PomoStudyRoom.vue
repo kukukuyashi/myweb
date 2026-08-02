@@ -455,6 +455,14 @@ function connectChat() {
         applyHistory(data.items || [])
       } else if (data.type === 'msg') {
         pushIncoming(data)
+      } else if (data.type === 'kick') {
+        const myId = myUserId.value
+        if (!myId || data.user_id === myId) {
+          chatError.value = (data.reason || '你已被管理员请出聊天室')
+          shake.value = true
+          setTimeout(() => { shake.value = false }, 800)
+          if (socket) { try { socket.close() } catch (e) {} }
+        }
       } else if (data.type === 'err') {
         if (data.reason === 'rate') {
           chatError.value = '发言太快,稍等再发'

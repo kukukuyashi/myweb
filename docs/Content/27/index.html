@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。">
+  <meta property="og:title" content="鼠标动画光标：从 PNG 序列到 Chrome 兼容 · Cyinc 的学习日志">
+  <meta property="og:description" content="PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/27">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="鼠标动画光标：从 PNG 序列到 Chrome 兼容 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/27">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>鼠标动画光标：从 PNG 序列到 Chrome 兼容 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"鼠标动画光标：从 PNG 序列到 Chrome 兼容","description":"PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。","datePublished":"2026-06-29","dateModified":"2026-06-29","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/27"},"url":"https://cyinc.ink/myweb/content/27","image":"https://cyinc.ink/myweb/img/bkm/5.jfif","keywords":"CSS, Vue, 前端, 鼠标, 动画, Python, Canvas","articleSection":"前端","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-C1LzVrRu.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>鼠标动画光标：从 PNG 序列到 Chrome 兼容</h1>
+<p class="prerender-meta">2026-06-29 · 前端</p>
+<div class="prerender-article"><p class="article-intro">PNG 序列生成透明 GIF，Canvas 叠加层逐帧清屏绘制，解决 Chrome 不动与移动拖影两个问题。</p>
+<h1>鼠标动画光标：从 PNG 序列到 Chrome 兼容</h1>
+<blockquote>日期：2026-06-29</blockquote>
+<hr>
+<h2>一、要解决的两个问题</h2>
+<ol>
+<li><strong>Chrome 里 CSS 光标不动</strong> — <code>cursor: url(...gif)</code> 往往只显示 GIF 第一帧。</li>
+<li><strong>移动时有黑色拖影</strong> — 用 <code>&lt;img&gt;</code> + <code>transform: translate()</code> 跟随时，GIF 半透明黑边会在路径上残留像素。</li>
+</ol>
+<p>Firefox 对 CSS GIF 光标支持较好；Chrome / Edge 需要 JS 叠加层。拖影则要用 Canvas 每帧 <code>clearRect</code> 再 <code>drawImage</code>，并用 <code>left/top</code> 定位（不用 <code>transform</code>）。</p>
+<h2>二、素材：<code>img/Mouse animation/</code></h2>
+<table><thead><tr>
+<th>子目录</th>
+<th>输出文件</th>
+<th>帧数</th>
+</tr></thead><tbody>
+<tr>
+<td><code>普通（第二版）/</code></td>
+<td><code>normal.gif</code></td>
+<td>130</td>
+</tr>
+<tr>
+<td><code>交互（第二版）/</code></td>
+<td><code>pointer.gif</code></td>
+<td>94</td>
+</tr>
+<tr>
+<td><code>文本/</code></td>
+<td><code>text.gif</code></td>
+<td>140</td>
+</tr>
+<tr>
+<td><code>加载/</code></td>
+<td><code>busy.gif</code></td>
+<td>45</td>
+</tr>
+</tbody></table>
+<p>PNG 为 240×240，脚本缩到 <strong>64×64</strong>（浏览器 cursor 尺寸上限附近）。</p>
+<h2>三、生成脚本 <code>scripts/generate-cursors.py</code></h2>
+<p>流程：排序 PNG → 缩放 → <strong>清理半透明黑边</strong> → 量化带透明索引的 GIF。</p>
+<p>半透明黑边是拖影根源之一。脚本会把 <code>alpha &lt; 48</code> 以及「半透明且 RGB 很暗」的像素改为全透明，再写入 GIF：</p>
+<pre><code class="language-python">
+def clean_alpha(frame):
+    # alpha 过低 → 透明
+    # 半透明黑边 (r,g,b &lt; 64 且 alpha &lt; 220) → 透明
+</code></pre>
+<p>写出时设 <code>disposal=2</code>，避免帧叠加脏背景。</p>
+<pre><code class="language-bash">
+npm run cursors:generate   # 单独生成
+npm run build              # 构建时自动跑
+</code></pre>
+<p>依赖：Python 3 + Pillow。</p>
+<h2>四、运行时：Canvas + PNG 精灵图</h2>
+<p><strong>为什么不用 GIF 直接画到 Canvas？</strong>  </p>
+<p><code>drawImage(gifImage, …)</code> 在浏览器里<strong>只会取 GIF 第一帧</strong>，动画会消失。  </p>
+<p><strong>为什么不用 <code>&lt;img&gt;</code> 跟着鼠标？</strong>  </p>
+<p><code>transform</code> 移动 animated GIF 容易留下黑色拖影。</p>
+<p>最终方案：构建时把 PNG 序列横向拼成 <strong>精灵图</strong>（<code>normal-sheet.png</code> 等），运行时读 <code>manifest.json</code>，Canvas 按帧索引切图：</p>
+<pre><code class="language-javascript">
+paintLoop → frameIndex++ → drawImage(sheet, index×64, 0, 64, 64, …)
+mousemove → left/top 定位（不用 transform）
+</code></pre>
+<p><code>App.vue</code> 挂载 <code>useAnimatedCursor()</code>；CSS 里 <code>html.has-animated-cursor { cursor: none }</code>。</p>
+<h3>状态切换</h3>
+<table><thead><tr>
+<th>场景</th>
+<th>光标</th>
+</tr></thead><tbody>
+<tr>
+<td>默认</td>
+<td><code>normal.gif</code></td>
+</tr>
+<tr>
+<td>链接、按钮</td>
+<td><code>pointer.gif</code></td>
+</tr>
+<tr>
+<td>输入框</td>
+<td><code>text.gif</code></td>
+</tr>
+<tr>
+<td>路由切换（<code>cursor-busy</code>）</td>
+<td><code>busy.gif</code></td>
+</tr>
+<tr>
+<td><code>[disabled]</code></td>
+<td>隐藏自定义层，用系统 <code>not-allowed</code></td>
+</tr>
+</tbody></table>
+<p><code>prefers-reduced-motion</code> 或 <code>(pointer: coarse)</code> 时不启用，回退 CSS 静态光标。</p>
+<h2>五、和上一篇的关系</h2>
+<p>《自定义鼠标样式与点击涟漪效果》讲的是 CSS <code>cursor: url()</code> 基础写法。本篇是在同一套 GIF 素材上，补齐 <strong>Chrome 动画</strong> 与 <strong>无拖影</strong> 的完整方案。</p>
+<h2>六、文件一览</h2>
+<table><thead><tr>
+<th>路径</th>
+<th>作用</th>
+</tr></thead><tbody>
+<tr>
+<td><code>img/Mouse animation/</code></td>
+<td>PNG 源序列</td>
+</tr>
+<tr>
+<td><code>scripts/generate-cursors.py</code></td>
+<td>GIF + 精灵图 + <code>manifest.json</code></td>
+</tr>
+<tr>
+<td><code>public/cursors/*-sheet.png</code></td>
+<td>Canvas 逐帧动画源</td>
+</tr>
+<tr>
+<td><code>public/cursors/manifest.json</code></td>
+<td>帧数、尺寸配置</td>
+</tr>
+<tr>
+<td><code>src/composables/useAnimatedCursor.js</code></td>
+<td>Canvas 逐帧播放精灵图</td>
+</tr>
+<tr>
+<td><code>src/styles/_base.css</code></td>
+<td><code>has-animated-cursor</code> 样式</td>
+</tr>
+<tr>
+<td><code>src/composables/useRouteTransition.js</code></td>
+<td>路由切换时 <code>cursor-busy</code></td>
+</tr>
+</tbody></table>
+<h2>七、踩坑</h2>
+<ol>
+<li><strong>Canvas + GIF</strong> → 只有第一帧，无动画。</li>
+<li><strong><code>&lt;img&gt;</code> + transform 移动</strong> → 容易黑边拖影，改 left/top 或精灵图。</li>
+<li><strong>GIF 半透明量化</strong> → 必须清 alpha 脏边，并设 <code>disposal=2</code>。</li>
+<li><strong>路径要带 base</strong> → <code>import.meta.env.BASE_URL + 'cursors/...'</code>。</li>
+<li><strong>不要用 <code>will-change: transform</code></strong> 跟鼠标 — 会加剧合成层残留。</li>
+</ol>
+<h2>八、相关</h2>
+<ul>
+<li><a href="/myweb/Content/26/" target="_blank" rel="noopener">自定义鼠标样式与点击涟漪效果</a></li>
+</ul>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

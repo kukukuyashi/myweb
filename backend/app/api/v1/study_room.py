@@ -6,10 +6,10 @@ import asyncio
 import json
 import time
 from collections import defaultdict
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,7 @@ from app.core.db import SessionLocal, get_db
 from app.core.response import ok
 from app.core.security import ALGORITHM
 from app.models.study_room import StudyRoomMessage
+from app.api.v1.notes_admin import require_notes_admin
 from app.models.user import User
 from app.schemas.study_room import (
     StudyRoomMessageCreate,
@@ -64,6 +65,9 @@ def _to_public_dict(msg: StudyRoomMessage, user: User | None) -> dict:
             "content": msg.content,
             "message_type": msg.message_type or "text",
             "sticker_url": msg.sticker_url,
+            "is_deleted": bool(msg.is_deleted) if msg.is_deleted is not None else False,
+            "deleted_by": msg.deleted_by,
+            "deleted_at": msg.deleted_at.isoformat() if msg.deleted_at else None,
             "created_at": created_iso,
         }
     return {
@@ -217,7 +221,7 @@ def list_messages(
     before: int | None = Query(None, description="取 id < before(分页向上滚加载更多)"),
     limit: int = Query(50, ge=1, le=100),
 ):
-    q = db.query(StudyRoomMessage)
+    q = db.query(StudyRoomMessage).filter(StudyRoomMessage.is_deleted == False)  # noqa: E712
     if before is not None:
         q = q.filter(StudyRoomMessage.id < before)
     rows = q.order_by(StudyRoomMessage.id.asc()).limit(limit).all()
@@ -479,3 +483,111 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
             })
         except Exception:
             pass
+
+# ============== Admin endpoints ==============
+
+def _admin_user():
+    settings = get_settings()
+    db = SessionLocal()
+    try:
+        return db.query(User).filter(User.username == settings.admin_username).first()
+    finally:
+        db.close()
+
+
+@router.get("/admin/messages", summary="(admin) 列出所有消息")
+def admin_list_messages(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+    before: int | None = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    include_deleted: int = Query(1),
+):
+    q = db.query(StudyRoomMessage)
+    if include_deleted == 0:
+        q = q.filter(StudyRoomMessage.is_deleted == False)  # noqa: E712
+    if before is not None:
+        q = q.filter(StudyRoomMessage.id < before)
+    rows = q.order_by(StudyRoomMessage.id.desc()).limit(limit).all()
+    user_ids = {r.user_id for r in rows}
+    users_map = {}
+    if user_ids:
+        for u in db.query(User).filter(User.id.in_(user_ids)).all():
+            users_map[u.id] = u
+    items = [_to_public_dict(r, users_map.get(r.user_id)) for r in rows]
+    return ok({"items": items, "count": len(items)})
+
+
+@router.delete("/admin/messages/{message_id}", summary="(admin) 软删一条消息")
+def admin_delete_message(
+    message_id: int,
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    admin = _admin_user()
+    row = db.query(StudyRoomMessage).filter(StudyRoomMessage.id == message_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="消息不存在")
+    if row.is_deleted:
+        return ok({"id": row.id, "is_deleted": True, "noop": True})
+    row.is_deleted = True
+    row.deleted_at = datetime.now(timezone.utc)
+    row.deleted_by = admin.id if admin else None
+    db.commit()
+    return ok({"id": row.id, "is_deleted": True, "deleted_at": row.deleted_at.isoformat()})
+
+
+@router.post("/admin/messages/{message_id}/restore", summary="(admin) 恢复软删消息")
+def admin_restore_message(
+    message_id: int,
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    row = db.query(StudyRoomMessage).filter(StudyRoomMessage.id == message_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="消息不存在")
+    if not row.is_deleted:
+        return ok({"id": row.id, "is_deleted": False, "noop": True})
+    row.is_deleted = False
+    row.deleted_at = None
+    row.deleted_by = None
+    db.commit()
+    return ok({"id": row.id, "is_deleted": False})
+
+
+@router.get("/admin/users", summary="(admin) 在线用户列表")
+def admin_list_online_users(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    ids = _collect_online_user_ids()
+    if not ids:
+        return ok({"items": [], "count": 0})
+    users = db.query(User).filter(User.id.in_(set(ids))).all()
+    items = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "nickname": getattr(u, "nickname", None),
+            "avatar": getattr(u, "avatar", None),
+        }
+        for u in users
+    ]
+    items.sort(key=lambda x: ids.index(x["id"]) if x["id"] in ids else 0)
+    return ok({"items": items, "count": len(items)})
+
+
+@router.post("/admin/kick/{user_id}", summary="(admin) 踢出用户")
+def admin_kick_user(
+    user_id: int,
+    _: Annotated[str, Depends(require_notes_admin)],
+    reason: str = Query("违反社区规范", max_length=120),
+):
+    payload = {
+        "type": "kick",
+        "user_id": user_id,
+        "reason": reason,
+        "ts": datetime.now(timezone.utc).isoformat(),
+    }
+    _publish(CHANNEL, payload)
+    return ok({"kicked": user_id, "reason": reason})
