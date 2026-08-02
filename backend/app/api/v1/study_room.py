@@ -162,6 +162,51 @@ def _load_users_map(db: Session, user_ids: set[int]) -> dict[int, User]:
     return out
 
 
+@router.post("/messages", summary="自习室发送消息(sticker 默认走 HTTP,绕过 WS stale-socket 问题)")
+def post_message(
+    payload: StudyRoomMessageCreate,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    content = (payload.content or "").strip() if isinstance(payload.content, str) else ""
+    sticker = (payload.sticker_url or "").strip() if isinstance(payload.sticker_url, str) else ""
+    if not content and not sticker:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="content or sticker_url required")
+    if content and len(content) > 500:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="too long")
+    if sticker:
+        allowed = (
+            sticker.startswith("https://")
+            or sticker.startswith("/myweb/img/bqb/")
+            or sticker.startswith("/uploads/")
+        )
+        if not allowed:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="bad sticker")
+    # rate limit (与 WS 同享 20/min)
+    if not _rate_limit_check(current_user.id):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=429, detail="rate")
+    try:
+        row = StudyRoomMessage(
+            user_id=current_user.id,
+            content=content or None,
+            message_type="sticker" if sticker else "text",
+            sticker_url=sticker or None,
+        )
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+        msg_payload = {"type": "msg", **_to_public_dict(row, current_user)}
+    except Exception:
+        db.rollback()
+        raise
+    _publish(CHANNEL, msg_payload)
+    return ok({"id": row.id, "message_type": row.message_type, "sticker_url": row.sticker_url})
+
+
 @router.get("/messages", summary="自习室历史消息")
 def list_messages(
     db: Annotated[Session, Depends(get_db)],

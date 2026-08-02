@@ -640,16 +640,27 @@ function loadChatPos() {
 }
 
 function sendSticker(s) {
+  if (!canSend.value) return
   const url = stickerUrl(s)
-  const dbg = { id: s && s.id, url, canSend: canSend.value, hasSocket: !!socket, readyState: socket && socket.readyState };
-  console.log('[sticker] send', dbg)
-  if (!canSend.value) {
-    console.warn('[sticker] blocked: canSend=false (token/socket not ready)')
-    return
-  }
-  const ok = socket && socket.send({ type: 'msg', content: null, sticker_url: url })
-  console.log('[sticker] sent=', ok)
-  if (ok) emojiOpen.value = false
+  // Stale-socket bypass: POST to /messages via HTTP (100% reliable, 1-2s latency)
+  ;(async () => {
+    try {
+      const r = await fetch('/api/v1/study-room/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: null, sticker_url: url })
+      })
+      if (r.ok) {
+        emojiOpen.value = false
+      } else {
+        chatError.value = 'send failed (' + r.status + ')'
+        shake.value = true
+        setTimeout(() => { shake.value = false }, 400)
+      }
+    } catch (e) {
+      chatError.value = 'send failed'
+    }
+  })()
 }
 
 function onStickerError(ev) {
