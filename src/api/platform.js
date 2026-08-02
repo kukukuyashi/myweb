@@ -488,6 +488,7 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
       } else if (data.type === 'presence') {
         if (typeof onPresence === 'function') onPresence(data)
       }
+if (data.type === 'ping') { try { ws.send(JSON.stringify({ type: 'pong' })) } catch {} ; return }
     }
     ws.onerror = (e) => {
       if (typeof onError === 'function') onError(e)
@@ -519,6 +520,7 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
           ? { type: 'msg', content: payload }
           : payload
         ws.send(JSON.stringify(body))
+        if (ws.readyState !== 1) { console.warn('[ws] half-open detected, readyState=', ws.readyState, 'close+false'); try { ws.close() } catch {}; return false }
         return true
       } catch { return false }
     },
