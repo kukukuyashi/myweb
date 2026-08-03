@@ -330,6 +330,7 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
         try:
             rows = (
                 db.query(StudyRoomMessage)
+                .filter(StudyRoomMessage.is_deleted == False)  # noqa: E712
                 .order_by(StudyRoomMessage.id.asc())
                 .limit(HISTORY_LIMIT)
                 .all()
@@ -537,6 +538,10 @@ def admin_delete_message(
     row.deleted_at = datetime.now(timezone.utc)
     row.deleted_by = admin.id if admin else None
     db.commit()
+    try:
+        _publish(CHANNEL, {"type": "delete", "id": row.id})
+    except Exception:
+        pass
     return ok({"id": row.id, "is_deleted": True, "deleted_at": row.deleted_at.isoformat()})
 
 
@@ -555,6 +560,11 @@ def admin_restore_message(
     row.deleted_at = None
     row.deleted_by = None
     db.commit()
+    try:
+        users_map_restore = _load_users_map(db, {row.user_id})
+        _publish(CHANNEL, {"type": "restore", **_to_public_dict(row, users_map_restore.get(row.user_id))})
+    except Exception:
+        pass
     return ok({"id": row.id, "is_deleted": False})
 
 

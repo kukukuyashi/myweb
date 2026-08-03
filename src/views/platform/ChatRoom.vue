@@ -223,6 +223,7 @@ function onListScroll(ev) {
 
 function pushIncoming(item) {
   if (!item || item.id == null) return
+  if (item.is_deleted) return
   if (messages.value.some((m) => m.id === item.id)) return
   messages.value.push(item)
   scrollToBottom()
@@ -313,6 +314,13 @@ function connectChat() {
         messages.value = []
         applyHistory(data.items || [])
       } else if (data.type === 'msg') {
+        pushIncoming(data)
+      } else if (data.type === 'delete') {
+        const id = data.id
+        if (id != null) {
+          messages.value = messages.value.filter((m) => m.id !== id)
+        }
+      } else if (data.type === 'restore') {
         pushIncoming(data)
       } else if (data.type === 'kick') {
         const myId = myUserId.value
