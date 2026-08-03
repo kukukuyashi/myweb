@@ -142,15 +142,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.sp-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.4rem; }
+.sp-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; padding: 0.5rem 0.6rem; margin: 0.5rem 0; }
 .sp-card {
   appearance: none;
-  background: rgba(8,10,14,0.55);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-elevated, rgba(8,10,14,0.55));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
   border-radius: 10px;
-  padding: 0.55rem 0.7rem;
+  padding: 0.45rem 0.55rem;
   text-align: left;
-  color: rgba(255,255,255,0.85);
+  color: var(--text, rgba(255,255,255,0.85));
   cursor: pointer;
   transition: border-color 0.15s, transform 0.15s;
   font-family: inherit;
@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
 .sp-card:hover { border-color: var(--orange, #ff7a45); transform: translateY(-1px); }
 .sp-card__head { display: flex; justify-content: space-between; align-items: center; }
 .sp-label { font-size: 0.6rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); text-transform: uppercase; }
-.sp-value { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--orange, #ff7a45); line-height: 1.1; }
+.sp-value { font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--orange, #ff7a45); line-height: 1.1; }
 .sp-card--pomo .sp-value { color: #6ef195; }
 .sp-sub { display: flex; gap: 0.3rem; align-items: center; min-width: 0; }
 .sp-sub__text { font-size: 0.66rem; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

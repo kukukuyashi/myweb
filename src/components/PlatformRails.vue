@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="platform-rails" aria-hidden="true">
     <aside class="platform-rail platform-rail--left">
       <div class="rail-block">
@@ -19,9 +19,6 @@
           :show-progress="false"
           :show-volume="false"
         />
-      </div>
-      <div class="rail-block rail-block--interactive">
-        <StudyRoomPomoCard />
       </div>
       <div class="rail-ticks" />
       <p class="rail-vertical">FORUM · POMO · GUEST</p>
@@ -57,7 +54,6 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { profile } from '../data/profile'
 import { platformLaunchDate } from '../data/platformBaGallery.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
-import StudyRoomPomoCard from './StudyRoomPomoCard.vue'
 
 const clockText = ref('')
 const visitorToday = ref(0)

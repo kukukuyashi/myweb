@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <aside class="platform-sidebar" :class="{ open: menuOpen, 'is-collapsed': collapsed }">
     <div class="sidebar-inner">
       <div class="sidebar-top">
@@ -68,6 +68,11 @@
       <div class="sidebar-spacer" />
 
       <SidebarMusicPanel variant="sidebar" @navigate="menuOpen = false" />
+
+      <div class="sidebar-divider" />
+
+      <StudyRoomPomoCard />
+
 
       <div class="sidebar-footer">
         <div class="sidebar-backdrop-ctrl">
@@ -156,6 +161,7 @@ import { getPlatformToken, fetchNotificationUnread } from '../api/platform.js'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
+import StudyRoomPomoCard from './StudyRoomPomoCard.vue'
 import { useForumBackdrop, BLUR_RANGE, DARK_RANGE, CARD_RANGE } from '../composables/useForumBackdrop.js'
 
 const route = useRoute()
