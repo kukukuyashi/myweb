@@ -79,6 +79,9 @@ def _to_public_dict(msg: StudyRoomMessage, user: User | None) -> dict:
         "content": msg.content,
         "message_type": msg.message_type or "text",
         "sticker_url": msg.sticker_url,
+        "is_deleted": bool(msg.is_deleted) if msg.is_deleted is not None else False,
+        "deleted_by": msg.deleted_by,
+        "deleted_at": msg.deleted_at.isoformat() if msg.deleted_at else None,
         "created_at": created_iso,
     }
 
