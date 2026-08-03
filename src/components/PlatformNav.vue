@@ -39,6 +39,9 @@
         <router-link to="/app/pomo" @click="menuOpen = false">
           <span class="nav-icon">◷</span> 番茄钟
         </router-link>
+        <router-link v-if="hasToken" to="/app/chat" @click="menuOpen = false">
+          <span class="nav-icon">💬</span> 聊天室
+        </router-link>
         <router-link to="/app/arcade" @click="menuOpen = false">
           <span class="nav-icon">◈</span> 奇怪的游戏厅
         </router-link>
@@ -69,9 +72,6 @@
 
       <SidebarMusicPanel variant="sidebar" @navigate="menuOpen = false" />
 
-      <div class="sidebar-divider" />
-
-      <StudyRoomPomoCard />
 
 
       <div class="sidebar-footer">
@@ -161,7 +161,6 @@ import { getPlatformToken, fetchNotificationUnread } from '../api/platform.js'
 import { usePlatformSidebar } from '../composables/usePlatformSidebar.js'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
 import SidebarMusicPanel from './SidebarMusicPanel.vue'
-import StudyRoomPomoCard from './StudyRoomPomoCard.vue'
 import { useForumBackdrop, BLUR_RANGE, DARK_RANGE, CARD_RANGE } from '../composables/useForumBackdrop.js'
 
 const route = useRoute()

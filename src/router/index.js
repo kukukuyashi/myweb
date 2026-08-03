@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
@@ -137,6 +137,12 @@ const routes = [
         path: 'pomo',
         name: 'Pomo',
         component: () => import('../views/Pomo.vue'),
+      },
+      {
+        path: 'chat',
+        name: 'ChatRoom',
+        component: () => import('../views/platform/ChatRoom.vue'),
+        meta: { title: '聊天室' },
       },
       {
         path: 'music',
