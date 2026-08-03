@@ -1,4 +1,5 @@
 import { formatApiError } from '../utils/apiError.js'
+import { getNotesAdminToken, setNotesAdminToken } from './notesAdmin.js'
 import { imgUrl } from '../data/profile.js'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '')
@@ -56,10 +57,12 @@ export function requirePlatformToken() {
   return token
 }
 
-export async function platformFetch(path, { method = 'GET', body, auth = false } = {}) {
+export async function platformFetch(path, { method = 'GET', body, auth = false, adminAuth = false } = {}) {
   const headers = { 'Content-Type': 'application/json; charset=utf-8' }
   if (auth) {
     headers.Authorization = `Bearer ${requirePlatformToken()}`
+  } else if (adminAuth) {
+    headers.Authorization = `Bearer ${getNotesAdminToken()}`
   }
   const res = await fetch(`${BASE}${path}`, {
     method,
@@ -74,7 +77,8 @@ export async function platformFetch(path, { method = 'GET', body, auth = false }
   }
   if (!res.ok) {
     if (res.status === 401) {
-      setPlatformToken(null)
+      if (adminAuth) setNotesAdminToken(null)
+      else setPlatformToken(null)
       const err = new Error(formatApiError(json.detail ?? json.message ?? '登录已过期，请重新登录'))
       err.code = 'AUTH_REQUIRED'
       throw err
@@ -566,22 +570,22 @@ export async function adminListStudyRoomMessages({ before, limit = 50, includeDe
   if (before) qs.set('before', String(before))
   qs.set('limit', String(limit))
   qs.set('include_deleted', String(includeDeleted))
-  return platformFetch(`/study-room/admin/messages?${qs.toString()}`, { auth: true })
+  return platformFetch(`/study-room/admin/messages?${qs.toString()}`, { adminAuth: true })
 }
 
 export async function adminDeleteStudyRoomMessage(id) {
-  return platformFetch(`/study-room/admin/messages/${id}`, { method: 'DELETE', auth: true })
+  return platformFetch(`/study-room/admin/messages/${id}`, { method: 'DELETE', adminAuth: true })
 }
 
 export async function adminRestoreStudyRoomMessage(id) {
-  return platformFetch(`/study-room/admin/messages/${id}/restore`, { method: 'POST', auth: true })
+  return platformFetch(`/study-room/admin/messages/${id}/restore`, { method: 'POST', adminAuth: true })
 }
 
 export async function adminListStudyRoomOnlineUsers() {
-  return platformFetch('/study-room/admin/users', { auth: true })
+  return platformFetch('/study-room/admin/users', { adminAuth: true })
 }
 
 export async function adminKickUser(userId, reason) {
   const q = reason ? '?reason=' + encodeURIComponent(reason) : ''
-  return platformFetch(`/study-room/admin/kick/${userId}${q}`, { method: 'POST', auth: true })
+  return platformFetch(`/study-room/admin/kick/${userId}${q}`, { method: 'POST', adminAuth: true })
 }
