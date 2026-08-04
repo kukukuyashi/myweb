@@ -707,6 +707,7 @@ async function onAvatarPick(e) {
     const json = await uploadAvatar(file)
     profile.value = json.data
     editForm.value.avatar = json.data.avatar || ''
+    avatarPreviewOverride.value = ''
     profileMsg.value = '头像已更新'
   } catch (err) {
     avatarPreviewOverride.value = ''
