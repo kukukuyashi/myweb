@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。">
+  <meta property="og:title" content="自定义鼠标样式与点击涟漪效果 · Cyinc 的学习日志">
+  <meta property="og:description" content="用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/26">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="自定义鼠标样式与点击涟漪效果 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/bkm/5.jfif">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/26">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>自定义鼠标样式与点击涟漪效果 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"自定义鼠标样式与点击涟漪效果","description":"用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。","datePublished":"2026-06-26","dateModified":"2026-06-26","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/26"},"url":"https://cyinc.ink/myweb/content/26","image":"https://cyinc.ink/myweb/img/bkm/5.jfif","keywords":"CSS, Vue, 前端, 鼠标, 动画","articleSection":"前端","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dy_mMF3H.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>自定义鼠标样式与点击涟漪效果</h1>
+<p class="prerender-meta">2026-06-26 · 前端</p>
+<div class="prerender-article"><p class="article-intro">用 CSS cursor 属性替换默认鼠标为动态 GIF 光标，加上纯 CSS 实现的点击涟漪波纹效果。</p>
+<h1>自定义鼠标样式与点击涟漪效果</h1>
+<blockquote>日期：2026-06-26</blockquote>
+<h2>一、自定义鼠标样式</h2>
+<h3>原理</h3>
+<p>浏览器的 <code>cursor</code> CSS 属性支持自定义图片作为光标，语法：</p>
+<pre><code class="language-css">
+cursor: url('图片路径') x y, fallback;
+</code></pre>
+<ul>
+<li><code>x y</code>：光标热点坐标（点击位置相对于图片左上角的偏移）</li>
+<li><code>fallback</code>：备用系统光标（<code>auto</code>、<code>pointer</code>、<code>text</code> 等）</li>
+</ul>
+<h3>支持的图片格式</h3>
+<table><thead><tr>
+<th>格式</th>
+<th>浏览器支持</th>
+<th>动态</th>
+<th>推荐</th>
+</tr></thead><tbody>
+<tr>
+<td><code>.png</code></td>
+<td>全部</td>
+<td>否</td>
+<td>静态光标</td>
+</tr>
+<tr>
+<td><code>.gif</code></td>
+<td>全部</td>
+<td>是</td>
+<td><strong>动态光标首选</strong></td>
+</tr>
+<tr>
+<td><code>.cur</code></td>
+<td>仅 IE</td>
+<td>否</td>
+<td>不推荐</td>
+</tr>
+<tr>
+<td><code>.ani</code></td>
+<td>仅 Windows</td>
+<td>是</td>
+<td>浏览器不支持</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：用 <code>.gif</code> 做动态光标，<code>.png</code> 做静态兜底。</p>
+<h3>尺寸限制</h3>
+<p>浏览器对 cursor 图片有尺寸限制，推荐 <strong>32x32 或 64x64</strong> 像素。太大的图片会被浏览器忽略。</p>
+<p>用 Python + Pillow 缩放：</p>
+<pre><code class="language-python">
+from PIL import Image
+
+img = Image.open('原始图片.gif')
+img = img.resize((64, 64), Image.Resampling.LANCZOS)
+img.save('输出.gif')
+</code></pre>
+<p>多帧 GIF 需要逐帧处理：</p>
+<pre><code class="language-python">
+frames = []
+durations = []
+try:
+    while True:
+        frame = img.copy().resize((64, 64), Image.Resampling.LANCZOS)
+        frames.append(frame.convert('RGBA'))
+        durations.append(img.info.get('duration', 100))
+        img.seek(img.tell() + 1)
+except EOFError:
+    pass
+
+frames[0].save(
+    'output.gif',
+    save_all=True,
+    append_images=frames[1:],
+    duration=durations,
+    loop=0,
+)
+</code></pre>
+<h3>文件放置</h3>
+<p>把光标 GIF 放到 <code>public/cursors/</code> 目录下，Vite 会自动把 <code>public/</code> 下的文件复制到构建输出。</p>
+<h3>CSS 实现</h3>
+<p>在 <code>src/styles/_base.css</code> 中添加：</p>
+<pre><code class="language-css">
+/* 默认光标 */
+html {
+  cursor: url('/myweb/cursors/normal.gif') 8 8, auto;
+}
+
+/* 加载/路由切换时的动态光标 */
+html.cursor-busy {
+  cursor: url('/myweb/cursors/busy.gif') 8 8, wait;
+}
+
+/* 链接和按钮 */
+a, button, [role="button"] {
+  cursor: url('/myweb/cursors/pointer.gif') 8 8, pointer;
+}
+
+/* 文本输入 */
+input, textarea, select {
+  cursor: url('/myweb/cursors/text.gif') 8 8, text;
+}
+</code></pre>
+<blockquote>注意路径要加上项目的 base 巌（如 <code>/myweb/</code>），否则开发环境会 404。</blockquote>
+<h3>路由切换时自动切换动态光标</h3>
+<p>在 <code>useRouteTransition.js</code> 中，路由切换时给 <code>html</code> 加上 <code>cursor-busy</code> class：</p>
+<pre><code class="language-js">
+router.beforeEach(() =&gt; {
+  document.documentElement.classList.add('cursor-busy')
+})
+
+router.afterEach(() =&gt; {
+  setTimeout(() =&gt; {
+    document.documentElement.classList.remove('cursor-busy')
+  }, 300)
+})
+</code></pre>
+<h3>从 .ani 提取帧</h3>
+<p>如果只有 <code>.ani</code> 文件（Windows 动态光标），可以用 Python 解析 RIFF 容器提取帧：</p>
+<pre><code class="language-python">
+import struct
+from PIL import Image
+import io
+
+with open('cursor.ani', 'rb') as f:
+    data = f.read()
+
+# 跳过 RIFF + ACON 头
+offset = 12
+icon_chunks = []
+
+while offset &lt; len(data) - 8:
+    chunk_id = data[offset:offset+4]
+    chunk_size = struct.unpack('&lt;I', data[offset+4:offset+8])[0]
+    chunk_data = data[offset+8:offset+8+chunk_size]
+
+    if chunk_id == b'LIST' and chunk_data[0:4] == b'fram':
+        inner = 4
+        while inner &lt; len(chunk_data) - 8:
+            sub_id = chunk_data[inner:inner+4]
+            sub_size = struct.unpack('&lt;I', chunk_data[inner+4:inner+8])[0]
+            if sub_id == b'icon':
+                icon_chunks.append(chunk_data[inner+8:inner+8+sub_size])
+            inner += 8 + sub_size + (sub_size % 2)
+
+    offset += 8 + chunk_size + (chunk_size % 2)
+
+# 逐帧转 PNG
+for i, icon_data in enumerate(icon_chunks):
+    img = Image.open(io.BytesIO(icon_data))
+    img = img.resize((64, 64), Image.Resampling.LANCZOS)
+    img.save(f'busy_{i}.png')
+</code></pre>
+<hr>
+<h2>二、点击涟漪效果</h2>
+<h3>原理</h3>
+<p>每次点击时，在鼠标位置创建一个 <code>&lt;div&gt;</code>，用 CSS <code>@keyframes</code> 让它从小圆扩散到大圆，同时淡出。动画结束后自动移除 DOM。</p>
+<h3>创建 composable</h3>
+<p>新建 <code>src/composables/useClickRipple.js</code>：</p>
+<pre><code class="language-js">
+import { onMounted, onUnmounted } from 'vue'
+
+export function useClickRipple() {
+  function createRipple(e) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const ripple = document.createElement('div')
+    ripple.className = 'click-ripple'
+    ripple.style.left = `${e.clientX}px`
+    ripple.style.top = `${e.clientY}px`
+    document.body.appendChild(ripple)
+
+    ripple.addEventListener('animationend', () =&gt; {
+      ripple.remove()
+    })
+  }
+
+  onMounted(() =&gt; document.addEventListener('click', createRipple))
+  onUnmounted(() =&gt; document.removeEventListener('click', createRipple))
+}
+</code></pre>
+<h3>CSS 动画</h3>
+<p>在 <code>src/styles/_layout.css</code> 中添加：</p>
+<pre><code class="language-css">
+.click-ripple {
+  position: fixed;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border: 2px solid var(--orange);
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  animation: click-ripple-expand 0.6s ease-out forwards;
+}
+
+@keyframes click-ripple-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.8;
+  }
+  100% {
+    width: 80px;
+    height: 80px;
+    opacity: 0;
+  }
+}
+</code></pre>
+<h3>在 App.vue 中启用</h3>
+<pre><code class="language-js">
+import { useClickRipple } from './composables/useClickRipple'
+useClickRipple()
+</code></pre>
+<h3>关键点</h3>
+<ul>
+<li><code>position: fixed</code> + <code>e.clientX/Y</code>：涟漪跟随点击位置，不随页面滚动</li>
+<li><code>pointer-events: none</code>：涟漪不拦截后续点击</li>
+<li><code>animationend</code> 事件后 <code>remove()</code>：自动清理 DOM，不会内存泄漏</li>
+<li><code>prefers-reduced-motion</code> 检测：尊重用户的动画偏好设置</li>
+<li><code>z-index: 99998</code>：确保在最上层但不遮挡加载屏幕</li>
+</ul>
+<hr>
+<h2>三、踩坑记录</h2>
+<ol>
+<li><strong>路径问题</strong>：Vite 项目的 <code>base</code> 配置会影响静态资源路径。如果设了 <code>base: '/myweb/'</code>，CSS 里的 cursor URL 要写 <code>/myweb/cursors/...</code> 而不是 <code>/cursors/...</code></li>
+<li><strong>图片尺寸</strong>：浏览器对 cursor 图片有 128x128 或更小的限制，实际测试 64x64 最稳定</li>
+<li><strong>GIF 动画</strong>：<code>cursor</code> 属性原生支持 GIF 动画，不需要任何 polyfill</li>
+<li><strong>.cur/.ani 不兼容</strong>：Windows 专用格式浏览器不支持，必须转成 PNG/GIF</li>
+<li><strong>CSS 选择器优先级</strong>：如果某个组件自己设了 <code>cursor</code>，会覆盖全局设置，需要用更具体的选择器或 <code>!important</code></li>
+</ol>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

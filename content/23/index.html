@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。">
+  <meta property="og:title" content="GitHub Actions 自动部署 Vue 博客 · Cyinc 的学习日志">
+  <meta property="og:description" content="push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/23">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GitHub Actions 自动部署 Vue 博客 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/xiaoqing.png">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/23">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>GitHub Actions 自动部署 Vue 博客 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"GitHub Actions 自动部署 Vue 博客","description":"push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。","datePublished":"2026-06-13","dateModified":"2026-06-13","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/23"},"url":"https://cyinc.ink/myweb/content/23","image":"https://cyinc.ink/myweb/img/xiaoqing.png","keywords":"GitHub Actions, CI/CD, Vue, 部署","articleSection":"部署","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dy_mMF3H.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>GitHub Actions 自动部署 Vue 博客</h1>
+<p class="prerender-meta">2026-06-13 · 部署</p>
+<div class="prerender-article"><p class="article-intro">push 代码就自动更新网站 — 这篇记录本博客 GitHub Actions 部署流程，适合第一次配 CI 的同学对照操作。</p>
+<h1>GitHub Actions 自动部署 Vue 博客</h1>
+<blockquote>日期：2026-06-13</blockquote>
+<blockquote>工作流文件：<code>.github/workflows/deploy.yml</code></blockquote>
+<blockquote>发布地址：<a href="https://kukukuyashi.github.io/myweb/" target="_blank" rel="noopener">https://kukukuyashi.github.io/myweb/</a></blockquote>
+<hr>
+
+<h2>最终效果</h2>
+<p>每次把代码 <code>git push</code> 到 <code>main</code> 分支，GitHub 会自动：</p>
+<ol>
+  <li>拉取仓库代码</li>
+  <li>安装 Node 依赖</li>
+  <li>执行 <code>npm run build</code></li>
+  <li>把 <code>docs/</code> 文件夹发布到 <code>gh-pages</code> 分支</li>
+</ol>
+<p>你本地不用手动上传，改完 push 等一两分钟就能在线上看到。</p>
+
+<h2>整体流程图（文字版）</h2>
+<pre><code class="language-text">你改代码 → push main
+    ↓
+GitHub Actions 触发
+    ↓
+npm install → npm run build
+    ↓
+生成 docs/（HTML + JS + Content + Music + img）
+    ↓
+peaceiris/actions-gh-pages 推到 gh-pages 分支
+    ↓
+GitHub Pages 从 gh-pages 提供网站</code></pre>
+
+<h2>工作流文件详解</h2>
+<pre><code class="language-yaml">name: Deploy Vue3 Project
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+      env:
+        VITE_TWIKOO_ENV_ID: https://cyinc-twikoo.netlify.app/.netlify/functions/twikoo
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        publish_branch: gh-pages
+        force_orphan: true</code></pre>
+
+<h3>逐段解释</h3>
+<table>
+  <thead><tr><th>配置</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td><code>on.push.branches: [main]</code></td><td>只有推 main 才部署，避免误触</td></tr>
+    <tr><td><code>permissions</code></td><td>允许 Action 写仓库（推 gh-pages 需要）</td></tr>
+    <tr><td><code>cache: 'npm'</code></td><td>缓存 node_modules，第二次构建更快</td></tr>
+    <tr><td><code>npm run build</code></td><td>本地同一套命令，保证 dev / CI 一致</td></tr>
+    <tr><td><code>VITE_TWIKOO_ENV_ID</code></td><td>CI 没有 <code>.env.local</code>，留言板地址在这里注入</td></tr>
+    <tr><td><code>publish_dir: ./docs</code></td><td>Vite 构建输出目录</td></tr>
+    <tr><td><code>force_orphan: true</code></td><td>gh-pages 分支只保留最新一次构建，历史不会膨胀</td></tr>
+  </tbody>
+</table>
+
+<h2>build 脚本里还做了什么？</h2>
+<p><code>package.json</code> 的 build 不是单纯 <code>vite build</code>：</p>
+<pre><code class="language-json">"build": "node scripts/generate-about-gallery.mjs && node scripts/generate-music-tracks.mjs && vite build --base /myweb/ && node scripts/generate-site-files.mjs docs"</code></pre>
+<ul>
+  <li><strong>generate-about-gallery</strong> — 扫描 <code>img/关于/</code> 生成贴纸墙数据</li>
+  <li><strong>generate-music-tracks</strong> — 扫描 <code>Music/</code> 生成音乐室曲目表</li>
+  <li><strong>vite build</strong> — 打包 Vue，<code>vite-plugin-static-copy</code> 复制 Content / img / Music</li>
+  <li><strong>generate-site-files</strong> — 生成 RSS、sitemap、robots.txt</li>
+</ul>
+<blockquote>💡 构建前跑脚本 = 「把磁盘上的资源变成前端能 import 的数据」，这样新增图片/歌曲不用手改 JS。</blockquote>
+
+<h2>GitHub 仓库还要设什么？</h2>
+<ol>
+  <li>打开仓库 <strong>Settings → Pages</strong></li>
+  <li>Source 选 <strong>Deploy from a branch</strong></li>
+  <li>Branch 选 <strong>gh-pages</strong>，目录 <strong>/ (root)</strong></li>
+  <li>保存后等 DNS 生效（通常 1～3 分钟）</li>
+</ol>
+<p>第一次 push 后如果 Pages 还是 404，多半是 gh-pages 还没生成，去 Actions 页看 workflow 是否绿勾。</p>
+
+<h2>环境变量怎么管理？</h2>
+<table>
+  <thead><tr><th>变量</th><th>放哪里</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>Twikoo envId</td><td>CI 的 <code>env:</code> 块</td><td>是公开 API 地址，不是密钥，打进前端 bundle 正常</td></tr>
+    <tr><td>API 密钥</td><td>GitHub Secrets</td><td>真正秘密的才放 Secrets，本博客前端静态站目前不需要</td></tr>
+    <tr><td>本地开发</td><td><code>.env.local</code></td><td>已 gitignore，Twikoo 本地可自建 env 文件</td></tr>
+  </tbody>
+</table>
+
+<h2>常见故障</h2>
+<table>
+  <thead><tr><th>现象</th><th>可能原因</th><th>处理</th></tr></thead>
+  <tbody>
+    <tr><td>Actions 红叉</td><td>依赖安装失败 / 构建报错</td><td>点进 log 看哪一步挂了，本地先 <code>npm run build</code> 复现</td></tr>
+    <tr><td>网站还是旧版</td><td>浏览器缓存 / CDN</td><td>硬刷新 Ctrl+F5，或无痕窗口打开</td></tr>
+    <tr><td>留言板加载失败</td><td>CI 没注入 envId</td><td>检查 deploy.yml 的 <code>VITE_TWIKOO_ENV_ID</code></td></tr>
+    <tr><td>音乐 404</td><td>Music 没进仓库或路径错</td><td>确认 git 跟踪了 Music 文件夹，且 build 有 static-copy</td></tr>
+  </tbody>
+</table>
+
+<h2>小结</h2>
+<p>自动部署的价值不只是「省事」，更是<strong>保证线上和 build 脚本一致</strong>。只要本地 <code>npm run build</code> 能过，push 之后线上就应该一样 — 这是个人项目最稳的发布方式。</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

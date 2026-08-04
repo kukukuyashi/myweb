@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。">
+  <meta property="og:title" content="个人博客重构记：Vue3 静态站上线 · Cyinc 的学习日志">
+  <meta property="og:description" content="记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/21">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/bkm/4.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="个人博客重构记：Vue3 静态站上线 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/bkm/4.jfif">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/21">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>个人博客重构记：Vue3 静态站上线 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"个人博客重构记：Vue3 静态站上线","description":"记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。","datePublished":"2026-06-12","dateModified":"2026-06-12","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/21"},"url":"https://cyinc.ink/myweb/content/21","image":"https://cyinc.ink/myweb/img/bkm/4.jfif","keywords":"Vue3, Vue, GitHub Pages, 重构, 部署","articleSection":"部署","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dy_mMF3H.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>个人博客重构记：Vue3 静态站上线</h1>
+<p class="prerender-meta">2026-06-12 · 部署</p>
+<div class="prerender-article"><p class="article-intro">记录这个博客从「老静态页」到 Vue3 + Vite + GitHub Pages 的重构过程，尽量用大白话讲清楚为什么要改、改了什么、踩了哪些坑。</p>
+<h1>个人博客重构记：Vue3 静态站上线</h1>
+<blockquote>日期：2026-06-12</blockquote>
+<blockquote>在线地址：<a href="https://kukukuyashi.github.io/myweb/" target="_blank" rel="noopener">https://kukukuyashi.github.io/myweb/</a></blockquote>
+<blockquote>仓库：<a href="https://github.com/kukukuyashi/myweb" target="_blank" rel="noopener">kukukuyashi/myweb</a></blockquote>
+<hr>
+
+<h2>为什么要重构？</h2>
+<p>最早这个站是<strong>纯静态 HTML</strong>：每篇文章一个文件，改导航要动好多页，样式也不统一。后来学了 Vue3，就想把它升级成「能维护的博客」而不是「一堆散文件」。</p>
+<p>目标很简单：</p>
+<ul>
+  <li><strong>免费托管</strong> — 继续用 GitHub Pages，不额外买服务器</li>
+  <li><strong>好改</strong> — 文章列表、分类、标签集中管理</li>
+  <li><strong>能扩展</strong> — 留言板、音乐室、关于页以后都能加</li>
+</ul>
+<blockquote>💡 个人博客不需要一上来就搞 SSR / 数据库，<strong>静态站 + 第三方服务</strong>对个人来说性价比最高。</blockquote>
+
+<h2>技术选型（一句话版）</h2>
+<table>
+  <thead><tr><th>部分</th><th>选型</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td>框架</td><td>Vue 3 + Composition API</td><td>组件化，和之前学的 Vue 笔记衔接</td></tr>
+    <tr><td>构建</td><td>Vite 7</td><td>本地 dev 快，配置比 Webpack 省心</td></tr>
+    <tr><td>路由</td><td>vue-router</td><td>单页应用，切页不整页刷新</td></tr>
+    <tr><td>状态</td><td>Pinia</td><td>音乐播放器跨页面共享播放状态</td></tr>
+    <tr><td>部署</td><td>GitHub Pages + Actions</td><td>push 到 main 自动发布</td></tr>
+    <tr><td>评论</td><td>Twikoo + Netlify 云函数</td><td>静态站本身不能存留言</td></tr>
+  </tbody>
+</table>
+
+<h2>目录结构（核心）</h2>
+<pre><code class="language-text">gerenboke/
+├── Content/          # 文章 HTML 正文（构建时复制到 docs）
+├── Music/            # 音乐室音频（构建时复制）
+├── img/              # 图片资源
+├── src/
+│   ├── views/        # 页面：Home、Content、Music、About…
+│   ├── components/   # NavBar、MusicPlayer、StickerWall…
+│   ├── data/
+│   │   └── posts.js  # 文章目录（标题、日期、分类、文件名）
+│   └── router/
+├── docs/             # 构建产物，GitHub Pages 实际发布这里
+└── vite.config.js    # base: '/myweb/' 很重要</code></pre>
+<p><strong>发新文章只需两步：</strong></p>
+<ol>
+  <li>在 <code>Content/</code> 放一篇 HTML</li>
+  <li>在 <code>src/data/posts.js</code> 加一条记录（id、title、date、category、tags、file）</li>
+</ol>
+
+<h2>重构时间线（按 git 提交大致还原）</h2>
+<table>
+  <thead><tr><th>阶段</th><th>做了什么</th></tr></thead>
+  <tbody>
+    <tr><td>① 换壳</td><td>删掉老静态站，用 Vue3 重做首页、文章页、导航，工业风 UI</td></tr>
+    <tr><td>② 上 Pages</td><td>配置 <code>base: '/myweb/'</code>、SPA fallback（404 跳回 index.html）</td></tr>
+    <tr><td>③ 留言板</td><td>接入 Twikoo，后端从 Hugging Face 迁到 Netlify（稳定很多）</td></tr>
+    <tr><td>④ 音乐室</td><td>底部播放器 + 曲目列表，<code>Music/</code> 随构建复制到站点</td></tr>
+    <tr><td>⑤ 体验升级</td><td>标签筛选、分页、RSS、sitemap、文章内评论、代码高亮</td></tr>
+    <tr><td>⑥ 关于页</td><td>ACG 人格 + 贴纸墙（<code>img/关于/</code> 自动生成画廊）</td></tr>
+  </tbody>
+</table>
+
+<h2>GitHub Pages 必踩的两个坑</h2>
+<h3>1. 子路径 base</h3>
+<p>仓库页地址是 <code>username.github.io/仓库名/</code>，不是根域名。Vite 必须设：</p>
+<pre><code class="language-js">export default defineConfig({
+  base: '/myweb/',
+  build: { outDir: 'docs' }
+})</code></pre>
+<p>否则 JS、CSS、图片全部 404。</p>
+
+<h3>2. SPA 刷新 404</h3>
+<p>Vue Router 用的是 History 模式，直接访问 <code>/myweb/content/19</code> 时，GitHub Pages 找不到这个物理文件。解决办法：在 <code>docs/404.html</code> 里写跳转逻辑，或构建脚本生成 fallback，让任意路径都回到 <code>index.html</code> 再由前端路由接管。</p>
+
+<h2>文章页怎么渲染 HTML？</h2>
+<p>正文不写在 Vue 组件里，而是独立的 HTML 片段。文章页用 <code>fetch</code> 拉取 <code>Content/xxx.html</code>，再 <code>v-html</code> 插入，最后用 Prism 做代码高亮。</p>
+<p>好处：写笔记可以用任意编辑器；坏处：要注意 XSS — 只放自己写的内容，别引入不可信 HTML。</p>
+
+<h2>现在站里还有什么？</h2>
+<ul>
+  <li><strong>首页</strong> — 分类 / 标签筛选、搜索、分页</li>
+  <li><strong>归档</strong> — 按年月浏览</li>
+  <li><strong>音乐室</strong> — 本地 FLAC 歌单（葬送のフリーレン OST 等）</li>
+  <li><strong>留言板</strong> — Twikoo</li>
+  <li><strong>关于</strong> — 个人介绍 + 贴纸墙</li>
+</ul>
+
+<h2>小结</h2>
+<p>这次重构的本质是：<strong>把「一堆页面」变成「一个可维护的前端项目」</strong>，部署仍然免费。对个人学习日志来说，Vue3 + Vite + GitHub Pages 够用了；等真有复杂需求（登录、后台发文）再考虑 CMS 也不迟。</p>
+<p>下一篇会单独写 <strong>GitHub Actions 自动部署</strong> 和 <strong>音乐室怎么在 Pages 上播 FLAC</strong>，本篇先搭整体框架。</p>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>

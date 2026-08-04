@@ -1,0 +1,729 @@
+<p>🖊 慢慢来，一步一步来。</p>
+
+                <h2 id="section1">1.JS 基础 认识数据</h2>
+
+                <h3 id="section1-1">1.1 认识变量</h3>
+
+                <h4>重点 1：文档输出内容</h4>
+                <pre><code class="javascript">document.write("Hello World!")
+
+document.write('&lt;h1&gt;你好，世界！&lt;/h1&gt;')</code></pre>
+
+                <h4>重点 2：控制台打印输出 给 程序员</h4>
+                <pre><code class="javascript">console.log('zaoshanghao')
+
+console.log('rizhi')</code></pre>
+
+                <h4>重点 3：输入语句</h4>
+                <pre><code class="javascript">prompt('请输入你的名字：')</code></pre>
+
+                <h4>重点 4：变量声明</h4>
+                <pre><code class="javascript">let age = 25  // 同时声明和赋值</code></pre>
+
+                <div class="exercise">
+                    <h4>变量声明练习</h4>
+                    <p>// 1.声明一个变量，用于存放用户购买的商品 数量(num)为 20 件</p>
+                    <p>// 2.声明一个变量，用于存放用户的 姓名(uname)为'张三</p>
+                    <p>// 3.依次控制台打印输出两个变量</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let num = 20
+
+- let uname = '张三'
+
+- console.log(num)
+
+- console.log(uname)</code></pre>
+                </div>
+
+                <h3 id="section1-2">1.2 JS 基础 变量</h3>
+
+                <h4>重点 1：用户输入</h4>
+                <pre><code class="javascript">prompt('请输入你的名字：')</code></pre>
+
+                <h4>重点 2：内部处理保存数据</h4>
+                <pre><code class="javascript">let uname = prompt('请输入你的姓名：')</code></pre>
+
+                <h4>重点 3：打印输出</h4>
+                <pre><code class="javascript">- let A = 10
+
+- document.write(A)</code></pre>
+
+                <div class="exercise">
+                    <h4>练习 1：变量练习-弹出姓名</h4>
+                    <p>// 1.浏览器中弹出对话框: 请输入姓名</p>
+                    <p>// 2.页面中输出: 刚才输入的姓名</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let uname = prompt('请输入你的姓名：')
+
+- document.write(uname)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习 2：变量案例-交换变量的值</h4>
+                    <p>- 需求:</p>
+                    <p>- 有 2 个变量: num1 里面放的是 10，num2 里面放的是 20</p>
+                    <p>- 最后变为 num1 里面放的是 20，num2 里面放的是 10</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let num1 = 10
+
+- let num2 = 20
+
+- let temp
+
+- temp = num1
+
+- num1 = num2
+
+- num2 = temp
+
+- console.log(num1,num2)</code></pre>
+                </div>
+
+                <h3 id="section1-3">1.3 JS 基础 变量命名的规则与规范</h3>
+
+                <h4>重点：变量命名的规则与规范</h4>
+                <h5>1.规则</h5>
+                <ul>
+                    <li>关键字: 有特殊含义的字符，JavaScript 内置的一些英语词汇。例如: let、var、if、for 等</li>
+                    <li>只能用下划线、字母、数字、$组成，且数字不能开头</li>
+                    <li>字母严格区分大小写，如 Age 和 age 是不同的变量</li>
+                </ul>
+
+                <h5>2.规范</h5>
+                <ul>
+                    <li>起名要有意义</li>
+                    <li>小驼峰命名法</li>
+                    <ul>
+                        <li>第一个单词首字母小写，后面每个单词首字母大写。例: userName</li>
+                    </ul>
+                </ul>
+
+                <h3 id="section1-4">1.4 JS 基础 var 和 let 的区别？</h3>
+
+                <h4>var 声明:</h4>
+                <ul>
+                    <li>可以先使用 在声明(不合理)</li>
+                    <li>var 声明过的变量可以重复声明(不合理)</li>
+                    <li>比如变量提升、全局变量、没有块级作用域等等</li>
+                </ul>
+
+                <h4>例如：</h4>
+                <pre><code class="javascript">- var num = 10
+
+- var num = 20
+
+- console.log(num)
+
+//结果打印出来为20</code></pre>
+
+                <h3 id="section1-5">1.5 JS 基础 数组的基本使用</h3>
+
+                <h4>重点 1：声明数组</h4>
+                <pre><code class="javascript">let arr = ["白子","星野","野宫"]</code></pre>
+
+                <h4>重点 2：使用数组 数组名 [索引号] 从 0 开始 以此类推</h4>
+                <pre><code class="javascript">- console.log(arr)
+
+- console.log(arr[1])</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：数组取值案例</h4>
+                    <p>需求: 定义一个数组，里面存放星期一、星期二… 直到星期日(共 7 天)，在控制台输出: 星期日</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let arr = ["星期一","星期二","星期三","星期四","星期五","星期六","星期日"]
+
+- console.log(arr[6])</code></pre>
+                </div>
+
+                <h3 id="section1-6">1.6 JS 基础 认识常数</h3>
+
+                <h4>重点 1：常量 不允许更改值</h4>
+                <pre><code class="javascript">- const PI = 3.14
+
+- console.log(PI)
+
+- PI = 3.15
+
+- console.log(PI)</code></pre>
+
+                <h4>重点 2：常量声明必须赋值</h4>
+                <pre><code class="javascript">- const A = 9.9
+
+- 不可以写成const A</code></pre>
+
+                <h3 id="section1-7">1.7 JS 基础 数据类型</h3>
+
+                <h4>重点 1：数字类型（Number）</h4>
+                <p>可以是整数，小数，正数，负数</p>
+                <p>算术运算符 + - * / %</p>
+
+                <div class="exercise">
+                    <h4>练习：计算圆的面积</h4>
+                    <p>需求: 对话框中输入圆的半径，算出圆的面积并显示到页面</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案</h5>
+                    <pre><code class="javascript">- let r = prompt("请输入圆的半径：")
+
+- let re = 3.14*r*r
+
+- document.write(re)</code></pre>
+                </div>
+
+                <h4>重点 2：NaN</h4>
+                <ul>
+                    <li>NaN 代表一个计算错误。</li>
+                    <li>它是一个不正确的或者一个未定义的数学操作所得到的结果</li>
+                    <li>NaN 是粘性的。任何对 NaN 的操作都会返回 NaN</li>
+                    <li>甚至 NaN 不等于自己 打印结果会是 false</li>
+                </ul>
+
+                <h4>重点 3：字符串类型</h4>
+                <p>知识 1.通过单引号("')、双引号(" ")或反引号(`)包裹的数据都叫字符串、单双引号没本质上的区别</p>
+                <p>知识 2.单引号/双引号可以互相嵌套，但是不以自已嵌套自己(口诀: 外双内单，或者外单内双)</p>
+                <p>知识 3.必要时可以使用转义符\，输出单引号或双引号</p>
+
+                <pre><code class="javascript">- let str = "白子"
+
+- let str1 = '黑子'
+
+- let str2 = '123'
+  // 用引号包裹了就是字符串了</code></pre>
+
+                <h4>知识 4.字符串拼接</h4>
+                <p>用法："字符串 1"+"字符串 2"</p>
+                <p>例如：</p>
+                <pre><code class="javascript">- document.write("你好"+"世界")
+
+- let uname = "碧蓝"
+
+- let uuname = "档案"
+
+- document.write(uname + uuname)</code></pre>
+
+                <h4>知识 5.模板字符串</h4>
+                <p>拼接字符串和变量</p>
+                <pre><code class="javascript">document.write(`大家好，我叫`+ name +`,今年`+ age + `岁`)</code></pre>
+
+                <p>语法：</p>
+                <ul>
+                    <li>内容拼接变量时，用 ${}包住变量</li>
+                </ul>
+                <p>例如：</p>
+                <pre><code class="javascript">document.write("大家好，我叫${name},今年${age}岁")</code></pre>
+
+                <h3 id="section1-8">1.8 JS 基础 数据类型检测</h3>
+
+                <h4>重点 1：通过 typeof 关键字检测数据类型</h4>
+                <p>typeof 运算符可以返回被检测的数据类型，它支持两种语法形式</p>
+                <ul>
+                    <li>1.作为运算符： typeof x</li>
+                    <li>2.typeof(x)</li>
+                </ul>
+
+                <h4>例如：</h4>
+                <pre><code class="javascript">- let num = 10
+
+- console.log (typeof num) 打印结果为 number （数字型）
+
+- let str = "你好"
+
+- console.log (typeof str) 打印结果为 string （字符型）</code></pre>
+
+                <h2 id="section2">2.JS 基础 运算符和语句</h2>
+
+                <h3 id="section2-1">2.1 赋值运算符</h3>
+
+                <h4>重点 1：赋值运算符</h4>
+                <p>等号 : 将等号右边的值赋予给左边，要求左边必须是一个容器</p>
+                <pre><code class="javascript">let num = 1
+// num = num + 1
+num += 1
+console.log(num)</code></pre>
+
+                <h4>重点 2：一元运算符</h4>
+                <p>正号和负号 就是一元运算符</p>
+
+                <h4>前置自增：</h4>
+                <pre><code class="javascript">let num = 1
+++num  //让num的值加 1变2
+
+let i = 1
+console.log(++i + 2)  // 结果为4</code></pre>
+                <p>前置自增：先自加再使用</p>
+
+                <h4>后置自增：</h4>
+                <pre><code class="javascript">let num = 1
+num++ //让num的值加 1变2
+
+let i = 1
+console.log(i++ + 2) // 结果为3 先用 i 和 2 相加 等于 3
+console.log(i) // 结果为2</code></pre>
+                <p>后置自增：先使用再自加</p>
+                <p>前置自增和后置自增独立使用时二者并没有差别</p>
+
+                <h3 id="section2-2">2.2 JS 基础 语句</h3>
+
+                <p>语句是一段可以执行的代码</p>
+                <p>表达式和语句的区别：</p>
+                <ul>
+                    <li>表达式: 因为表达式可被求值，所以它可以写在赋值语句的右侧</li>
+                    <li>而语句不一定有值，所以比如 alert()for 和 break 等语句就不能被用于赋值</li>
+                </ul>
+
+                <p>程序三大流程控制语句</p>
+                <ul>
+                    <li>顺序结构</li>
+                    <li>分支结构</li>
+                    <ul>
+                        <li>if 分支语句</li>
+                        <li>三元运算符</li>
+                        <li>switch 语句</li>
+                    </ul>
+                    <li>循环结构</li>
+                </ul>
+
+                <h2 id="section3">3.JS 基础 循环</h2>
+
+                <h3 id="section3-1">3.1 for 循环语法</h3>
+
+                <p>作用: 重复执行代码</p>
+                <p>好处: 把声明起始值、循环条件、变化值写到一起，让人一目了然，它是最常使用的循环形式</p>
+
+                <pre><code class="javascript">for (let i = 0; i <= 3; i++) {
+    document.write("你好,js")
+}</code></pre>
+
+                <h3 id="section3-2">3.2 for 循环的最大价值: 循环数组</h3>
+
+                <div class="exercise">
+                    <h4>练习：</h4>
+                    <p>请将 数组 ["小白", "小黑", "小红", "小蓝", "小绿"] 依次打印 出来</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = ["小白","小黑","小红","小蓝","小绿"]
+for (let i = 0;i <= arr.length - 1; i++) {
+  document.write(`${arr[i]}<br>`)
+}</code></pre>
+                </div>
+
+                <h3 id="section3-3">3.3 for 循环—基本使用</h3>
+
+                <h4>退出循环</h4>
+                <p>continue ：退出本次循环，一般用于排除或者跳过某一个选项的时候，可以使用 continue</p>
+                <p>break ：退出整个 for 循环，一般用于结果已经得到, 后续的循环不需要的时候可以使用</p>
+
+                <h5>例如 continue：</h5>
+                <pre><code class="javascript">for(let i = 1; i <= 5; i++) {
+  if (i === 3) {
+      continue
+  }
+  console.log(i)
+}  // i 等于3的时候 3不会在控制台打印出来</code></pre>
+
+                <h5>例如 break：</h5>
+                <pre><code class="javascript">for(let i = 1; i <= 5; i++) {
+  if (i === 3) {
+      break
+  }
+  console.log(i)
+}  // i 等于3的时候  剩下的都不打印了 包括3</code></pre>
+
+                <blockquote>
+                    <p>for 循环和 while 循环有什么区别呢:</p>
+                    <p>当如果明确了循环的次数的时候推荐使用 for 循环，当不明确循环的次数的时候推荐使用 while 循环</p>
+                </blockquote>
+
+                <div class="exercise">
+                    <h4>练习：打印 5 行 5 列的星星</h4>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">for (let i = 0;i <= 4 ;i++) {
+  document.write(`<br>`)
+  for (let j = 1; j<= 5;j++)
+  document.write(`⭐`)
+}</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：打印倒三角形星星</h4>
+                    <p>如图所示：</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">for (let i = 0;i <= 4 ;i++) {
+    document.write(`<br>`)
+  for (let j = 0;j <= i ;j++) {
+    document.write(`⭐`)
+  }
+}</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：九九乘法表</h4>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">&lt;style&gt;
+    span {
+      display: inline-block;
+      text-align: center;
+      padding: 5px 10px;
+      border : 1px solid pink;
+      width: 60px;
+      margin: 0px 2px ; 
+      border-radius: 5px;
+      box-shadow: 2px 2px 2px rgba(250, 198, 207, 0.859);
+      background-color: rgba(255, 96, 122, 0.117);
+    }
+  &lt;/style&gt;
+  &lt;script&gt;
+    for (let i = 1;i &lt;= 9 ;i++) {
+        document.write(`&lt;br&gt;`)
+
+      for (let j = 1;j &lt;= i ;j++) {
+        document.write(`&lt;span&gt;${j}*${i}=${j*i}&lt;/span&gt;`)
+      }
+    }
+  &lt;/script&gt;</code></pre>
+                </div>
+
+                <h3 id="section3-4">3.4 for 循环嵌套</h3>
+
+                <p>循环嵌套就是 for 里面有个 for</p>
+
+                <pre><code class="javascript">for (let i = 1;i <= 3 ;i++) {
+  document.write(`你好啊，${i}<br>`)
+  for (let j = 1; j<= 5;j++)
+  document.write(`谢谢，${j}<br>`)
+}</code></pre>
+
+                <h3 id="section3-5">3.5 数组</h3>
+
+                <h4>数组：Array</h4>
+                <p>是一种可以按顺序保存数据的数据类型</p>
+
+                <p>声明语法：</p>
+                <p>let 数组名 = [数据 1，数据 2，数据 3，……, 数据 n]</p>
+
+                <pre><code class="javascript">let arr = [1,2,"ping",true]
+// 计算机中的编号从0开始，所以1的编号为0，2编号为1，以此类推</code></pre>
+
+                <h4>数组操作 —— 修改</h4>
+                <p>数组本质是 数据集合，操作数据无非就是 增 删 改 查 语法:</p>
+
+                <h5>数组的增：</h5>
+                <p>数组名字.push() 方法将一个或多个元素添加到数组的 末尾，并返回该数组的新长度</p>
+
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.push("green")
+arr.push("1","2")
+console.log(arr)</code></pre>
+
+                <p>数组名字.unshift 方法将一个或多个元素添加到数组的 开头，并返回该数组的新长度</p>
+
+                <h5>数组的删：</h5>
+                <p>数组.pop() 方法 从数组中 删除最后一个元素，并返回该元素的值</p>
+                <p>数组.shift() 方法 从数组中 删除第一个元素，并返回该元素的值</p>
+
+                <h5>数组的改：</h5>
+                <pre><code class="javascript">let arr = ['pink','red','green']
+for (let i = 0; i < arr.length; i++) {
+  arr[i] = arr[i] + '劳斯' //改值了
+}
+console.log(arr)</code></pre>
+
+                <h5>数组的查：</h5>
+                <pre><code class="javascript">let arr = ['pink','red','green']
+console.log(arr[1])
+console.log(arr)</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：求和以及平均值</h4>
+                    <p>需求: 求数组 [2,6,1,7,4] 里面所有元素的和以及平均值</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let sum = 0
+let ave = 0
+let arr = [2,6,1,7,4]
+for (let i = 0;i <= arr.length-1; i++) {
+  sum = sum + arr[i]
+  ave = sum/arr.length
+}
+alert(`和为：${sum}`)
+alert(`平均值：${ave}`)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：求最大值最小值</h4>
+                    <p>需求: 求数组 [2,6,1,77,52,25,7] 中的最大值和最小值</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">// 最大值
+let max = 0
+let arr = [2,6,1,77,52,25,7]
+for (let i = 1;i <= arr.length;i++)  {
+  max = max > arr[i-1] ? max : arr[i-1]  
+}
+alert(`最大值为：${max}`)
+
+// 最小值
+let arr = [2,6,1,77,52,25,7]
+let min = arr[0]
+for (let i = 1;i <= arr.length;i++)  {
+  min = min < arr[i-1] ? min : arr[i-1]  
+}
+alert(`最小值为：${min}`)</code></pre>
+                </div>
+
+                <h4>数组操作 —— 详细说明</h4>
+                <p>数组本质是数据集合，操作数据无非就是 增 删 改 查</p>
+
+                <h5>数组的增：</h5>
+                <p>数组名字.push() 方法将一个或多个元素添加到数组的 末尾，并返回该数组的新长度</p>
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.push("green")
+arr.push("1","2")
+console.log(arr)</code></pre>
+
+                <p>数组名字.unshift() 方法将一个或多个元素添加到数组的 开头，并返回该数组的新长度</p>
+                <pre><code class="javascript">let arr = ["pink","red"]
+arr.unshift("green")
+arr.unshift("1","2")
+console.log(arr)</code></pre>
+
+                <h5>数组的删：</h5>
+                <p>数组.pop() 方法 从数组中 删除最后一个元素，并返回该元素的值</p>
+                <p>数组.shift() 方法 从数组中 删除第一个元素，并返回该元素的值</p>
+                <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+arr.pop()
+arr.shift()
+console.log(arr)</code></pre>
+
+                <h5>数组 splice：</h5>
+                <p>语法：arr.splice(start, deleteCount) - splice(起始位置，删除几个)</p>
+                <pre><code class="javascript">let arr = [2,0,6,1,7]
+arr.splice(1,2)
+console.log(arr) // 剩下2，1，7</code></pre>
+
+                <div class="exercise">
+                    <h4>练习：数组筛选</h4>
+                    <p>需求: 将数组 [2,0,6,1,77,0,52,0,25,7] 中大于等于 10 的元素选出来，放入新数组</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+let arr2 = []
+for (let i = 0; i < arr.length; i++) {
+  if (arr[i] >= 10) {
+    arr2.push(arr[i])
+  }
+}
+console.log(arr2)</code></pre>
+                </div>
+
+                <div class="exercise">
+                    <h4>练习：数组去 0 案例</h4>
+                    <p>需求: 将数组 [2,0,6,1,77,0,52,0,25,7] 中的 0 去掉后，形成一个不包含 0 的新数组</p>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">let arr = [2,0,6,1,77,0,52,0,25,7]
+let arr2 = []
+for (let i = 0; i < arr.length; i++) {
+  if (arr[i] !== 0) {
+    arr2.push(arr[i])
+  }
+}
+console.log(arr2)</code></pre>
+                </div>
+
+                <h4>冒泡排序</h4>
+                <p>冒泡排序是一种简单的排序算法。它重复地走访过要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。走访数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。这个算法的名字由来是因为越小的元素会经由交换慢慢"浮"到数列的顶端。</p>
+                <p>比如数组 [2,3,1,4,5] 经过排序成为了 [1,2,3,4,5] 或者 [5,4,3,2,1]</p>
+
+                <h5>第一种：手动实现冒泡排序</h5>
+                <pre><code class="javascript">let arr = [1,4,3,5,2]
+for (let i = 0; i < arr.length-1; i++) {
+  for (let j = 0; j < arr.length -i-1; j++) {
+    if (arr[j] > arr[j+1]) {
+      let temp = arr[j]
+      arr[j] = arr[j+1]
+      arr[j+1] = temp
+    }
+  }
+}
+document.write(arr) // 1,2,3,4,5</code></pre>
+
+                <h5>第二种：使用 sort() 方法</h5>
+                <pre><code class="javascript">// 升序 从小到大
+let arr = [1,4,3,5,2]
+arr.sort(function(a,b) { 
+  return a - b
+})
+document.write(arr)
+
+// 降序 从大到小
+let arr = [1,4,3,5,2]
+arr.sort(function(a,b) {
+  return b - a
+})
+document.write(arr)</code></pre>
+
+                <h3 id="section3-6">3.6 实战案例</h3>
+
+                <div class="exercise">
+                    <h4>练习 1：根据数据生成柱形图</h4>
+                    <p>需求: 用户输入四个季度的数据，可以生成柱形图</p>
+                    <p>分析:</p>
+                    <ul>
+                        <li>需要输入 4 次，所以可以把 4 个数据放到一个数组里面。利用循环，弹出 4 次框，同时存到数组里面</li>
+                        <li>遍历改数组，根据数据生成 4 个柱形图，渲染打印到页面中。柱形图就是 div 盒子，设置宽度固定，高度是用户输入的数据，div 里面包含显示的数字和 第 n 季度</li>
+                    </ul>
+                </div>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;柱形图&lt;/title&gt;
+    &lt;style&gt;
+        .box {
+            display: flex;
+            width: 700px;
+            height: 300px;
+            border-left: 1px solid pink;
+            border-bottom: 1px solid pink;
+            margin: 50px auto;
+            justify-content: space-around;
+            align-items: flex-end;
+            text-align: center;
+        }
+        .box&gt;div {
+            display: flex;
+            width: 50px;
+            background-color: pink;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .box div span {
+            margin-top: -20px;
+        }
+        .box div h4 {
+            margin-bottom: -35px;
+            width: 70px;
+            margin-left: -10px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;script&gt;
+      let arr = []
+      for (let i = 1; i &lt;= 4; i++) {
+        arr.push(prompt(`请输入第${i}季度的数据：`))
+      }
+      document.write(`&lt;div class="box"&gt;`)
+      for (let i = 0;i &lt; arr.length;i++) {
+        document.write(`
+        &lt;div style="height: ${arr[i]}px;"&gt;
+          &lt;span&gt;${arr[i]}&lt;/span&gt;
+          &lt;h4&gt;第${i+1}季度&lt;/h4&gt;
+        &lt;/div&gt;
+        `)
+      }
+      document.write(`&lt;/div&gt;`)
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h4>综合大练习：</h4>
+                <p>写一个程序，要求如下：</p>
+                <ul>
+                    <li>需求 1：让用户输入五个有效年龄（0-100 之间），放入数组中。必须输入五个有效年龄年龄，如果是无效年龄，则不能放入数组中</li>
+                    <li>需求 2：打印出所有成年人的年龄 (数组筛选)</li>
+                    <li>需求 3：打印出所有人总年龄 （累加）</li>
+                    <li>需求 4：打印出所有人的平均年龄 （累加）</li>
+                    <li>需求 5：打印出最大年龄和最小年龄 （最大值）</li>
+                </ul>
+
+                <div class="exercise-answer">
+                    <h5>练习答案：</h5>
+                    <pre><code class="javascript">// 1.让用户输入五个有效年龄（0-100 之间），放入数组中
+let arr = []
+while( arr.length &lt; 5 ){
+    let num = +prompt(`请输入第${arr.length+1}个人有效年龄`)
+    if( num &gt; 0 && num &lt; 100){
+        arr.push(num)
+    }
+}
+console.log(arr)
+
+// 2. 打印输出成人的年龄  年龄 &gt; 18 
+for (let i = 0; i &lt; arr.length; i++) {
+  if (arr [i] &gt;= 18) {
+    document.write(`已经成人的年龄是: ${arr[i]} &lt;br&gt;`)
+  }
+}
+
+// 需求 3：打印出所有人总年龄 （累加）
+let sum = 0
+for (let i = 0; i &lt; arr.length; i++) {
+  sum += arr [i]
+}
+document.write(`所有人的年龄是: ${sum} &lt;br&gt;`)
+
+// 需求 4：打印出所有人的平均年龄 （累加）
+let average = 0
+average = sum / arr.length
+document.write(`所有人的年龄是: ${average} &lt;br&gt;`)
+
+// 需求 5：打印出最大年龄和最小年龄 （最大值）   假设法
+let max = arr [0]
+let min = arr [0]
+for (let i = 1; i &lt; arr.length; i++) {
+  if (max &lt; arr [i]) {
+    max = arr [i]
+  }
+  if (min &gt; arr [i]) {
+    min = arr [i]
+  }
+}
+document.write(`最大值是: ${max} &lt;br&gt;`)
+document.write(`最小值是: ${min} &lt;br&gt;`)
+
+// 需求 5：打印出最大年龄和最小年龄 （最大值）   排序法
+arr.sort(function (a, b) {
+  return a - b;
+}) // 升序
+let min = arr [0]  
+let max = arr [arr.length - 1]</code></pre>
+                </div>

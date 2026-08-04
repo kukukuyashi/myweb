@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。">
+  <meta property="og:title" content="从 LLM 到 Agent Skill 笔记 · Cyinc 的学习日志">
+  <meta property="og:description" content="LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。">
+  <meta property="og:url" content="https://cyinc.ink/myweb/content/18">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cyinc 的学习日志">
+  <meta property="og:image" content="https://cyinc.ink/myweb/img/bkm/3.jfif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="从 LLM 到 Agent Skill 笔记 · Cyinc 的学习日志">
+  <meta name="twitter:description" content="LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。">
+  <meta name="twitter:image" content="https://cyinc.ink/myweb/img/bkm/3.jfif">
+  <link rel="canonical" href="https://cyinc.ink/myweb/content/18">
+  <link rel="icon" type="image/png" href="/myweb/img/xiaoqing.png">
+  <link rel="alternate" type="application/rss+xml" title="Cyinc 的学习日志 RSS" href="/myweb/feed.xml">
+  <title>从 LLM 到 Agent Skill 笔记 · Cyinc 的学习日志</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"从 LLM 到 Agent Skill 笔记","description":"LLM、Token、Context、Prompt、Tool、MCP、Agent、Skill 基础概念梳理，带通俗解释。","datePublished":"2026-06-09","dateModified":"2026-06-09","author":{"@type":"Person","name":"Cyinc","url":"https://cyinc.ink/myweb"},"publisher":{"@type":"Person","name":"Cyinc"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://cyinc.ink/myweb/content/18"},"url":"https://cyinc.ink/myweb/content/18","image":"https://cyinc.ink/myweb/img/bkm/3.jfif","keywords":"Agent, LLM, Skill, MCP, AI","articleSection":"Agent","inLanguage":"zh-CN"}</script>
+  <link rel="stylesheet" crossorigin href="/myweb/assets/index-B01BvxwU.css">
+  <script type="module" crossorigin src="/myweb/assets/index-Dy_mMF3H.js"></script>
+  <style>
+    .prerender-fallback{max-width:42rem;margin:0 auto;padding:2rem 1.25rem 4rem;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a}
+    .prerender-fallback a{color:#e85d04}
+    .prerender-fallback h1{font-size:1.5rem;margin:0 0 .5rem}
+    .prerender-meta{font-size:.85rem;color:#5c5c5c;margin-bottom:1.25rem}
+    .prerender-note{margin-top:2rem;padding:.75rem 1rem;border:1px dashed #c8c2ba;font-size:.8rem;color:#5c5c5c}
+    .prerender-list{list-style:none;padding:0;margin:0}
+    .prerender-list li{padding:.45rem 0;border-bottom:1px solid #c8c2ba}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="prerender-fallback" data-prerender="true">
+<h1>从 LLM 到 Agent Skill 笔记</h1>
+<p class="prerender-meta">2026-06-09 · Agent</p>
+<div class="prerender-article"><p class="article-intro">从 LLM 到 Agent Skill 的基础概念梳理，带 💡 通俗解释，方便随时查阅。</p>
+
+<h2 id="section1">一、底层引擎：大语言模型（LLM）</h2>
+<ul>
+  <li><strong>LLM</strong>：Large Language Model 的缩写，就是「大语言模型」，也叫「大模型」。</li>
+</ul>
+<blockquote>💡 一个特别能猜词的超级智能程序。</blockquote>
+<ul>
+  <li><strong>Transformer</strong>：2017 年谷歌提出的技术架构，所有现代大模型都基于它。</li>
+</ul>
+<blockquote>💡 大模型的「发动机」，让模型能看懂词语之间的顺序和关系。</blockquote>
+<ul>
+  <li><strong>工作原理</strong>：本质是<strong>文字接龙</strong>。模型根据你给的文字，一个一个地猜下一个字（词）是什么，直到生成完整回答。</li>
+</ul>
+<blockquote>💡 就像手机输入法的「预测下一个词」，但比它强大一万倍。</blockquote>
+
+<h2 id="section2">二、数据处理单元：Token</h2>
+<ul>
+  <li><strong>Token</strong>：大模型处理文本的最小单位。不是字，也不是单词，是切分出来的片段。<br>👉 大白话：模型「吃饭」时的一口食物。一口可能是一个字的一半，也可能是一个完整单词。</li>
+  <li><strong>Tokenizer（分词器）</strong>：把原始文本切成 Token 的工具。<br>👉 大白话：厨房里的菜刀，把句子切成一段一段。</li>
+  <li><strong>Token ID</strong>：每个 Token 对应的数字编号。<br>👉 大白话：每个「菜段」的标签码，模型只认这个码。</li>
+</ul>
+<p><strong>常见换算（大致）</strong>：</p>
+<ul>
+  <li>1 个 Token ≈ 0.75 个英文单词</li>
+  <li>1 个 Token ≈ 1.5~2 个汉字</li>
+  <li>40 万 Token ≈ 一本超厚的小说（60~80 万字）</li>
+</ul>
+
+<h2 id="section3">三、临时记忆体：Context</h2>
+<ul>
+  <li><strong>Context</strong>：模型在处理一次任务时「看到」的全部信息，包括你的问题、历史对话、刚才生成的词、系统设定等。<br>👉 大白话：模型的「临时工作台」，上面摆着它当前能用的所有材料。</li>
+  <li><strong>Context Window（上下文窗口）</strong>：模型一次最多能处理的 Token 数量。<br>👉 大白话：工作台的最大面积。面积越大，一次能放的材料越多。</li>
+</ul>
+<table>
+  <thead>
+    <tr>
+      <th>模型（示例）</th>
+      <th>窗口大小（Token）</th>
+      <th>约合汉字</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GPT-4 Turbo</td>
+      <td>12.8 万</td>
+      <td>约 19 万字</td>
+    </tr>
+    <tr>
+      <td>Gemini 1.5 Pro</td>
+      <td>100 万</td>
+      <td>约 150 万字</td>
+    </tr>
+    <tr>
+      <td>Claude 3 Opus</td>
+      <td>20 万</td>
+      <td>约 30 万字</td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li><strong>RAG（检索增强生成）</strong>：当问题需要的知识太多放不进窗口时，先从外部知识库里找出最相关的内容，只把这些塞给模型。<br>👉 大白话：书太多桌子放不下，就先查目录，只把有用的几页放在桌上。</li>
+</ul>
+
+<h2 id="section4">四、指令交互：Prompt</h2>
+<ul>
+  <li><strong>Prompt</strong>：你给大模型的指令或问题。<br>👉 大白话：你对模型说的「开场白」或「命令」。</li>
+  <li><strong>User Prompt</strong>：用户直接输入的内容。<br>👉 大白话：「你」对模型说的话。</li>
+  <li><strong>System Prompt</strong>：开发者在后台设定的「人设」和「规则」。<br>👉 大白话：模型开机自带的「性格说明书」和「工作守则」。</li>
+  <li><strong>Prompt Engineering（提示词工程）</strong>：研究怎么写更有效的 Prompt。<br>👉 大白话：学习怎样「把话说清楚」，让模型更容易懂你。<br>现状：门槛低，重要性在下降，因为模型越来越聪明。</li>
+</ul>
+
+<h2 id="section5">五、外部能力扩展：Tool</h2>
+<ul>
+  <li><strong>Tool（工具）</strong>：大模型可以调用的外部函数/API，比如查天气、算数学、发邮件。</li>
+</ul>
+<blockquote>💡 给模型配的「外挂设备」。模型本来只会说话，加了工具就能动手做事。</blockquote>
+<p><strong>解决痛点</strong>：</p>
+<ul>
+  <li>大模型不知道实时信息（比如今天天气）</li>
+  <li>大模型计算大数容易出错</li>
+  <li>大模型不能直接操作你的电脑或手机</li>
+</ul>
+
+<h2 id="section6">六、工具标准化：MCP</h2>
+<ul>
+  <li><strong>MCP</strong>：Model Context Protocol，模型上下文协议。</li>
+</ul>
+<blockquote>💡 让不同大模型（OpenAI、Google、Anthropic）都能用<strong>同一套标准</strong>来调用工具。</blockquote>
+<p><strong>类比</strong>：以前每个平台都有自己的充电口（Lightning、Micro-USB、Type-C）。MCP 就像大家都统一成 <strong>Type-C 接口</strong>。你只按 MCP 标准开发一次工具，所有支持 MCP 的模型都能用。</p>
+
+<h2 id="section7">七、自主决策系统：Agent</h2>
+<ul>
+  <li><strong>Agent</strong>：能自己规划步骤、自己决定调用哪个工具、一直工作到完成你交给它的任务的那个程序。</li>
+</ul>
+<blockquote>💡 一个「跑腿小能手」——你给它一个目标，它自己想办法、用工具、反复尝试，直到搞定。</blockquote>
+<p><strong>核心能力</strong>：</p>
+<ul>
+  <li>多维度推理（想一想先做什么后做什么）</li>
+  <li>工具选择（知道该查天气还是该发邮件）</li>
+  <li>流程控制（自己做判断，不用每一步都问你）</li>
+</ul>
+<p><strong>代表产品</strong>：Claude Code、Codex、Gemini CLI</p>
+<p><strong>典型工作模式</strong>：ReAct（思考+行动）、Plan and Execute（规划后执行）</p>
+
+<h2 id="section8">八、任务定制：Agent Skill</h2>
+<ul>
+  <li><strong>Agent Skill</strong>：为 Agent 预先定制好的「专项技能包」，让它能更高效地完成特定任务。</li>
+</ul>
+<blockquote>💡 给 Agent 装的「APP」或「插件」。比如「Excel 处理技能」、「合同审阅技能」。</blockquote>
+<p><strong>高级功能</strong>：</p>
+<ul>
+  <li>运行代码</li>
+  <li>引用本地文件</li>
+  <li>渐进式微调（只更新必要的部分，节省 Token）</li>
+  <li>按需检索相关知识</li>
+</ul>
+</div>
+      <p class="prerender-note">静态预览供搜索引擎阅读；交互版由 Vue 加载后替换本区域。</p>
+    </main>
+  </div>
+</body>
+</html>
