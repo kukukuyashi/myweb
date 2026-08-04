@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -23,13 +24,21 @@ def create_access_token(
     subject: str,
     expires_minutes: int | None = None,
     *,
+    token_version: int = 0,
     extra_claims: dict | None = None,
 ) -> str:
     settings = get_settings()
-    expire = datetime.now(timezone.utc) + timedelta(
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(
         minutes=expires_minutes or settings.access_token_expire_minutes
     )
-    payload: dict = {"sub": subject, "exp": expire}
+    payload: dict = {
+        "sub": subject,
+        "exp": expire,
+        "iat": now,
+        "jti": uuid.uuid4().hex,
+        "ver": token_version,
+    }
     if extra_claims:
         payload.update(extra_claims)
     return jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)

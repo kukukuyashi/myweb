@@ -52,7 +52,12 @@ print('posts after', len(lp()))
 
 备份建议（site-data 是最宝贵的目录）：
 ```
-tar -czf /root/site-data-$(date +%Y%m%d).tar.gz -C /var/www/cyinc site-data
+# 手动备份
+bash /var/www/cyinc/deploy/scripts/backup.sh
+
+# 自动每日备份（ECS 上执行一次即可）：
+# crontab -e  添加：
+# 0 3 * * * /var/www/cyinc/deploy/scripts/backup.sh >> /var/log/cyinc-backup.log 2>&1
 ```
 
 ## 代码提交约束

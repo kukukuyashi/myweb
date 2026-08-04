@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,7 @@ from app.schemas.user import (
 )
 from app.services.email_service import send_password_reset_email, send_verification_email
 from app.services.email_verify import can_send_code, generate_code, mark_send_rate, store_code, verify_code
+from app.utils.rate_limit import rate_limit
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -33,7 +34,8 @@ def _is_dev_mode() -> bool:
 
 
 @router.post("/email/code", summary="发送注册邮箱验证码")
-def send_email_code(payload: EmailCodeRequest, db: Annotated[Session, Depends(get_db)]):
+def send_email_code(request: Request, payload: EmailCodeRequest, db: Annotated[Session, Depends(get_db)]):
+    rate_limit(request, scope="email_code", max_requests=3, window_sec=900)
     settings = get_settings()
     email = str(payload.email).strip().lower()
     if db.query(User).filter(User.email == email).first():
@@ -70,7 +72,8 @@ def send_email_code(payload: EmailCodeRequest, db: Annotated[Session, Depends(ge
 
 
 @router.post("/register", summary="用户注册（需邮箱验证码）")
-def register(payload: UserRegister, db: Annotated[Session, Depends(get_db)]):
+def register(request: Request, payload: UserRegister, db: Annotated[Session, Depends(get_db)]):
+    rate_limit(request, scope="register", max_requests=3, window_sec=3600)
     email = str(payload.email).strip().lower()
     if not verify_code(email, payload.code):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="验证码错误或已过期")
@@ -93,7 +96,8 @@ def register(payload: UserRegister, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post("/login", summary="用户登录")
-def login(payload: UserLogin, db: Annotated[Session, Depends(get_db)]):
+def login(request: Request, payload: UserLogin, db: Annotated[Session, Depends(get_db)]):
+    rate_limit(request, scope="login", max_requests=5, window_sec=900)
     identifier = payload.username.strip()
     user = (
         db.query(User)
@@ -103,7 +107,7 @@ def login(payload: UserLogin, db: Annotated[Session, Depends(get_db)]):
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="账号/邮箱或密码错误")
 
-    token = create_access_token(subject=user.username)
+    token = create_access_token(subject=user.username, token_version=user.token_version)
     data = TokenData(access_token=token).model_dump()
     return ok(data, message="登录成功")
 
@@ -114,7 +118,8 @@ def me(current_user: Annotated[User, Depends(get_current_user)]):
 
 
 @router.post("/password/code", summary="发送重置密码验证码")
-def send_password_code(payload: EmailCodeRequest, db: Annotated[Session, Depends(get_db)]):
+def send_password_code(request: Request, payload: EmailCodeRequest, db: Annotated[Session, Depends(get_db)]):
+    rate_limit(request, scope="password_code", max_requests=3, window_sec=900)
     settings = get_settings()
     email = str(payload.email).strip().lower()
     user = db.query(User).filter(User.email == email).first()
@@ -162,6 +167,7 @@ def reset_password(payload: PasswordResetRequest, db: Annotated[Session, Depends
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="验证码错误或已过期")
 
     user.password_hash = get_password_hash(payload.password)
+    user.token_version += 1
     db.add(user)
     db.commit()
     return ok(message="密码已重置，请使用新密码登录")

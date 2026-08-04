@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
+
+from app.utils.sanitize import sanitize_html
 
 
 class StudyRoomMessageCreate(BaseModel):
@@ -16,6 +18,13 @@ class StudyRoomMessageCreate(BaseModel):
         if not (self.content and self.content.strip()) and not self.sticker_url:
             raise ValueError("content or sticker_url must be provided")
         return self
+
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return sanitize_html(v)
 
 
 class StudyRoomMessagePublic(BaseModel):

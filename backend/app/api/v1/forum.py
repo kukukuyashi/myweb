@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user, get_optional_user
@@ -14,6 +14,7 @@ from app.services.image_upload import save_uploaded_image
 from app.services.level_config import get_tier
 from app.services.notification_service import create_notification
 from app.services.xp_service import apply_xp, today, xp_payload
+from app.utils.rate_limit import rate_limit
 from app.schemas.forum import (
     ForumAuthor,
     ForumCategoryPublic,
@@ -268,10 +269,12 @@ def get_thread(
 
 @router.post("/threads", summary="发帖", status_code=status.HTTP_201_CREATED)
 def create_thread(
+    request: Request,
     payload: ForumThreadCreate,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
+    rate_limit(request, scope="create_thread", max_requests=10, window_sec=3600)
     cat = db.query(ForumCategory).filter(ForumCategory.id == payload.category_id).first()
     if not cat:
         raise HTTPException(status_code=400, detail="板块不存在")
@@ -345,11 +348,13 @@ def delete_thread(
 
 @router.post("/threads/{thread_id}/replies", summary="回帖", status_code=status.HTTP_201_CREATED)
 def create_reply(
+    request: Request,
     thread_id: int,
     payload: ForumReplyCreate,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
+    rate_limit(request, scope="create_reply", max_requests=20, window_sec=3600)
     thread = db.query(ForumThread).filter(ForumThread.id == thread_id).first()
     if not thread:
         raise HTTPException(status_code=404, detail="帖子不存在")
@@ -391,10 +396,12 @@ def create_reply(
 
 @router.post("/threads/{thread_id}/like", summary="点赞帖子")
 def like_thread(
+    request: Request,
     thread_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
+    rate_limit(request, scope="like_thread", max_requests=30, window_sec=3600)
     thread = db.query(ForumThread).options(joinedload(ForumThread.user)).filter(ForumThread.id == thread_id).first()
     if not thread:
         raise HTTPException(status_code=404, detail="帖子不存在")

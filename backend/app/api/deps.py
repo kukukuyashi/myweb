@@ -32,6 +32,10 @@ def get_current_user(
     user = db.query(User).filter(User.username == username).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户不存在")
+
+    token_ver = payload.get("ver")
+    if token_ver is not None and int(token_ver) != user.token_version:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="token 已失效，请重新登录")
     return user
 
 
@@ -49,4 +53,10 @@ def get_optional_user(
             return None
     except JWTError:
         return None
-    return db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:
+        return None
+    token_ver = payload.get("ver")
+    if token_ver is not None and int(token_ver) != user.token_version:
+        return None
+    return user

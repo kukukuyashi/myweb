@@ -92,6 +92,7 @@ def change_password(
     if verify_password(payload.new_password, current_user.password_hash):
         raise HTTPException(status_code=400, detail="新密码不能与当前密码相同")
     current_user.password_hash = get_password_hash(payload.new_password)
+    current_user.token_version += 1
     db.add(current_user)
     db.commit()
     return ok(message="密码已更新，请使用新密码登录")

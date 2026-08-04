@@ -54,6 +54,18 @@ fi
 
 echo "==> docker compose build & up"
 # docker-compose v1.29.2 recreate 有 ContainerConfig bug，改用 build + stop + rm + up 规避
+
+# 备份当前运行容器的镜像，用于健康检查失败时回滚
+ROLLBACK_IMG="cyinc-api-rollback"
+ROLLBACK_SAVED=0
+if $DC -f "$COMPOSE_FILE" ps -q api >/dev/null 2>&1; then
+  CID=$($DC -f "$COMPOSE_FILE" ps -q api)
+  if docker commit "$CID" "$ROLLBACK_IMG" >/dev/null 2>&1; then
+    ROLLBACK_SAVED=1
+    echo "   rollback snapshot saved: $ROLLBACK_IMG"
+  fi
+fi
+
 $DC -f "$COMPOSE_FILE" build api
 $DC -f "$COMPOSE_FILE" up -d --no-recreate redis
 $DC -f "$COMPOSE_FILE" stop api || true
@@ -64,6 +76,8 @@ echo "==> wait for API health"
 for i in $(seq 1 30); do
   if curl -sf http://127.0.0.1:8000/api/health >/dev/null; then
     echo "API healthy"
+    # 清理回滚快照
+    docker rmi "$ROLLBACK_IMG" 2>/dev/null || true
     $DC -f "$COMPOSE_FILE" ps
     echo "Frontend index:"
     head -c 200 myweb/index.html || true
@@ -75,4 +89,26 @@ done
 
 echo "ERROR: API health check failed" >&2
 $DC -f "$COMPOSE_FILE" logs --tail=80 api
+
+# ── 回滚 ──
+if [ "$ROLLBACK_SAVED" = "1" ]; then
+  echo "==> rolling back to previous version..."
+  $DC -f "$COMPOSE_FILE" stop api || true
+  $DC -f "$COMPOSE_FILE" rm -f api || true
+  # docker-compose 镜像命名规则：<项目目录名>_<服务名>
+  docker tag "$ROLLBACK_IMG" "cyinc_api:latest" 2>/dev/null || true
+  $DC -f "$COMPOSE_FILE" up -d --no-deps --no-build api
+
+  echo "==> rollback: waiting for API health..."
+  for i in $(seq 1 15); do
+    if curl -sf http://127.0.0.1:8000/api/health >/dev/null; then
+      echo "Rollback API healthy — previous version restored"
+      docker rmi "$ROLLBACK_IMG" 2>/dev/null || true
+      exit 1
+    fi
+    sleep 2
+  done
+  echo "ERROR: rollback also failed!" >&2
+  $DC -f "$COMPOSE_FILE" logs --tail=80 api
+fi
 exit 1

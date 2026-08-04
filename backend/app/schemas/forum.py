@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.utils.sanitize import sanitize_html
 
 
 class ForumAuthor(BaseModel):
@@ -79,6 +81,11 @@ class ForumThreadCreate(BaseModel):
     content: str = Field(min_length=1, max_length=20000)
     cover_url: str | None = Field(default=None, max_length=512)
 
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        return sanitize_html(v)
+
 
 class ForumThreadUpdate(BaseModel):
     category_id: int | None = None
@@ -86,9 +93,21 @@ class ForumThreadUpdate(BaseModel):
     content: str | None = Field(default=None, min_length=1, max_length=20000)
     cover_url: str | None = Field(default=None, max_length=512)
 
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return sanitize_html(v)
+
 
 class ForumReplyCreate(BaseModel):
     content: str = Field(min_length=1, max_length=10000)
+
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        return sanitize_html(v)
 
 
 class ForumThreadListResponse(BaseModel):

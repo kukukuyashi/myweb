@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -27,6 +28,8 @@ from app.models.glossary import GlossaryTerm  # noqa: F401
 from app.models.friend_link import FriendLink  # noqa: F401
 from app.services.forum_seed import seed_forum_categories
 from app.services.acg_scheduler import shutdown_scheduler, start_scheduler
+
+logger = logging.getLogger("cyinc")
 
 
 class ForceHttpsMiddleware:
@@ -77,6 +80,8 @@ def _ensure_schema_patches() -> None:
                 conn.execute(text("ALTER TABLE users ADD COLUMN checkin_streak INT NOT NULL DEFAULT 0"))
             if "last_checkin_date" not in cols:
                 conn.execute(text("ALTER TABLE users ADD COLUMN last_checkin_date DATE NULL"))
+            if "token_version" not in cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN token_version INT NOT NULL DEFAULT 0"))
     if insp.has_table("posts"):
         cols = {c["name"] for c in insp.get_columns("posts")}
         with engine.begin() as conn:
@@ -224,6 +229,14 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=422,
             content={"detail": format_validation_errors(exc)},
+        )
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
+        logger.exception("Unhandled exception: %s", exc)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "服务器内部错误，请稍后重试"},
         )
 
     upload_root = Path(settings.upload_dir).resolve()
