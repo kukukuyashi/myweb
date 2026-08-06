@@ -117,23 +117,25 @@ def _clear_online(user_id: int) -> None:
 
 
 def _collect_online_user_ids() -> list[int]:
+    """收集在线用户 ID（以 Redis 为唯一真源，去重）。
+
+    不再把 _local_conns 合并进结果 —— 那会让 TCP 半开幽灵连接
+    在 Redis key 过期后仍被计数，导致在线人数偏高。
+    _local_conns 仅在 Redis 完全不可用时作兜底。
+    """
     cli = _client()
     if not cli:
         return list(_local_conns.keys())
     try:
-        ids: list[int] = []
+        ids: set[int] = set()
         for key in cli.scan_iter(f"{ONLINE_KEY_PREFIX}*"):
             try:
-                uid = int(key.split(":")[-1])
-                ids.append(uid)
+                ids.add(int(key.split(":")[-1]))
             except Exception:
                 continue
-        # 合并本机连接(可能 Redis 暂时不可用)
-        for uid in _local_conns.keys():
-            if uid not in ids:
-                ids.append(uid)
-        return ids
+        return list(ids)
     except Exception:
+        # Redis 异常时退回本机连接
         return list(_local_conns.keys())
 
 def _get_online_count() -> int:
@@ -476,17 +478,18 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
                 pass
         _local_conns[user.id].discard(websocket)
         if not _local_conns[user.id]:
+            # 最后一个连接断开才清 Redis + 广播 leave
             del _local_conns[user.id]
-        _clear_online(user.id)
-        try:
-            await _broadcast_local({
-                "type": "presence",
-                "event": "leave",
-                "user_id": user.id,
-                "count": _get_online_count(),
-            })
-        except Exception:
-            pass
+            _clear_online(user.id)
+            try:
+                await _broadcast_local({
+                    "type": "presence",
+                    "event": "leave",
+                    "user_id": user.id,
+                    "count": _get_online_count(),
+                })
+            except Exception:
+                pass
 
 # ============== Admin endpoints ==============
 
