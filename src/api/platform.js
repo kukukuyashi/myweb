@@ -239,26 +239,6 @@ export async function fetchPosts(page = 1, pageSize = 10) {
   return platformFetch(`/posts?page=${page}&page_size=${pageSize}&status=published`)
 }
 
-export async function fetchPomodoroStats() {
-  return platformFetch('/pomodoro/stats', { auth: true })
-}
-
-export async function fetchPomodoroSessions(page = 1, pageSize = 10) {
-  return platformFetch(`/pomodoro/sessions?page=${page}&page_size=${pageSize}`, { auth: true })
-}
-
-export async function createPomodoroSession(payload) {
-  return platformFetch('/pomodoro/sessions', {
-    method: 'POST',
-    auth: true,
-    body: payload,
-  })
-}
-
-export async function fetchPomodoroTimeline(days = 14) {
-  return platformFetch(`/pomodoro/timeline?days=${days}`, { auth: true })
-}
-
 export async function fetchForumCategories() {
   return platformFetch('/forum/categories')
 }
@@ -389,6 +369,22 @@ export async function fetchCheckinCalendar(months = 3) {
   return platformFetch(`/users/me/checkin/calendar?months=${months}`, { auth: true })
 }
 
+export async function fetchPomodoroStats() {
+  return platformFetch('/pomodoro/stats', { auth: true })
+}
+
+export async function fetchPomodoroTimeline(days = 90) {
+  return platformFetch(`/pomodoro/timeline?days=${days}`, { auth: true })
+}
+
+export async function createPomodoroSession(payload) {
+  return platformFetch('/pomodoro/sessions', {
+    method: 'POST',
+    auth: true,
+    body: payload,
+  })
+}
+
 export async function fetchAnimeSchedule() {
   const token = getPlatformToken()
   const controller = new AbortController()
@@ -496,7 +492,7 @@ export function openStudyRoomSocket({ token, onMessage, onPresence, onOpen, onCl
         try { ws.send(JSON.stringify({ type: 'pong' })) } catch {}
         return
       }
-      if (data.type === 'msg' || data.type === 'history' || data.type === 'err') {
+      if (['msg', 'history', 'err', 'delete', 'restore', 'kick'].includes(data.type)) {
         if (typeof onMessage === 'function') onMessage(data)
       } else if (data.type === 'presence') {
         if (typeof onPresence === 'function') onPresence(data)
