@@ -4,6 +4,7 @@
     :class="{
       'platform-layout--auth': isAuthRoute,
       'platform-layout--sidebar-collapsed': sidebarCollapsed && !isAuthRoute,
+      'platform-layout--focus': route.name === 'FocusSpace',
     }"
     :style="layoutStyle"
   >
@@ -165,6 +166,21 @@ const backdropStyle = computed(() => {
 }
 
 .platform-layout--auth .platform-main::before {
+  display: none;
+}
+.platform-layout.platform-layout--focus {
+  background: #ffffff;
+}
+
+.platform-layout.platform-layout--focus .platform-backdrop {
+  display: none;
+}
+
+.platform-layout.platform-layout--focus .platform-main {
+  background: #ffffff;
+}
+
+.platform-layout.platform-layout--focus .platform-main::before {
   display: none;
 }
 

@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
@@ -41,6 +41,11 @@ const routes = [
     path: '/guestbook',
     name: 'Guestbook',
     component: () => import('../views/Guestbook.vue')
+  },
+  {
+    path: '/app/pomo',
+    name: 'FocusSpace',
+    component: () => import('../views/platform/FocusSpace.vue')
   },
   {
     path: '/ai',
@@ -132,11 +137,6 @@ const routes = [
         name: 'ForgotPassword',
         component: () => import('../views/auth/ForgotPassword.vue'),
         meta: { guestOnly: true },
-      },
-      {
-        path: 'pomo',
-        name: 'Pomo',
-        component: () => import('../views/Pomo.vue'),
       },
       {
         path: 'chat',
