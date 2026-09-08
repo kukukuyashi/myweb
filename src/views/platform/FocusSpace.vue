@@ -182,6 +182,10 @@
         class="focus-chat-window"
         eyebrow="CHAT · CONNECTED"
         title="月读"
+        :width="390"
+        :height="480"
+        :min-width="320"
+        :min-height="320"
         @close="chatWindowOpen = false"
       >
         <StudyRoomChatPanel />
@@ -290,7 +294,30 @@
 
             <section class="focus-panel">
               <h3>正在播放</h3>
-              <p class="focus-song">{{ musicStore.currentSong?.title || '未选曲 · 可在主界面随机播放' }}</p>
+              <div class="focus-music">
+                <div class="focus-music__row">
+                  <span class="focus-music__state" :class="{ playing: musicStore.isPlaying }">
+                    {{ musicStore.isPlaying ? '▶' : '❚❚' }}
+                  </span>
+                  <Transition name="focus-song-fade" mode="out-in">
+                    <p :key="currentMusicTitle" class="focus-song" :title="currentMusicTitle">
+                      {{ currentMusicTitle }}
+                    </p>
+                  </Transition>
+                </div>
+                <label class="focus-setting focus-setting--music">
+                  <span>音量 {{ musicVolumePercent }}%</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    :value="musicStore.volume"
+                    aria-label="音乐音量"
+                    @input="setMusicVolume"
+                  >
+                </label>
+              </div>
             </section>
           </div>
         </section>
@@ -306,6 +333,7 @@ import FloatingWindow from '../../components/platform/FloatingWindow.vue'
 import StudyRoomChatPanel from '../../components/platform/StudyRoomChatPanel.vue'
 import { useMusicStore } from '../../store'
 import { playTrackAtIndex, pausePlayback } from '../../composables/useMusicPlayback'
+import { getGlobalAudio } from '../../utils/musicAudio'
 import {
   createPomodoroSession,
   fetchPomodoroStats,
@@ -323,6 +351,10 @@ const modes = [
 
 const storageKey = 'cyinc-focus-state'
 const musicStore = useMusicStore()
+const currentMusicTitle = computed(() =>
+  musicStore.currentSong?.title || '未选曲 · 点击顶部音乐随机播放'
+)
+const musicVolumePercent = computed(() => Math.round(musicStore.volume * 100))
 const currentMode = ref('focus')
 const isRunning = ref(false)
 const remainingSeconds = ref(25 * 60)
@@ -541,6 +573,14 @@ function toggleMusic() {
     ? musicStore.currentIndex
     : Math.floor(Math.random() * musicStore.playlist.length)
   void playTrackAtIndex(index)
+}
+
+function setMusicVolume(event) {
+  const volume = Number(event.target.value)
+  if (!Number.isFinite(volume)) return
+  musicStore.setVolume(volume)
+  const audio = getGlobalAudio()
+  if (audio) audio.volume = musicStore.volume
 }
 
 function toggleFullscreen() {
@@ -855,7 +895,12 @@ usePageMeta({
   right: 1.1rem;
   bottom: 1.1rem;
   width: min(390px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
   max-height: min(70vh, 560px);
+}
+.focus-chat-window :deep(.study-chat-panel__list) {
+  height: 100%;
+  min-height: 0;
 }
 .focus-modes {
   display: flex;
@@ -1048,7 +1093,55 @@ usePageMeta({
 .focus-song {
   margin: 0.85rem 0 0;
   line-height: 1.5;
-}.focus-setting,
+}
+.focus-music {
+  display: grid;
+  gap: 0.75rem;
+}
+.focus-music__row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.focus-music__row .focus-song {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-music__state {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.58rem;
+}
+.focus-music__state.playing {
+  border-color: rgba(255, 209, 102, 0.42);
+  color: var(--focus-accent);
+  background: rgba(255, 209, 102, 0.12);
+}
+.focus-setting--music {
+  margin-bottom: 0;
+}
+.focus-song-fade-enter-active,
+.focus-song-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.focus-song-fade-enter-from,
+.focus-song-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.focus-setting,
 .focus-switch {
   display: grid;
   gap: 0.55rem;

@@ -1,7 +1,7 @@
 <template>
   <section
     class="floating-window"
-    :style="{ transform: `translate(${offset.x}px, ${offset.y}px)` }"
+    :style="windowStyle"
   >
     <header
       class="floating-window__header"
@@ -18,21 +18,48 @@
     <div class="floating-window__body">
       <slot />
     </div>
+    <div
+      class="floating-window__resize"
+      role="separator"
+      aria-orientation="diagonal"
+      aria-label="调整窗口大小"
+      title="拖拽调整大小"
+      tabindex="0"
+      @pointerdown="startResize"
+      @keydown="onResizeKeydown"
+    >
+      <span aria-hidden="true"></span>
+    </div>
   </section>
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   eyebrow: { type: String, default: 'FLOATING WINDOW' },
   title: { type: String, required: true },
+  width: { type: Number, default: null },
+  height: { type: Number, default: null },
+  minWidth: { type: Number, default: 300 },
+  minHeight: { type: Number, default: 220 },
 })
 
 const emit = defineEmits(['close'])
 
 const offset = ref({ x: 0, y: 0 })
+const size = ref({
+  width: props.width,
+  height: props.height,
+})
 let dragStart = null
+let resizeStart = null
+
+const windowStyle = computed(() => ({
+  transform: `translate(${offset.value.x}px, ${offset.value.y}px)`,
+  ...(size.value.width ? { width: `${size.value.width}px` } : {}),
+  ...(size.value.height ? { height: `${size.value.height}px` } : {}),
+}))
 
 function startDrag(event) {
   if (event.button !== 0 || event.target.closest('button')) return
@@ -63,7 +90,67 @@ function stopDrag() {
   window.removeEventListener('pointercancel', stopDrag)
 }
 
-onBeforeUnmount(stopDrag)
+function startResize(event) {
+  if (event.button !== 0) return
+  resizeStart = {
+    pointerX: event.clientX,
+    pointerY: event.clientY,
+    offsetX: offset.value.x,
+    offsetY: offset.value.y,
+    width: size.value.width ?? event.currentTarget.parentElement.offsetWidth,
+    height: size.value.height ?? event.currentTarget.parentElement.offsetHeight,
+  }
+  event.currentTarget.setPointerCapture(event.pointerId)
+  window.addEventListener('pointermove', onResize)
+  window.addEventListener('pointerup', stopResize)
+  window.addEventListener('pointercancel', stopResize)
+}
+
+function onResize(event) {
+  if (!resizeStart) return
+  const maxWidth = Math.max(props.minWidth, window.innerWidth - 16)
+  const maxHeight = Math.max(props.minHeight, window.innerHeight - 16)
+  const width = Math.min(maxWidth, Math.max(props.minWidth, resizeStart.width + event.clientX - resizeStart.pointerX))
+  const height = Math.min(maxHeight, Math.max(props.minHeight, resizeStart.height + event.clientY - resizeStart.pointerY))
+  size.value = { width, height }
+  offset.value = {
+    x: resizeStart.offsetX + width - resizeStart.width,
+    y: resizeStart.offsetY + height - resizeStart.height,
+  }
+}
+
+function onResizeKeydown(event) {
+  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return
+  event.preventDefault()
+  const step = event.shiftKey ? 40 : 12
+  const delta = {
+    ArrowLeft: [-step, 0],
+    ArrowRight: [step, 0],
+    ArrowUp: [0, -step],
+    ArrowDown: [0, step],
+  }[event.key]
+  const currentWidth = size.value.width ?? event.currentTarget.parentElement.offsetWidth
+  const currentHeight = size.value.height ?? event.currentTarget.parentElement.offsetHeight
+  const width = Math.max(props.minWidth, currentWidth + delta[0])
+  const height = Math.max(props.minHeight, currentHeight + delta[1])
+  size.value = { width, height }
+  offset.value = {
+    x: offset.value.x + width - currentWidth,
+    y: offset.value.y + height - currentHeight,
+  }
+}
+
+function stopResize() {
+  resizeStart = null
+  window.removeEventListener('pointermove', onResize)
+  window.removeEventListener('pointerup', stopResize)
+  window.removeEventListener('pointercancel', stopResize)
+}
+
+onBeforeUnmount(() => {
+  stopDrag()
+  stopResize()
+})
 </script>
 
 <style scoped>
@@ -135,5 +222,36 @@ onBeforeUnmount(stopDrag)
 .floating-window__body {
   min-height: 0;
   overflow: auto;
+}
+
+.floating-window__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.floating-window__resize span {
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(255, 255, 255, 0.34);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.34);
+  border-radius: 0 0 4px 0;
+  transition: border-color 0.2s ease;
+}
+
+.floating-window__resize:hover span,
+.floating-window__resize:focus-visible span {
+  border-color: rgba(255, 209, 102, 0.85);
+}
+
+.floating-window__resize:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 209, 102, 0.35);
 }
 </style>

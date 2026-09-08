@@ -376,6 +376,10 @@ onBeforeUnmount(() => {
   border-radius: 10px;
 }
 
+.study-chat-panel__message.mine img {
+  margin-left: auto;
+}
+
 .study-chat-panel__form {
   position: relative;
   display: grid;
