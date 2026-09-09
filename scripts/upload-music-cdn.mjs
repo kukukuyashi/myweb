@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '..')
 const musicRoot = path.join(root, 'Music')
 
-const AUDIO_RE = /\.(flac|mp3|ogg|wav)$/i
+const AUDIO_RE = /\.(flac|m4a|mp3|ogg|wav)$/i
 const COVER_RE = /^(folder|cover|COVER|Folder)\.(jpg|jpeg|png|webp)$/i
 
 function walkMusicFiles(dir, rel = '') {
@@ -95,6 +95,7 @@ for (const { full, key } of files) {
   const contentType =
     ext === '.mp3' ? 'audio/mpeg'
     : ext === '.flac' ? 'audio/flac'
+    : ext === '.m4a' ? 'audio/mp4'
     : ext === '.ogg' ? 'audio/ogg'
     : ext === '.wav' ? 'audio/wav'
     : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
