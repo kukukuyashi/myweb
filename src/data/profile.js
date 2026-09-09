@@ -34,6 +34,7 @@ export const profile = {
 
 export function imgUrl(relativePath) {
   if (!relativePath) return ''
+  if (/^(https?:)?\/\//i.test(relativePath)) return relativePath
   const base = import.meta.env.BASE_URL || '/'
   const path = encodePathSegments(String(relativePath).replace(/^\//, ''))
   return `${base}${path}`

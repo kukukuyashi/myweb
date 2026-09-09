@@ -74,9 +74,9 @@ const visitorTotal = ref(0)
 const quickLinks = [
   { to: '/projects', label: 'PROJ' },
   { to: '/changelog', label: 'LOG' },
-  { to: '/music', label: 'MUSIC' },
+  { to: '/app/music', label: 'MUSIC' },
   { to: '/archive', label: 'ARCH' },
-  { to: '/guestbook', label: 'GUEST' },
+  { to: '/app/forum', label: 'GUEST' },
   { to: '/about', label: 'ABOUT' },
 ]
 

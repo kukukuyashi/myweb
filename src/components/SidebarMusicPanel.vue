@@ -89,7 +89,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { useMusicStore } from '../store'
 import { getGlobalAudio } from '../utils/musicAudio.js'
 import {
@@ -108,13 +107,10 @@ defineProps({
 defineEmits(['navigate'])
 
 const musicStore = useMusicStore()
-const route = useRoute()
 
 const hasTrack = computed(() => !!musicStore.currentSong)
 
-const musicRoomTo = computed(() =>
-  route.path.startsWith('/app') ? '/app/music' : '/music'
-)
+const musicRoomTo = '/app/music'
 
 const seekMax = computed(() => {
   const d = musicStore.duration

@@ -33,16 +33,6 @@ const routes = [
     props: true
   },
   {
-    path: '/music',
-    name: 'Music',
-    component: () => import('../views/Music.vue')
-  },
-  {
-    path: '/guestbook',
-    name: 'Guestbook',
-    component: () => import('../views/Guestbook.vue')
-  },
-  {
     path: '/app/pomo',
     name: 'FocusSpace',
     component: () => import('../views/platform/FocusSpace.vue')
@@ -231,6 +221,12 @@ const routes = [
         component: () => import('../views/admin/FriendLinksAdmin.vue'),
         props: { embedded: true },
         meta: { title: '友链管理' },
+      },
+      {
+        path: 'pages',
+        name: 'SitePagesAdmin',
+        component: () => import('../views/admin/SitePagesAdmin.vue'),
+        meta: { title: '页面管理' },
       },
       {
         path: 'acg-bot',

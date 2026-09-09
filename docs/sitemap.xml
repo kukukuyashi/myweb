@@ -26,16 +26,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://cyinc.ink/myweb/music</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://cyinc.ink/myweb/guestbook</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://cyinc.ink/myweb/content/29</loc>
     <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>

@@ -4,8 +4,11 @@
     <main class="page-main">
       <div class="container archive-wrap">
         <header class="archive-header">
-          <h1 class="page-title">文章归档</h1>
-          <div class="archive-meta">
+          <h1 class="page-title">{{ archiveContent.title }}</h1>
+          <p v-if="archiveContent.description" class="archive-description">
+            {{ archiveContent.description }}
+          </p>
+          <div v-if="archiveContent.showStats" class="archive-meta">
             TOTAL {{ totalPosts }} POSTS · {{ totalTags }} TAGS · LAST UPDATE {{ lastUpdate }}
           </div>
         </header>
@@ -67,7 +70,7 @@
             </p>
           </section>
 
-          <aside class="archive-aside" aria-label="笔记分类">
+          <aside v-if="archiveContent.showCategoryPanel" class="archive-aside" aria-label="笔记分类">
             <div class="archive-panel archive-type-panel">
               <div class="archive-panel-head">
                 <span class="archive-panel-label">笔记类型</span>
@@ -136,7 +139,7 @@
 <script setup>
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   getPostsSorted,
   getLastUpdateDate,
@@ -150,11 +153,14 @@ import {
 } from '../data/posts'
 import { usePageMeta } from '../composables/usePageMeta'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
+import { defaultArchiveContent, cloneSitePageContent } from '../data/sitePageDefaults'
+import { fetchSitePage } from '../api/sitePages'
 
 usePageMeta({ title: '归档', description: '按时间轴浏览全部技术学习笔记。' })
 
 const streamRef = ref(null)
 const activeCategory = ref('')
+const archiveContent = ref(cloneSitePageContent(defaultArchiveContent))
 useRevealOnScroll(streamRef, '[data-reveal]')
 
 const totalPosts = computed(() => getPostsSorted().length)
@@ -184,8 +190,11 @@ const filteredPosts = computed(() => {
     ...post,
     url: postUrl(post.id),
   }))
-  if (!activeCategory.value) return sorted
-  return sorted.filter((post) => post.category === activeCategory.value)
+  const limited = archiveContent.value.postLimit > 0
+    ? sorted.slice(0, archiveContent.value.postLimit)
+    : sorted
+  if (!activeCategory.value) return limited
+  return limited.filter((post) => post.category === activeCategory.value)
 })
 
 const timelineEntries = computed(() => {
@@ -223,6 +232,19 @@ function toggleCategory(name) {
   activeCategory.value = activeCategory.value === name ? '' : name
 }
 
+onMounted(async () => {
+  try {
+    const data = await fetchSitePage('archive')
+    if (data?.content) {
+      archiveContent.value = {
+        ...cloneSitePageContent(defaultArchiveContent),
+        ...data.content,
+      }
+    }
+  } catch {
+  }
+})
+
 function formatTimelineDate(date) {
   const [y, m, d] = date.split('-')
   return `${y}.${m}.${d}`
@@ -245,6 +267,12 @@ function formatTimelineDate(date) {
   margin-bottom: 0.65rem;
   padding-bottom: 0;
   border-bottom: none;
+}
+
+.archive-description {
+  margin: -0.2rem 0 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .archive-meta {

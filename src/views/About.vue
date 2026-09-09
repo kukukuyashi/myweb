@@ -7,78 +7,62 @@
           <InkRevealPanel
             tag="section"
             root-class="about-hero about-hero--ink"
-            image="img/关于/Fp6MHMdaEAA806l.jfif"
+            :image="heroImageUrl"
             position="78% center"
             :r-end="122"
             fade-direction="left"
           >
             <div class="about-hero-main">
               <div class="acg-frame acg-frame--profile">
-                <img :src="avatarUrl" :alt="profile.name" width="140" height="140" loading="lazy">
+                <img :src="avatarUrl" :alt="aboutContent.name" width="140" height="140" loading="lazy">
                 <span class="frame-label">ID · CYINC</span>
               </div>
               <div class="about-intro">
                 <p class="page-ink-coord">PROFILE · ACG · <span class="ink-hint">hover 晕染</span></p>
-                <h1 class="page-title about-name">{{ profile.name }}</h1>
-                <p class="about-tagline">{{ profile.tagline }}</p>
+                <h1 class="page-title about-name">{{ aboutContent.name }}</h1>
+                <p class="about-tagline">{{ aboutContent.tagline }}</p>
                 <div class="acg-chips about-chips">
-                  <span v-for="t in profile.acgTags" :key="t" class="acg-chip">{{ t }}</span>
+                  <span v-for="t in aboutContent.acgTags" :key="t" class="acg-chip">{{ t }}</span>
                 </div>
               </div>
             </div>
-            <p class="about-lead">
-              这个站既是<strong>技术笔记本</strong>，也是<strong>ACG 爱好者的自留地</strong>。
-              笔记可以查，音乐室可以听，留言板可以聊 — 不必把爱好和技术分开。
-            </p>
+            <p class="about-lead">{{ aboutContent.lead }}</p>
           </InkRevealPanel>
 
           <section class="about-block">
             <h2>我是谁</h2>
-            <p>
-              叫我 Cyinc 就好。平时写 Vue / Java / Agent 相关的东西，私下是重度 ACG 用户：
-              追番、囤 OST、看 MAD，音乐室里那几首就是真实歌单。
-            </p>
-            <p>
-              博客最初是前端学习草稿本，后来加了 Agent 笔记、Twikoo 留言板、音乐播放器。
-              风格刻意做成「工业蓝图」的样子 — 但人格不用跟着变冷，ACG 图会放在<strong>档案框</strong>里，像贴纸墙一样，不破坏整体版式。
-            </p>
+            <p v-for="paragraph in aboutContent.whoIAm" :key="paragraph">{{ paragraph }}</p>
           </section>
 
           <section class="about-block">
             <h2>现在在做什么</h2>
             <ul class="about-list">
-              <li v-for="item in profile.favorites" :key="item.label">
+              <li v-for="item in aboutContent.favorites" :key="item.label">
                 <span class="list-key">{{ item.label }}</span>
                 {{ item.text }}
               </li>
             </ul>
-            <blockquote>写下来，才算真正学过一遍 — 番剧观后感也算。</blockquote>
+            <blockquote>{{ aboutContent.quote }}</blockquote>
           </section>
 
           <section class="about-block">
             <h2>技术栈</h2>
             <div class="skill-tags">
-              <span>Vue / JS</span>
-              <span>Agent / LLM</span>
-              <span>Python</span>
-              <span>Node.js</span>
-              <span>Java</span>
-              <span>PHP</span>
-              <span>Twikoo</span>
+              <span v-for="skill in aboutContent.skills" :key="skill">{{ skill }}</span>
             </div>
           </section>
 
           <section class="about-block">
             <h2>贴纸墙</h2>
-            <StickerWall :items="aboutGallery" />
+            <StickerWall :items="aboutContent.stickers" />
           </section>
 
           <section class="about-block">
             <h2>联系方式</h2>
-            <p>📧 邮箱：<a :href="`mailto:${profile.email}`">{{ profile.email }}</a></p>
-            <p>🌐 博客：<a :href="profile.blog">{{ profile.blog }}</a></p>
-            <p>💻 GitHub：<a :href="profile.github" target="_blank" rel="noopener">{{ profile.github }}</a></p>
-            <p>🎵 音乐室：<router-link to="/music">/music</router-link></p>
+            <p>📧 邮箱：<a :href="`mailto:${aboutContent.contacts.email}`">{{ aboutContent.contacts.email }}</a></p>
+            <p>🌐 博客：<a :href="aboutContent.contacts.blog">{{ aboutContent.contacts.blog }}</a></p>
+            <p>💻 GitHub：<a :href="aboutContent.contacts.github" target="_blank" rel="noopener">{{ aboutContent.contacts.github }}</a></p>
+            <p>🎵 音乐室：<router-link :to="aboutContent.contacts.musicPath">{{ aboutContent.contacts.musicPath }}</router-link></p>
           </section>
 
           <section class="about-block">
@@ -108,29 +92,62 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import NavBar from '../components/NavBar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import InkRevealPanel from '../components/InkRevealPanel.vue'
 import { usePageMeta } from '../composables/usePageMeta'
-import { profile, imgUrl } from '../data/profile'
-import { aboutGallery } from '../data/aboutGallery'
-import { friendLinks, randomFriendLink } from '../data/social'
+import { imgUrl } from '../data/profile'
+import { friendLinks as defaultFriendLinks } from '../data/social'
+import { defaultAboutContent, cloneSitePageContent } from '../data/sitePageDefaults'
+import { fetchSitePage } from '../api/sitePages'
+import { fetchFriendLinksPublic } from '../api/friendLinks'
 
 const StickerWall = defineAsyncComponent(() => import('../components/StickerWall.vue'))
 
+const aboutContent = ref(cloneSitePageContent(defaultAboutContent))
+const friendLinks = ref([...defaultFriendLinks])
+
 function teleportRandom() {
-  const link = randomFriendLink()
+  const pool = friendLinks.value.filter((link) => !link.url.includes('kukukuyashi.github.io'))
+  const source = pool.length ? pool : friendLinks.value
+  const link = source[Math.floor(Math.random() * source.length)]
   if (link) window.open(link.url, '_blank', 'noopener')
 }
 
 usePageMeta({
   title: '关于我',
   description: 'Cyinc — 前端与 Agent 学习者，ACG 爱好者。技术笔记 + 音乐室 + 贴纸墙。',
-  image: imgUrl(profile.avatar),
+  image: imgUrl(aboutContent.value.avatar),
 })
 
-const avatarUrl = computed(() => imgUrl(profile.avatar))
+const heroImageUrl = computed(() => imgUrl(aboutContent.value.heroImage))
+const avatarUrl = computed(() => imgUrl(aboutContent.value.avatar))
+
+onMounted(async () => {
+  try {
+    const data = await fetchSitePage('about')
+    if (data?.content) {
+      aboutContent.value = {
+        ...cloneSitePageContent(defaultAboutContent),
+        ...data.content,
+      }
+    }
+  } catch {
+  }
+
+  try {
+    const data = await fetchFriendLinksPublic()
+    if (data?.links?.length) {
+      friendLinks.value = data.links.map((link) => ({
+        name: link.name,
+        url: link.url,
+        desc: link.description || link.desc || '',
+      }))
+    }
+  } catch {
+  }
+})
 </script>
 
 <style scoped>

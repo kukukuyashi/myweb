@@ -16,9 +16,9 @@
       <router-link to="/about" @mouseenter="onNavHover('About')" @click="menuOpen = false">关于</router-link>
       <router-link to="/archive" @mouseenter="onNavHover('Archive')" @click="menuOpen = false">归档</router-link>
       <router-link to="/projects" @mouseenter="onNavHover('Projects')" @click="menuOpen = false">项目</router-link>
-      <router-link to="/music" @mouseenter="onNavHover('Music')" @click="menuOpen = false">音乐室</router-link>
+      <router-link to="/app/music" @mouseenter="onNavHover('Music')" @click="menuOpen = false">音乐室</router-link>
       <router-link to="/app" @mouseenter="onNavHover('PlatformHome')" @click="menuOpen = false">主站</router-link>
-      <router-link to="/guestbook" @mouseenter="onNavHover('Guestbook')" @click="menuOpen = false">留言板</router-link>
+      <router-link to="/app/forum" @mouseenter="onNavHover('Guestbook')" @click="menuOpen = false">留言板</router-link>
     </nav>
 
     <div class="topbar-actions">

@@ -52,7 +52,7 @@ const slides = computed(() => [
     text: musicStore.currentSong
       ? `${musicStore.isPlaying ? '▶' : '❚❚'} ${musicStore.currentSong.title}`
       : '暂无播放 — 去音乐室选一首',
-    link: '/music',
+    link: '/app/music',
     linkLabel: '音乐室',
   },
   {

@@ -26,6 +26,7 @@ from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare, Use
 from app.models.notification import Notification  # noqa: F401
 from app.models.glossary import GlossaryTerm  # noqa: F401
 from app.models.friend_link import FriendLink  # noqa: F401
+from app.models.site_page_config import SitePageConfig  # noqa: F401
 from app.services.forum_seed import seed_forum_categories
 from app.services.acg_scheduler import shutdown_scheduler, start_scheduler
 

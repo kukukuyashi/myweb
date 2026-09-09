@@ -9,8 +9,8 @@
         <router-link to="/archive">归档</router-link>
         <router-link to="/projects">项目</router-link>
         <router-link to="/changelog">更新</router-link>
-        <router-link to="/guestbook">留言板</router-link>
-        <router-link to="/music">音乐室</router-link>
+        <router-link to="/app/forum">留言板</router-link>
+        <router-link to="/app/music">音乐室</router-link>
         <a :href="rssUrl" target="_blank" rel="noopener">RSS</a>
         <a href="https://github.com/kukukuyashi/myweb" target="_blank" rel="noopener">GitHub</a>
         <a :href="reportMailto" class="footer-report">举报</a>

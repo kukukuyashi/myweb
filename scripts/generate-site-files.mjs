@@ -50,8 +50,6 @@ const urls = [
   { loc: siteUrl('archive'), priority: '0.7' },
   { loc: siteUrl('projects'), priority: '0.6' },
   { loc: siteUrl('changelog'), priority: '0.5' },
-  { loc: siteUrl('music'), priority: '0.5' },
-  { loc: siteUrl('guestbook'), priority: '0.6' },
   ...sorted.map(p => ({
     loc: siteUrl(`content/${p.id}`),
     priority: '0.8',

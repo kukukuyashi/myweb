@@ -260,7 +260,7 @@
             <li><router-link to="/">技术博客</router-link></li>
             <li><router-link to="/app/music">音乐室</router-link></li>
             <li><router-link to="/about">关于 & 贴纸墙</router-link></li>
-            <li><router-link to="/guestbook">留言板</router-link></li>
+            <li><router-link to="/app/forum">留言板</router-link></li>
           </ul>
         </div>
       </div>

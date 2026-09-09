@@ -178,18 +178,6 @@ const staticRoutes = [
     description: 'CYINC.LOG 站点功能演化记录。',
     body: `<h1>更新日志</h1><p class="prerender-meta">站点本身的功能更新，不是文章列表。</p>`,
   },
-  {
-    path: 'music',
-    title: '音乐室',
-    description: 'Cyinc 的真实歌单，静态站 FLAC 播放。',
-    body: `<h1>音乐室</h1><p class="prerender-meta">OST 与 ACG 曲目收藏。</p>`,
-  },
-  {
-    path: 'guestbook',
-    title: '留言板',
-    description: '欢迎留下想法、建议或打个招呼。',
-    body: `<h1>留言板</h1><p class="prerender-meta">Twikoo 留言，欢迎交流。</p>`,
-  },
 ]
 
 for (const route of staticRoutes) {

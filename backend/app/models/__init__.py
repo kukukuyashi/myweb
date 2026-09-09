@@ -10,6 +10,7 @@ from app.models.qa import QaMessage
 from app.models.user import User
 from app.models.glossary import GlossaryTerm
 from app.models.friend_link import FriendLink
+from app.models.site_page_config import SitePageConfig
 from app.models.study_room import StudyRoomMessage
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "AnimeWatchlist",
     "GlossaryTerm",
     "FriendLink",
+    "SitePageConfig",
     "StudyRoomMessage",
 ]

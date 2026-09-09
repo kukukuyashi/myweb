@@ -111,6 +111,7 @@ const navGroups = [
       { label: '笔记管理', icon: '✎', to: '/admin/notes' },
       { label: '术语库', icon: '☷', to: '/admin/glossary' },
       { label: '友链', icon: '⚯', to: '/admin/links' },
+      { label: '页面管理', icon: '⌘', to: '/admin/pages' },
     ],
   },
   {
