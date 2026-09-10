@@ -88,17 +88,27 @@
 
       <h3>贴纸墙 <small>{{ about.stickers.length }} / 10</small></h3>
       <div class="sticker-toolbar">
+        <button
+          type="button"
+          class="platform-btn-primary"
+          :disabled="uploadingSticker || about.stickers.length >= 10"
+          @click="stickerFileInput?.click()"
+        >
+          {{ uploadingSticker ? '上传中…' : '上传贴纸' }}
+        </button>
         <select v-model="selectedLibraryPath" class="library-select">
           <option value="">从现有贴纸库选择…</option>
           <option v-for="item in availableStickers" :key="item.path" :value="item.path">
             {{ item.label }} · {{ item.path }}
           </option>
         </select>
-        <button type="button" class="platform-btn-ghost" :disabled="!selectedLibraryPath" @click="addLibrarySticker">
-          添加
-        </button>
-        <button type="button" class="platform-btn-ghost" :disabled="uploadingSticker" @click="stickerFileInput?.click()">
-          {{ uploadingSticker ? '上传中…' : '上传新贴纸' }}
+        <button
+          type="button"
+          class="platform-btn-ghost"
+          :disabled="!selectedLibraryPath || about.stickers.length >= 10"
+          @click="addLibrarySticker"
+        >
+          从贴纸库添加
         </button>
         <input ref="stickerFileInput" type="file" accept="image/*" hidden @change="onStickerFile" />
       </div>
@@ -236,6 +246,11 @@ function nextStickerLabel() {
   return String(about.stickers.length + 1).padStart(2, '0')
 }
 
+function stickerLabelFromFileName(fileName = '') {
+  const label = String(fileName).replace(/\.[^.]+$/, '').trim()
+  return label || nextStickerLabel()
+}
+
 function addSticker(path, label = '') {
   if (about.stickers.length >= 10) {
     notify('贴纸墙最多只能保留 10 张', 'error')
@@ -265,10 +280,15 @@ function removeSticker(index) {
 async function onStickerFile(event) {
   const file = event.target.files?.[0]
   if (!file) return
+  if (about.stickers.length >= 10) {
+    event.target.value = ''
+    notify('贴纸墙最多只能保留 10 张', 'error')
+    return
+  }
   uploadingSticker.value = true
   try {
     const data = await uploadNoteImage(file)
-    if (addSticker(data.url)) notify('贴纸已上传')
+    if (addSticker(data.url, stickerLabelFromFileName(file.name))) notify('贴纸已上传')
   } catch (err) {
     notify(err.message || '贴纸上传失败', 'error')
   } finally {
@@ -319,7 +339,8 @@ onMounted(load)
 .favorite-row { display: grid; grid-template-columns: 160px 1fr 74px; gap: 0.6rem; align-items: center; }
 .favorite-row input { width: 100%; }
 .sticker-toolbar { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-.library-select { min-width: min(360px, 100%); }
+.library-select { min-width: min(320px, 100%); }
+.sticker-toolbar > .platform-btn-primary { min-width: 118px; }
 .sticker-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 0.7rem; align-items: center; padding: 0.55rem; border: 1px solid var(--border); border-radius: 12px; }
 .sticker-row img { width: 72px; height: 48px; object-fit: cover; border-radius: 8px; background: var(--bg-muted); }
 .sticker-fields { display: grid; grid-template-columns: minmax(0, 2fr) 90px; gap: 0.5rem; }
@@ -334,5 +355,7 @@ onMounted(load)
   .page-head, .head-actions { flex-direction: column; align-items: stretch; }
   .form-grid, .favorite-row, .sticker-row { grid-template-columns: 1fr; }
   .sticker-fields { grid-template-columns: 1fr; }
+  .sticker-toolbar { flex-direction: column; align-items: stretch; }
+  .library-select, .sticker-toolbar > .platform-btn-primary { width: 100%; }
 }
 </style>
