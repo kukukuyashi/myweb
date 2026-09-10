@@ -1,0 +1,651 @@
+<h2 id="section1">1. JS 进阶 函数</h2>
+                    <blockquote>
+                        <p>学习作用域、变量提升、闭包等语言特征，加深对 JavaScript 的理解，掌握变量赋值、函数声明的简洁语法，降低代码的冗余度。</p>
+                        <ul>
+                            <li>理解作用域对程序执行的影响</li>
+                            <li>能够分析程序执行的作用域范围</li>
+                            <li>理解闭包本质，利用闭包创建隔离作用域</li>
+                            <li>了解什么变量提升及函数提升</li>
+                            <li>掌握箭头函数、解析剩余参数等简洁语法</li>
+                        </ul>
+                    </blockquote>
+
+                    <h3 id="section1-1">1.1 作用域</h3>
+                    <blockquote>
+                        <p>了解作用域对程序执行的影响及作用域链的查找机制，使用闭包函数创建隔离作用域避免全局变量污染。</p>
+                        <p>作用域（scope）规定了变量能够被访问的"范围"，离开了这个"范围"变量便不能被访问，作用域分为全局作用域和局部作用域。</p>
+                    </blockquote>
+
+                    <h4>局部作用域</h4>
+                    <p>局部作用域分为函数作用域和块作用域。</p>
+
+                    <h5>函数作用域</h5>
+                    <p>在函数内部声明的变量只能在函数内部被访问，外部无法直接访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 声明 counter 函数
+  function counter(x, y) {
+    // 函数内部声明的变量
+    const s = x + y
+    console.log(s) // 18
+  }
+  // 设用 counter 函数
+  counter(10, 8)
+  // 访问变量 s
+  console.log(s)// 报错
+&lt;/script&gt;</code></pre>
+
+                    <h5>总结：</h5>
+                    <ol>
+                        <li>函数内部声明的变量，在函数外部无法被访问</li>
+                        <li>函数的参数也是函数内部的局部变量</li>
+                        <li>不同函数内部声明的变量无法互相访问</li>
+                        <li>函数执行完毕后，函数内部的变量实际被清空了</li>
+                    </ol>
+
+                    <h3 id="section1-2">1.2 块作用域</h3>
+                    <p>在 JavaScript 中使用 `{}` 包裹的代码称为代码块，代码块内部声明的变量外部将【有可能】无法被访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  {
+    // age 只能在该代码块中被访问
+    let age = 18;
+    console.log(age); // 正常
+  }
+  
+  // 超出了 age 的作用域
+  console.log(age) // 报错
+  
+  let flag = true;
+  if(flag) {
+    // str 只能在该代码块中被访问
+    let str = 'hello world!'
+    console.log(str); // 正常
+  }
+  
+  // 超出了 age 的作用域
+  console.log(str); // 报错
+  
+  for(let t = 1; t <= 6; t++) {
+    // t 只能在该代码块中被访问
+    console.log(t); // 正常
+  }
+  
+  // 超出了 t 的作用域
+  console.log(t); // 报错
+&lt;/script&gt;</code></pre>
+
+                    <p>JavaScript 中除了变量外还有常量，常量与变量本质的区别是【常量必须要有值且不允许被重新赋值】，常量值为对象时其属性和方法允许重新赋值。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 必须要有值
+  const version = '1.0.0';
+
+  // 不能重新赋值
+  // version = '1.0.1';
+
+  // 常量值为对象类型
+  const user = {
+    name: '小明',
+    age: 18
+  }
+
+  // 不能重新赋值
+  user = {};
+
+  // 属性和方法允许被修改
+  user.name = '小小明';
+  user.gender = '男';
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>`let` 声明的变量会产生块作用域，`var` 不会产生块作用域</li>
+                        <li>`const` 声明的常量也会产生块作用域</li>
+                        <li>不同代码块之间的变量无法互相访问</li>
+                        <li>推荐使用 `let` 或 `const`</li>
+                    </ol>
+
+                    <p>注：开发中 `let` 和 `const` 经常不加区分的使用，如果担心某个值会不小被修改时，则只能使用 `const` 声明成常量。</p>
+
+                    <h3 id="section1-3">1.3 全局作用域</h3>
+                    <p>`&lt;script&gt;` 标签和 `.js` 文件的【最外层】就是所谓的全局作用域，在此声明的变量在函数内部也可以被访问。</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 此处是全局
+  
+  function sayHi() {
+    // 此处为局部
+  }
+
+  // 此处为全局
+&lt;/script&gt;</code></pre>
+
+                    <p>全局作用域中声明的变量，任何其它作用域都可以被访问，如下代码所示：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+    // 全局变量 name
+    const name = '小明'
+  
+    // 函数作用域中访问全局
+    function sayHi() {
+      // 此处为局部
+      console.log('你好' + name)
+    }
+
+    // 全局变量 flag 和 x
+    const flag = true
+    let x = 10
+  
+    // 块作用域中访问全局
+    if(flag) {
+      let y = 5
+      console.log(x + y) // x 是全局的
+    }
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>为 `window` 对象动态添加的属性默认也是全局的，不推荐！</li>
+                        <li>函数中未使用任何关键字声明的变量为全局变量，不推荐！！！</li>
+                        <li>尽可能少的声明全局变量，防止全局变量被污染</li>
+                    </ol>
+
+                    <p>JavaScript 中的作用域是程序被执行时的底层机制，了解这一机制有助于规范代码书写习惯，避免因作用域导致的语法错误。</p>
+
+                    <h3 id="section1-4">1.4 作用域链</h3>
+                    <p>在解释什么是作用域链前先来看一段代码：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 全局作用域
+  let a = 1
+  let b = 2
+  // 局部作用域
+  function f() {
+    let c
+    // 局部作用域
+    function g() {
+      let d = 'yo'
+    }
+  }
+&lt;/script&gt;</code></pre>
+
+                    <p>函数内部允许创建新的函数，`f` 函数内部创建的新函数 `g`，会产生新的函数作用域，由此可知作用域产生了嵌套的关系。</p>
+
+                    <p>父子关系的作用域关联在一起形成了链状的结构，作用域链的名字也由此而来。</p>
+
+                    <p>作用域链本质上是底层的变量查找机制，在函数被执行时，会优先查找当前函数作用域中查找变量，如果当前作用域查找不到则会依次逐级查找父级作用域直到全局作用域，如下代码所示：</p>
+
+                    <pre><code class="html">&lt;script&gt;
+  // 全局作用域
+  let a = 1
+  let b = 2
+
+  // 局部作用域
+  function f() {
+    let c
+    // let a = 10;
+    console.log(a) // 1 或 10
+    console.log(d) // 报错
+    
+    // 局部作用域
+    function g() {
+      let d = 'yo'
+      // let b = 20;
+      console.log(b) // 2 或 20
+    }
+    
+    // 调用 g 函数
+    g()
+  }
+
+  console.log(c) // 报错
+  console.log(d) // 报错
+  
+  f();
+&lt;/script&gt;</code></pre>
+
+                    <h4>总结：</h4>
+                    <ol>
+                        <li>嵌套关系的作用域串联起来形成了作用域链</li>
+                        <li>相同作用域链中按着从小到大的规则查找变量</li>
+                        <li>子作用域能够访问父作用域，父级作用域无法访问子级作用域</li>
+                    </ol>
+
+                    <h3 id="section1-5">1.5 变量提升</h3>
+                    <p>变量提升（Hoisting）是JavaScript中的一种行为，指的是在代码执行前，JavaScript引擎会将变量和函数声明移动到其所在作用域的顶部。</p>
+
+                    <h4>var 声明的变量提升</h4>
+                    <p>使用var声明的变量会被提升到函数或全局作用域的顶部，但赋值操作仍然在原位置执行。</p>
+
+                    <pre><code class="javascript">console.log(myVar); // undefined，而不是报错
+var myVar = 10;
+console.log(myVar); // 10</code></pre>
+
+                    <h4>let 和 const 声明的变量</h4>
+                    <p>使用let和const声明的变量也会被提升，但它们会进入"暂时性死区"（Temporal Dead Zone，TDZ），在声明之前访问这些变量会报错。</p>
+
+                    <pre><code class="javascript">console.log(myLet); // 报错：Cannot access 'myLet' before initialization
+let myLet = 20;
+console.log(myLet); // 20</code></pre>
+
+                    <h4>函数提升</h4>
+                    <p>函数声明也会被提升，这意味着可以在函数声明之前调用函数。</p>
+
+                    <pre><code class="javascript">myFunction(); // 可以调用，不会报错
+
+function myFunction() {
+    console.log("函数被调用");
+}</code></pre>
+
+                    <h3 id="section1-6">1.6 闭包</h3>
+                    <p>闭包（Closure）是JavaScript中一个重要的概念，指的是函数能够记住并访问其词法作用域中的变量，即使该函数在其词法作用域之外执行。</p>
+
+                    <h4>闭包的基本概念</h4>
+                    <p>当一个函数返回另一个函数时，返回的函数会保留对创建它的函数作用域的访问，这就是闭包。</p>
+
+                    <pre><code class="javascript">function outerFunction() {
+    let outerVar = "外部变量";
+    
+    return function innerFunction() {
+        console.log(outerVar); // 可以访问外部变量
+    };
+}
+
+let myClosure = outerFunction();
+myClosure(); // 输出：外部变量</code></pre>
+
+                    <h4>闭包的应用场景</h4>
+                    <ul>
+                        <li>数据私有化：通过闭包创建私有变量</li>
+                        <li>函数工厂：创建具有特定预设参数的函数</li>
+                        <li>模块模式：创建具有公共和私有方法的模块</li>
+                    </ul>
+
+                    <h4>闭包的注意事项</h4>
+                    <ul>
+                        <li>闭包会占用内存，不当使用可能导致内存泄漏</li>
+                        <li>在循环中创建闭包时，需要特别注意变量的引用</li>
+                    </ul>
+
+                    <h3 id="section1-7">1.7 箭头函数</h3>
+                    <p>箭头函数是ES6引入的一种更简洁的函数语法，它不仅语法更简洁，还具有一些特殊的特性。</p>
+
+                    <h4>箭头函数的基本语法</h4>
+                    <pre><code class="javascript">// 传统函数
+function add(a, b) {
+    return a + b;
+}
+
+// 箭头函数
+const add = (a, b) => {
+    return a + b;
+}
+
+// 更简洁的箭头函数（单行返回）
+const add = (a, b) => a + b;</code></pre>
+
+                    <h4>箭头函数的特性</h4>
+                    <ul>
+                        <li>没有自己的this值，this继承自外层作用域</li>
+                        <li>不能用作构造函数</li>
+                        <li>没有arguments对象</li>
+                    </ul>
+
+                    <h4>箭头函数的应用场景</h4>
+                    <ul>
+                        <li>回调函数：简化回调函数的写法</li>
+                        <li>数组方法：如map、filter、reduce等</li>
+                        <li>Promise链式调用</li>
+                    </ul>
+
+                    <h3 id="section1-8">1.8 解构赋值</h3>
+                    <p>解构赋值是ES6引入的一种语法，允许我们从数组或对象中提取值并赋值给变量。</p>
+
+                    <h4>数组解构</h4>
+                    <pre><code class="javascript">const numbers = [1, 2, 3, 4, 5];
+
+const [first, second, ...rest] = numbers;
+console.log(first); // 1
+console.log(second); // 2
+console.log(rest); // [3, 4, 5]</code></pre>
+
+                    <h4>对象解构</h4>
+                    <pre><code class="javascript">const person = {
+    name: "张三",
+    age: 25,
+    city: "北京"
+};
+
+const { name, age, city } = person;
+console.log(name); // 张三
+console.log(age); // 25
+console.log(city); // 北京</code></pre>
+
+                    <h4>默认值</h4>
+                    <pre><code class="javascript">const { name = "匿名", age = 0 } = {};
+console.log(name); // 匿名
+console.log(age); // 0</code></pre>
+
+                    <h3 id="section1-9">1.9 垃圾回收机制</h3>
+                    <h4>堆栈空间分配区别</h4>
+                    <ol>
+                        <li>栈(操作系统):由操作系统自动分配释放函数的参数值、局部变量等，基本数据类型放到栈里面。</li>
+                        <li>堆(操作系统):一般由程序员分配释放，若程序员不释放，由垃圾回收机制回收。复杂数据类型放到堆里面。</li>
+                    </ol>
+
+                    <h4>垃圾回收算法</h4>
+                    <p>引用计数法 和 标记清除法</p>
+
+                    <h5>引用计数法</h5>
+                    <p>IE采用的引用计数算法，定义"内存不再使用"一个对象是否有指向它的引用，没有引用了就回收对象。</p>
+                    <p>算法：</p>
+                    <ol>
+                        <li>跟踪记录被引用的次数</li>
+                        <li>如果被引用了一次，那么就记录次数1,多次引用会累加 ++</li>
+                        <li>如果减少一个引用就 减1--</li>
+                        <li>如果引用次数是0，则释放内存</li>
+                    </ol>
+
+                    <p>如果：嵌套引用(循环引用)</p>
+                    <p>如果两个对象相互引用，尽管他们已不再使用，垃圾回收器不会进行回收，导致内存泄露。</p>
+
+                    <pre><code class="javascript">function fn() {
+      let o1 = {}
+      let o2 = {}
+      o1.a = 1
+      o2.b = 2
+      return '引用计数无法回收'
+    }
+fn()</code></pre>
+
+                    <p>因为他们的引用次数永远不会是0。这样的相互引用如果说很大量的存在就会导致大量的内存泄露！</p>
+
+                    <h5>标记清除法</h5>
+                    <p>现代的浏览器已经不再使用引用计数算法了。</p>
+                    <p>现代浏览器通用的大多是基于标记清除算法的某些改违算法，总体思想都是一致的。</p>
+
+                    <p>核心：</p>
+                    <ol>
+                        <li>标记清除算法将"不再使用的对象"定义为"无法达到的对象"</li>
+                        <li>就是从根部(在JS中就是全局对象)出发定时扫描内存中的对象。凡是能从根部到达的对象，都是还需要使用的，那些无法由根部出发触及到的对象被标记为不再使用，稍后进行回收。</li>
+                    </ol>
+
+                    <h2 id="section2">2. JS 进阶 构造函数</h2>
+                    <h3 id="section2-1">2.1 深入对象</h3>
+                    <p>对象是 JavaScript 中最重要的数据类型之一，它允许我们存储和组织相关的数据和功能。</p>
+
+                    <h4>对象的创建方式</h4>
+                    <pre><code class="javascript">// 字面量方式
+const obj1 = {};
+
+// 构造函数方式
+const obj2 = new Object();
+
+// 工厂函数方式
+function createObj(name, age) {
+    return {
+        name: name,
+        age: age,
+        sayHi: function() {
+            console.log(`Hello, my name is ${this.name}`);
+        }
+    };
+}
+const obj3 = createObj('张三', 25);</code></pre>
+
+                    <h4>对象的属性操作</h4>
+                    <pre><code class="javascript">const obj = { name: '张三' };
+
+// 添加属性
+obj.age = 25;
+obj['gender'] = '男';
+
+// 修改属性
+obj.name = '李四';
+
+// 删除属性
+delete obj.age;
+
+// 访问属性
+console.log(obj.name); // 李四
+console.log(obj['gender']); // 男</code></pre>
+
+                    <h3 id="section2-2">2.2 内置构造函数</h3>
+                    <p>JavaScript 提供了多种内置构造函数，用于创建不同类型的对象。</p>
+
+                    <h4>常用内置构造函数</h4>
+                    <ul>
+                        <li>Object：创建对象</li>
+                        <li>Array：创建数组</li>
+                        <li>String：创建字符串</li>
+                        <li>Number：创建数字</li>
+                        <li>Boolean：创建布尔值</li>
+                        <li>Function：创建函数</li>
+                        <li>Date：创建日期</li>
+                        <li>RegExp：创建正则表达式</li>
+                    </ul>
+
+                    <pre><code class="javascript">// 使用内置构造函数创建对象
+const str = new String('Hello');
+const num = new Number(10);
+const bool = new Boolean(true);
+const arr = new Array(1, 2, 3);
+const date = new Date();</code></pre>
+
+                    <h3 id="section2-3">2.3 包装类型</h3>
+                    <p>包装类型是 JavaScript 中一种特殊的对象类型，用于基本数据类型的方法调用。</p>
+
+                    <pre><code class="javascript">// 基本数据类型
+const str = 'Hello';
+
+// 自动包装为对象
+console.log(str.length); // 5
+console.log(str.toUpperCase()); // HELLO
+
+// 手动包装
+const strObj = new String('Hello');
+console.log(strObj.length); // 5
+
+// 拆箱操作
+const strPrimitive = strObj.valueOf(); // 'Hello'</code></pre>
+
+                    <h3 id="section2-4">2.4 深浅拷贝</h3>
+                    <p>在 JavaScript 中，对象的拷贝分为浅拷贝和深拷贝两种方式。</p>
+
+                    <h4>浅拷贝</h4>
+                    <p>浅拷贝只复制对象的引用，不复制对象本身。</p>
+                    <pre><code class="javascript">const obj1 = { name: '张三', age: 25 };
+const obj2 = obj1;
+obj2.name = '李四';
+console.log(obj1.name); // 李四</code></pre>
+
+                    <h4>深拷贝</h4>
+                    <p>深拷贝复制对象的所有层级，创建一个全新的对象。</p>
+                    <pre><code class="javascript">// 方法1：JSON序列化
+const obj1 = { name: '张三', age: 25, address: { city: '北京' } };
+const obj2 = JSON.parse(JSON.stringify(obj1));
+obj2.address.city = '上海';
+console.log(obj1.address.city); // 北京
+
+// 方法2：递归拷贝
+function deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (obj instanceof Date) return new Date(obj);
+    if (obj instanceof Array) return obj.map(item => deepClone(item));
+    if (typeof obj === 'object') {
+        const clonedObj = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                clonedObj[key] = deepClone(obj[key]);
+            }
+        }
+        return clonedObj;
+    }
+}
+const obj3 = deepClone(obj1);</code></pre>
+
+                    <h2 id="section3">3. JS 进阶 面向对象编程</h2>
+                    <h3 id="section3-1">3.1 编程思想</h3>
+                    <p>面向对象编程（OOP）是一种编程范式，它将数据和操作数据的方法封装在一起，形成对象。</p>
+
+                    <h4>面向对象编程的特点</h4>
+                    <ul>
+                        <li>封装：将数据和方法封装在对象中</li>
+                        <li>继承：子类可以继承父类的属性和方法</li>
+                        <li>多态：不同对象对同一方法的不同实现</li>
+                    </ul>
+
+                    <h3 id="section3-2">3.2 构造函数</h3>
+                    <p>构造函数是一种特殊的函数，用于创建和初始化对象。</p>
+
+                    <pre><code class="javascript">// 构造函数
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+    this.sayHi = function() {
+        console.log(`Hello, my name is ${this.name}`);
+    };
+}
+
+// 使用构造函数创建对象
+const person1 = new Person('张三', 25);
+const person2 = new Person('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四</code></pre>
+
+                    <h4>构造函数的特点</h4>
+                    <ul>
+                        <li>构造函数的首字母通常大写</li>
+                        <li>使用 new 关键字调用构造函数</li>
+                        <li>构造函数内部使用 this 指向新创建的对象</li>
+                        <li>构造函数默认返回新创建的对象</li>
+                    </ul>
+
+                    <h3 id="section3-3">3.3 原型</h3>
+                    <p>原型是 JavaScript 中实现继承的重要机制，每个函数都有一个 prototype 属性。</p>
+
+                    <pre><code class="javascript">// 构造函数
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+// 在原型上添加方法
+Person.prototype.sayHi = function() {
+    console.log(`Hello, my name is ${this.name}`);
+};
+
+// 使用构造函数创建对象
+const person1 = new Person('张三', 25);
+const person2 = new Person('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四
+
+// 检查原型链
+console.log(person1 instanceof Person); // true
+console.log(person1 instanceof Object); // true</code></pre>
+
+                    <h4>原型链</h4>
+                    <p>当访问对象的属性或方法时，JavaScript 会先在对象本身查找，如果找不到，就会沿着原型链向上查找，直到找到为止。</p>
+
+                    <h3 id="section3-4">3.4 类</h3>
+                    <p>ES6 引入了类（class）语法，提供了更简洁、更清晰的方式来实现面向对象编程。</p>
+
+                    <pre><code class="javascript">// 使用类语法
+class Person {
+    // 构造方法
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    // 实例方法
+    sayHi() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+    
+    // 静态方法
+    static create(name, age) {
+        return new Person(name, age);
+    }
+}
+
+// 使用类创建对象
+const person1 = new Person('张三', 25);
+const person2 = Person.create('李四', 30);
+
+person1.sayHi(); // Hello, my name is 张三
+person2.sayHi(); // Hello, my name is 李四</code></pre>
+
+                    <h4>类的继承</h4>
+                    <pre><code class="javascript">// 父类
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+    
+    eat() {
+        console.log(`${this.name} is eating`);
+    }
+}
+
+// 子类
+class Dog extends Animal {
+    constructor(name, breed) {
+        super(name); // 调用父类的构造方法
+        this.breed = breed;
+    }
+    
+    bark() {
+        console.log(`${this.name} is barking`);
+    }
+}
+
+// 使用子类创建对象
+const dog = new Dog('Buddy', 'Golden Retriever');
+dog.eat(); // Buddy is eating
+dog.bark(); // Buddy is barking</code></pre>
+
+                    <h3 id="section3-5">3.5 模块化</h3>
+                    <p>模块化是一种将代码分割成独立、可重用的模块的方式，它有助于提高代码的可维护性和可扩展性。</p>
+
+                    <h4>ES6 模块</h4>
+                    <pre><code class="javascript">// module.js
+// 导出
+const name = '张三';
+const age = 25;
+
+function sayHi() {
+    console.log(`Hello, my name is ${name}`);
+}
+
+export { name, age, sayHi };
+
+// 导入
+import { name, age, sayHi } from './module.js';
+
+console.log(name); // 张三
+console.log(age); // 25
+sayHi(); // Hello, my name is 张三</code></pre>
+
+                    <h4>CommonJS 模块</h4>
+                    <pre><code class="javascript">// module.js
+// 导出
+const name = '张三';
+const age = 25;
+
+function sayHi() {
+    console.log(`Hello, my name is ${name}`);
+}
+
+module.exports = { name, age, sayHi };
+
+// 导入
+const { name, age, sayHi } = require('./module.js');
+
+console.log(name); // 张三
+console.log(age); // 25
+sayHi(); // Hello, my name is 张三</code></pre>

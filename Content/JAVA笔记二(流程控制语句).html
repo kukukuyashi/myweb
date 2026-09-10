@@ -1,0 +1,1342 @@
+<h2>JAVA笔记二</h2>
+
+<h3>流程控制语句</h3>
+
+<h4>1.控制语句</h4>
+
+<h5>1.1 流程控制语句分类</h5>
+
+<ul>
+<li>顺序结构</li>
+<li>判断和选择结构(if, switch)</li>
+<li>循环结构(for, while, do…while)</li>
+</ul>
+
+<h4>2.判断语句：if语句</h4>
+
+<h5>2.1 if语句格式1</h5>
+
+<p><strong>格式：</strong></p>
+
+<pre><code class="language-java">if (关系表达式) {
+    语句体;  
+}</code></pre>
+
+<p><strong>执行流程：</strong></p>
+
+<ol>
+<li>首先计算关系表达式的值</li>
+<li>如果关系表达式的值为true就执行语句体</li>
+<li>如果关系表达式的值为false就不执行语句体</li>
+<li>继续执行后面的语句内容</li>
+</ol>
+
+<pre><code class="language-java">static void main(String[] args) {
+    double bodyTemperature = 38.5;
+    if(bodyTemperature >= 38){
+        System.out.println("发烧");
+    }
+}</code></pre>
+
+<h5>2.2 练习2：游戏人物血量</h5>
+
+<p><strong>需求：</strong></p>
+
+<p>初始最大生命200，受到X点伤害，技能恢复Y点血，X和Y由键盘录入而来</p>
+<p>假设，游戏人物不会死亡，最少1点血</p>
+<p>问：最终游戏人物血量是多少？</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">public class IfDemo2 {
+    public static void main(String[] args) {
+        // 1. 定义变量记录游戏人物的生命值
+        int hp = 200;
+
+        // 2. 键盘录入一个值，表示当前人物受到的伤害
+        System.out.println("请输入当前人物受到的伤害：");
+        Scanner sc = new Scanner(System.in);
+        int hurt = sc.nextInt();
+
+        // 3.计算当前的血量
+        hp = hp - hurt;
+
+        // 游戏人物不会死亡，最少1点血
+        if(hp <= 0){
+            hp = 1;
+        }
+
+        System.out.println("当前游戏人物的血量是：" + hp);
+
+        // 4. 键盘录入一个值，表示技能回复的血量
+        System.out.println("请输入技能回复的血量：");
+        int add = sc.nextInt();
+
+        // 5. 计算当前游戏人物的血量
+        hp = hp + add;
+
+        if (hp > 200){
+            hp = 200;
+        }
+
+        System.out.println("当前游戏人物的血量是：" + hp);
+    }
+}</code></pre>
+
+<h4>3.if语句格式2</h4>
+
+<p><strong>格式：</strong></p>
+
+<pre><code class="language-java">if (关系表达式) {
+    语句体1; 
+} else {
+    语句体2; 
+}</code></pre>
+
+<p><strong>执行流程：</strong></p>
+
+<ol>
+<li>首先计算关系表达式的值</li>
+<li>如果关系表达式的值为true就执行语句体1</li>
+<li>如果关系表达式的值为false就执行语句体2</li>
+<li>继续执行后面的语句内容</li>
+</ol>
+
+<pre><code class="language-java">public class IfDemo02 {
+  public static void main(String[] args) {
+    System.out.println("开始");    //定义两个变量
+    int a = 10;
+    int b = 20;
+    //需求：判断a是否大于b，如果是，在控制台输出：a的值大于b，否则，在控制台输出：a的值不大于b
+    if(a > b) {
+      System.out.println("a的值大于b");
+    } else {
+      System.out.println("a的值不大于b");
+    }    System.out.println("结束");
+  }
+}</code></pre>
+
+<h5>3.1 练习2：外卖优惠券</h5>
+
+<p><strong>需求：</strong></p>
+
+<p>小明在每次订外卖都会在多家平台对比，看谁的优惠力度更大</p>
+<p>已知：</p>
+<ul>
+<li>饱了么App：全场9折优惠</li>
+<li>美单App：满30减10元</li>
+</ul>
+<p>请问1：</p>
+<p>小明买了一吨烧烤50元，在哪家下单更划算</p>
+<p>请问2：</p>
+<p>如果价格不确定，数据由键盘录入而来呢？</p>
+<p>细节：</p>
+<p>变量只在所属的大括号中是有效的</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">public class IfDemo6 {
+    public static void main(String[] args) {
+        // 1. 定义一个变量记录价格
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入订单的价格：");
+        double price = sc.nextDouble();
+
+        // 2. 计算两个APP优惠之后的价格
+        double price1 = price * 0.9; // 饱了么App
+
+        System.out.println(price1);
+
+        double price2 = 0;
+        if(price >= 30){
+            // 满30减10元
+           price2 = price - 10;
+        }else{
+            // 原价
+            price2 = price;
+        }
+
+        System.out.println(price2);
+
+        // 3. 判断
+        if(price1 < price2){
+            System.out.println("饱了么App最便宜");
+        }else{
+            System.out.println("美单App最便宜");
+        }
+
+
+    }
+}</code></pre>
+
+<h4>4.if语句格式3</h4>
+
+<p><strong>格式：</strong></p>
+
+<pre><code class="language-java">if (关系表达式1) {
+    语句体1; 
+} else if (关系表达式2) {
+    语句体2; 
+} 
+…
+else {
+    语句体n+1;
+}</code></pre>
+
+<p><strong>执行流程：</strong></p>
+
+<ol>
+<li>首先计算关系表达式1的值</li>
+<li>如果值为true就执行语句体1；如果值为false就计算关系表达式2的值</li>
+<li>如果值为true就执行语句体2；如果值为false就计算关系表达式3的值</li>
+<li>…</li>
+<li>如果没有任何关系表达式为true，就执行语句体n+1。</li>
+</ol>
+
+<h5>4.1 练习1：优惠券</h5>
+
+<p>需求：很多App都有不同的优惠券</p>
+<p>假设，现在有以下优惠券</p>
+<ul>
+<li>全场商品满10减8</li>
+<li>全场商品满50减30</li>
+<li>全场商品满100减50</li>
+<li>全场商品满200减90</li>
+<li>会员卡：全场8折</li>
+</ul>
+<p>请问：会员卡和优惠券不能同时使用，最优惠的价格是多少？</p>
+
+<p>解法1：</p>
+
+<pre><code class="language-java">import java.util.Scanner;
+public class ifDemo6 {
+    static void main(String[] args) {
+//        需求:很多App都有不同的优惠券假设，现在有以下优惠券
+//        全场商品满10减8
+//        全场商品满50减30
+//        全场商品满100减50
+//        全场商品满200减90
+//        会员卡:全场8折请问:会员卡和优惠券不能同时使用，最优惠的价格是多少?
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入商品价格:");
+        double num = sc.nextDouble();
+        double num2 = num * 0.8;
+        if(num >= 200){
+            num = num -90;
+        } else if(num >= 100){
+            num = num - 50;
+        } else if(num >= 50){
+            num = num - 30;
+        } else if(num >= 10){
+            num = num - 8;
+        } else {
+            System.out.println("没有优惠券");
+        }
+        if(num2 < num){
+            System.out.println("使用会员卡，价格为："+num2);
+        } else {
+            System.out.println("使用优惠券，价格为："+num);
+        }
+    }
+}</code></pre>
+
+<p>解法2：</p>
+
+<pre><code class="language-java">public class IfDemo8 {
+    public static void main(String[] args) {
+        // 1. 定义变量记录商品的价格
+        double price = 1000;
+        // 2. 定义变量记录使用优惠券之后, 可以少付的钱
+        double discountPrice = 0;
+
+        // 3. 计算使用优惠券之后，可以少付的钱
+        if (price > 0) {
+            if (price < 10) discountPrice = 0;
+            else if (price < 50) discountPrice = 8;
+            else if (price < 100) discountPrice = 30;
+            else if (price < 200) discountPrice = 50;
+            else discountPrice = 90;
+        } else {
+            System.out.println("商品价格有误");
+        }
+        // System.out.println("使用优惠券之后，可以少付的钱：" + discountPrice);
+
+        // 4. 定义变量记录使用会员卡之后，可以少付的钱
+        double memberPrice = price * 0.2;
+
+        // 5. 判断
+        if(discountPrice > memberPrice){
+            System.out.println("使用优惠券的价格更低：" + (price - discountPrice));
+        }else{
+            System.out.println("使用会员卡的价格更低：" + (price - memberPrice));
+        }
+
+    }
+}</code></pre>
+
+<p>练习3：</p>
+
+<p>用电量计算采取阶梯计费原则，规则如下:</p>
+<ol>
+<li>[0~100]度，按0.5元/度计费</li>
+<li>(100~200]度，按0.8元/度计费</li>
+<li>(超过200]度，按1.2元/度计费</li>
+</ol>
+
+<pre><code class="language-java">import java.util.Scanner;
+
+public class ifDemo8 {
+    static void main(String[] args) {
+//        用电量计算采取阶梯计费原则，规则如下:
+//        1.[0~100]度，按0.5元/度计费
+//        2.(100~200]度，按0.8元/度计费
+//        3.(超过200]度，按1.2元/度计费
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入用电量:");
+        double yd = sc.nextDouble();
+        if (yd <= 100){
+            System.out.println("本次电费为：" + yd * 0.5);
+        } else if (yd > 100 && yd <= 200){
+            System.out.println("本次电费为：" +(50 + (yd - 100) * 0.8));
+        } else {
+            System.out.println("本次电费为：" +(130 + (yd - 200) * 1.2));
+        }
+    }
+}</code></pre>
+
+<p>练习4：</p>
+
+<p><strong>需求：</strong></p>
+
+<p>键盘录入任意三个大于0的小数，判断这三个数值构成什么类型的三角形？</p>
+<p>需要判断的类型如下：</p>
+<p>等边、等腰、直角、普通、无效</p>
+<p>三角形的构成条件：任意两边之和大于第三边</p>
+<p>a + b > c && a + c > b && b + c > a</p>
+
+<pre><code class="language-java">public class ifDemo9 {
+    static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入第一条边的长度：");
+        double a = sc.nextDouble();
+        System.out.println("请输入第二条边的长度：");
+        double b = sc.nextDouble();
+        System.out.println("请输入第三条边的长度：");
+        double c = sc.nextDouble();
+        if(a + b > c && a + c > b && b + c > a){
+             if (a==b && b==c){
+                System.out.println("是等边三角形");
+            }else if (a==b || b==c || a==c){
+                System.out.println("是等腰三角形");
+            }else if (a*a + b*b == c*c || a*a + c*c == b*b || b*b + c*c == a*a){
+                System.out.println("是直角三角形");
+            }else {
+                System.out.println("是普通三角形");
+            }
+        } else {
+            System.out.println("不是三角形");
+        }
+    }
+}</code></pre>
+
+<h4>5.switch语句</h4>
+
+<h5>5.1 格式</h5>
+
+<pre><code class="language-java">switch (表达式) {
+  case 1:
+    语句体1;
+    break;
+  case 2:
+    语句体2;
+    break;
+  ...
+  default:
+    语句体n+1;
+    break;
+}</code></pre>
+
+<h5>5.2 执行流程：</h5>
+
+<ul>
+<li>首先，计算出表达式的值</li>
+<li>其次，和case依次比较，一旦有对应的值，就会执行相应的语句，在执行的过程中，遇到break就会结束。</li>
+<li>最后，如果所有的case都和表达式的值不匹配，就会执行default语句体部分，然后程序结束掉。</li>
+</ul>
+
+<h5>5.3 练习：运动计划</h5>
+
+<p><strong>需求：</strong>键盘录入星期数，显示今天的减肥活动。</p>
+<ul>
+<li>周一：跑步</li>
+<li>周二：游泳</li>
+<li>周三：慢走</li>
+<li>周四：动感单车</li>
+<li>周五：拳击</li>
+<li>周六：爬山</li>
+<li>周日：好好吃一顿</li>
+</ul>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">package a01switch选择语句;
+
+import java.util.Scanner;
+
+public class SwitchDemo2 {
+    public static void main(String[] args) {
+        //1.键盘录入一个整数表示星期
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入一个整数表示星期");
+        int week = sc.nextInt();
+
+        //2.书写一个switch语句去跟week进行匹配
+        switch (week){
+            case 1:
+                System.out.println("跑步");
+                break;
+            case 2:
+                System.out.println("游泳");
+                break;
+            case 3:
+                System.out.println("慢走");
+                break;
+            case 4:
+                System.out.println("动感单车");
+                break;
+            case 5:
+                System.out.println("拳击");
+                break;
+            case 6:
+                System.out.println("爬山");
+                break;
+            case 7:
+                System.out.println("好好吃一顿");
+                break;
+            default:
+                System.out.println("输入错误，没有这个星期");
+                break;
+        }
+    }
+}</code></pre>
+
+<blockquote>
+  <strong>注意：</strong><br>
+  <strong>1.表达式:结果(字符/整数byte shortint/枚举/字符串)</strong><br>
+  <strong>2.case:被匹配的值，只能是真实的数据I.</strong><br>
+  <strong>3.case:值不允许重复</strong><br>
+  <strong>4.break:表示中断，结束的意思，结束switch语</strong><br>
+  <strong>5.default:所有情况都不匹配，执行该处的内容</strong><br>
+</blockquote>
+
+<h4>6.switch的扩展知识：</h4>
+
+<ul>
+<li>default的位置和省略情况</li>
+</ul>
+
+<p>default可以放在任意位置，也可以省略</p>
+
+<ul>
+<li>case穿透</li>
+</ul>
+
+<p>不写break会引发case穿透现象</p>
+
+<ul>
+<li>switch是高版本的新特性，JDK12（预览版）JDK14（正式版）</li>
+</ul>
+
+<pre><code class="language-java">int number = 10;
+switch (number) {
+    case 1 -> System.out.println("一");
+    case 2 -> System.out.println("二");
+    case 3 -> System.out.println("三");
+    default -> System.out.println("其他");
+}</code></pre>
+
+<p>练习1：</p>
+
+<pre><code class="language-java">Scanner sc = new Scanner(System.in);
+        System.out.println("请输入月份：");
+        int month = sc.nextInt();
+        switch (month){
+            case 3:
+            case 4:
+            case 5:
+                System.out.println("春季");
+                break;
+            case 6:
+            case 7:
+            case 8:
+                System.out.println("夏季");
+                break;
+            case 9:
+            case 10:
+            case 11:
+                System.out.println("秋季");
+                break;
+            case 12:
+            case 1:
+            case 2:
+                System.out.println("冬季");
+                break;
+            default:
+                System.out.println("输入的月份有误");
+        }</code></pre>
+
+<p>练习2：</p>
+
+<p>yield关键字：</p>
+
+<pre><code class="language-java">public class SwitchDemo5 {
+    public static void main(String[] args) {
+         /*
+               四、yield关键字
+        */
+        int number = 8;
+        String name = switch (number) {
+            case 1, 2, 3, 4, 5 -> "一";
+            case 6, 7, 8 -> "二";
+            case 9, 10, 11 -> "三";
+            default -> "没有这个星期";
+        };
+
+        // 如果下面，我要继续使用switch的结果，就无法操作
+        System.out.println(name);
+
+        // 练习：
+        //      利用switch模拟计算器 + - * /
+
+        int a = 10;
+        int b = 20;
+        String operator = "*";
+        int result = switch (operator) {
+            case "+" -> a + b;
+            case "-" -> a - b;
+            case "*" -> a * b;
+            case "/" -> a / b;
+            default -> 0;
+        };
+        System.out.println(result);
+    }
+}</code></pre>
+
+<h4>7.循环结构</h4>
+
+<h5>7.1 for循环结构（掌握）</h5>
+
+<p>循环语句可以在满足循环条件的情况下，反复执行某一段代码，这段被重复执行的代码被称为循环体语句，当反复执行这个循环体时，需要在合适的时候把循环判断条件修改为false，从而结束循环，否则循环将一直执行下去，形成死循环。</p>
+
+<h6>7.1.1 for循环格式</h6>
+
+<pre><code class="language-java">for (初始化语句;条件判断语句;条件控制语句) {
+  循环体语句;
+}</code></pre>
+
+<p><strong>格式解释：</strong></p>
+
+<ul>
+<li>初始化语句： 用于表示循环开启时的起始状态，简单说就是循环开始的时候什么样</li>
+<li>条件判断语句：用于表示循环反复执行的条件，简单说就是判断循环是否能一直执行下去</li>
+<li>循环体语句： 用于表示循环反复执行的内容，简单说就是循环反复执行的事情</li>
+<li>条件控制语句：用于表示循环执行中每次变化的内容，简单说就是控制循环是否能执行下去</li>
+</ul>
+
+<p><strong>执行流程：</strong></p>
+
+<ol>
+<li>执行初始化语句</li>
+<li>执行条件判断语句，看其结果是true还是false<br>  - 如果是false，循环结束<br>  - 如果是true，继续执行</li>
+<li>执行循环体语句</li>
+<li>执行条件控制语句</li>
+<li>回到②继续</li>
+</ol>
+
+<p><strong>for循环书写技巧：</strong></p>
+
+<ul>
+<li>确定循环的开始条件</li>
+<li>确定循环的结束条件</li>
+<li>确定循环要重复执行的代码</li>
+</ul>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">//1.确定循环的开始条件
+//2.确定循环的结束条件
+//3.确定要重复执行的代码
+
+//需求：打印5次HelloWorld
+//开始条件：1
+//结束条件：5
+//重复代码：打印语句
+
+for (int i = 1; i <= 5; i++) {
+    System.out.println("HelloWorld");
+}</code></pre>
+
+<h6>7.1.2 for循环练习</h6>
+
+<h7>案例一：输出数据</h7>
+
+<p><strong>需求：</strong>在控制台输出1-5和5-1的数据</p>
+
+<p><strong>示例代码：</strong></p>
+
+<pre><code class="language-java">package com.itheima.loopfor;
+
+public class ForDemo2 {
+    public static void main(String[] args) {
+       /*
+            需求：在实际开发中，如果要获取一个范围中的每一个数据时，就会用到循环。
+            要求1：打印1-5
+            
+       */
+
+
+        // 打印 1 ~ 5
+        //  循环的开始条件： 1
+        //  循环的结束条件： 5
+        //  重复执行的代码： 输出语句 sout
+
+        // 第一次循环：i = 1，输出1，i++，执行完毕，i = 2 --- 第一次循环结束
+        // 第二次循环：i <= 5, 输出2，i++，执行完毕，i = 3 --- 第二次循环结束
+        // 第三次循环：i <= 5，输出3，i++，执行完毕，i = 4 --- 第三次循环结束
+        // 第四次循环：i <= 5，输出4，i++，执行完毕，i = 5 --- 第四次循环结束
+        // 第五次循环：i <= 5，输出5，i++，执行完毕，i = 6 --- 第五次循环结束
+        // 第六次循环：i <= 5  （6 <= 5）false --- 循环结束
+        for(int i = 1; i <= 5; i++){
+            System.out.println(i);
+        }
+        
+        // 要求2：打印5-1
+        // 循环的开始条件：5
+        // 循环的结束条件：1
+        // 重复要执行的代码： 输出数字sout
+        for(int i = 5; i >= 1; i--){
+            System.out.println(i);
+        }
+    }
+}</code></pre>
+
+<p>练习1：</p>
+
+<p>输入两个数，在这两个数之间找出并统计指定范围内同时能被 3 和 5 整除的数字</p>
+
+<pre><code class="language-java">Scanner sc = new Scanner(System.in);
+    System.out.println("请输入第一个数字：");
+    int a = sc.nextInt();
+    System.out.println("请输入第二个数字：");
+    int b = sc.nextInt();
+    int j = 0;
+    for(int i = a; i <= b; i++){
+        if(i % 3 == 0 && i % 5 == 0){
+            j++;
+            System.out.println(i);
+        }
+    }
+    System.out.println("共有" + j + "个");
+}</code></pre>
+
+<p>练习2：</p>
+
+<p>有一组特殊的数字，从第三项开始，每一项都是前两项的数字和，请问第10项的数字是多少?</p>
+<p>0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...</p>
+
+<pre><code class="language-java">Scanner sc = new Scanner(System.in);
+        System.out.println("请输入数字：");
+        int num = sc.nextInt();
+        int a = 0;
+        int b = 1;
+        int c = 0;
+        for(int i = 3;i <= num;i++){
+            c = a + b;
+            a = b;
+            b = c;
+        }
+        System.out.println(c);</code></pre>
+
+<p>练习3：</p>
+<p>计算以下数列前n项的和:</p>
+<p>S(n)=1-2+3-4+...</p>
+
+<pre><code class="language-java">Scanner sc = new Scanner(System.in);
+        System.out.println("请输入数字：");
+        int num = sc.nextInt();
+        int sum = 0;
+        for(int i = 0; i <= num; i++){
+            if (i % 2 == 0){
+                sum += i;
+            } else {
+                sum -= i;
+            }
+        }
+        System.out.println(sum);</code></pre>
+
+<h4>8.while循环</h4>
+
+<h5>8.1 格式</h5>
+
+<pre><code class="language-java">初始化语句;
+while(条件判断语句){
+  循环体;
+  条件控制语句;
+}</code></pre>
+
+<h6>练习1：打印5次HelloWorld</h6>
+
+<pre><code class="language-java">int i = 1;
+while(i <= 5){
+    System.out.println("HelloWorld");
+    i++;
+}
+System.out.println(i);</code></pre>
+
+<pre><code class="language-java">public class WhileDemo3 {
+    public static void main(String[] args) {
+        // 1. 定义变量记录本金
+        double money = 100000;
+
+       /* // 2. 定义变量记录期望的本金
+        double expectMoney = 200000;
+
+        // 3. 定义变量记录年数
+        int year = 0;
+
+        // 4. 利用循环计算需要多少年本金才能翻倍
+        //  while：条件判断语句  money < expectMoney
+
+        while (money < expectMoney){
+            // 计算一年的本金 + 利息
+            money = money + money * 0.017;
+            // 年 + 1
+            year++;
+        }
+
+        System.out.println(year);*/
+
+
+        // 单利
+        // 计算一年的利息
+        System.out.println(100000 / (money * 0.017));
+
+
+    }
+}</code></pre>
+
+<h6>练习3：珠穆朗玛峰</h6>
+
+<p><strong>需求：</strong></p>
+
+<p>世界最高山峰珠穆朗玛峰高度是：8848.86米=8848860毫米，</p>
+<p>假如我有一张足够大的纸，它的厚度是0.1毫米。</p>
+<p>请问：该纸张折叠多少次，可以折成珠穆朗玛峰的高度？</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">public class WhileDemo4 {
+    public static void main(String[] args) {
+         // 1. 定义变量表示纸张的厚度
+        double paper = 0.1;
+
+        // 2. 定义变量表示山的高度
+        double height = 8848860;
+
+        // 3. 定义变量记录折叠的次数
+        int count = 0;
+
+        // 利用循环折叠纸张
+        while (paper < height){
+            paper = paper * 2;
+            count++;
+        }
+
+        System.out.println(count);
+    }
+}</code></pre>
+
+<h6>练习4：数位之和</h6>
+
+<p><strong>需求：</strong></p>
+
+<p>给定一个整数 n，请计算其所有数位之和。若 n 为负数，请先取其绝对值。</p>
+
+<p><strong>示例1</strong></p>
+
+<p>输入：12</p>
+<p>说明：1 + 2 = 3</p>
+<p>输出：3</p>
+
+<p><strong>示例2</strong></p>
+
+<p>输入：-305</p>
+<p>说明：获取绝对值305，再求和3 + 0 + 5 = 8</p>
+<p>输出：8</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">public class WhileDemo5 {
+    public static void main(String[] args) {
+        // 1. 键盘录入一个整数
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入一个整数：");
+        int number = sc.nextInt();
+
+        // 2.获取number的绝对值
+        //  正数 0   本身   负数  相反数
+        if(number < 0){
+            number = -number;
+        }
+
+        // 3. 定义求和变量
+        int sum = 0;
+        // 4. 利用循环获取number上的每一位数字
+        // 305:
+        //   个位： number % 10
+        //   去掉个位： number / 10  --- 30
+        //   个位： number % 10   0
+        //   去掉个位： number / 10  --- 3
+        //   个位： number % 10   3
+        //   去掉个位： number / 10  --- 0
+        while (number != 0){
+            // 获取个位
+            // System.out.println(number % 10);
+            sum = sum + number % 10;
+
+            // 去掉个位
+            number = number / 10;
+        }
+
+        System.out.println(sum);
+    }
+}</code></pre>
+
+<h4>9.do...while循环</h4>
+
+<p>本知识点了解即可</p>
+
+<p><strong>格式</strong></p>
+
+<pre><code class="language-java">初始化语句;
+do{
+    循环体;
+    条件控制语句;
+}while(条件判断语句);</code></pre>
+
+<p><strong>特点：</strong>1.先执行，再判断。<br> 2.循环体至少执行一次</p>
+
+<h4>10.无限循环</h4>
+
+<p><strong>概念：</strong>又叫死循环。循环一直停不下来。</p>
+
+<h5>10.1 for格式</h5>
+
+<pre><code class="language-java">for(;;){
+    System.out.println("循环执行一直在打印内容");
+}</code></pre>
+
+<p><strong>解释：</strong></p>
+
+<ul>
+<li>初始化语句可以空着不写，表示循环之前不定义任何的控制变量。</li>
+<li>条件判断语句可以空着不写，如果不写，默认表示true，循环一直进行。</li>
+<li>条件控制语句可以空着不写，表示每次循环体执行完毕后，控制变量不做任何变化。</li>
+</ul>
+
+<h5>10.2 while格式</h5>
+
+<pre><code class="language-java">while(true){
+    System.out.println("循环执行一直在打印内容");
+}</code></pre>
+
+<p><strong>解释：</strong>小括号里面就不能省略了，true一定要写出来，否则代码会报错。</p>
+
+<h5>10.3 do...while格式</h5>
+
+<pre><code class="language-java">do{
+    System.out.println("循环执行一直在打印内容");
+}while(true);</code></pre>
+
+<p><strong>解释：</strong>小括号里面就不能省略了，true一定要写出来，否则代码会报错。</p>
+
+<h5>10.4 无限循环的注意事项</h5>
+
+<ul>
+<li>最为常用的格式：while</li>
+<li>无限循环下面不能再写其他代码了，因为永远执行不到</li>
+</ul>
+
+<h4>10.1 条件控制语句</h4>
+
+<ul>
+<li>break</li>
+<li>continue</li>
+</ul>
+
+<h4>10.2 break</h4>
+
+<p>不能单独存在的。可以用在switch和循环中，表示结束，跳出的意思。</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">//1.吃1~5号包子
+for (int i = 1; i <= 5; i++) {
+    System.out.println("在吃第" + i + "个包子");
+    //2.吃完第三个的时候就不吃了
+    if(i == 3){
+        break;//结束整个循环。
+    }
+}</code></pre>
+
+<h5>练习1：游戏人物</h5>
+
+<p><strong>需求:</strong></p>
+
+<p>初始最大生命200，受到X点伤害，技能恢复Y点血，X和Y由键盘录入而来。</p>
+<p>假设，游戏人物不会死亡，最少1点血 问：最终游戏人物血量是多少？</p>
+<p>要考虑的情况：键盘录入必须大于0，否则需要重新输入</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">public class BreakDemo2 {
+    public static void main(String[] args) {
+        // 1. 定义变量记录游戏人物的生命值
+        int hp = 200;
+
+        // 2. 键盘录入一个值，表示当前人物受到的伤害
+
+        Scanner sc = new Scanner(System.in);
+        // 循环 + break
+        // 一直录入数据，直到数据符合要求为止
+        int hurt = 0;
+        while (true){
+            System.out.println("请输入当前人物受到的伤害：");
+            hurt = sc.nextInt();
+            // 判断是否符合当前的需求
+            if (hurt > 0) {
+                break;
+            }else{
+                System.out.println("当前收到了伤害不能为负数");
+            }
+        }
+
+        // 3.计算当前的血量
+        hp = hp - hurt;
+
+        // 游戏人物不会死亡，最少1点血
+        if (hp <= 0) {
+            hp = 1;
+        }
+
+        System.out.println("当前游戏人物的血量是：" + hp);
+
+        // 4. 键盘录入一个值，表示技能回复的血量
+        int add = 0;
+        while (true){
+            System.out.println("请输入技能回复的血量：");
+            add = sc.nextInt();
+            if(add > 0){
+                break;
+            }else{
+                System.out.println("恢复的血量不能为负数");
+            }
+        }
+        // 5. 计算当前游戏人物的血量
+        hp = hp + add;
+
+        if (hp > 200) {
+            hp = 200;
+        }
+
+        System.out.println("当前游戏人物的血量是：" + hp);
+
+
+    }
+}</code></pre>
+
+<h4>10.3 continue</h4>
+
+<p>不能单独存在的。只能存在于循环当中。表示：跳过本次循环，继续执行下次循环。</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">//1.吃1~5号包子
+for (int i = 1; i <= 5; i++) {
+    //2.第3个包子有虫子就跳过，继续吃下面的包子
+    if(i == 3){
+        //跳过本次循环（本次循环中，下面的代码就不执行了），继续执行下次循环。
+        continue;
+    }
+    System.out.println("在吃第" + i + "个包子");
+}</code></pre>
+
+<p>练习1：</p>
+
+<pre><code class="language-java">Random r = new Random();
+        Scanner sc = new Scanner(System.in);
+        int number = r.nextInt(100);
+        while(true){
+            int num1 = sc.nextInt();
+            if(number > num1){
+                System.out.println("猜小了");
+                continue;
+            } else if(number < num1){
+                System.out.println("猜大了");
+                continue;
+            } else {
+                System.out.println("猜对了");
+                break;
+            }
+        }</code></pre>
+
+<h4>11.Random（随机数）</h4>
+
+<p>Random跟Scanner一样，也是Java提前写好的类，我们不需要关心是如何实现的，只要直接使用就可以了。</p>
+
+<p><strong>使用步骤</strong></p>
+
+<ol>
+<li><strong>导包</strong></li>
+</ol>
+
+<pre><code class="language-java">import java.util.Random;
+导包的动作必须出现在类定义的上边。</code></pre>
+
+<ol start="2">
+<li><strong>创建对象</strong></li>
+</ol>
+
+<pre><code class="language-java">Random r = new Random ();
+上面这个格式里面，只有r是变量名，可以变，其他的都不允许变。</code></pre>
+
+<ol start="3">
+<li><strong>生成随机数</strong></li>
+</ol>
+
+<pre><code class="language-java">int number = r.nextInt(随机数的范围);
+上面这个格式里面，只有number是变量名，可以变，其他的都不允许变。
+随机数范围的特点：从0开始，不包含指定值。比如：参数为10，生成的范围[0,10)</code></pre>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">package com.itheima.controllerloop;
+
+// 定位Random类的位置
+import java.util.Random;
+
+public class Test1 {
+    public static void main(String[] args) {
+
+        // 1. 找到Random这个类
+        // Random r = new Random();
+
+        // 2. 生成一个随机数
+        // (了解)第一种写法：int n = r.nextInt();   默认是在int的取值范围之内获取随机数
+
+        // (重要)第二种写法：小括号写一个数字n，表示随机的最大值，但是不包含这个数字
+        // (重要)第三种写法：小括号写两个数字a b，表示随机的取值范围是a ~ b，包含a，不包含b    JDK17
+
+       /* for (int i = 0; i < 100; i++) {
+            int n = r.nextInt(1 , 10);
+            System.out.println(n);
+        }*/
+
+        // 利用第二种写法，生成一个1 ~ 100之间的随机数
+        // Random r = new Random();
+        // int number = r.nextInt(100) + 1;
+
+        // 利用第三种写法，生成一个1 ~ 100之间的随机数
+        // JDK17 +
+        Random r = new Random();
+        int number = r.nextInt(1, 101);
+        System.out.println(number);
+
+    }
+}</code></pre>
+
+<h4>1. 综合练习</h4>
+
+<h5>1.1 猜数字小游戏1</h5>
+
+<p><strong>需求：</strong>程序自动生成一个1-100之间的随机数，在代码中使用键盘录入去猜出这个数字是多少？</p>
+<p><strong>要求：</strong>使用循环猜，一直猜中为止。</p>
+
+<p><strong>思路分析：</strong></p>
+
+<ol>
+<li>生成一个1-100之间的随机数</li>
+<li>使用键盘录入去猜出这个数字是多少</li>
+<li>把反复猜的代码写在循环中</li>
+</ol>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">package com.itheima.controllerloop;
+
+// 定位Random类的位置
+import java.util.Random;
+
+public class Test1 {
+    public static void main(String[] args) {
+        // 1. 找到Random这个类
+        // Random r = new Random();
+
+        // 2. 生成一个随机数
+        // (了解)第一种写法：int n = r.nextInt();   默认是在int的取值范围之内获取随机数
+
+        // (重要)第二种写法：小括号写一个数字n，表示随机的最大值，但是不包含这个数字
+        // (重要)第三种写法：小括号写两个数字a b，表示随机的取值范围是a ~ b，包含a，不包含b    JDK17
+
+       /* for (int i = 0; i < 100; i++) {
+            int n = r.nextInt(1 , 10);
+            System.out.println(n);
+        }*/
+
+
+
+        // 利用第二种写法，生成一个1 ~ 100之间的随机数
+        // Random r = new Random();
+        // int number = r.nextInt(100) + 1;
+
+
+
+        // 利用第三种写法，生成一个1 ~ 100之间的随机数
+        // JDK17 +
+        Random r = new Random();
+        int number = r.nextInt(1, 101);
+        System.out.println(number);
+
+    }
+}</code></pre>
+
+<h5>1.2 猜数字小游戏2</h5>
+
+<p><strong>需求：</strong>程序自动生成一个1-100之间的随机数，在代码中使用键盘录入去猜出这个数字是多少？</p>
+<p><strong>要求：</strong>使用循环猜，一直猜中为止。</p>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">        Random r = new Random();
+        Scanner sc = new Scanner(System.in);
+        int number = r.nextInt(100);
+        while(true){
+            int num1 = sc.nextInt();
+            if(number > num1){
+                System.out.println("猜小了");
+                continue;
+            } else if(number < num1){
+                System.out.println("猜大了");
+                continue;
+            } else {
+                System.out.println("猜对了");
+                break;
+            }
+        }</code></pre>
+
+<h5>1.3 猜数字小游戏3</h5>
+
+<p><strong>需求：</strong>程序自动生成一个1-100之间的随机数，在代码中使用键盘录入去猜出这个数字是多少？</p>
+<ol>
+<li>前 2 次无提示，后 3 次有提示，第 5 次触发大保底</li>
+</ol>
+
+<p><strong>代码示例：</strong></p>
+
+<pre><code class="language-java">       Scanner sc = new Scanner(System.in);
+        Random r = new Random();
+        int number = r.nextInt(1, 101) + 1;
+        boolean flag = false;
+        for (int i = 0; i < 5; i++) {
+            System.out.println("第 " + (i + 1) + " 次猜测：");
+            int num1 = sc.nextInt();
+            
+            if(i == 4) {
+                System.out.println("猜对了 (大保底)");
+                flag = true;
+                break;
+            }
+            if (number > num1) {
+                if (i > 1) System.out.println("(小保底),提示:" + (number - 5) + "~" + (number + 5));
+                System.out.println("猜小了");
+                continue;
+            } else if (number < num1) {
+                if (i > 1) System.out.println("(小保底),提示:" + (number - 5) + "~" + (number + 5));
+                System.out.println("猜大了");
+                continue;
+            } else {
+                System.out.println("猜对了");
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            System.out.println("猜对了 (大保底)");
+        }</code></pre>
+
+<h4>12.循环嵌套</h4>
+
+<p>循环嵌套就是循环里面还有其他循环</p>
+
+<blockquote>
+  for和while循环都可以进行嵌套，还可以for里面有while，while里面有for
+</blockquote>
+
+<p>练习1：</p>
+
+<p>打印一个三角形</p>
+
+<pre><code class="language-java">for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < i; j++) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }</code></pre>
+
+<p>练习2：</p>
+<p>打印一个倒三角形</p>
+
+<pre><code class="language-java">for (int i = 0; i < 6; i++) {
+            for (int j = 5; j > i; j--) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }</code></pre>
+
+<p>练习3：</p>
+<p>打印一个平行四边形</p>
+
+<pre><code class="language-java">for (int i = 0; i < 3; i++) {
+    int sp = 2 - i;
+    for (int k = 0; k < sp; k++) {
+        System.out.print(" ");
+    }
+    for (int j = 0; j < 6; j++) {
+        System.out.print("*");
+    }
+    System.out.println();
+}</code></pre>
+
+<p>练习4：</p>
+<p>打印一个梯形</p>
+
+<pre><code class="language-java">for (int i = 0; i < 5; i++) {
+    int sp = 2 - i;
+    int star = 3 + i;
+    for (int k = 0; k < sp; k++) {
+        System.out.print(" ");
+    }
+    if (star % 2 == 1) {
+        for (int j = 0; j < star; j++) {
+            System.out.print("*");
+        }
+        System.out.println();
+    }
+}</code></pre>
+
+<p>练习5：</p>
+<p>打印一个棱形</p>
+
+<pre><code class="language-java">int rows = 4;
+for (int i = 1; i <= rows; i++) {
+    // 打印空格：每行空格数 = 总行数 - 当前行数
+    for (int k = 0; k < rows - i; k++) {
+        System.out.print(" ");
+    }
+    // 打印星号：每行星号数 = 2 * 当前行数 - 1
+    for (int j = 0; j < 2 * i - 1; j++) {
+        System.out.print("*");
+    }
+    System.out.println();
+}
+for (int i = rows - 1; i > 0; i--) {
+    for (int j = rows; j > i; j--) {
+        System.out.print(" ");
+    }
+    for (int k = 0; k < i * 2 - 1; k++) {
+        System.out.print("*");
+    }
+    System.out.println();
+}
+// 打印结果：
+   *
+  ***
+ *****
+*******
+ *****
+  ***
+   *</code></pre>
+
+<p>练习6：</p>
+<p>打印一个空心菱形：</p>
+
+<pre><code class="language-java">int rows = 4;
+// 打印上半部分（正金字塔）
+for (int i = 1; i <= rows; i++) {
+    for (int j = 0; j < rows - i; j++) {
+        System.out.print(" ");
+    }
+    for (int k = 0; k < 2 * i - 1; k++) {
+        System.out.print(k == 0 || k == 2 * i - 2 ? "*" : " ");
+    }
+    System.out.println();
+}
+// 打印下半部分（倒金字塔）
+for (int i = rows - 1; i >= 1; i--) {
+    for (int j = 0; j < rows - i; j++) {
+        System.out.print(" ");
+    }
+    for (int k = 0; k < 2 * i - 1; k++) {
+        System.out.print(k == 0 || k == 2 * i - 2 ? "*" : " ");
+    }
+    System.out.println();
+}
+// 打印结果：
+  *
+ * *
+*   *
+ * *
+  *</code></pre>
+
+<p>练习8：</p>
+<p>打印9x9乘法表</p>
+
+<pre><code class="language-java">for (int i = 1; i <= 9; i++) {
+    for (int k = 1; k <= i; k++) {
+        System.out.print(k +"*"+ i +"="+ i * k +"\t");
+    }
+    System.out.println();
+}</code></pre>
+
+<h4>补充知识：	制表符</h4>
+
+<p><strong>作用：</strong></p>
+
+<p>打印表格数据的时候，可以让上下对齐</p>
+
+<p><strong>简单理解：</strong></p>
+
+<p>长度可变的大空格，打印表格类数据的时候，可以让上下对其。（99乘法表）</p>
+
+<h4>补充：System.out.println 和 System.out.print 的区别</h4>
+
+<p>示例对比：</p>
+
+<p>使用 println（换行）：</p>
+
+<pre><code class="language-java">for (int i = 0; i < 3; i++) {
+    System.out.println("*");
+}
+// 输出：
+// *
+// *
+// *</code></pre>
+
+<p>使用 print（不换行）：</p>
+
+<pre><code class="language-java">for (int i = 0; i < 3; i++) {
+    System.out.print("*");
+}
+// 输出：***</code></pre>
