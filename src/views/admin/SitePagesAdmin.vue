@@ -86,12 +86,12 @@
       </div>
       <button type="button" class="platform-btn-ghost" @click="addFavorite">+ 添加一条</button>
 
-      <h3>贴纸墙 <small>{{ about.stickers.length }} / 10</small></h3>
+      <h3>贴纸墙 <small>{{ about.stickers.length }} 张</small></h3>
       <div class="sticker-toolbar">
         <button
           type="button"
           class="platform-btn-primary"
-          :disabled="uploadingSticker || about.stickers.length >= 10"
+          :disabled="uploadingSticker"
           @click="stickerFileInput?.click()"
         >
           {{ uploadingSticker ? '上传中…' : '上传贴纸' }}
@@ -105,7 +105,7 @@
         <button
           type="button"
           class="platform-btn-ghost"
-          :disabled="!selectedLibraryPath || about.stickers.length >= 10"
+          :disabled="!selectedLibraryPath"
           @click="addLibrarySticker"
         >
           从贴纸库添加
@@ -114,7 +114,7 @@
       </div>
 
       <div v-for="(item, index) in about.stickers" :key="`${item.path}-${index}`" class="sticker-row">
-        <img :src="imgUrl(item.path)" alt="" />
+        <img :src="resolvePublicUrl(item.path)" alt="" />
         <div class="sticker-fields">
           <input v-model="item.path" type="text" placeholder="图片路径或 URL" />
           <input v-model="item.label" type="text" placeholder="标签" />
@@ -156,7 +156,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { aboutGallery } from '../../data/aboutGallery'
-import { imgUrl } from '../../data/profile'
+import { resolvePublicUrl } from '../../api/platform.js'
 import {
   cloneSitePageContent,
   defaultAboutContent,
@@ -252,10 +252,6 @@ function stickerLabelFromFileName(fileName = '') {
 }
 
 function addSticker(path, label = '') {
-  if (about.stickers.length >= 10) {
-    notify('贴纸墙最多只能保留 10 张', 'error')
-    return false
-  }
   if (!path.trim()) return false
   about.stickers.push({ path: path.trim(), label: label.trim() || nextStickerLabel() })
   return true
@@ -280,11 +276,6 @@ function removeSticker(index) {
 async function onStickerFile(event) {
   const file = event.target.files?.[0]
   if (!file) return
-  if (about.stickers.length >= 10) {
-    event.target.value = ''
-    notify('贴纸墙最多只能保留 10 张', 'error')
-    return
-  }
   uploadingSticker.value = true
   try {
     const data = await uploadNoteImage(file)
@@ -298,10 +289,6 @@ async function onStickerFile(event) {
 }
 
 async function saveActive() {
-  if (activeTab.value === 'about' && about.stickers.length > 10) {
-    notify('贴纸墙最多只能保留 10 张', 'error')
-    return
-  }
   saving.value = true
   try {
     const content = activeTab.value === 'about'

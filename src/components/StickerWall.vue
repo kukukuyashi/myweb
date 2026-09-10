@@ -61,7 +61,7 @@
         <button type="button" class="lb-close" aria-label="关闭" @click="closeLightbox">✕</button>
         <button type="button" class="lb-nav lb-prev" aria-label="上一张" @click.stop="shiftLightbox(-1)">‹</button>
         <figure class="lb-figure">
-          <img :src="imgUrl(items[lightboxIndex].path)" :alt="items[lightboxIndex].label">
+          <img :src="resolvePublicUrl(items[lightboxIndex].path)" :alt="items[lightboxIndex].label">
           <figcaption v-if="items[lightboxIndex].label">[ {{ items[lightboxIndex].label }} ]</figcaption>
         </figure>
         <button type="button" class="lb-nav lb-next" aria-label="下一张" @click.stop="shiftLightbox(1)">›</button>
@@ -73,7 +73,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { imgUrl } from '../data/profile'
+import { resolvePublicUrl } from '../api/platform.js'
 import { thumbUrl, onThumbError } from '../utils/thumbs.js'
 
 const BATCH = 24
