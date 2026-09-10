@@ -34,8 +34,12 @@ export const profile = {
 
 export function imgUrl(relativePath) {
   if (!relativePath) return ''
-  if (/^(https?:)?\/\//i.test(relativePath)) return relativePath
+  const raw = String(relativePath)
+  if (/^(https?:)?\/\//i.test(raw)) return raw
+  // 站点根绝对路径（例如 /uploads/notes/xxx.png）直接用，
+  // 不能再拼 BASE_URL，否则会变成 /myweb/uploads/... 而 404
+  if (raw.startsWith('/')) return encodePathSegments(raw)
   const base = import.meta.env.BASE_URL || '/'
-  const path = encodePathSegments(String(relativePath).replace(/^\//, ''))
+  const path = encodePathSegments(raw.replace(/^\//, ''))
   return `${base}${path}`
 }
