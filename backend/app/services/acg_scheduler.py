@@ -20,6 +20,7 @@ from app.models.acg import AcgSubmission
 from app.models.forum import ForumCategory
 from app.services.acg_digest import build_daily_bundle
 from app.services.acg_publish import publish_submission
+from app.services.acg_settings import load_settings, purge_old_drafts, titles_created_today
 
 log = logging.getLogger("acg_bot.scheduler")
 
@@ -36,35 +37,53 @@ def _resolve_category_id(db, slug: str, fallback_id: int | None) -> int | None:
 
 
 async def run_daily_job() -> None:
-    """定时任务主体：抓取 -> 入草稿 -> 可选自动发布速报。"""
-    settings = get_settings()
+    """定时任务主体：抓取 -> 入草稿 -> 可选自动发布速报 -> 清理旧草稿。"""
     started = datetime.now(_TZ).isoformat()
     log.info("acg_bot cron start at %s", started)
 
+    db = SessionLocal()
     try:
-        bundle = await build_daily_bundle(use_ai=False, article_limit=3)
+        bot_cfg = load_settings(db)
     except Exception as exc:  # noqa: BLE001
+        db.close()
+        log.exception("acg_bot cron: load settings failed: %s", exc)
+        return
+
+    if not bot_cfg["auto_enabled"]:
+        db.close()
+        log.info("acg_bot cron skipped: auto_enabled=false（管理台总开关已关闭）")
+        return
+
+    try:
+        bundle = await build_daily_bundle(use_ai=False, article_limit=bot_cfg["article_limit"])
+    except Exception as exc:  # noqa: BLE001
+        db.close()
         log.exception("acg_bot cron: build bundle failed: %s", exc)
         return
 
-    db = SessionLocal()
     try:
         daily_category_id = _resolve_category_id(db, "acg-daily", None)
         article_category_id = _resolve_category_id(db, "acg-news", None)
+        existing_titles = titles_created_today(db)
 
         daily = bundle["daily"]
-        sub_daily = AcgSubmission(
-            title=daily["title"],
-            content=daily["content_md"],
-            category_id=daily_category_id,
-            cover_url=daily.get("cover_url"),
-            source_meta=daily.get("source_meta"),
-            status="draft",
-        )
-        db.add(sub_daily)
+        sub_daily: AcgSubmission | None = None
+        if daily["title"] not in existing_titles:
+            sub_daily = AcgSubmission(
+                title=daily["title"],
+                content=daily["content_md"],
+                category_id=daily_category_id,
+                cover_url=daily.get("cover_url"),
+                source_meta=daily.get("source_meta"),
+                status="draft",
+            )
+            db.add(sub_daily)
+            existing_titles.add(daily["title"])
 
         article_subs: list[AcgSubmission] = []
         for art in bundle["articles"]:
+            if art["title"] in existing_titles:
+                continue
             s = AcgSubmission(
                 title=art["title"],
                 content=art["content_md"],
@@ -75,14 +94,15 @@ async def run_daily_job() -> None:
             )
             db.add(s)
             article_subs.append(s)
+            existing_titles.add(art["title"])
 
         db.commit()
-        db.refresh(sub_daily)
+        if sub_daily is not None:
+            db.refresh(sub_daily)
         for s in article_subs:
             db.refresh(s)
 
-        auto_daily = settings.acg_bot_auto_publish_daily
-        if auto_daily:
+        if sub_daily is not None and bot_cfg["auto_publish_daily"]:
             try:
                 thread = publish_submission(db, sub_daily)
                 log.info(
@@ -96,8 +116,9 @@ async def run_daily_job() -> None:
                 log.exception("acg_bot cron: 自动发布速报失败，草稿仍在队列: %s", exc)
         else:
             log.info(
-                "acg_bot cron done: %d 草稿入队（1 速报 + %d 深度文），等待人工审核",
-                1 + len(article_subs),
+                "acg_bot cron done: %d 草稿入队（%d 速报 + %d 深度文），等待人工审核",
+                (1 if sub_daily is not None else 0) + len(article_subs),
+                1 if sub_daily is not None else 0,
                 len(article_subs),
             )
 
@@ -107,6 +128,12 @@ async def run_daily_job() -> None:
             log.info("acg_bot cron meta: %s", json.dumps(meta, ensure_ascii=False))
         except Exception:  # noqa: BLE001
             pass
+
+        # 按保留天数清理旧草稿
+        try:
+            purge_old_drafts(db, bot_cfg["draft_retention_days"])
+        except Exception as exc:  # noqa: BLE001
+            log.exception("acg_bot cron: purge drafts failed: %s", exc)
     finally:
         db.close()
 
@@ -143,6 +170,16 @@ def start_scheduler() -> None:
     _scheduler = sched
     next_run = sched.get_job("acg_bot_daily").next_run_time
     log.info("acg_bot scheduler started, cron=%s, next=%s", cron_expr, next_run)
+
+
+def get_next_run_time() -> str | None:
+    """下次定时运行时间（ISO），未启用返回 None。"""
+    if _scheduler is None:
+        return None
+    job = _scheduler.get_job("acg_bot_daily")
+    if job is None or job.next_run_time is None:
+        return None
+    return job.next_run_time.isoformat()
 
 
 def shutdown_scheduler() -> None:

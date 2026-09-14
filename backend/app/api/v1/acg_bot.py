@@ -19,6 +19,13 @@ from app.models.acg import AcgSubmission
 from app.models.forum import ForumCategory
 from app.services.acg_digest import build_daily_bundle, polish_with_dify
 from app.services.acg_publish import publish_submission
+from app.services.acg_scheduler import get_next_run_time
+from app.services.acg_settings import (
+    load_settings,
+    purge_old_drafts,
+    save_settings,
+    titles_created_today,
+)
 from app.services.notes_markdown import markdown_to_html
 from pydantic import BaseModel
 
@@ -28,7 +35,14 @@ router = APIRouter(prefix="/acg-bot", tags=["acg-bot"])
 class GenerateBody(BaseModel):
     use_ai: bool = False
     category_id: int | None = None
-    article_limit: int = 3
+    article_limit: int | None = None
+
+
+class BotSettingsBody(BaseModel):
+    auto_enabled: bool | None = None
+    auto_publish_daily: bool | None = None
+    article_limit: int | None = None
+    draft_retention_days: int | None = None
 
 
 class SubmissionUpdateBody(BaseModel):
@@ -80,37 +94,85 @@ def _resolve_category_id(db: Session, slug: str, fallback_id: int | None) -> int
     return fallback_id
 
 
+@router.get("/settings", summary="机器人运行设置")
+def get_bot_settings(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    settings = get_settings()
+    return ok(
+        {
+            "settings": load_settings(db),
+            "schedule_cron": (settings.acg_bot_schedule_cron or "").strip(),
+            "next_run": get_next_run_time(),
+        }
+    )
+
+
+@router.put("/settings", summary="保存机器人运行设置")
+def put_bot_settings(
+    body: BotSettingsBody,
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    payload = body.model_dump(exclude_unset=True)
+    merged = save_settings(db, payload)
+    return ok({"settings": merged}, message="设置已保存")
+
+
+@router.post("/purge-drafts", summary="清理 N 天前的草稿")
+def purge_drafts(
+    _: Annotated[str, Depends(require_notes_admin)],
+    db: Annotated[Session, Depends(get_db)],
+    days: Annotated[int, Query(ge=1, le=30)] = 7,
+):
+    n = purge_old_drafts(db, days)
+    return ok({"deleted": n}, message=f"已清理 {n} 篇 {days} 天前的草稿")
+
+
 @router.post("/generate", summary="一键采集：1 篇速报 + N 篇深度文章")
 async def generate(
     body: GenerateBody,
     _: Annotated[str, Depends(require_notes_admin)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    bundle = await build_daily_bundle(use_ai=body.use_ai, article_limit=body.article_limit)
+    article_limit = body.article_limit
+    if article_limit is None:
+        article_limit = load_settings(db)["article_limit"]
+    bundle = await build_daily_bundle(use_ai=body.use_ai, article_limit=article_limit)
 
     daily_category_id = _resolve_category_id(db, "acg-daily", body.category_id)
     article_category_id = _resolve_category_id(db, "acg-news", body.category_id)
+    existing_titles = titles_created_today(db)
 
     created: list[AcgSubmission] = []
+    skipped = 0
 
     # 1 篇速报
     daily = bundle["daily"]
-    daily_content_md = daily["content_md"]
-    if body.use_ai:
-        daily_content_md = await polish_with_dify(daily["title"], daily_content_md)
-    sub_daily = AcgSubmission(
-        title=daily["title"],
-        content=daily_content_md,
-        category_id=daily_category_id,
-        cover_url=daily.get("cover_url"),
-        source_meta=daily.get("source_meta"),
-        status="draft",
-    )
-    db.add(sub_daily)
-    created.append(sub_daily)
+    if daily["title"] in existing_titles:
+        skipped += 1
+    else:
+        daily_content_md = daily["content_md"]
+        if body.use_ai:
+            daily_content_md = await polish_with_dify(daily["title"], daily_content_md)
+        sub_daily = AcgSubmission(
+            title=daily["title"],
+            content=daily_content_md,
+            category_id=daily_category_id,
+            cover_url=daily.get("cover_url"),
+            source_meta=daily.get("source_meta"),
+            status="draft",
+        )
+        db.add(sub_daily)
+        created.append(sub_daily)
+        existing_titles.add(daily["title"])
 
     # N 篇深度文章
     for art in bundle["articles"]:
+        if art["title"] in existing_titles:
+            skipped += 1
+            continue
         sub = AcgSubmission(
             title=art["title"],
             content=art["content_md"],
@@ -121,6 +183,7 @@ async def generate(
         )
         db.add(sub)
         created.append(sub)
+        existing_titles.add(art["title"])
 
     db.commit()
     for s in created:
@@ -130,8 +193,9 @@ async def generate(
         {
             "submissions": [_serialize(s, with_source=True) for s in created],
             "meta": bundle["meta"],
+            "skipped": skipped,
         },
-        message=f"已生成 1 篇速报 + {len(created) - 1} 篇深度文章",
+        message=f"已生成 {len(created)} 篇草稿" + (f"（跳过 {skipped} 篇今日已有）" if skipped else ""),
     )
 
 

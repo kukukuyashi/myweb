@@ -46,11 +46,23 @@ async function request(path, options = {}) {
   return json
 }
 
-export function generateDigest({ useAi = false, categoryId = null } = {}) {
+export function generateDigest({ useAi = false, categoryId = null, articleLimit = null } = {}) {
   return request('/generate', {
     method: 'POST',
-    body: JSON.stringify({ use_ai: useAi, category_id: categoryId }),
+    body: JSON.stringify({ use_ai: useAi, category_id: categoryId, article_limit: articleLimit }),
   })
+}
+
+export function fetchBotSettings() {
+  return request('/settings')
+}
+
+export function saveBotSettings(payload) {
+  return request('/settings', { method: 'PUT', body: JSON.stringify(payload) })
+}
+
+export function purgeDrafts(days = 7) {
+  return request(`/purge-drafts?days=${days}`, { method: 'POST' })
 }
 
 export function fetchSubmissions(status = 'all') {

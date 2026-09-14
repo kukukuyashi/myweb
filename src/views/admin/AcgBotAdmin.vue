@@ -47,6 +47,48 @@
 
     <div v-else class="admin-shell">
       <section class="admin-list">
+        <div class="bot-settings">
+          <button type="button" class="settings-head" @click="settingsOpen = !settingsOpen">
+            <span>机器人设置</span>
+            <span class="settings-state" :data-on="botSettings.auto_enabled">
+              {{ botSettings.auto_enabled ? '定时开启' : '定时已停' }}
+            </span>
+            <span class="settings-caret">{{ settingsOpen ? '▾' : '▸' }}</span>
+          </button>
+          <div v-if="settingsOpen" class="settings-body">
+            <label class="settings-toggle">
+              <input v-model="botSettings.auto_enabled" type="checkbox" />
+              定时自动采集（总开关）
+            </label>
+            <label class="settings-toggle">
+              <input v-model="botSettings.auto_publish_daily" type="checkbox" />
+              速报自动发布到论坛
+            </label>
+            <div class="settings-grid">
+              <label>
+                每次深度文篇数
+                <input v-model.number="botSettings.article_limit" type="number" min="0" max="5" />
+              </label>
+              <label>
+                草稿保留天数
+                <input v-model.number="botSettings.draft_retention_days" type="number" min="1" max="30" />
+              </label>
+            </div>
+            <p class="settings-meta">
+              定时规则 <code>{{ scheduleCron || '未配置' }}</code>
+              <template v-if="nextRun"> · 下次运行 {{ formatDate(nextRun) }}</template>
+            </p>
+            <div class="settings-actions">
+              <button type="button" class="btn btn-primary" :disabled="savingSettings" @click="saveSettings">
+                {{ savingSettings ? '保存中…' : '保存设置' }}
+              </button>
+              <button type="button" class="btn btn-ghost" :disabled="purging" @click="handlePurgeDrafts">
+                {{ purging ? '清理中…' : '立即清理旧草稿' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="list-head">
           <h2>投稿 · {{ submissions.length }} 篇</h2>
           <div class="status-filters">
@@ -201,13 +243,16 @@ import {
 } from '../../api/notesAdmin'
 import {
   discardSubmission,
+  fetchBotSettings,
   fetchForumCategories,
   fetchSubmission,
   fetchSubmissions,
   generateDigest,
   previewSubmission,
   publishSubmission,
+  purgeDrafts,
   repairPublishedMedia,
+  saveBotSettings,
   updateSubmission,
 } from '../../api/acgBot'
 
@@ -232,6 +277,17 @@ const discarding = ref(false)
 const statusFilter = ref('all')
 const submissions = ref([])
 const categories = ref([])
+const settingsOpen = ref(false)
+const savingSettings = ref(false)
+const purging = ref(false)
+const scheduleCron = ref('')
+const nextRun = ref('')
+const botSettings = reactive({
+  auto_enabled: true,
+  auto_publish_daily: true,
+  article_limit: 2,
+  draft_retention_days: 7,
+})
 const current = ref(null)
 const sourceItems = ref([])
 const previewHtml = ref('')
@@ -305,7 +361,7 @@ async function bootstrapAuth() {
   try {
     await fetchNotesAdminMe()
     authed.value = true
-    await Promise.all([reloadList(), loadCategories()])
+    await Promise.all([reloadList(), loadCategories(), loadBotSettings()])
   } catch {
     clearNotesAdminToken()
     authed.value = false
@@ -319,7 +375,7 @@ async function handleLogin() {
     await loginNotesAdmin(loginForm.username.trim(), loginForm.password)
     loginForm.password = ''
     authed.value = true
-    await Promise.all([reloadList(), loadCategories()])
+    await Promise.all([reloadList(), loadCategories(), loadBotSettings()])
   } catch (err) {
     loginError.value = err.message || '登录失败'
     authed.value = false
@@ -346,6 +402,49 @@ async function loadCategories() {
   }
 }
 
+async function loadBotSettings() {
+  try {
+    const res = await fetchBotSettings()
+    Object.assign(botSettings, res.settings || {})
+    scheduleCron.value = res.schedule_cron || ''
+    nextRun.value = res.next_run || ''
+  } catch {
+    /* ignore */
+  }
+}
+
+async function saveSettings() {
+  savingSettings.value = true
+  try {
+    const res = await saveBotSettings({
+      auto_enabled: botSettings.auto_enabled,
+      auto_publish_daily: botSettings.auto_publish_daily,
+      article_limit: botSettings.article_limit,
+      draft_retention_days: botSettings.draft_retention_days,
+    })
+    Object.assign(botSettings, res.settings || {})
+    flash('设置已保存', 'success')
+  } catch (err) {
+    flash(err.message, 'error')
+  } finally {
+    savingSettings.value = false
+  }
+}
+
+async function handlePurgeDrafts() {
+  if (!window.confirm(`确定清理 ${botSettings.draft_retention_days} 天前的草稿？`)) return
+  purging.value = true
+  try {
+    const res = await purgeDrafts(botSettings.draft_retention_days)
+    flash(`已清理 ${res?.deleted ?? 0} 篇旧草稿`, 'success')
+    await reloadList()
+  } catch (err) {
+    flash(err.message, 'error')
+  } finally {
+    purging.value = false
+  }
+}
+
 async function reloadList() {
   loadingList.value = true
   try {
@@ -366,7 +465,7 @@ async function selectStatus(value) {
 async function handleGenerate() {
   generating.value = true
   try {
-    const res = await generateDigest({ useAi: useAi.value })
+    const res = await generateDigest({ useAi: useAi.value, articleLimit: botSettings.article_limit })
     const list = res?.submissions || []
     const meta = res?.meta || {}
     const first = list[0]
@@ -652,6 +751,95 @@ onBeforeUnmount(() => clearTimeout(previewTimer))
   border-right: 1px solid var(--border);
   padding: 1rem;
   overflow: auto;
+}
+
+.bot-settings {
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  margin-bottom: 0.9rem;
+}
+
+.settings-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-state {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.settings-state[data-on='true'] {
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+.settings-caret {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.settings-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.settings-grid label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.settings-grid input {
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+}
+
+.settings-meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.settings-meta code {
+  color: var(--orange);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .list-head {
