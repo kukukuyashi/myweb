@@ -286,7 +286,7 @@ async function loadArticleContent() {
     const url = `${base}Content/${encodeURIComponent(post.file)}`
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 15000)
-    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' })
+    const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' })
     clearTimeout(timer)
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     let content = await response.text()

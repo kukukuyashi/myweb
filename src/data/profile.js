@@ -7,7 +7,7 @@ export const profile = {
   name: 'Cyinc',
   handle: 'CYINC.LOG',
   tagline: '写代码，也写番剧观后感；Agent 在学，芙莉莲旅途进行中。',
-  avatar: 'img/xiaoqing.png',
+  avatar: 'img/xiaoqing.thumb.webp',
   email: '1344908013@qq.com',
   github: 'https://github.com/kukukuyashi/myweb',
   blog: 'https://kukukuyashi.github.io/myweb/',

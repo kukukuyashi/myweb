@@ -298,7 +298,7 @@ export function ensurePostsCatalogLoaded() {
   _postsCatalogPromise = (async () => {
     try {
       const base = import.meta.env.BASE_URL || '/myweb/'
-      const res = await fetch(`${base}data/posts.json`, { cache: 'no-store' })
+      const res = await fetch(`${base}data/posts.json`, { cache: 'no-cache' })
       if (res.ok) {
         const data = await res.json()
         const list = Array.isArray(data?.posts) ? data.posts : Array.isArray(data) ? data : null

@@ -1,16 +1,41 @@
 # CYINC 生产 Nginx — 整站同域（Vue /myweb/ + API + Admin + uploads）
-# 复制到 /etc/nginx/sites-available/cyinc
+# 复制到 /etc/nginx/sites-available/cyinc，nginx -t && systemctl reload nginx
+#
+# 性能要点（2026-09 优化版）：
+#   1. 443 server 必须带 http2（nginx 1.18 用 listen ... http2 旧语法；1.25+ 用 http2 on;）
+#   2. map 修复 upstream keepalive：只有真 WebSocket 才发 Connection: upgrade
+#   3. /myweb/assets/ 带 hash 必须 immutable 长缓存，否则每个 chunk 每次访问都回源验证
+#   4. posts.json / Content/*.html 用 no-cache + ETag：内容更新即生效，未变时 304 省流量
+#   5. index.html / 预渲染 html no-cache：保证发版立即生效
 
 upstream cyinc_api {
     server 127.0.0.1:8000;
     keepalive 8;
 }
 
+# 仅当客户端请求 WebSocket 升级时才透传 Connection: upgrade；
+# 普通 API 请求 Connection 为空 → upstream keepalive 复用连接
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      '';
+}
+
+# HTTP → HTTPS 跳转（certbot --nginx 会生成/调整本段）
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name cyinc.ink www.cyinc.ink;
+    return 301 https://$host$request_uri;
+}
 
-    # certbot --nginx -d yourdomain.com -d www.yourdomain.com
+server {
+    # nginx < 1.25.1 用这个写法（本机 nginx/1.18.0）
+    listen 443 ssl http2;
+    # nginx >= 1.25.1 改为：listen 443 ssl; 再加单独一行 http2 on;
+    server_name cyinc.ink www.cyinc.ink;
+
+    # certbot 会填好下面两行
+    # ssl_certificate     /etc/letsencrypt/live/cyinc.ink/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/cyinc.ink/privkey.pem;
 
     client_max_body_size 16m;
 
@@ -19,6 +44,13 @@ server {
     open_file_cache_valid 30s;
     open_file_cache_min_uses 2;
     open_file_cache_errors on;
+
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 5;
+    gzip_min_length 256;
+    gzip_types text/plain text/css application/json application/javascript
+               text/xml application/xml application/rss+xml image/svg+xml;
 
     # FastAPI API(包含 WebSocket /api/v1/study-room/ws)
     location /api {
@@ -29,7 +61,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
     }
@@ -46,6 +78,8 @@ server {
     }
 
     # 用户头像等上传文件（FastAPI StaticFiles）— 浏览器可缓存一天
+    # 可选优化：compose 把 uploads 改为 bind mount 后，这里直接 alias 到宿主机目录，
+    # 不再过 uvicorn，省一层 Python
     location /uploads {
         proxy_pass http://cyinc_api;
         proxy_http_version 1.1;
@@ -59,18 +93,20 @@ server {
     }
 
     # 博客文章正文（运行时数据，住在 site-data/，与前端部署隔离）
+    # 管理台重发后文件会更新 → no-cache 让浏览器每次回源问一句 ETag，没变就 304
     location ^~ /myweb/Content/ {
         alias /var/www/cyinc/site-data/Content/;
         try_files $uri =404;
+        add_header Cache-Control "no-cache, must-revalidate";
     }
 
     # 文章目录 posts.json（运行时数据，同样住在 site-data/）
     location = /myweb/data/posts.json {
         alias /var/www/cyinc/site-data/data/posts.json;
-        add_header Cache-Control "no-store";
+        add_header Cache-Control "no-cache, must-revalidate";
     }
 
-    # Vite hashed assets — 文件名带 hash，可长期缓存
+    # Vite hashed assets — 文件名带 hash，可长期缓存（关键！缺了这条每次访问全部 chunk 都要回源验证）
     location ^~ /myweb/assets/ {
         root /var/www/cyinc;
         expires 30d;
@@ -102,12 +138,23 @@ server {
         access_log off;
     }
 
-    # Vue 静态站（Vite base=/myweb/）— 仅含 index.html + assets + Content
-    # 构建：npm run build → deploy/scripts/pack-frontend.ps1 → 上传 frontend.zip 到 myweb/ 解压
-    # 必须包含 Content/（文章正文）与 assets/
+    # 入口与预渲染 html 不缓存（发版后立即生效；文件小，304 也很快）
+    location = /myweb/ {
+        root /var/www/cyinc;
+        try_files /myweb/index.html =404;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
+    location ~ ^/myweb/.+\.html$ {
+        root /var/www/cyinc;
+        try_files $uri /myweb/index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
+
+    # Vue 静态站其余文件（feed.xml / cursors/ / data/ 等）— 短缓存
     location /myweb/ {
         root /var/www/cyinc;
         try_files $uri $uri/ /myweb/index.html;
+        expires 10m;
     }
 
     location = /myweb {
@@ -117,8 +164,4 @@ server {
     location = / {
         return 301 /myweb/;
     }
-
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
-    gzip_min_length 256;
 }
