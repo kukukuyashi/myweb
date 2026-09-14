@@ -1,82 +1,103 @@
-# CYINC.LOG · 个人博客
+# CYINC.LOG
 
-Cyinc 的技术学习日志 — Vue 3 静态博客，部署在 GitHub Pages。
+Cyinc 的个人全栈站点 — 静态博客 + 动态平台，同域部署在阿里云 ECS。
 
-在线地址：<https://kukukuyashi.github.io/myweb/>
+- 生产环境：<https://cyinc.ink/myweb/>
+- GitHub Pages（备用静态形态）：<https://kukukuyashi.github.io/myweb/>
+
+## 这是什么
+
+仓库名 `gerenboke`，包含两部分：
+
+1. **博客主站**（Vue 3 + Vite）：文章、归档、项目、音乐室、留言板、关于页。构建产物在 `docs/`，线上由 Nginx 以 `/myweb/` 提供。
+2. **动态平台**（同仓 FastAPI + MySQL + Redis）：用户体系与互动功能，入口 `/myweb/app/*`，管理台 `/myweb/admin/*`。
 
 ## 功能概览
 
+**博客**
+
 - 首页：分类 / 标签 / 搜索、系列导航、精选文章
 - 文章：目录、阅读进度、代码高亮、Twikoo 评论、复制链接、JSON-LD
-- 归档：时间轴 + 月份热力预览
-- 项目：实战项目卡片墙
-- 更新日志：站点功能演化时间线
-- 标签页：`/tags/:tag` 独立 URL
-- 构建 prerender：文章 / 标签 / 主要页面静态 HTML（SEO）
-- 音乐室、留言板、关于页（贴纸墙 + 墨染交互）
-- RSS / sitemap / robots.txt（build 时自动生成）
+- 归档：时间轴 + 月份热力预览；标签页 `/tags/:tag` 独立 URL
+- 音乐室、留言板、关于页（贴纸墙 + 墨染交互）、项目卡片墙、更新日志
+- 构建期 prerender：文章 / 标签 / 主要页面静态 HTML（SEO），自动生成 RSS / sitemap / robots.txt
+
+**平台 `/app/*`**
+
+- 注册 / 登录（JWT）、个人资料、头像上传
+- 用户文章（编辑器 + 详情页）、论坛（板块 / 发帖 / 回帖 / 点赞）、留言板 Q&A
+- 番茄钟与专注空间、签到与 XP、聊天室（WebSocket）
+- 番剧放送表、街机小游戏、友情链接、AI 助手（Dify）
+- 管理台：仪表盘 / 笔记 / 机器人 / 数据管理；SQLAdmin `/admin` 运维入口
+- ACG 资讯机器人（APScheduler 定时任务）
+
+## 技术栈
+
+| 层 | 技术 |
+|----|------|
+| 前端 | Vue 3 · Vite 7 · Vue Router · Pinia · Prism.js · marked · DOMPurify |
+| 后端 | FastAPI · SQLAlchemy 2 · PyMySQL · JWT · bcrypt · SQLAdmin · APScheduler |
+| 数据 | MySQL（必需）· Redis（缓存 / 聊天室广播，可选降级） |
+| 集成 | Dify Cloud（AI）· n8n（发文 Webhook）· Twikoo（博客评论） |
+| 生产 | 阿里云 ECS · Docker · Nginx · HTTPS · Cloudflare R2（音乐 CDN） |
+
+## 目录结构
+
+```
+src/                前端源码（views/platform/ 为 /app/* 平台页）
+  api/              platform.js 等 → 调 /api/v1
+  data/             posts.js · series.js · projects.js · changelog.js · profile.js
+笔记/               博客文章 Markdown 源文件（不入库产物见下）
+Content/            发布生成的文章 HTML
+docs/               vite build 输出（勿手改）
+backend/app/        FastAPI：api/v1 · models · schemas · services · admin · core
+scripts/            构建、发文、缩略图、音乐 CDN 上传等脚本
+deploy/             ECS 部署文档与 Nginx / systemd 示例
+img/  Music/        媒体资源（大图库与音乐不随 Git 全量同步，生产由 Nginx/R2 提供）
+```
 
 ## 本地开发
 
 ```bash
+# 前端（base 与生产一致）
 npm install
-npm run dev
+npm run dev          # http://localhost:5173/myweb/
+
+# 后端（需先启动 MySQL，详见 backend/README.md）
+npm run dev:api      # http://127.0.0.1:8000 · /api/docs · /admin
 ```
 
-默认 dev 地址：`http://localhost:5173/myweb/`（与生产 base 一致）
+前端联调在 `.env` 中设置 `VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1`。
 
-## 发布新文章
+## 发布一篇博客文章
 
-1. 在 `Content/` 放入 HTML 正文
-2. 在 `src/data/posts.js` 的 `posts` 数组顶部加一条（`id` 递增、`file` 对应文件名）
-   - 可选 `cover: 'img/...'` 作为分享预览图与卡片缩略图
-3. 若属于某系列，在 `src/data/series.js` 的 `postIds` 里补上 id
-4. 若是项目复盘，在 `src/data/projects.js` 加一条（可选）
-5. 若是站点功能更新，在 `src/data/changelog.js` 加一条（可选）
-6. 执行 `npm run build` 并 push
+```bash
+npm run new:post        # 在 笔记/ 下脚手架新建 md
+npm run publish:post    # md → Content/*.html，并更新 src/data/posts.js
+npm run build           # 重新构建 docs/
+```
+
+可选元数据：系列归 `src/data/series.js`，项目复盘归 `src/data/projects.js`，站点更新归 `src/data/changelog.js`。
 
 ## 构建与部署
 
 ```bash
-npm run build
+npm run build      # 导出 posts.json + 缩略图 + vite build → docs/ + feed/sitemap/prerender
+npm run preview    # 本地预览构建产物
 ```
 
-产物输出到 `docs/`，并自动生成 feed、sitemap、**prerender 静态页**（供搜索引擎抓取正文）。
+**生产部署**：ECS 上运行时数据（`site-data/` 的 posts.json 与文章 HTML）与前端产物物理隔离，部署有固定脚本与铁律，见：
 
-本地预览 build：
+- [deploy/README-m6-ecs.md](deploy/README-m6-ecs.md) — 整站 ECS 部署指南
+- [deploy/nginx.conf.example](deploy/nginx.conf.example) — Nginx 配置（HTTP/2、缓存策略、反向代理）
+- [backend/README.md](backend/README.md) — 后端建库、启动、SQLAdmin、API 一览、冒烟测试
+- [AGENTS.md](AGENTS.md) — 部署铁律与协作者须知
 
-```bash
-npm run preview
-```
-
-## 目录结构（精简）
-
-```
-src/
-  data/          posts.js · series.js · projects.js · changelog.js · profile.js
-  views/         页面
-  components/    可复用组件
-Content/         文章 HTML 正文
-docs/            构建输出（勿手改）
-scripts/         构建辅助脚本
-```
+性能要点：带 hash 的前端资源 `immutable` 长缓存、文章数据走 ETag/304 协商缓存、装饰图使用 WebP 缩略图、音乐走 R2 CDN 不占用 ECS 带宽。
 
 ## 环境变量
 
-复制 `.env.example` 为 `.env`，按需配置 Twikoo、音乐 CDN 等（详见各部署笔记文章）。
-
-## 技术栈
-
-Vue 3 · Vite · Vue Router · Pinia · Prism.js · Twikoo
-
-## 平台 v2（M1–M5.5 已完成 · M6 整站 ECS）
-
-**方案 A 开发** + **M6 整站阿里云同域部署**（前端 + API 均在 ECS）。
-
-- **后端 API**：[backend/README.md](backend/README.md)
-- **M6 上线指南**：[deploy/README-m6-ecs.md](deploy/README-m6-ecs.md)
-- **方案 A 本地开发**：[deploy/README-cloud-dev.md](deploy/README-cloud-dev.md)
-- 工作流：[笔记/项目/CYINC动态主站工作流.md](笔记/项目/CYINC动态主站工作流.md)
+复制 `.env.example` 为 `.env.local`（不提交），按需配置：Twikoo `envId`、音乐 CDN `VITE_MUSIC_BASE_URL`、API Base，以及 `npm run music:upload` 用的 `CDN_S3_*` 对象存储凭据。后端变量见 `backend/.env.example` 与 `.env.production.example`。
 
 ## License
 
