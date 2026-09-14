@@ -12,7 +12,7 @@ from app.models.site_page_config import SitePageConfig
 
 router = APIRouter(prefix="/site-pages", tags=["site-pages"])
 
-ALLOWED_PAGE_KEYS = {"about", "archive"}
+ALLOWED_PAGE_KEYS = {"about", "archive", "platform_home"}
 
 
 class SitePageBody(BaseModel):

@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>页面管理</h2>
-        <p class="page-hint">维护个人博客的「关于」和「归档」展示配置。</p>
+        <p class="page-hint">维护个人博客的「关于」「归档」与主站图床展示配置。</p>
       </div>
       <div class="head-actions">
         <button type="button" class="platform-btn-ghost" :disabled="loading" @click="load">
@@ -127,7 +127,7 @@
       </div>
     </section>
 
-    <section v-else class="platform-panel form-panel">
+    <section v-else-if="activeTab === 'archive'" class="platform-panel form-panel">
       <div class="form-grid">
         <label>标题
           <input v-model="archive.title" type="text" />
@@ -150,6 +150,50 @@
         </label>
       </div>
     </section>
+
+    <section v-else class="platform-panel form-panel">
+      <p class="page-hint">主站首页「档案 / 图床」轮播图，点击保存后全站生效。</p>
+
+      <div class="sticker-toolbar">
+        <button
+          type="button"
+          class="platform-btn-primary"
+          :disabled="uploadingBa"
+          @click="baFileInput?.click()"
+        >
+          {{ uploadingBa ? '上传中…' : '上传图片' }}
+        </button>
+        <select v-model="selectedBaPath" class="library-select">
+          <option value="">从默认图库选择…</option>
+          <option v-for="item in availableBaImages" :key="item.path" :value="item.path">
+            {{ item.label }} · {{ item.path }}
+          </option>
+        </select>
+        <button
+          type="button"
+          class="platform-btn-ghost"
+          :disabled="!selectedBaPath"
+          @click="addLibraryBa"
+        >
+          从图库添加
+        </button>
+        <button type="button" class="platform-btn-ghost" @click="addBa()">+ 手动添加</button>
+        <input ref="baFileInput" type="file" accept="image/*" hidden @change="onBaFile" />
+      </div>
+
+      <div v-for="(item, index) in platformHome.baStrip" :key="`${item.path}-${index}`" class="sticker-row">
+        <img :src="resolvePublicUrl(item.path)" alt="" />
+        <div class="sticker-fields">
+          <input v-model="item.path" type="text" placeholder="图片路径或 URL" />
+          <input v-model="item.label" type="text" placeholder="标签" />
+        </div>
+        <div class="sticker-ops">
+          <button type="button" class="platform-btn-ghost" :disabled="index === 0" @click="moveBa(index, -1)">↑</button>
+          <button type="button" class="platform-btn-ghost" :disabled="index === platformHome.baStrip.length - 1" @click="moveBa(index, 1)">↓</button>
+          <button type="button" class="platform-btn-ghost danger" @click="platformHome.baStrip.splice(index, 1)">删除</button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -157,10 +201,12 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { aboutGallery } from '../../data/aboutGallery'
 import { resolvePublicUrl } from '../../api/platform.js'
+import { platformBaStrip } from '../../data/platformBaGallery'
 import {
   cloneSitePageContent,
   defaultAboutContent,
   defaultArchiveContent,
+  defaultPlatformHomeContent,
 } from '../../data/sitePageDefaults'
 import { fetchSitePage, saveSitePage } from '../../api/sitePages'
 import { uploadNoteImage } from '../../api/notesAdmin'
@@ -168,19 +214,24 @@ import { uploadNoteImage } from '../../api/notesAdmin'
 const tabs = [
   { key: 'about', label: '关于' },
   { key: 'archive', label: '归档' },
+  { key: 'platform_home', label: '主站图床' },
 ]
 
 const activeTab = ref('about')
 const loading = ref(false)
 const saving = ref(false)
 const uploadingSticker = ref(false)
+const uploadingBa = ref(false)
 const message = ref('')
 const messageType = ref('ok')
 const selectedLibraryPath = ref('')
+const selectedBaPath = ref('')
 const stickerFileInput = ref(null)
+const baFileInput = ref(null)
 
 const about = reactive(cloneSitePageContent(defaultAboutContent))
 const archive = reactive(cloneSitePageContent(defaultArchiveContent))
+const platformHome = reactive(cloneSitePageContent(defaultPlatformHomeContent))
 
 const aboutTagsText = computed({
   get: () => about.acgTags.join(' / '),
@@ -208,6 +259,11 @@ const availableStickers = computed(() => {
   return aboutGallery.filter((item) => !selected.has(item.path))
 })
 
+const availableBaImages = computed(() => {
+  const selected = new Set(platformHome.baStrip.map((item) => item.path))
+  return platformBaStrip.filter((item) => !selected.has(item.path))
+})
+
 function notify(text, type = 'ok') {
   message.value = text
   messageType.value = type
@@ -217,9 +273,10 @@ async function load() {
   loading.value = true
   message.value = ''
   try {
-    const [aboutResult, archiveResult] = await Promise.allSettled([
+    const [aboutResult, archiveResult, homeResult] = await Promise.allSettled([
       fetchSitePage('about'),
       fetchSitePage('archive'),
+      fetchSitePage('platform_home'),
     ])
     if (aboutResult.status === 'fulfilled' && aboutResult.value?.content) {
       Object.assign(about, cloneSitePageContent(defaultAboutContent), aboutResult.value.content)
@@ -227,7 +284,10 @@ async function load() {
     if (archiveResult.status === 'fulfilled' && archiveResult.value?.content) {
       Object.assign(archive, cloneSitePageContent(defaultArchiveContent), archiveResult.value.content)
     }
-    const failed = [aboutResult, archiveResult].some((item) => item.status === 'rejected')
+    if (homeResult.status === 'fulfilled' && homeResult.value?.content) {
+      Object.assign(platformHome, cloneSitePageContent(defaultPlatformHomeContent), homeResult.value.content)
+    }
+    const failed = [aboutResult, archiveResult, homeResult].some((item) => item.status === 'rejected')
     notify(failed ? '部分配置加载失败，已显示默认值' : '配置已加载')
   } finally {
     loading.value = false
@@ -288,14 +348,49 @@ async function onStickerFile(event) {
   }
 }
 
+function addBa(path = '', label = '') {
+  platformHome.baStrip.push({ path: path.trim(), label: label.trim() })
+}
+
+function addLibraryBa() {
+  const item = platformBaStrip.find((entry) => entry.path === selectedBaPath.value)
+  if (item) {
+    addBa(item.path, item.label)
+    selectedBaPath.value = ''
+  }
+}
+
+function moveBa(index, direction) {
+  const target = index + direction
+  if (target < 0 || target >= platformHome.baStrip.length) return
+  const [item] = platformHome.baStrip.splice(index, 1)
+  platformHome.baStrip.splice(target, 0, item)
+}
+
+async function onBaFile(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  uploadingBa.value = true
+  try {
+    const data = await uploadNoteImage(file)
+    addBa(data.url, stickerLabelFromFileName(file.name))
+    notify('图片已上传')
+  } catch (err) {
+    notify(err.message || '图片上传失败', 'error')
+  } finally {
+    uploadingBa.value = false
+    event.target.value = ''
+  }
+}
+
+const tabLabels = { about: '关于', archive: '归档', platform_home: '主站图床' }
+
 async function saveActive() {
   saving.value = true
   try {
-    const content = activeTab.value === 'about'
-      ? cloneSitePageContent(about)
-      : cloneSitePageContent(archive)
-    await saveSitePage(activeTab.value, content)
-    notify(`${activeTab.value === 'about' ? '关于' : '归档'}配置已保存`)
+    const sources = { about, archive, platform_home: platformHome }
+    await saveSitePage(activeTab.value, cloneSitePageContent(sources[activeTab.value]))
+    notify(`${tabLabels[activeTab.value]}配置已保存`)
   } catch (err) {
     notify(err.message || '保存失败', 'error')
   } finally {

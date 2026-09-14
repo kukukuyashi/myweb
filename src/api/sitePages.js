@@ -27,12 +27,14 @@ async function request(path, options = {}) {
   return unwrap(json)
 }
 
+const PAGE_KEYS = ['about', 'archive', 'platform_home']
+
 export function fetchSitePage(pageKey) {
-  if (!['about', 'archive'].includes(pageKey)) throw new Error('不支持的页面配置')
+  if (!PAGE_KEYS.includes(pageKey)) throw new Error('不支持的页面配置')
   return request(`/${pageKey}`)
 }
 
 export function saveSitePage(pageKey, content) {
-  if (!['about', 'archive'].includes(pageKey)) throw new Error('不支持的页面配置')
+  if (!PAGE_KEYS.includes(pageKey)) throw new Error('不支持的页面配置')
   return request(`/${pageKey}`, { method: 'PUT', body: JSON.stringify({ content }) })
 }

@@ -121,8 +121,7 @@
       <p class="section-lead">
         碧蓝档案与其它 ACG 收藏，点击可预览大图。
       </p>
-      <BaStripCarousel :items="platformBaStrip" @select="openLightbox" />
-      <p class="archive-note">※ 以上图片仅供个人收藏展示，路径位于 <code>img/BA/</code></p>
+      <BaStripCarousel :items="baStrip" @select="openLightbox" />
     </section>
 
     <!-- 留言板 -->
@@ -285,10 +284,10 @@
         <button type="button" class="lb-nav lb-prev" aria-label="上一张" @click.stop="shiftLightbox(-1)">‹</button>
         <figure class="lb-figure">
           <img
-            :src="imgUrl(platformBaStrip[lightboxIndex].path)"
-            :alt="platformBaStrip[lightboxIndex].label"
+            :src="imgUrl(baStrip[lightboxIndex].path)"
+            :alt="baStrip[lightboxIndex].label"
           >
-          <figcaption>[ {{ platformBaStrip[lightboxIndex].label }} ]</figcaption>
+          <figcaption>[ {{ baStrip[lightboxIndex].label }} ]</figcaption>
         </figure>
         <button type="button" class="lb-nav lb-next" aria-label="下一张" @click.stop="shiftLightbox(1)">›</button>
       </div>
@@ -306,7 +305,6 @@ import PlatformOnboarding from '../../components/PlatformOnboarding.vue'
 import { usePageMeta } from '../../composables/usePageMeta'
 import { useRevealOnScroll } from '../../composables/useRevealOnScroll'
 import {
-  platformBaStrip,
   platformHeroInk,
   platformHeroTicker,
   platformLaunchDate,
@@ -318,6 +316,8 @@ import {
 } from '../../data/platformBaGallery.js'
 import { guestboardExamples } from '../../data/social.js'
 import { imgUrl, profile as siteProfile } from '../../data/profile.js'
+import { cloneSitePageContent, defaultPlatformHomeContent } from '../../data/sitePageDefaults.js'
+import { fetchSitePage } from '../../api/sitePages.js'
 import { thumbUrl, onThumbError } from '../../utils/thumbs.js'
 import {
   createQaMessage,
@@ -345,6 +345,9 @@ const token = ref(getPlatformToken())
 const profile = ref(null)
 const stats = ref(null)
 const lightboxIndex = ref(-1)
+
+/** 档案 / 图床轮播 — 可在管理台「页面管理 · 主站图床」维护 */
+const baStrip = ref(cloneSitePageContent(defaultPlatformHomeContent).baStrip)
 
 const qaList = ref([])
 const qaName = ref('')
@@ -392,8 +395,23 @@ function closeLightbox() {
 }
 
 function shiftLightbox(delta) {
-  const n = platformBaStrip.length
+  const n = baStrip.value.length
+  if (!n) return
   lightboxIndex.value = (lightboxIndex.value + delta + n) % n
+}
+
+async function loadBaStrip() {
+  try {
+    const data = await fetchSitePage('platform_home')
+    const items = data?.content?.baStrip
+    if (Array.isArray(items) && items.length) {
+      const clean = items
+        .filter((item) => item && item.path)
+        .map((item) => ({ path: String(item.path), label: String(item.label || '') }))
+      if (clean.length) baStrip.value = clean
+    }
+  } catch {
+  }
 }
 
 async function loadQa() {
@@ -465,7 +483,7 @@ async function loadProfileAndStats() {
 
 onMounted(async () => {
   window.addEventListener('keydown', onKeydown)
-  await Promise.all([loadProfileAndStats(), loadQa(), loadRecentPosts()])
+  await Promise.all([loadProfileAndStats(), loadQa(), loadRecentPosts(), loadBaStrip()])
 })
 
 onUnmounted(() => {
@@ -836,17 +854,6 @@ onUnmounted(() => {
   font-family: var(--mono);
   font-size: 0.62rem;
   color: var(--text-muted);
-}
-
-.archive-note {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin: 1rem 0 0;
-}
-
-.archive-note code {
-  color: var(--orange);
 }
 
 .work-grid {

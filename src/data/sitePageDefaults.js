@@ -1,4 +1,5 @@
 import { aboutGallery } from './aboutGallery'
+import { platformBaStrip } from './platformBaGallery'
 import { profile } from './profile'
 
 export const defaultAboutContent = {
@@ -30,6 +31,10 @@ export const defaultArchiveContent = {
   postLimit: 0,
   showStats: true,
   showCategoryPanel: true,
+}
+
+export const defaultPlatformHomeContent = {
+  baStrip: platformBaStrip.map((item) => ({ ...item })),
 }
 
 export function cloneSitePageContent(content) {
