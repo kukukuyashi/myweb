@@ -9,6 +9,16 @@ export const SITE_DESCRIPTION = 'Cyinc 的个人全栈站：前端/后端学习�
 
 export const posts = [
   {
+    id: 30,
+    title: '博客性能优化实录：从 curl 探测到 HTTP/2 与缓存策略',
+    date: '2026-09-14',
+    category: '部署',
+    tags: ['性能优化', 'Nginx', '缓存', 'HTTP2', 'CDN'],
+    excerpt: '访客反馈站点偏慢的完整排查与修复：curl 实测响应头、ALPN 探 HTTP/2、解析 .git/index 定位 404 根因，以及 no-store/no-cache/immutable 缓存策略的差异。',
+    file: '博客性能优化实录 从curl探测到HTTP2与缓存策略.html',
+    cover: 'img/bkm/2.jfif',
+  },
+  {
     id: 29,
     title: 'Git 与 GitHub入门笔记',
     date: '2026-07-01',

@@ -5,7 +5,15 @@
     <link>https://cyinc.ink/myweb/</link>
     <description>Cyinc 的个人全栈站：前端/后端学习笔记、论坛、OST 音乐室、追番表、番茄钟。Vue + FastAPI + MySQL + Redis，欢迎留言交流。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 14 Sep 2026 00:46:36 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 14 Sep 2026 03:26:41 GMT</lastBuildDate>
+  <item>
+    <title>博客性能优化实录：从 curl 探测到 HTTP/2 与缓存策略</title>
+    <link>https://cyinc.ink/myweb/content/30</link>
+    <guid isPermaLink="true">https://cyinc.ink/myweb/content/30</guid>
+    <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+    <description>访客反馈站点偏慢的完整排查与修复：curl 实测响应头、ALPN 探 HTTP/2、解析 .git/index 定位 404 根因，以及 no-store/no-cache/immutable 缓存策略的差异。</description>
+    <category>部署</category>
+  </item>
   <item>
     <title>Git 与 GitHub入门笔记</title>
     <link>https://cyinc.ink/myweb/content/29</link>
