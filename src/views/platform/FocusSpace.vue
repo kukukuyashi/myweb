@@ -381,6 +381,7 @@ let audioContext = null
 const backgrounds = [
   { label: '默认氛围', src: imgUrl('img/pomo-focus-background-2k.mp4') },
   { label: '动漫氛围', src: imgUrl('img/pomo-anime-background-2k.mp4') },
+  { label: '书房氛围', src: imgUrl('img/pomo-programming-background-2k.mp4') },
 ]
 
 const backgroundVideo = computed(() => backgrounds[backgroundIndex.value % backgrounds.length].src)
