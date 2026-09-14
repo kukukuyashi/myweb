@@ -57,12 +57,15 @@ export function requirePlatformToken() {
   return token
 }
 
-export async function platformFetch(path, { method = 'GET', body, auth = false, adminAuth = false } = {}) {
+export async function platformFetch(path, { method = 'GET', body, auth = false, adminAuth = false, optionalAuth = false } = {}) {
   const headers = { 'Content-Type': 'application/json; charset=utf-8' }
   if (auth) {
     headers.Authorization = `Bearer ${requirePlatformToken()}`
   } else if (adminAuth) {
     headers.Authorization = `Bearer ${getNotesAdminToken()}`
+  } else if (optionalAuth) {
+    const token = getPlatformToken()
+    if (token) headers.Authorization = `Bearer ${token}`
   }
   const res = await fetch(`${BASE}${path}`, {
     method,
@@ -440,10 +443,15 @@ export async function fetchQaMessages(limit = 20) {
   return platformFetch(`/qa/messages?limit=${limit}`)
 }
 
+export async function fetchQaBoardStatus() {
+  return platformFetch('/qa/board-status')
+}
+
 export async function createQaMessage(payload) {
   return platformFetch('/qa/messages', {
     method: 'POST',
     body: payload,
+    optionalAuth: true,
   })
 }
 export async function fetchStudyRoomMessages({ before, limit = 50 } = {}) {

@@ -123,6 +123,7 @@ const navGroups = [
     items: [
       { label: '数据管理', icon: '▤', to: '/admin/data' },
       { label: '聊天室管理', icon: '◉', to: '/admin/study-room' },
+      { label: '留言板', icon: '✉', to: '/admin/qa' },
     ],
   },
 ]

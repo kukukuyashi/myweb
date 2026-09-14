@@ -134,7 +134,11 @@
         友人A：这里可以留言吗？<br>可以，随便写点什么～
       </p>
 
-      <form class="guestboard-form" @submit.prevent="submitQa">
+      <p v-if="!qaBoard.submit_enabled" class="muted">留言板暂时关闭，稍后再来看看～</p>
+      <p v-else-if="qaBoard.require_login && !qaLoggedIn" class="muted">
+        留言板现在需要登录后才能发言，<router-link to="/app/login">去登录 →</router-link>
+      </p>
+      <form v-else class="guestboard-form" @submit.prevent="submitQa">
         <div class="guestboard-form-row">
           <input v-model="qaName" type="text" maxlength="50" placeholder="昵称（可选）" class="guestboard-input">
           <button type="submit" class="btn-primary" :disabled="qaLoading">
@@ -324,6 +328,7 @@ import {
   fetchPomodoroStats,
   fetchPosts,
   fetchProfile,
+  fetchQaBoardStatus,
   fetchQaMessages,
   getPlatformToken,
 } from '../../api/platform.js'
@@ -354,6 +359,8 @@ const qaName = ref('')
 const qaContent = ref('')
 const qaLoading = ref(false)
 const qaError = ref('')
+const qaBoard = ref({ submit_enabled: true, require_login: false })
+const qaLoggedIn = computed(() => Boolean(token.value))
 
 const recentPosts = ref([])
 const postsLoading = ref(true)
@@ -426,6 +433,14 @@ async function loadQa() {
   }
 }
 
+async function loadQaStatus() {
+  try {
+    const json = await fetchQaBoardStatus()
+    if (json && json.data) qaBoard.value = json.data
+  } catch {
+  }
+}
+
 async function loadRecentPosts() {
   postsLoading.value = true
   try {
@@ -483,7 +498,7 @@ async function loadProfileAndStats() {
 
 onMounted(async () => {
   window.addEventListener('keydown', onKeydown)
-  await Promise.all([loadProfileAndStats(), loadQa(), loadRecentPosts(), loadBaStrip()])
+  await Promise.all([loadProfileAndStats(), loadQa(), loadQaStatus(), loadRecentPosts(), loadBaStrip()])
 })
 
 onUnmounted(() => {

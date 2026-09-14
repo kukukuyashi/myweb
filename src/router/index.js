@@ -247,6 +247,12 @@ const routes = [
         component: () => import('../views/admin/StudyRoomAdmin.vue'),
         meta: { title: '聊天室管理' },
       },
+      {
+        path: 'qa',
+        name: 'QaAdmin',
+        component: () => import('../views/admin/QaAdmin.vue'),
+        meta: { title: '留言板设置' },
+      },
     ],
   },
   {
