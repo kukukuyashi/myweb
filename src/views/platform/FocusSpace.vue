@@ -1,7 +1,7 @@
 <template>
   <section
     class="focus-room"
-    :class="[`focus-room--${currentMode}`, { 'focus-room--running': isRunning }]"
+    :class="[`focus-room--${currentMode}`, { 'focus-room--running': isRunning, 'focus-room--immersive': immersive }]"
   >
     <Transition name="focus-background-fade">
       <video
@@ -47,15 +47,6 @@
           @click="chatWindowOpen = !chatWindowOpen"
         >
           <span aria-hidden="true">💬</span>
-        </button>
-        <button
-          type="button"
-          class="focus-top-button"
-          :aria-label="`切换背景，当前：${backgroundLabel}`"
-          :title="`切换背景，当前：${backgroundLabel}`"
-          @click="toggleBackground"
-        >
-          <span aria-hidden="true">◐</span>
         </button>
         <button
           type="button"
@@ -191,6 +182,33 @@
         <StudyRoomChatPanel />
       </FloatingWindow>
     </main>
+
+    <button
+      type="button"
+      class="focus-bg-arrow focus-bg-arrow--prev"
+      :aria-label="`上一张背景，当前：${backgroundLabel}`"
+      title="上一张背景"
+      @click="switchBackground(-1)"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+    <button
+      type="button"
+      class="focus-bg-arrow focus-bg-arrow--next"
+      :aria-label="`下一张背景，当前：${backgroundLabel}`"
+      title="下一张背景"
+      @click="switchBackground(1)"
+    >
+      <span aria-hidden="true">›</span>
+    </button>
+
+    <p v-if="immersive" class="focus-immersive-hint">移动鼠标显示控件</p>
+
+    <div v-if="immersive" class="focus-immersive-capsule" aria-live="polite">
+      <strong>{{ formattedTime }}</strong>
+      <span>{{ currentModeLabel }}</span>
+      <i><b :style="{ width: `${Math.round(progress * 100)}%` }"></b></i>
+    </div>
 
     <Teleport to="body">
       <div v-if="settingsOpen" class="focus-modal-backdrop" @click.self="settingsOpen = false">
@@ -377,6 +395,8 @@ const historyRows = ref([])
 const backgroundIndex = ref(0)
 let tickTimer = null
 let audioContext = null
+const immersive = ref(false)
+let immersiveIdleTimer = null
 
 const backgrounds = [
   { label: '默认氛围', src: imgUrl('img/pomo-focus-background-2k.mp4') },
@@ -592,8 +612,21 @@ function toggleFullscreen() {
   }
 }
 
-function toggleBackground() {
-  backgroundIndex.value = (backgroundIndex.value + 1) % backgrounds.length
+function switchBackground(step) {
+  backgroundIndex.value = (backgroundIndex.value + step + backgrounds.length) % backgrounds.length
+}
+
+// 计时运行中指针静置 ~3s 进入沉浸模式：隐藏界面只剩视频与计时环
+function scheduleImmersive() {
+  if (immersiveIdleTimer) window.clearTimeout(immersiveIdleTimer)
+  immersiveIdleTimer = window.setTimeout(() => {
+    if (isRunning.value && !settingsOpen.value) immersive.value = true
+  }, 3200)
+}
+
+function wakeImmersive() {
+  if (immersive.value) immersive.value = false
+  scheduleImmersive()
 }
 
 function onFullscreenChange() {
@@ -653,6 +686,7 @@ async function loadStats() {
 }
 
 function handleKeydown(event) {
+  wakeImmersive()
   if (event.code === 'Escape') {
     settingsOpen.value = false
     chatWindowOpen.value = false
@@ -673,6 +707,15 @@ watch(
 )
 watch(settingsOpen, (open) => {
   document.body.classList.toggle('focus-modal-open', open)
+  if (open) immersive.value = false
+})
+watch(isRunning, (running) => {
+  if (running) {
+    scheduleImmersive()
+  } else {
+    immersive.value = false
+    if (immersiveIdleTimer) window.clearTimeout(immersiveIdleTimer)
+  }
 })
 
 onMounted(async () => {
@@ -680,6 +723,10 @@ onMounted(async () => {
   remainingSeconds.value = totalSeconds.value
   document.addEventListener('fullscreenchange', onFullscreenChange)
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('pointermove', wakeImmersive, { passive: true })
+  window.addEventListener('pointerdown', wakeImmersive, { passive: true })
+  window.addEventListener('wheel', wakeImmersive, { passive: true })
+  window.addEventListener('touchstart', wakeImmersive, { passive: true })
   tickTimer = window.setInterval(() => {
     if (!isRunning.value) return
     syncRemainingFromEnd()
@@ -694,7 +741,12 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.body.classList.remove('focus-modal-open')
   window.clearInterval(tickTimer)
+  if (immersiveIdleTimer) window.clearTimeout(immersiveIdleTimer)
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('pointermove', wakeImmersive)
+  window.removeEventListener('pointerdown', wakeImmersive)
+  window.removeEventListener('wheel', wakeImmersive)
+  window.removeEventListener('touchstart', wakeImmersive)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
 })
 
@@ -741,8 +793,9 @@ usePageMeta({
 }
 .focus-overlay {
   background:
-    radial-gradient(circle at 50% 42%, rgba(10, 12, 16, 0.04), rgba(8, 10, 14, 0.62)),
-    linear-gradient(180deg, rgba(8, 10, 14, 0.42), rgba(7, 9, 13, 0.78));
+    radial-gradient(circle at 50% 42%, rgba(10, 12, 16, 0.05), rgba(8, 10, 14, 0.52)),
+    linear-gradient(180deg, rgba(8, 10, 14, 0.22), rgba(7, 9, 13, 0.58));
+  transition: opacity 0.9s ease;
 }
 .focus-aura {
   pointer-events: none;
@@ -751,7 +804,123 @@ usePageMeta({
     radial-gradient(circle at 78% 16%, rgba(116, 192, 252, 0.10), transparent 34%),
     radial-gradient(circle at 18% 82%, rgba(255, 158, 128, 0.09), transparent 32%);
   opacity: 0.92;
-  transition: background 0.6s ease;
+  transition: background 0.6s ease, opacity 0.9s ease;
+}
+/* 沉浸模式：计时运行 + 指针静置时，隐藏界面只剩视频与计时环 */
+.focus-room--immersive,
+.focus-room--immersive * { cursor: none !important; }
+.focus-room--immersive .focus-topbar,
+.focus-room--immersive .focus-controls,
+.focus-room--immersive .focus-timer,
+.focus-room--immersive .focus-rhythm-window,
+.focus-room--immersive .focus-chat-window,
+.focus-room--immersive .focus-bg-arrow {
+  opacity: 0;
+  pointer-events: none;
+}
+.focus-room--immersive .focus-overlay { opacity: 0.5; }
+.focus-room--immersive .focus-aura { opacity: 0.45; }
+.focus-topbar { transition: opacity 0.6s ease, transform 0.6s ease; }
+.focus-controls { transition: opacity 0.6s ease; }
+.focus-immersive-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 9vh;
+  transform: translateX(-50%);
+  z-index: 15;
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+  animation: focusHintFade 3.6s ease forwards;
+}
+@keyframes focusHintFade {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+.focus-immersive-capsule {
+  position: fixed;
+  left: 50%;
+  bottom: 4vh;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.45em 1.1em;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.42);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.focus-immersive-capsule strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.focus-immersive-capsule span {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+.focus-immersive-capsule i {
+  width: 56px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+.focus-immersive-capsule i b {
+  display: block;
+  height: 100%;
+  background: var(--focus-accent);
+  transition: width 0.3s linear;
+}
+@media (max-width: 640px) {
+  .focus-immersive-capsule {
+    bottom: 12vh;
+    font-size: 0.78rem;
+  }
+  .focus-immersive-capsule i { width: 40px; }
+}
+.focus-rhythm-window,
+.focus-chat-window { transition: opacity 0.6s ease; }
+.focus-bg-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 14;
+  width: 46px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(10, 12, 18, 0.28);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.6s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.focus-bg-arrow:hover {
+  background: rgba(10, 12, 18, 0.55);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.focus-bg-arrow--prev { left: 20px; }
+.focus-bg-arrow--next { right: 20px; }
+@media (max-width: 640px) {
+  .focus-bg-arrow { width: 38px; height: 56px; font-size: 1.3rem; }
+  .focus-bg-arrow--prev { left: 10px; }
+  .focus-bg-arrow--next { right: 10px; }
 }
 .focus-topbar {
   position: fixed;
@@ -939,29 +1108,30 @@ usePageMeta({
   position: relative;
   width: min(370px, 38vw);
   aspect-ratio: 1;
+  transition: opacity 0.6s ease;
 }
 .focus-ring {
   width: 100%;
   height: 100%;
   transform: rotate(-90deg);
 }
-.focus-ring__aura { fill: rgba(255, 255, 255, 0.025); }
+.focus-ring__aura { fill: rgba(255, 255, 255, 0.015); }
 .focus-ring__ticks line {
-  stroke: rgba(255, 255, 255, 0.16);
+  stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 1;
   stroke-linecap: round;
 }
-.focus-ring__ticks line:nth-child(5n) { stroke: rgba(255, 255, 255, 0.28); }
+.focus-ring__ticks line:nth-child(5n) { stroke: rgba(255, 255, 255, 0.16); }
 .focus-ring__track,
 .focus-ring__progress {
   fill: none;
-  stroke-width: 12;
+  stroke-width: 8;
   stroke-linecap: round;
 }
-.focus-ring__track { stroke: rgba(255, 255, 255, 0.10); }
+.focus-ring__track { stroke: rgba(255, 255, 255, 0.08); }
 .focus-ring__progress {
   stroke: var(--focus-accent);
-  filter: drop-shadow(0 0 12px var(--focus-accent-soft));
+  filter: drop-shadow(0 0 6px var(--focus-accent-soft));
   transition: stroke-dashoffset 0.3s linear;
 }.focus-time {
   position: absolute;
