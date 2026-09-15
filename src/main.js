@@ -35,7 +35,22 @@ if (redirectPath) {
   router.replace(redirectPath)
 }
 
-ensurePostsCatalogLoaded().finally(() => {
+// 博客目录（posts.json）只在博客相关路由需要就绪后再挂载；
+// /app、/admin 等平台页不消费该目录，直接挂载以加快首屏
+const base = import.meta.env.BASE_URL
+const initialPath = (redirectPath || window.location.pathname).replace(base, '/')
+const needsPostsCatalog =
+  !initialPath.startsWith('/app') &&
+  !initialPath.startsWith('/admin')
+
+const mount = () => {
   app.mount('#app')
   hideLoadingScreen()
-})
+}
+
+if (needsPostsCatalog) {
+  ensurePostsCatalogLoaded().finally(mount)
+} else {
+  ensurePostsCatalogLoaded()
+  mount()
+}

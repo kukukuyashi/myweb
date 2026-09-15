@@ -13,8 +13,8 @@
   --platform-topbar-bg: #1a1a2e;
   --platform-topbar-text: #ffffff;
   --content-width: min(1680px, calc(100vw - clamp(3rem, 10vw, 12rem)));
-  --mono: ui-monospace, 'Cascadia Code', 'IBM Plex Mono', monospace;
-  --sans: system-ui, -apple-system, 'Segoe UI', 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --card-background: var(--bg-paper);
   --primary-color: var(--orange);
   --primary-darker: #c44900;

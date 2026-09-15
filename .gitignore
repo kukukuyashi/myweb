@@ -56,3 +56,21 @@ docs/Music/
 *.njsproj
 *.sln
 *.sw?
+
+# 本地临时构建/调试产物与压缩包（不入库，可安全删除）
+.tmp*
+*.zip
+*.tar.gz
+/_*
+/'
+/study/
+/skills-lock.json
+rhine.*
+rhine-*
+.miku.*
+.codex/
+.codex-*
+agent.md
+*.thumb.thumb.*
+.trae/
+.windsurf/
