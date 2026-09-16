@@ -8,6 +8,7 @@
         :key="backgroundVideo"
         class="focus-background"
         :src="backgroundVideo"
+        :poster="backgroundPoster"
         autoplay
         muted
         loop
@@ -60,9 +61,10 @@
         <button
           type="button"
           class="focus-top-button"
-          :aria-label="musicStore.isPlaying ? '暂停音乐' : '播放音乐'"
-          :title="musicStore.isPlaying ? '暂停音乐' : '播放音乐'"
-          @click="toggleMusic"
+          :class="{ active: musicWindowOpen }"
+          :aria-label="musicWindowOpen ? '关闭音乐面板' : '打开音乐面板'"
+          :title="musicWindowOpen ? '关闭音乐面板' : '音乐面板'"
+          @click="musicWindowOpen = !musicWindowOpen"
         >
           <span aria-hidden="true">{{ musicStore.isPlaying ? '⏸' : '♪' }}</span>
         </button>
@@ -180,6 +182,96 @@
         @close="chatWindowOpen = false"
       >
         <StudyRoomChatPanel />
+      </FloatingWindow>
+
+      <FloatingWindow
+        v-if="musicWindowOpen"
+        class="focus-music-window"
+        eyebrow="MUSIC"
+        title="背景音乐"
+        :width="340"
+        :height="430"
+        :min-width="300"
+        :min-height="340"
+        @close="musicWindowOpen = false"
+      >
+        <div class="focus-music-panel">
+          <div class="focus-music-panel__now">
+            <span class="focus-music-panel__state" :class="{ playing: musicStore.isPlaying }">
+              {{ musicStore.isPlaying ? '▶' : '❚❚' }}
+            </span>
+            <p :title="musicStore.currentSong?.title">
+              {{ musicStore.currentSong?.title || '未选曲 · 从下方列表挑一首' }}
+            </p>
+          </div>
+
+          <div class="focus-music-panel__seek">
+            <span>{{ fmtMusicTime(musicStore.currentTime) }}</span>
+            <input
+              type="range"
+              min="0"
+              :max="musicStore.duration || 0"
+              step="0.1"
+              :value="musicStore.currentTime"
+              :disabled="!musicStore.duration"
+              aria-label="播放进度"
+              @input="onMusicSeekInput"
+              @change="onMusicSeekEnd"
+            >
+            <span>{{ fmtMusicTime(musicStore.duration) }}</span>
+          </div>
+
+          <div class="focus-music-panel__controls">
+            <button
+              type="button"
+              :disabled="!musicStore.hasPrev()"
+              aria-label="上一首"
+              @click="playPrevTrack"
+            >⏮</button>
+            <button
+              type="button"
+              class="focus-music-panel__play"
+              :aria-label="musicStore.isPlaying ? '暂停' : '播放'"
+              @click="toggleMusic"
+            >{{ musicStore.isPlaying ? '⏸' : '▶' }}</button>
+            <button
+              type="button"
+              :disabled="!musicStore.hasNext()"
+              aria-label="下一首"
+              @click="playNextTrack"
+            >⏭</button>
+          </div>
+
+          <label class="focus-music-panel__vol">
+            <span>音量 {{ musicVolumePercent }}%</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              :value="musicStore.volume"
+              aria-label="音量"
+              @input="setMusicVolume"
+            >
+          </label>
+
+          <div class="focus-music-panel__list">
+            <template v-for="group in musicGroups" :key="group.source">
+              <p class="focus-music-panel__album">{{ group.source }}</p>
+              <button
+                v-for="track in group.tracks"
+                :key="track.index"
+                type="button"
+                class="focus-music-panel__track"
+                :class="{ active: track.index === musicStore.currentIndex }"
+                @click="playMusicTrack(track.index)"
+              >
+                <span>{{ track.name }}</span>
+                <i v-if="track.index === musicStore.currentIndex && musicStore.isPlaying" aria-hidden="true">▶</i>
+              </button>
+            </template>
+          </div>
+        </div>
       </FloatingWindow>
     </main>
 
@@ -352,6 +444,8 @@ import StudyRoomChatPanel from '../../components/platform/StudyRoomChatPanel.vue
 import { useMusicStore } from '../../store'
 import { playTrackAtIndex, pausePlayback } from '../../composables/useMusicPlayback'
 import { getGlobalAudio } from '../../utils/musicAudio'
+import { musicTracks } from '../../data/musicTracks'
+import { buildTrackList, groupTracksByAlbum } from '../../utils/music'
 import {
   createPomodoroSession,
   fetchPomodoroStats,
@@ -370,9 +464,10 @@ const modes = [
 const storageKey = 'cyinc-focus-state'
 const musicStore = useMusicStore()
 const currentMusicTitle = computed(() =>
-  musicStore.currentSong?.title || '未选曲 · 点击顶部音乐随机播放'
+  musicStore.currentSong?.title || '未选曲 · 点击顶部 ♪ 打开音乐面板'
 )
 const musicVolumePercent = computed(() => Math.round(musicStore.volume * 100))
+const musicGroups = computed(() => groupTracksByAlbum(buildTrackList(musicTracks)))
 const currentMode = ref('focus')
 const isRunning = ref(false)
 const remainingSeconds = ref(25 * 60)
@@ -388,6 +483,7 @@ const settings = ref({ focus: 25, short: 5, long: 15 })
 const settingsOpen = ref(false)
 const rhythmWindowOpen = ref(true)
 const chatWindowOpen = ref(false)
+const musicWindowOpen = ref(false)
 const newTask = ref('')
 const dailyGoal = ref(8)
 const tasks = ref([])
@@ -399,12 +495,25 @@ const immersive = ref(false)
 let immersiveIdleTimer = null
 
 const backgrounds = [
-  { label: '默认氛围', src: imgUrl('img/pomo-focus-background-2k.mp4') },
-  { label: '动漫氛围', src: imgUrl('img/pomo-anime-background-2k.mp4') },
-  { label: '书房氛围', src: imgUrl('img/pomo-programming-background-2k.mp4') },
+  {
+    label: '默认氛围',
+    src: imgUrl('img/pomo-focus-background-2k.mp4'),
+    poster: imgUrl('img/pomo-focus-poster.webp'),
+  },
+  {
+    label: '动漫氛围',
+    src: imgUrl('img/pomo-anime-background-2k.mp4'),
+    poster: imgUrl('img/pomo-anime-poster.webp'),
+  },
+  {
+    label: '书房氛围',
+    src: imgUrl('img/pomo-programming-background-2k.mp4'),
+    poster: imgUrl('img/pomo-programming-poster.webp'),
+  },
 ]
 
 const backgroundVideo = computed(() => backgrounds[backgroundIndex.value % backgrounds.length].src)
+const backgroundPoster = computed(() => backgrounds[backgroundIndex.value % backgrounds.length].poster)
 const backgroundLabel = computed(() => backgrounds[backgroundIndex.value % backgrounds.length].label)
 
 const currentModeLabel = computed(() => modes.find(mode => mode.key === currentMode.value)?.label || '')
@@ -584,11 +693,18 @@ function removeTask(id) {
   tasks.value = tasks.value.filter(task => task.id !== id)
 }
 
+function ensureMusicPlaylist() {
+  if (!musicStore.playlist.length) {
+    musicStore.setPlaylist(buildTrackList(musicTracks))
+  }
+}
+
 function toggleMusic() {
   if (musicStore.isPlaying) {
     pausePlayback()
     return
   }
+  ensureMusicPlaylist()
   if (!musicStore.playlist.length) return
   const index = musicStore.currentIndex >= 0
     ? musicStore.currentIndex
@@ -602,6 +718,40 @@ function setMusicVolume(event) {
   musicStore.setVolume(volume)
   const audio = getGlobalAudio()
   if (audio) audio.volume = musicStore.volume
+}
+
+function playMusicTrack(index) {
+  ensureMusicPlaylist()
+  void playTrackAtIndex(index)
+}
+
+function playPrevTrack() {
+  if (musicStore.hasPrev()) void playTrackAtIndex(musicStore.currentIndex - 1)
+}
+
+function playNextTrack() {
+  if (musicStore.hasNext()) void playTrackAtIndex(musicStore.currentIndex + 1)
+}
+
+function onMusicSeekInput(event) {
+  const t = Number(event.target.value)
+  if (Number.isFinite(t)) musicStore.setCurrentTime(t)
+}
+
+function onMusicSeekEnd(event) {
+  const t = Number(event.target.value)
+  const audio = getGlobalAudio()
+  if (!Number.isFinite(t) || !audio) return
+  audio.currentTime = t
+  musicStore.setCurrentTime(t)
+  musicStore.saveState()
+}
+
+function fmtMusicTime(sec) {
+  if (!sec || !Number.isFinite(sec)) return '0:00'
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 function toggleFullscreen() {
@@ -814,6 +964,7 @@ usePageMeta({
 .focus-room--immersive .focus-timer,
 .focus-room--immersive .focus-rhythm-window,
 .focus-room--immersive .focus-chat-window,
+.focus-room--immersive .focus-music-window,
 .focus-room--immersive .focus-bg-arrow {
   opacity: 0;
   pointer-events: none;
@@ -852,9 +1003,8 @@ usePageMeta({
   gap: 0.6em;
   padding: 0.45em 1.1em;
   border-radius: 999px;
-  background: rgba(10, 12, 18, 0.42);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 18, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.85);
   pointer-events: none;
@@ -890,7 +1040,8 @@ usePageMeta({
   .focus-immersive-capsule i { width: 40px; }
 }
 .focus-rhythm-window,
-.focus-chat-window { transition: opacity 0.6s ease; }
+.focus-chat-window,
+.focus-music-window { transition: opacity 0.6s ease; }
 .focus-bg-arrow {
   position: fixed;
   top: 50%;
@@ -900,10 +1051,9 @@ usePageMeta({
   height: 72px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 14px;
-  background: rgba(10, 12, 18, 0.28);
-  backdrop-filter: blur(6px);
+  background: rgba(10, 12, 18, 0.45);
   color: rgba(255, 255, 255, 0.55);
   font-size: 1.7rem;
   line-height: 1;
@@ -1071,6 +1221,179 @@ usePageMeta({
 .focus-chat-window :deep(.study-chat-panel__list) {
   height: 100%;
   min-height: 0;
+}
+.focus-music-window {
+  left: 1.1rem;
+  bottom: 1.1rem;
+  width: min(340px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: min(72vh, 540px);
+}
+.focus-music-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.focus-music-panel__now {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 0.9rem 0.6rem;
+}
+.focus-music-panel__state {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.58rem;
+}
+.focus-music-panel__state.playing {
+  border-color: rgba(255, 209, 102, 0.42);
+  color: var(--focus-accent);
+  background: rgba(255, 209, 102, 0.12);
+}
+.focus-music-panel__now p {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  color: #fff;
+}
+.focus-music-panel__seek {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.9rem 0.6rem;
+}
+.focus-music-panel__seek span {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.58);
+  min-width: 2rem;
+  font-variant-numeric: tabular-nums;
+}
+.focus-music-panel input[type='range'] {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  outline: none;
+  cursor: pointer;
+}
+.focus-music-panel input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #0b0e13;
+  border-radius: 50%;
+  background: var(--focus-accent);
+  cursor: pointer;
+}
+.focus-music-panel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.9rem 0.6rem;
+}
+.focus-music-panel__controls button {
+  width: 2.15rem;
+  height: 2.15rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.focus-music-panel__controls button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.focus-music-panel__controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.focus-music-panel__controls .focus-music-panel__play {
+  width: 2.6rem;
+  height: 2.6rem;
+  background: var(--focus-accent);
+  border-color: var(--focus-accent);
+  color: #171207;
+  font-size: 0.9rem;
+}
+.focus-music-panel__vol {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.9rem 0.75rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+.focus-music-panel__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.4rem 0.55rem 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.focus-music-panel__album {
+  margin: 0.55rem 0.35rem 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+.focus-music-panel__track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.42rem 0.55rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.76rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.focus-music-panel__track span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-music-panel__track:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.focus-music-panel__track.active {
+  color: var(--focus-accent);
+  background: rgba(255, 209, 102, 0.1);
+}
+.focus-music-panel__track i {
+  font-style: normal;
+  font-size: 0.6rem;
+  flex: 0 0 auto;
 }
 .focus-modes {
   display: flex;
@@ -1600,7 +1923,8 @@ usePageMeta({
     width: min(340px, 82vw);
   }
   .focus-rhythm-window,
-  .focus-chat-window {
+  .focus-chat-window,
+  .focus-music-window {
     right: 0.65rem;
     left: 0.65rem;
     width: auto;
