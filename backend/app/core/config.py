@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     redis_url: str = ""
     dify_api_url: str = ""
     dify_summary_api_key: str = ""
-    dify_chat_api_key: str = ""
     dify_timeout_sec: int = 30
     n8n_webhook_url: str = ""
     n8n_webhook_secret: str = ""

@@ -137,18 +137,6 @@ export async function platformRegister({ username, email, password, code, nickna
   return platformLogin(username, password)
 }
 
-export async function fetchAiStatus() {
-  return platformFetch('/ai/status')
-}
-
-export async function sendAiChat(query, conversationId) {
-  return platformFetch('/ai/chat', {
-    method: 'POST',
-    auth: true,
-    body: { query, conversation_id: conversationId || null },
-  })
-}
-
 export async function fetchProfile() {
   return platformFetch('/users/me', { auth: true })
 }

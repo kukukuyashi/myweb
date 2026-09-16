@@ -227,15 +227,6 @@ docker compose up -d redis
 | GET | `/pomodoro/stats` | 统计 | Bearer |
 | GET | `/pomodoro/timeline` | 按日分组时间线 | Bearer |
 
-### AI 与集成（M3 / M4）
-
-| 方法 | 路径 | 说明 | 鉴权 |
-|------|------|------|------|
-| GET | `/ai/status` | Dify 配置是否就绪 | 否 |
-| POST | `/ai/summary` | 文本摘要 | Bearer |
-| POST | `/ai/chat` | 站内 AI 对话 | Bearer |
-| GET | `/integrations/status` | Dify + n8n 状态 | 否 |
-
 ---
 
 ## 七、环境变量
@@ -295,7 +286,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 | `Access denied for user 'root'` | 密码错，去 phpStudy 数据库页改/查 |
 | `Unknown database 'cyinc'` | 执行 `scripts/init-db.sql` 或 `setup-db.ps1` |
 | 注册 500 / bcrypt 报错 | `pip install passlib[bcrypt]` 或确认 `bcrypt` 已装 |
-| Dify `summary_ready: false` | 检查 `.env` 中 `DIFY_*_API_KEY`，见 cloud-dev 文档 |
+| AI 摘要返回 503 | 检查 `.env` 中 `DIFY_API_URL` / `DIFY_SUMMARY_API_KEY`，见 cloud-dev 文档 |
 | CORS 报错 | 把前端 Origin 加入 `CORS_ORIGINS` |
 | `/pomodoro/timeline` 401 | 需登录，带 Bearer Token |
 

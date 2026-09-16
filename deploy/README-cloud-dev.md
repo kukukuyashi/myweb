@@ -28,7 +28,7 @@ flowchart LR
 
 ---
 
-## 二、Dify Cloud（AI 摘要 + 站内助手）
+## 二、Dify Cloud（AI 摘要 + ACG 文章润色）
 
 ### 1. 注册
 
@@ -41,31 +41,18 @@ flowchart LR
 3. LLM 节点生成摘要，结束节点输出：`summary`、`suggested_tags`（可选）
 4. **发布** → **API 访问** → 复制 **API Key**
 
-### 3. 创建「站内助手」Chatflow
-
-1. **创建应用** → **聊天助手**
-2. 可选：上传知识库（博客 Markdown）
-3. 发布 → 复制 **API Key**
-
-### 4. 写入 `backend/.env`
+### 3. 写入 `backend/.env`
 
 ```env
 DIFY_API_URL=https://api.dify.ai/v1
 DIFY_SUMMARY_API_KEY=app-xxxxxxxx
-DIFY_CHAT_API_KEY=app-yyyyyyyy
 DIFY_TIMEOUT_SEC=60
 ```
 
-重启 uvicorn 后访问：
+### 4. 验证
 
-- `GET http://127.0.0.1:8000/api/v1/ai/status`
-- 或 `GET http://127.0.0.1:8000/api/v1/integrations/status`
-
-`summary_ready` / `chat_ready` 为 `true` 即成功。
-
-### 5. 前端试用
-
-<http://localhost:5173/myweb/ai>（需平台账号登录）
+重启 uvicorn 后，登录平台 → 文章编辑器 → 点「AI 摘要」按钮；  
+或 Swagger 里 `POST /api/v1/posts/{id}/summary`（Bearer）。返回摘要即成功。
 
 ---
 
@@ -135,7 +122,6 @@ ADMIN_PASSWORD_HASH=bcrypt哈希
 
 DIFY_API_URL=https://api.dify.ai/v1
 DIFY_SUMMARY_API_KEY=app-xxx
-DIFY_CHAT_API_KEY=app-yyy
 
 N8N_WEBHOOK_URL=https://xxx.app.n8n.cloud/webhook/post-published
 PUBLIC_SITE_URL=http://127.0.0.1:5173/myweb

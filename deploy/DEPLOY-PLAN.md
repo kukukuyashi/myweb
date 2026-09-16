@@ -148,7 +148,6 @@ PUBLIC_SITE_URL=https://你的域名.com/myweb
 REDIS_URL=redis://redis:6379/0
 
 DIFY_SUMMARY_API_KEY=app-xxx
-DIFY_CHAT_API_KEY=app-yyy
 N8N_WEBHOOK_URL=https://xxx.app.n8n.cloud/webhook/...
 
 # 若开启邮箱注册验证码

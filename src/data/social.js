@@ -13,11 +13,6 @@ export const friendLinks = [
     desc: '项目源码',
   },
   {
-    name: 'Dify',
-    url: 'https://dify.ai/',
-    desc: '站内 AI 助手引擎',
-  },
-  {
     name: 'n8n',
     url: 'https://n8n.io/',
     desc: '发文自动化工作流',

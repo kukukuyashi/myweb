@@ -3,12 +3,11 @@
 > **本机无法装 Docker？** 请用 **方案 A**：[README-cloud-dev.md](./README-cloud-dev.md)（Dify Cloud + n8n Cloud）  
 > 下文为 **ECS 自建**（M6 上线时使用）。
 
-CYINC 平台通过 **Dify HTTP API** 调用两个应用：
+CYINC 平台通过 **Dify HTTP API** 调用一个 Workflow 应用：
 
-| 应用 | 类型 | 环境变量 | FastAPI 路径 |
-|------|------|----------|--------------|
-| 文章摘要 | Workflow | `DIFY_SUMMARY_API_KEY` | `POST /api/v1/ai/summary`、`POST /api/v1/posts/{id}/summary` |
-| 站内助手 | Chatflow + 知识库 | `DIFY_CHAT_API_KEY` | `POST /api/v1/ai/chat` |
+| 应用 | 类型 | 环境变量 | 用途 |
+|------|------|----------|------|
+| 文章摘要 | Workflow | `DIFY_SUMMARY_API_KEY` | `POST /api/v1/posts/{id}/summary`、ACG 机器人文章润色 |
 
 ---
 
@@ -83,32 +82,14 @@ DIFY_SUMMARY_API_KEY=app-xxxxxxxx
 
 ---
 
-## 5. 创建「站内 AI 助手」Chatflow
-
-1. **创建应用** → **聊天助手**（或 Chatflow）
-2. **知识库** → 新建 → 上传博客 Markdown/HTML 转文本
-3. 在应用中关联知识库，开启 RAG
-4. 发布 → 复制 API Key：
-
-```env
-DIFY_CHAT_API_KEY=app-yyyyyyyy
-```
-
-5. 前端访问：<http://localhost:5173/myweb/ai>（需先登录平台账号）
-
----
-
-## 6. 验证
+## 5. 验证
 
 ```powershell
-# 后端健康 + Dify 配置状态
-curl http://127.0.0.1:8000/api/v1/ai/status
-
-# Swagger 登录后测试
-# http://127.0.0.1:8000/api/docs
+# Swagger 登录后测试摘要接口
+# http://127.0.0.1:8000/api/docs → POST /api/v1/posts/{id}/summary
 ```
 
-`ai/status` 返回 `"chat_ready": true` / `"summary_ready": true` 即配置成功。
+返回摘要即配置成功；未配置时接口返回 503。
 
 ---
 
@@ -116,7 +97,6 @@ curl http://127.0.0.1:8000/api/v1/ai/status
 
 - Dify 与 FastAPI **同 ECS 内网**通信，不暴露 Dify 公网
 - Nginx 只反代 CYINC 前端 + `/api`
-- 知识库定期用脚本同步新文章
 
 ---
 
@@ -124,7 +104,6 @@ curl http://127.0.0.1:8000/api/v1/ai/status
 
 | 现象 | 处理 |
 |------|------|
-| `503 Dify 未配置` | 检查 `.env` 三个 DIFY_* 变量，重启 uvicorn |
+| `503 Dify 未配置` | 检查 `.env` 的 `DIFY_API_URL` / `DIFY_SUMMARY_API_KEY`，重启 uvicorn |
 | Workflow 无 outputs | 确认 Dify 结束节点输出变量名为 `summary` |
-| Chat 无 answer | 确认 Chatflow 已发布且 API Key 正确 |
 | Docker 拉取失败 | 配置镜像加速或使用 VPN |

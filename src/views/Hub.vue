@@ -6,7 +6,7 @@
         <header class="hub-header reveal-item" data-reveal>
           <p class="hub-coord">PLATFORM · CYINC v2</p>
           <h1 class="page-title">平台入口</h1>
-          <p class="hub-desc">博客、AI、番茄钟与个人中心 — FastAPI + Dify + n8n 全栈平台。</p>
+          <p class="hub-desc">博客、番茄钟与个人中心 — FastAPI + Dify + n8n 全栈平台。</p>
         </header>
 
         <div class="hub-grid">
@@ -43,7 +43,7 @@ useRevealOnScroll(hubRef)
 
 usePageMeta({
   title: '平台入口',
-  description: 'CYINC 全栈平台 Hub：博客、AI 助手、番茄钟、个人中心。',
+  description: 'CYINC 全栈平台 Hub：博客、番茄钟、个人中心。',
 })
 
 const entries = [
@@ -52,12 +52,6 @@ const entries = [
     tag: 'BLOG',
     title: '技术博客',
     desc: 'Vue 3 静态博客、归档、项目与音乐室。',
-  },
-  {
-    to: '/ai',
-    tag: 'AI · DIFY',
-    title: '站内 AI 助手',
-    desc: '基于 Dify Chatflow，可询问博客与技术栈。',
   },
   {
     to: '/pomo',
