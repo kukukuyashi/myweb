@@ -46,8 +46,10 @@ class StudyRoomOnlineUser(BaseModel):
     username: str
     nickname: str | None = None
     avatar: str | None = None
+    is_admin: bool = False
 
 
 class StudyRoomOnlineResponse(BaseModel):
     count: int
     recent: list[StudyRoomOnlineUser] = Field(default_factory=list)
+    admin_online: bool = False

@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted } from 'vue'
+import { onCursorPreferenceChange, prefersNativeCursor } from '../utils/cursorPreference'
 
 const POINTER_SELECTOR = [
   'a',
@@ -93,6 +94,8 @@ export function useAnimatedCursor() {
   let pendingX = 0
   let pendingY = 0
   let observer = null
+  let active = false
+  let offPrefChange = null
 
   function setPosition(x, y) {
     if (!canvas) return
@@ -198,8 +201,25 @@ export function useAnimatedCursor() {
     })
   }
 
-  onMounted(async () => {
-    if (prefersReducedMotion() || !hasFinePointer()) return
+  function teardown() {
+    if (!active) return
+    active = false
+    document.documentElement.classList.remove('has-animated-cursor')
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseout', onMouseOut)
+    document.removeEventListener('mouseover', onMouseOver)
+    observer?.disconnect()
+    observer = null
+    if (loopRaf) cancelAnimationFrame(loopRaf)
+    loopRaf = 0
+    canvas?.remove()
+    canvas = null
+    ctx = null
+  }
+
+  async function init() {
+    if (active) return
+    if (prefersReducedMotion() || !hasFinePointer() || prefersNativeCursor()) return
 
     const base = `${import.meta.env.BASE_URL || '/'}cursors/`
 
@@ -227,6 +247,9 @@ export function useAnimatedCursor() {
       return
     }
 
+    // 资源加载期间用户可能已切回系统指针
+    if (prefersNativeCursor()) return
+
     canvas = document.createElement('canvas')
     canvas.className = 'animated-cursor'
     canvas.width = size
@@ -239,6 +262,7 @@ export function useAnimatedCursor() {
     ctx = canvas.getContext('2d', { alpha: true })
     document.body.appendChild(canvas)
 
+    active = true
     document.documentElement.classList.add('has-animated-cursor')
     currentType = 'normal'
     lastFrameTime = performance.now()
@@ -256,19 +280,20 @@ export function useAnimatedCursor() {
       attributes: true,
       attributeFilter: ['class'],
     })
+  }
+
+  function onPrefChange(native) {
+    if (native) teardown()
+    else void init()
+  }
+
+  onMounted(() => {
+    void init()
+    offPrefChange = onCursorPreferenceChange(onPrefChange)
   })
 
   onUnmounted(() => {
-    if (!canvas) return
-
-    document.documentElement.classList.remove('has-animated-cursor')
-    document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseout', onMouseOut)
-    document.removeEventListener('mouseover', onMouseOver)
-    observer?.disconnect()
-    if (loopRaf) cancelAnimationFrame(loopRaf)
-    canvas.remove()
-    canvas = null
-    ctx = null
+    offPrefChange?.()
+    teardown()
   })
 }

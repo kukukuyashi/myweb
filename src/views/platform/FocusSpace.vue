@@ -30,6 +30,18 @@
       </div>
       <div class="focus-top-actions">
         <button
+          type="button"
+          class="focus-presence"
+          :title="`当前 ${onlineCount} 人在线${adminOnline ? '，站长也在' : ''} · 点击打开月读聊天`"
+          aria-label="在线状态，点击打开聊天室"
+          @click="chatWindowOpen = true"
+        >
+          <i class="focus-presence__dot" :class="{ live: onlineCount > 0 }" aria-hidden="true"></i>
+          <span>{{ onlineCount }} 在线</span>
+          <i class="focus-presence__dot" :class="{ live: adminOnline }" aria-hidden="true"></i>
+          <span class="focus-presence__admin">站长</span>
+        </button>
+        <button
           v-if="!rhythmWindowOpen"
           type="button"
           class="focus-top-button"
@@ -400,6 +412,10 @@
                 <input v-model="autoStart" type="checkbox">
                 <span>自动进入下一阶段</span>
               </label>
+              <label class="focus-switch">
+                <input v-model="nativeCursor" type="checkbox" @change="onNativeCursorChange">
+                <span>使用系统原生鼠标指针</span>
+              </label>
             </section>
 
             <section class="focus-panel">
@@ -450,9 +466,11 @@ import {
   createPomodoroSession,
   fetchPomodoroStats,
   fetchPomodoroTimeline,
+  fetchStudyRoomOnline,
   getPlatformToken,
 } from '../../api/platform'
 import { imgUrl } from '../../data/profile'
+import { prefersNativeCursor, setNativeCursor } from '../../utils/cursorPreference'
 import { usePageMeta } from '../../composables/usePageMeta'
 
 const modes = [
@@ -481,6 +499,11 @@ const message = ref('选择一个节奏，开始你的第一轮专注。')
 const stats = ref({ todayMinutes: 0, todaySessions: 0, weekMinutes: 0, weekSessions: 0 })
 const settings = ref({ focus: 25, short: 5, long: 15 })
 const settingsOpen = ref(false)
+const nativeCursor = ref(prefersNativeCursor())
+
+function onNativeCursorChange() {
+  setNativeCursor(nativeCursor.value)
+}
 const rhythmWindowOpen = ref(true)
 const chatWindowOpen = ref(false)
 const musicWindowOpen = ref(false)
@@ -493,6 +516,9 @@ let tickTimer = null
 let audioContext = null
 const immersive = ref(false)
 let immersiveIdleTimer = null
+const onlineCount = ref(0)
+const adminOnline = ref(false)
+let onlinePollTimer = null
 
 const backgrounds = [
   {
@@ -783,6 +809,14 @@ function onFullscreenChange() {
   isFullscreen.value = !!document.fullscreenElement
 }
 
+async function refreshOnlinePresence() {
+  try {
+    const response = await fetchStudyRoomOnline()
+    onlineCount.value = Number(response?.data?.count) || 0
+    adminOnline.value = !!response?.data?.admin_online
+  } catch {}
+}
+
 function playChime() {
   try {
     audioContext = audioContext || new AudioContext()
@@ -882,6 +916,8 @@ onMounted(async () => {
     syncRemainingFromEnd()
     if (remainingSeconds.value <= 0) void finishPhase()
   }, 250)
+  void refreshOnlinePresence()
+  onlinePollTimer = window.setInterval(refreshOnlinePresence, 30000)
   await loadStats()
   if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
     void Notification.requestPermission()
@@ -891,6 +927,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.body.classList.remove('focus-modal-open')
   window.clearInterval(tickTimer)
+  if (onlinePollTimer) window.clearInterval(onlinePollTimer)
   if (immersiveIdleTimer) window.clearTimeout(immersiveIdleTimer)
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('pointermove', wakeImmersive)
@@ -1152,6 +1189,43 @@ usePageMeta({
   border-color: rgba(255, 255, 255, 0.32);
   background: rgba(255, 255, 255, 0.14);
   transform: translateY(-1px);
+}
+.focus-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  height: 2.7rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--focus-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.82);
+  font-family: inherit;
+  font-size: 0.74rem;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.focus-presence:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.14);
+}
+.focus-presence__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.focus-presence__dot.live {
+  background: #5ad07a;
+  box-shadow: 0 0 8px rgba(90, 208, 122, 0.7);
+}
+.focus-presence__admin { color: rgba(255, 255, 255, 0.55); }
+@media (max-width: 520px) {
+  .focus-presence__admin,
+  .focus-presence .focus-presence__dot:last-of-type { display: none; }
 }
 .focus-shell {
   position: relative;

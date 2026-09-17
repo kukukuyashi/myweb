@@ -50,38 +50,37 @@ html.cheat-mode body::before {
   padding: 0;
 }
 
-/* 自定义鼠标样式 - 普通的鼠标指针V1.2 */
-html {
+/* 自定义鼠标样式 - 普通的鼠标指针V1.2（use-native-cursor 时全部还原系统指针） */
+html:not(.use-native-cursor) {
   cursor: url('/myweb/cursors/normal.gif') 12 12, auto;
 }
 
 /* 页面加载/等待时的动态光标 */
-html.cursor-busy {
+html.cursor-busy:not(.use-native-cursor) {
   cursor: url('/myweb/cursors/busy.gif') 48 48, wait;
 }
 
-a,
-button,
-[role="button"],
-.router-link-active,
-.router-link-exact-active,
-.topbar-nav a,
-.filter-btn,
-.search-btn,
-.code-copy-link,
-.tag-link,
-.featured-read,
-.post-card-read,
-.archive-title,
-.nav-prev,
-.nav-next {
+html:not(.use-native-cursor) :is(
+  a,
+  button,
+  [role="button"],
+  .router-link-active,
+  .router-link-exact-active,
+  .topbar-nav a,
+  .filter-btn,
+  .search-btn,
+  .code-copy-link,
+  .tag-link,
+  .featured-read,
+  .post-card-read,
+  .archive-title,
+  .nav-prev,
+  .nav-next
+) {
   cursor: url('/myweb/cursors/pointer.gif') 12 12, pointer;
 }
 
-input,
-textarea,
-select,
-[contenteditable="true"] {
+html:not(.use-native-cursor) :is(input, textarea, select, [contenteditable="true"]) {
   cursor: url('/myweb/cursors/text.gif') 12 38, text;
 }
 
@@ -91,13 +90,13 @@ select,
 }
 
 /* JS 叠加层播放 GIF 动画（Chrome 不支持 CSS cursor 里的 GIF 动画） */
-html.has-animated-cursor,
-html.has-animated-cursor * {
+html.has-animated-cursor:not(.use-native-cursor),
+html.has-animated-cursor:not(.use-native-cursor) * {
   cursor: none !important;
 }
 
-html.has-animated-cursor [disabled],
-html.has-animated-cursor .not-allowed {
+html.has-animated-cursor:not(.use-native-cursor) [disabled],
+html.has-animated-cursor:not(.use-native-cursor) .not-allowed {
   cursor: not-allowed !important;
 }
 

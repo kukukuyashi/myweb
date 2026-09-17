@@ -23,6 +23,9 @@
       <button @click="toggleDarkMode" class="theme-btn" :title="isDarkMode ? '浅色模式' : '深色模式'">
         {{ isDarkMode ? '☀' : '☾' }}
       </button>
+      <button @click="toggleCursorMode" class="theme-btn" :title="nativeCursor ? '恢复自定义光标' : '使用系统原生鼠标'">
+        {{ nativeCursor ? '↖' : '🖱' }}
+      </button>
       <button
         class="menu-btn"
         :aria-expanded="menuOpen"
@@ -42,9 +45,11 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { onNavHover } from '../composables/useLinkPrefetch'
 import { applyTheme, getInitialDarkState, toggleTheme } from '../utils/theme.js'
+import { prefersNativeCursor, setNativeCursor } from '../utils/cursorPreference.js'
 
 const route = useRoute()
 const isDarkMode = ref(getInitialDarkState())
+const nativeCursor = ref(prefersNativeCursor())
 const menuOpen = ref(false)
 const clockText = ref('')
 let clockTimer = null
@@ -64,6 +69,11 @@ watch(menuOpen, (open) => {
 
 const toggleDarkMode = () => {
   isDarkMode.value = toggleTheme()
+}
+
+const toggleCursorMode = () => {
+  nativeCursor.value = !nativeCursor.value
+  setNativeCursor(nativeCursor.value)
 }
 
 onMounted(() => {
