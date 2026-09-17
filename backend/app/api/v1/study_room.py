@@ -250,7 +250,8 @@ def list_online(db: Annotated[Session, Depends(get_db)]):
         seen.add(i)
         uniq.append(i)
     recent_ids = uniq[-ONLINE_RECENT_MAX:]
-    admin_username = (get_settings().admin_username or "").strip()
+    settings = get_settings()
+    owner_username = (settings.site_owner_username or settings.admin_username or "").strip()
     users: list[dict] = []
     if recent_ids:
         users_map = _load_users_map(db, set(recent_ids))
@@ -258,7 +259,7 @@ def list_online(db: Annotated[Session, Depends(get_db)]):
         users = [
             {
                 **_user_display_dict(users_map[uid]),
-                "is_admin": users_map[uid].username == admin_username,
+                "is_admin": users_map[uid].username == owner_username,
             }
             for uid in recent_ids
             if uid in users_map
@@ -266,8 +267,8 @@ def list_online(db: Annotated[Session, Depends(get_db)]):
         users.sort(key=lambda x: order.get(x["user_id"], 0))
     # 站长即使不在 recent 12 人里也要能判定，用全量 ids 查
     admin_online = False
-    if admin_username and ids:
-        admin = db.query(User).filter(User.username == admin_username).first()
+    if owner_username and ids:
+        admin = db.query(User).filter(User.username == owner_username).first()
         admin_online = bool(admin and admin.id in set(ids))
     return ok({"count": len(uniq), "admin_online": admin_online, "recent": users})
 

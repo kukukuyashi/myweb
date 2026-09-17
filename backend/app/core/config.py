@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     admin_username: str = "admin"
     admin_password_hash: str = ""
+    # 站长平台账号 username（自习室"站长在线"等展示用）；留空回退到 admin_username
+    site_owner_username: str = ""
     redis_url: str = ""
     dify_api_url: str = ""
     dify_summary_api_key: str = ""
