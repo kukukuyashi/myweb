@@ -229,7 +229,9 @@ def list_messages(
     q = db.query(StudyRoomMessage).filter(StudyRoomMessage.is_deleted == False)  # noqa: E712
     if before is not None:
         q = q.filter(StudyRoomMessage.id < before)
-    rows = q.order_by(StudyRoomMessage.id.asc()).limit(limit).all()
+    # 倒序取最新 N 条再反转为正序：asc+limit 会永远只返回最早 50 条，新消息刷新后消失
+    rows = q.order_by(StudyRoomMessage.id.desc()).limit(limit).all()
+    rows.reverse()
     users_map = _load_users_map(db, {r.user_id for r in rows})
     items = [
         StudyRoomMessagePublic.model_validate(_to_public_dict(r, users_map.get(r.user_id))).model_dump()
@@ -343,10 +345,11 @@ async def study_room_ws(websocket: WebSocket, token: str | None = None):
             rows = (
                 db.query(StudyRoomMessage)
                 .filter(StudyRoomMessage.is_deleted == False)  # noqa: E712
-                .order_by(StudyRoomMessage.id.asc())
+                .order_by(StudyRoomMessage.id.desc())
                 .limit(HISTORY_LIMIT)
                 .all()
             )
+            rows.reverse()
             users_map = _load_users_map(db, {r.user_id for r in rows})
             await _send_text(websocket, {
                 "type": "history",
