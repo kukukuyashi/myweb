@@ -1,0 +1,40 @@
+{
+  "size": 96,
+  "hotspotX": 12,
+  "hotspotY": 12,
+  "frameMs": 33,
+  "cursors": {
+    "normal": {
+      "frames": 130,
+      "sheet": "normal-sheet.png",
+      "anchor": "tip",
+      "hotspotX": 12,
+      "hotspotY": 12,
+      "contentHeight": 74
+    },
+    "pointer": {
+      "frames": 94,
+      "sheet": "pointer-sheet.png",
+      "anchor": "tip",
+      "hotspotX": 12,
+      "hotspotY": 12,
+      "contentHeight": 84
+    },
+    "text": {
+      "frames": 140,
+      "sheet": "text-sheet.png",
+      "anchor": "center-top",
+      "hotspotX": 12,
+      "hotspotY": 38,
+      "contentHeight": 53
+    },
+    "busy": {
+      "frames": 45,
+      "sheet": "busy-sheet.png",
+      "anchor": "center",
+      "hotspotX": 48,
+      "hotspotY": 48,
+      "contentHeight": 84
+    }
+  }
+}

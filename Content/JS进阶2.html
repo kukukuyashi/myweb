@@ -1,0 +1,223 @@
+<h2 id="section4">4 JS 进阶 异步编程</h2>
+                            <blockquote>
+                                <p>学习 JavaScript 中异步编程的概念和实现方式，包括回调函数、Promise、async/await 等。</p>
+                            </blockquote>
+
+                            <h3 id="section4-1">4.1 异步编程概述</h3>
+                            <p>JavaScript 是单线程语言，这意味着它一次只能执行一个任务。但是，JavaScript 提供了异步编程机制，允许在等待某些操作（如网络请求、文件读取等）完成时继续执行其他代码。</p>
+
+                            <h4>同步与异步</h4>
+                            <ul>
+                                <li>同步：代码按照顺序执行，前一个任务完成后才能执行下一个任务</li>
+                                <li>异步：代码不需要等待前一个任务完成就可以继续执行</li>
+                            </ul>
+
+                            <pre><code class="javascript">// 同步代码
+console.log('开始');
+console.log('中间');
+console.log('结束');
+
+// 异步代码
+console.log('开始');
+setTimeout(() => {
+    console.log('延迟执行');
+}, 1000);
+console.log('结束');</code></pre>
+
+                            <h3 id="section4-2">4.2 回调函数</h3>
+                            <p>回调函数是作为参数传递给另一个函数的函数，当某个事件或条件满足时被调用。</p>
+
+                            <h4>基本用法</h4>
+                            <pre><code class="javascript">function fetchData(callback) {
+    setTimeout(() => {
+        callback("数据已加载");
+    }, 1000);
+}
+
+fetchData(function(message) {
+    console.log(message); // 数据已加载
+});</code></pre>
+
+                            <h4>回调地狱</h4>
+                            <p>当多个异步操作需要按顺序执行时，回调函数会嵌套多层，形成"回调地狱"，代码难以阅读和维护。</p>
+
+                            <pre><code class="javascript">// 回调地狱示例
+getData(function(a) {
+    getMoreData(a, function(b) {
+        getMoreData(b, function(c) {
+            getMoreData(c, function(d) {
+                // 多层嵌套，难以维护
+            });
+        });
+    });
+});</code></pre>
+
+                            <h3 id="section4-3">4.3 Promise</h3>
+                            <p>Promise是ES6引入的一种处理异步操作的方式，它代表了一个异步操作的最终完成或失败。</p>
+
+                            <h4>基本语法</h4>
+                            <p>Promise 对象有三种状态：</p>
+                            <ul>
+                                <li>Pending（进行中）：初始状态</li>
+                                <li>Fulfilled（已成功）：操作成功完成</li>
+                                <li>Rejected（已失败）：操作失败</li>
+                            </ul>
+
+                            <pre><code class="javascript">const fetchData = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const success = true;
+            if (success) {
+                resolve("数据已加载");
+            } else {
+                reject("加载失败");
+            }
+        }, 1000);
+    });
+};
+
+fetchData()
+    .then(message => {
+        console.log(message); // 数据已加载
+    })
+    .catch(error => {
+        console.error(error); // 加载失败
+    })
+    .finally(() => {
+        console.log("操作完成");
+    });</code></pre>
+
+                            <h4>Promise 链式调用</h4>
+                            <p>Promise 的 then 方法返回一个新的 Promise，因此可以进行链式调用，避免回调地狱。</p>
+
+                            <pre><code class="javascript">fetchData()
+    .then(data => {
+        console.log(data);
+        return fetchMoreData(data);
+    })
+    .then(data => {
+        console.log(data);
+        return fetchMoreData(data);
+    })
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error(error);
+    });</code></pre>
+
+                            <h4>Promise 静态方法</h4>
+                            <p>Promise 提供了一些静态方法，用于处理多个 Promise 对象。</p>
+
+                            <pre><code class="javascript">// Promise.all：所有 Promise 都成功时才成功
+const promise1 = Promise.resolve(3);
+const promise2 = 1337;
+const promise3 = new Promise((resolve) => setTimeout(resolve, 100, 'foo'));
+
+Promise.all([promise1, promise2, promise3]).then((values) => {
+    console.log(values); // [3, 1337, "foo"]
+});
+
+// Promise.race：第一个完成的 Promise 的结果
+const promise4 = new Promise((resolve) => setTimeout(resolve, 500, 'one'));
+const promise5 = new Promise((resolve) => setTimeout(resolve, 100, 'two'));
+
+Promise.race([promise4, promise5]).then((value) => {
+    console.log(value); // "two"
+});</code></pre>
+
+                            <h3 id="section4-4">4.4 async/await</h3>
+                            <p>async/await是ES2017引入的一种处理异步操作的语法糖，它让异步代码看起来像同步代码一样。</p>
+
+                            <h4>async 函数</h4>
+                            <p>async 函数总是返回一个 Promise 对象。</p>
+
+                            <pre><code class="javascript">async function hello() {
+    return "Hello";
+}
+
+hello().then(value => console.log(value)); // Hello</code></pre>
+
+                            <h4>await 表达式</h4>
+                            <p>await 只能在 async 函数内部使用，它会暂停 async 函数的执行，等待 Promise 完成后再继续执行。</p>
+
+                            <pre><code class="javascript">const fetchData = () => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve("数据已加载");
+        }, 1000);
+    });
+};
+
+async function main() {
+    try {
+        const message = await fetchData();
+        console.log(message); // 数据已加载
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+main();</code></pre>
+
+                            <h4>async/await 的优势</h4>
+                            <ul>
+                                <li>代码更简洁，更易读</li>
+                                <li>可以使用 try/catch 进行错误处理</li>
+                                <li>可以使用 for、while 等循环语句</li>
+                            </ul>
+
+                            <h4>并行处理</h4>
+                            <p>使用 Promise.all 可以并行执行多个异步操作。</p>
+
+                            <pre><code class="javascript">async function fetchAllData() {
+    try {
+        const [data1, data2, data3] = await Promise.all([
+            fetchData1(),
+            fetchData2(),
+            fetchData3()
+        ]);
+        console.log(data1, data2, data3);
+    } catch (error) {
+        console.error(error);
+    }
+}</code></pre>
+
+                            <h3 id="section4-5">4.5 异步编程最佳实践</h3>
+                            <h4>错误处理</h4>
+                            <p>始终使用 try/catch 处理 async/await 中的错误。</p>
+
+                            <pre><code class="javascript">async function fetchData() {
+    try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        throw error;
+    }
+}</code></pre>
+
+                            <h4>避免阻塞</h4>
+                            <p>不要在循环中使用 await，除非需要按顺序执行。</p>
+
+                            <pre><code class="javascript">// 不推荐：顺序执行，耗时较长
+async function processItems(items) {
+    for (const item of items) {
+        await processItem(item);
+    }
+}
+
+// 推荐：并行执行，耗时较短
+async function processItems(items) {
+    await Promise.all(items.map(item => processItem(item)));
+}</code></pre>
+
+                            <h4>总结</h4>
+                            <ol>
+                                <li>回调函数是最基本的异步编程方式，但容易形成回调地狱</li>
+                                <li>Promise 提供了链式调用，避免了回调地狱</li>
+                                <li>async/await 让异步代码看起来像同步代码，更易读</li>
+                                <li>始终使用 try/catch 处理 async/await 中的错误</li>
+                                <li>使用 Promise.all 并行执行多个异步操作，提高性能</li>
+                            </ol>
