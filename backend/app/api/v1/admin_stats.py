@@ -12,7 +12,6 @@ from app.api.v1.notes_admin import require_notes_admin
 from app.core.db import get_db
 from app.core.response import ok
 from app.models.acg import AcgSubmission
-from app.models.anime_watchlist import AnimeWatchlist
 from app.models.forum import ForumReply, ForumThread
 from app.models.post import Post
 from app.models.qa import QaMessage
@@ -51,7 +50,6 @@ def summary(
             "replies": _count(db, ForumReply),
             "users": _count(db, User),
             "messages": _count(db, QaMessage),
-            "anime": _count(db, AnimeWatchlist),
             "botDrafts": bot_drafts,
         }
     )

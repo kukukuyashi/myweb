@@ -29,7 +29,7 @@ export const authLoginPanel = aboutImg(0)
 export const authRegisterPanel = aboutImg(0)
 
 export const authDefaultStats = [
-  { value: '论坛', label: '板块讨论' },
+  { value: 'POMO', label: '番茄钟' },
   { value: 'FLAC', label: '音乐室' },
   { value: '24/7', label: '全天在线' },
 ]

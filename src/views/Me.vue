@@ -2,7 +2,7 @@
   <PlatformPageShell
     coord="ACCOUNT · ME"
     title="个人中心"
-    :lead="token ? '资料、文章、论坛帖与专注时间线 — 你的主站控制台。' : '登录后管理头像、Markdown 文章、论坛帖与番茄钟记录。'"
+    :lead="token ? '资料、文章与专注时间线 — 你的主站控制台。' : '登录后管理头像、Markdown 文章与番茄钟记录。'"
     :ink-image="PLATFORM_ME_INK_IMAGE"
     :ink-position="PLATFORM_ME_INK_POSITION"
     :ink-r-end="114"
@@ -10,7 +10,7 @@
     <section v-if="!token" class="platform-panel ink-panel me-guest">
       <p class="platform-coord">GUEST · READ ONLY</p>
       <h2 class="me-guest-title">尚未登录</h2>
-      <p class="muted">登录后可编辑资料、发布文章、管理论坛帖，并查看专注时间线。</p>
+      <p class="muted">登录后可编辑资料、发布文章，并查看专注时间线。</p>
       <div class="me-auth-actions">
         <router-link to="/app/login?redirect=/app/me" class="platform-btn-primary">登录</router-link>
         <router-link to="/app/register" class="platform-btn-ghost">注册新账号</router-link>
@@ -201,68 +201,6 @@
           </template>
         </div>
 
-        <div v-show="activeTab === 'anime'" class="platform-panel ink-panel tab-panel">
-          <div class="panel-head">
-            <router-link to="/app/anime" class="platform-btn-primary">去追番表</router-link>
-          </div>
-          <p v-if="animeLoading" class="muted">加载中…</p>
-          <template v-else>
-            <div class="anime-group">
-              <h3 class="anime-group-title">正在追（{{ watchingList.length }}）</h3>
-              <p v-if="!watchingList.length" class="muted">还没有正在追的番。</p>
-              <ul v-else class="item-list">
-                <li v-for="a in watchingList" :key="a.bangumi_id">
-                  <div class="item-main">
-                    <span>{{ a.name_cn || a.name }}</span>
-                    <span v-if="a.air_weekday" class="badge">周{{ weekdayLabel(a.air_weekday) }}</span>
-                  </div>
-                  <div class="item-actions">
-                    <button type="button" class="act" @click="setAnimeStatus(a, 'plan')">改为想看</button>
-                    <button type="button" class="act danger" @click="removeAnime(a)">取消</button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="anime-group">
-              <h3 class="anime-group-title">想看（{{ planList.length }}）</h3>
-              <p v-if="!planList.length" class="muted">还没有想看的番。</p>
-              <ul v-else class="item-list">
-                <li v-for="a in planList" :key="a.bangumi_id">
-                  <div class="item-main">
-                    <span>{{ a.name_cn || a.name }}</span>
-                    <span v-if="a.air_weekday" class="badge">周{{ weekdayLabel(a.air_weekday) }}</span>
-                  </div>
-                  <div class="item-actions">
-                    <button type="button" class="act" @click="setAnimeStatus(a, 'watching')">改为正在追</button>
-                    <button type="button" class="act danger" @click="removeAnime(a)">取消</button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </template>
-        </div>
-
-        <div v-show="activeTab === 'threads'" class="platform-panel ink-panel tab-panel">
-          <div class="panel-head">
-            <router-link to="/app/forum/new" class="platform-btn-primary">发帖</router-link>
-          </div>
-          <p v-if="threadsLoading" class="muted">加载中…</p>
-          <p v-else-if="!forumThreads.length" class="muted">暂无帖子，去论坛发一条吧。</p>
-          <ul v-else class="item-list">
-            <li v-for="t in forumThreads" :key="t.id">
-              <div class="item-main">
-                <router-link :to="`/app/forum/t/${t.id}`">{{ t.title }}</router-link>
-                <span class="badge">{{ t.category_name }}</span>
-              </div>
-              <span class="date">{{ formatDate(t.created_at) }}</span>
-              <div class="item-actions">
-                <router-link :to="`/app/forum/t/${t.id}/edit`" class="act">编辑</router-link>
-                <button type="button" class="act danger" @click="removeThread(t)">删除</button>
-              </div>
-            </li>
-          </ul>
-        </div>
-
         <div v-show="activeTab === 'messages'" class="platform-panel ink-panel tab-panel">
           <div class="panel-head">
             <button
@@ -325,11 +263,6 @@ import LevelBadge from '../components/LevelBadge.vue'
 import { PLATFORM_ME_INK_IMAGE, PLATFORM_ME_INK_POSITION } from '../data/inkTheme.js'
 import { usePageMeta } from '../composables/usePageMeta'
 import {
-  deleteForumThread,
-  fetchMyForumThreads,
-  fetchAnimeWatchlist,
-  addAnimeWatchlist,
-  removeAnimeWatchlist,
   fetchNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -348,14 +281,12 @@ import {
 
 usePageMeta({
   title: '个人中心',
-  description: 'CYINC 主站个人中心：资料、文章、帖子与专注时间线。',
+  description: 'CYINC 主站个人中心：资料、文章与专注时间线。',
 })
 
 const tabs = [
   { id: 'profile', label: '资料' },
   { id: 'checkin', label: '签到' },
-  { id: 'threads', label: '我的帖子' },
-  { id: 'anime', label: '我的追番' },
   { id: 'messages', label: '消息' },
   { id: 'timeline', label: '专注时间线' },
 ]
@@ -364,22 +295,17 @@ const route = useRoute()
 const router = useRouter()
 const token = ref(getPlatformToken())
 const activeTab = ref(
-  route.query.tab === 'threads' ? 'threads'
-    : route.query.tab === 'anime' ? 'anime'
-      : route.query.tab === 'messages' ? 'messages'
-        : route.query.tab === 'checkin' ? 'checkin'
-          : 'profile',
+  route.query.tab === 'messages' ? 'messages'
+    : route.query.tab === 'checkin' ? 'checkin'
+      : route.query.tab === 'timeline' ? 'timeline'
+        : 'profile',
 )
 const profile = ref(null)
 const editForm = ref({ nickname: '', avatar: '' })
-const animeList = ref([])
-const forumThreads = ref([])
 const notifications = ref([])
 const notificationsLoading = ref(false)
 const timelineDays = ref([])
 const loading = ref(false)
-const animeLoading = ref(false)
-const threadsLoading = ref(false)
 const timelineLoading = ref(false)
 const error = ref('')
 const profileMsg = ref('')
@@ -460,53 +386,6 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('zh-CN', { hour12: false })
 }
 
-const watchingList = computed(() => animeList.value.filter((a) => a.status === 'watching'))
-const planList = computed(() => animeList.value.filter((a) => a.status !== 'watching'))
-
-function weekdayLabel(id) {
-  return { 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '日' }[id] || '?'
-}
-
-async function setAnimeStatus(a, status) {
-  error.value = ''
-  try {
-    await addAnimeWatchlist({
-      bangumi_id: a.bangumi_id,
-      name: a.name,
-      name_cn: a.name_cn,
-      cover_url: a.cover_url,
-      air_weekday: a.air_weekday,
-      air_time: a.air_time,
-      status,
-    })
-    await loadAnime()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-async function removeAnime(a) {
-  if (!window.confirm(`确定取消追番「${a.name_cn || a.name}」？`)) return
-  error.value = ''
-  try {
-    await removeAnimeWatchlist(a.bangumi_id)
-    animeList.value = animeList.value.filter((x) => x.bangumi_id !== a.bangumi_id)
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-async function removeThread(thread) {
-  if (!window.confirm(`确定删除「${thread.title}」？回复也会一并删除。`)) return
-  error.value = ''
-  try {
-    await deleteForumThread(thread.id)
-    forumThreads.value = forumThreads.value.filter((t) => t.id !== thread.id)
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
 async function loadProfile() {
   if (!token.value) return
   error.value = ''
@@ -520,32 +399,6 @@ async function loadProfile() {
   } catch (e) {
     error.value = e.message
     if (authSessionExpired(e.message)) logout()
-  }
-}
-
-async function loadAnime() {
-  if (!token.value) return
-  animeLoading.value = true
-  try {
-    const json = await fetchAnimeWatchlist()
-    animeList.value = json.data?.items || []
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    animeLoading.value = false
-  }
-}
-
-async function loadThreads() {
-  if (!token.value) return
-  threadsLoading.value = true
-  try {
-    const json = await fetchMyForumThreads()
-    forumThreads.value = json.data.items || []
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    threadsLoading.value = false
   }
 }
 
@@ -581,7 +434,7 @@ async function openNotification(n) {
     /* ignore */
   }
   if (n.thread_id) {
-    router.push(`/app/forum/t/${n.thread_id}`)
+    router.push('/app')
   }
 }
 
@@ -722,26 +575,22 @@ function logout() {
   token.value = ''
   profile.value = null
   avatarPreviewOverride.value = ''
-  animeList.value = []
-  forumThreads.value = []
   timelineDays.value = []
 }
 
 async function loadAll() {
   await loadProfile()
-  await Promise.all([loadAnime(), loadThreads(), loadTimeline(), loadCheckin()])
+  await Promise.all([loadTimeline(), loadCheckin()])
 }
 
 watch(() => route.query.tab, (tab) => {
-  if (tab === 'anime' || tab === 'threads' || tab === 'messages' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
+  if (tab === 'messages' || tab === 'timeline' || tab === 'profile' || tab === 'checkin') {
     activeTab.value = tab
   }
 })
 
 watch(activeTab, (tab) => {
   if (!token.value) return
-  if (tab === 'anime') loadAnime()
-  if (tab === 'threads') loadThreads()
   if (tab === 'messages') loadNotifications()
   if (tab === 'timeline') loadTimeline()
   if (tab === 'checkin') loadCheckin()
@@ -843,9 +692,6 @@ input::placeholder {
   color: var(--text-muted);
   opacity: 0.85;
 }
-
-.anime-group { margin-bottom: 1.2rem; }
-.anime-group-title { margin: 0 0 0.6rem; font-size: 1rem; color: var(--ink, #333); }
 
 .item-list {
   list-style: none;

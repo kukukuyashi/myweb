@@ -39,7 +39,7 @@ const routes = [
   },
   {
     path: '/ai',
-    redirect: '/app/forum',
+    redirect: '/app',
   },
   {
     path: '/app',
@@ -52,36 +52,13 @@ const routes = [
       },
       {
         path: 'ai',
-        redirect: '/app/forum',
+        redirect: '/app',
       },
-      {
-        path: 'forum',
-        name: 'ForumCategories',
-        component: () => import('../views/platform/ForumCategories.vue'),
-      },
-      {
-        path: 'forum/c/:slug',
-        name: 'ForumCategory',
-        component: () => import('../views/platform/ForumCategory.vue'),
-        props: true,
-      },
-      {
-        path: 'forum/new',
-        name: 'ForumNewThread',
-        component: () => import('../views/platform/ForumNewThread.vue'),
-      },
-      {
-        path: 'forum/t/:id/edit',
-        name: 'ForumEditThread',
-        component: () => import('../views/platform/ForumEditThread.vue'),
-        props: true,
-      },
-      {
-        path: 'forum/t/:id',
-        name: 'ForumThread',
-        component: () => import('../views/platform/ForumThread.vue'),
-        props: true,
-      },
+      { path: 'forum', redirect: '/app' },
+      { path: 'forum/c/:slug', redirect: '/app' },
+      { path: 'forum/new', redirect: '/app' },
+      { path: 'forum/t/:id/edit', redirect: '/app' },
+      { path: 'forum/t/:id', redirect: '/app' },
       {
         path: 'posts/new',
         name: 'PostNew',
@@ -106,9 +83,7 @@ const routes = [
       },
       {
         path: 'u/:id',
-        name: 'UserProfile',
-        component: () => import('../views/platform/UserProfile.vue'),
-        props: true,
+        redirect: '/app',
       },
       {
         path: 'login',
@@ -141,8 +116,7 @@ const routes = [
       },
       {
         path: 'anime',
-        name: 'AnimeSchedule',
-        component: () => import('../views/platform/AnimeSchedule.vue'),
+        redirect: '/app',
       },
       {
         path: 'arcade',
@@ -166,8 +140,7 @@ const routes = [
       },
       {
         path: 'arcade/reaction',
-        name: 'ArcadeReaction',
-        component: () => import('../views/platform/ArcadeReaction.vue'),
+        redirect: '/app/arcade',
       },
       {
         path: 'arcade/size',
@@ -184,7 +157,7 @@ const routes = [
   { path: '/hub', redirect: '/app' },
   { path: '/me', redirect: '/app/me' },
   { path: '/pomo', redirect: '/app/pomo' },
-  { path: '/forum', redirect: '/app/forum' },
+  { path: '/forum', redirect: '/app' },
   {
     path: '/content/:id',
     name: 'Content',

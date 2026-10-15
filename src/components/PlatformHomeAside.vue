@@ -57,7 +57,7 @@
       <div class="panel-header">Quick</div>
       <nav class="panel-body aside-quick">
         <router-link to="/app/pomo">番茄钟</router-link>
-        <router-link to="/app/forum">论坛</router-link>
+        <a href="#guestboard" @click.prevent="$emit('section', 'guestboard')">留言板</a>
         <router-link to="/app/me">个人中心</router-link>
         <router-link to="/">返回博客</router-link>
       </nav>

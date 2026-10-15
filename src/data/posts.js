@@ -5,7 +5,7 @@ import { encodePathSegments } from '../utils/music.js'
 
 export const SITE_NAME = 'Cyinc 的学习日志'
 export const SITE_URL = 'https://cyinc.ink/myweb'
-export const SITE_DESCRIPTION = 'Cyinc 的个人全栈站：前端/后端学习笔记、论坛、OST 音乐室、追番表、番茄钟。Vue + FastAPI + MySQL + Redis，欢迎留言交流。'
+export const SITE_DESCRIPTION = 'Cyinc 的个人全栈站：前端/后端学习笔记、OST 音乐室、番茄钟与留言板。Vue + FastAPI + MySQL + Redis，欢迎留言交流。'
 
 export const posts = [
   {

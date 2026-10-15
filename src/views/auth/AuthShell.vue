@@ -65,14 +65,14 @@ defineProps({
   brandTitle: { type: String, default: '加入 CYINC 社区' },
   brandCopy: {
     type: String,
-    default: '探索 ACG 与技术日常，逛论坛、听音乐室、记录专注 — 与同好一起创造属于我们的社区。',
+    default: '探索 ACG 与技术日常，听音乐室、记录专注、在留言板打个招呼。',
   },
   panelImage: { type: String, required: true },
   backdropImage: { type: String, default: '' },
   stats: {
     type: Array,
     default: () => [
-      { value: '论坛', label: '板块讨论' },
+      { value: 'POMO', label: '番茄钟' },
       { value: 'FLAC', label: '音乐室' },
       { value: '24/7', label: '全天在线' },
     ],

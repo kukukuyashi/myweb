@@ -52,13 +52,6 @@ const games = [
     desc: '记住格子亮起的顺序，再一个个复现出来。',
   },
   {
-    to: '/app/arcade/reaction',
-    glyph: '⚡',
-    name: '反应速度测试',
-    tag: '反应力 · 毫秒',
-    desc: '看到绿色立刻点，测你从看到到动手的纯反应时间。',
-  },
-  {
     to: '/app/arcade/size',
     glyph: '⧉',
     name: '数值·字号冲突',

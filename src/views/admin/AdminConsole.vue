@@ -5,7 +5,7 @@
       <div class="platform-panel console-login-card">
         <span class="console-badge">CYINC ADMIN</span>
         <h2>登录管理控制台</h2>
-        <p class="login-hint">使用运维账号（ADMIN_USERNAME / 密码），一次登录管理笔记、机器人与数据。</p>
+        <p class="login-hint">使用运维账号（ADMIN_USERNAME / 密码），一次登录管理笔记与数据。</p>
         <form class="login-form" @submit.prevent="handleLogin">
           <label>
             用户名
@@ -113,10 +113,6 @@ const navGroups = [
       { label: '友链', icon: '⚯', to: '/admin/links' },
       { label: '页面管理', icon: '⌘', to: '/admin/pages' },
     ],
-  },
-  {
-    title: '论坛',
-    items: [{ label: '发帖机器人', icon: '✦', to: '/admin/acg-bot' }],
   },
   {
     title: '系统',

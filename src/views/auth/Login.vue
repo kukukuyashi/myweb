@@ -3,7 +3,7 @@
     title="开启 CYINC 之旅"
     subtitle="登录您的账号，探索主站功能"
     brand-title="欢迎回来"
-    brand-copy="登录后可管理资料、发布 Markdown 文章、参与论坛讨论，并同步番茄钟专注记录。"
+    brand-copy="登录后可管理资料、发布 Markdown 文章、在留言板发言，并同步番茄钟专注记录。"
     :panel-image="authVisual.panel"
     :backdrop-image="authVisual.backdrop"
     :stats="authDefaultStats"

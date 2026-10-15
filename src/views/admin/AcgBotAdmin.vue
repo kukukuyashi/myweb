@@ -140,7 +140,7 @@
               <p class="path-line">
                 #{{ current.id }} · 创建于 {{ formatDate(current.created_at) }}
                 <template v-if="current.published_thread_id">
-                  · <a :href="threadUrl(current.published_thread_id)" target="_blank" rel="noopener">查看论坛帖 #{{ current.published_thread_id }}</a>
+                  · 已发布 #{{ current.published_thread_id }}（前台论坛已隐藏）
                 </template>
               </p>
             </div>
@@ -159,13 +159,7 @@
                   {{ discarding ? '丢弃中…' : '丢弃' }}
                 </button>
               </template>
-              <a
-                v-else-if="current.published_thread_id"
-                class="btn btn-primary"
-                :href="threadUrl(current.published_thread_id)"
-                target="_blank"
-                rel="noopener"
-              >打开论坛帖</a>
+              <span v-else-if="current.published_thread_id" class="btn btn-ghost">前台论坛已隐藏</span>
             </div>
           </div>
 
@@ -265,7 +259,6 @@ const loggingIn = ref(false)
 const loginError = ref('')
 const loginForm = reactive({ username: 'Cyinc', password: '' })
 
-const baseUrl = import.meta.env.BASE_URL || '/'
 const useAi = ref(false)
 const generating = ref(false)
 const repairing = ref(false)
@@ -334,10 +327,6 @@ function formatDate(iso) {
   if (Number.isNaN(d.getTime())) return iso
   const p = (n) => n.toString().padStart(2, '0')
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
-}
-
-function threadUrl(threadId) {
-  return `${baseUrl}app/forum/t/${threadId}`
 }
 
 function flash(text, type = 'info') {

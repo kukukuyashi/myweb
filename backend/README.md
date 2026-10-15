@@ -40,7 +40,7 @@ phpStudy → **数据库** 页面里若已有库（例如 `cyinclog` / 用户 `C
 DATABASE_URL=mysql+pymysql://Cyinc:你的密码@127.0.0.1:3306/cyinclog
 ```
 
-启动 API 后会自动建表并 seed 论坛板块。
+启动 API 后会自动建表并 seed 论坛板块。ACG 资讯机器人默认停用：`ACG_BOT_SCHEDULE_CRON` 必须留空，否则会重新注册定时抓取。追番表已下线，启动时会一次性删除 `anime_watchlist` 表。
 
 ### 方式 B：一键脚本（root 新建 cyinc 库）
 
@@ -93,7 +93,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | 层级 | 工具 | 用途 |
 |------|------|------|
 | 运维后台 | **SQLAdmin** `/admin` | 浏览器管理用户、文章、论坛、留言板 |
-| 业务 API | **Swagger** `/api/docs` | 注册、发文、论坛、留言板等 |
+| 业务 API | **Swagger** `/api/docs` | 注册、发文、论坛（前台已隐藏）、留言板等 |
 | 数据库 | **mysql 命令行 / RDS DMS** | 紧急排查、批量 SQL |
 
 ### SQLAdmin 登录

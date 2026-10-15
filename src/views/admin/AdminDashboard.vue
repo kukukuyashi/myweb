@@ -44,13 +44,10 @@ const statCards = [
   { key: 'replies', label: '论坛回复', icon: '↩', hint: '回复总数' },
   { key: 'users', label: '注册用户', icon: '👤', hint: '平台用户数' },
   { key: 'messages', label: '留言', icon: '✉', hint: '留言板消息' },
-  { key: 'anime', label: '追番收藏', icon: '📺', hint: '追番条目数' },
-  { key: 'botDrafts', label: '机器人草稿', icon: '✦', hint: '待审核投稿' },
 ]
 
 const quickActions = [
   { to: '/admin/notes', icon: '✎', title: '笔记管理', desc: '新建、编辑、发布你的 Markdown 笔记' },
-  { to: '/admin/acg-bot', icon: '✦', title: '发帖机器人', desc: '一键采集资讯，审核后发布到论坛' },
   { to: '/admin/data', icon: '▤', title: '数据管理', desc: '用户 / 文章 / 论坛 / 留言数据表' },
 ]
 

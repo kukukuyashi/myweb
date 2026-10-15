@@ -44,7 +44,7 @@
         </div>
       </div>
       <nav class="rail-nav">
-        <router-link v-for="link in quickLinks" :key="link.to" :to="link.to">{{ link.label }}</router-link>
+        <router-link v-for="link in quickLinks" :key="link.label" :to="link.to">{{ link.label }}</router-link>
       </nav>
       <ul class="rail-tags">
         <li v-for="t in fanTags" :key="t">
@@ -76,7 +76,7 @@ const quickLinks = [
   { to: '/changelog', label: 'LOG' },
   { to: '/app/music', label: 'MUSIC' },
   { to: '/archive', label: 'ARCH' },
-  { to: '/app/forum', label: 'GUEST' },
+  { to: { path: '/app', hash: '#guestboard' }, label: 'GUEST' },
   { to: '/about', label: 'ABOUT' },
 ]
 

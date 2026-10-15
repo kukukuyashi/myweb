@@ -89,6 +89,9 @@ CORS_ORIGINS=https://你的域名.com
 PUBLIC_SITE_URL=https://你的域名.com/myweb
 REDIS_URL=redis://redis:6379/0
 UPLOAD_DIR=uploads
+# 资讯机器人默认停用：必须留空，否则会重新注册定时抓取
+ACG_BOT_SCHEDULE_CRON=
+ACG_BOT_AUTO_PUBLISH_DAILY=false
 ```
 
 生成 Admin 密码：

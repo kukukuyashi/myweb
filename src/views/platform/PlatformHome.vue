@@ -182,7 +182,7 @@
         <h2 class="section-title">工作台</h2>
         <p class="section-sub">NAV · QUICK ACCESS</p>
       </header>
-      <p class="section-lead">专注、论坛、个人资料 — 从这里进。</p>
+      <p class="section-lead">专注、留言、个人资料 — 从这里进。</p>
 
       <div class="work-grid">
         <router-link
@@ -252,7 +252,7 @@
         <div class="footer-col">
           <h4>站内导航</h4>
           <ul>
-            <li><router-link to="/app/forum">论坛</router-link></li>
+            <li><a href="#guestboard" @click.prevent="scrollToSection('guestboard')">留言板</a></li>
             <li><router-link to="/app/me">个人中心</router-link></li>
             <li><router-link to="/app/pomo">番茄钟</router-link></li>
           </ul>
@@ -263,7 +263,7 @@
             <li><router-link to="/">技术博客</router-link></li>
             <li><router-link to="/app/music">音乐室</router-link></li>
             <li><router-link to="/about">关于 & 贴纸墙</router-link></li>
-            <li><router-link to="/app/forum">留言板</router-link></li>
+            <li><router-link to="/app/arcade">游戏厅</router-link></li>
           </ul>
         </div>
       </div>

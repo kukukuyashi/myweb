@@ -20,7 +20,6 @@ from app.core.response import ok
 from app.core.validation_zh import format_validation_errors
 from app.models import ForumCategory, ForumReply, ForumThread, PomodoroSession, Post, QaMessage, User  # noqa: F401
 from app.models.checkin import UserCheckin  # noqa: F401
-from app.models.anime_watchlist import AnimeWatchlist  # noqa: F401
 from app.models.acg import AcgSubmission  # noqa: F401
 from app.models.xp import ForumReplyLike, ForumThreadLike, ForumThreadShare, UserXpLog  # noqa: F401
 from app.models.notification import Notification  # noqa: F401
@@ -89,10 +88,9 @@ def _ensure_schema_patches() -> None:
             if "cover_url" not in cols:
                 conn.execute(text("ALTER TABLE posts ADD COLUMN cover_url TEXT NULL"))
     if insp.has_table("anime_watchlist"):
-        cols = {c["name"] for c in insp.get_columns("anime_watchlist")}
-        if "status" not in cols:
-            with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE anime_watchlist ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT 'plan'"))
+        with engine.begin() as conn:
+            conn.execute(text("DROP TABLE anime_watchlist"))
+        logger.info("dropped leftover table anime_watchlist")
     if insp.has_table("study_room_messages"):
         cols = {c["name"] for c in insp.get_columns("study_room_messages")}
         with engine.begin() as conn:
@@ -170,7 +168,6 @@ async def lifespan(_: FastAPI):
     (Path(settings.upload_dir) / "avatars").mkdir(parents=True, exist_ok=True)
     (Path(settings.upload_dir) / "forum").mkdir(parents=True, exist_ok=True)
     (Path(settings.upload_dir) / "posts").mkdir(parents=True, exist_ok=True)
-    (Path(settings.upload_dir) / "anime").mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
     _ensure_schema_patches()
     seed_forum_categories()
@@ -244,7 +241,6 @@ def create_app() -> FastAPI:
     upload_root.mkdir(parents=True, exist_ok=True)
     (upload_root / "avatars").mkdir(parents=True, exist_ok=True)
     (upload_root / "forum").mkdir(parents=True, exist_ok=True)
-    (upload_root / "anime").mkdir(parents=True, exist_ok=True)
     app.mount("/uploads", StaticFiles(directory=str(upload_root)), name="uploads")
 
     @app.get("/api/health", tags=["system"], summary="健康检查")

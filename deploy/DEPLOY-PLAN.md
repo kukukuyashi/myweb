@@ -226,7 +226,7 @@ sudo certbot --nginx -d 你的域名.com -d www.你的域名.com
 - [ ] `https://域名/myweb/app` — 主站 Hub
 - [ ] `https://域名/myweb/app/pomo` — 番茄钟（弹匣/能量格）
 - [ ] `https://域名/myweb/app/me` — 登录、改密、头像
-- [ ] `https://域名/myweb/app/forum` — 论坛
+- [ ] `https://域名/myweb/app` — 主站（论坛前台已隐藏，旧 /app/forum 会跳回这里）
 - [ ] `https://域名/api/health` — `{"status":"ok"}` 或类似
 - [ ] `https://域名/admin` — SQLAdmin 登录
 - [ ] 注册 → 登录 → 发文 → n8n Executions 有记录

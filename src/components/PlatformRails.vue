@@ -21,7 +21,7 @@
         />
       </div>
       <div class="rail-ticks" />
-      <p class="rail-vertical">FORUM · POMO · GUEST</p>
+      <p class="rail-vertical">BLOG · POMO · GUEST</p>
     </aside>
 
     <aside class="platform-rail platform-rail--right">
@@ -67,7 +67,7 @@ const quickLinks = [
   { to: '/app', label: 'HOME' },
   { to: '/app/pomo', label: 'POMO' },
   { to: '/app/music', label: 'MUSIC' },
-  { to: '/app/forum', label: 'FORUM' },
+  { to: '/app/arcade', label: 'ARCADE' },
   { to: '/app/me', label: 'ME' },
   { to: '/', label: 'BLOG' },
 ]

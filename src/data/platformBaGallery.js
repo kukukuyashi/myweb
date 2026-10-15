@@ -30,7 +30,7 @@ export const platformBaStrip = [
 export const platformSiteAttrs = [
   { key: '坐标', value: 'CYINC · /app' },
   { key: '栈', value: 'Vue 3 · FastAPI · MySQL' },
-  { key: '论坛', value: '板块 · 贴纸墙 · Markdown' },
+  { key: '留言', value: '主站留言板 Q&A' },
   { key: 'ACG', value: '碧蓝档案 · 葬送のフリーレン' },
   { key: '主色', value: '#e85d04 工业橙' },
   { key: '字体', value: 'IBM Plex Mono' },
@@ -68,20 +68,6 @@ export const platformQuickEntries = [
     title: '番茄钟',
     desc: '圆环计时、反思总结与本周统计。',
     thumb: 'img/BA/R/日奈/5d0a8942b8224ab477751bdcffa8abc3.jpeg',
-  },
-  {
-    to: '/app/forum',
-    tag: 'FORUM',
-    title: 'ACG 社区',
-    desc: '论坛讨论、贴纸墙精选与板块。',
-    thumb: 'img/BA/mika/acdcfb54cb622b0e8bdf29af195398f6_720.jpg',
-  },
-  {
-    to: '/app/anime',
-    tag: 'ANIME',
-    title: '追番表',
-    desc: '本季番剧、今日更新与周放送表。',
-    thumb: 'img/BA/A/爱莉/2fd0a12728327701054df80f0686eb0f.jpeg',
   },
   {
     to: '/app/music',

@@ -3,7 +3,7 @@
     title="创建 CYINC 账户"
     subtitle="填写以下信息完成注册，验证码将发送到邮箱"
     brand-title="加入 CYINC 社区"
-    brand-copy="注册后可逛论坛、收藏歌单、记录专注 — 与同好一起分享 ACG 与技术日常。"
+    brand-copy="注册后可听音乐室、记录专注、在留言板打个招呼 — 与博客账号通用。"
     :panel-image="authVisual.panel"
     :backdrop-image="authVisual.backdrop"
     :stats="[
